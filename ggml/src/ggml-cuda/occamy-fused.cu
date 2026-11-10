@@ -184,8 +184,11 @@ __device__ __forceinline__ void route(const Scratch * s, int lane, int * sel, fl
 
 // DX (GGML_CUDA_MOE_DOWNX=1): down prologue reordered so the L2-resident activations (h_exp/h_sh/gpart) are
 // requested before the first down rows (DRAM), instead of queueing behind them; group sums straight from
-// registers (same lanes, same butterfly) -> one __syncthreads instead of two. Arithmetic is unchanged.
-template <int PHASE, bool DX = false>
+// registers (same lanes, same butterfly) -> one __syncthreads instead of two (bit 1).
+// Bit 2: down rows dealt warp-major (row = warp * grid + block + k * W) so the partial last row wave
+// (2048 rows over 384 warps) is spread over every block/SM instead of the first 16 blocks.
+// Rows are independent and each row's arithmetic is unchanged -> bit-identical output.
+template <int PHASE, int DX = 0>
 __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
     extern __shared__ float smem[];
     __shared__ int sel[TOPK];
@@ -249,8 +252,8 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
     if (PHASE == 0 || PHASE == 3) {
         if (PHASE == 3) { if (warp == 0) route(s, lane, sel, selw); __syncthreads(); }
         constexpr int NX = (TOPK * FF + FFS) / NT, NXE = TOPK * FF / NT;
-        float hv[DX ? NX : 1], gp[NQ];
-        if (DX) {
+        float hv[(DX & 1) ? NX : 1], gp[NQ];
+        if (DX & 1) {
 #pragma unroll
             for (int j = 0; j < NX; ++j) {
                 const int i = threadIdx.x + NT * j;
@@ -266,14 +269,14 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
             cb[i] = (m < TOPK ? L.down_exps + (size_t)sel[m < TOPK ? m : 0] * H * ROW_D : L.down_sh) + w * 16;
         }
         uint4 cv[6];
-        int r = gw;
+        int r = (DX & 2) ? warp * gridDim.x + blockIdx.x : gw;
         if (r < H) {
 #pragma unroll
             for (int i = 0; i < 5; ++i) cv[i] = __ldg((const uint4 *)(cb[i] + (size_t)r * ROW_D));
             if (lane < 2) cv[5] = __ldg((const uint4 *)(cb[5] + (size_t)r * ROW_D));
         }
         float gl = 0.f;
-        if (DX) {
+        if (DX & 1) {
             // thread (warp, lane) slot j holds element 256j + 32warp + lane = group 8j + warp, lane position lane
 #pragma unroll
             for (int j = 0; j < NX; ++j) {
@@ -325,7 +328,7 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
 struct DevState {
     Scratch * scratch = nullptr;
     int grid = 0;
-    int grid_dx = 0;   // co-resident grid of moe_v2<0, true> (GGML_CUDA_MOE_DOWNX)
+    int grid_dx = 0;   // co-resident grid of moe_v2<0, 3> (GGML_CUDA_MOE_DOWNX; >= that of <0, 1> / <0, 2>)
 };
 static DevState g_dev[GGML_CUDA_MAX_DEVICES];
 static std::mutex g_mtx;
@@ -364,7 +367,7 @@ static DevState & dev_state(int device) {
             d.grid = -1;
         }
         int per_sm_dx = 0;
-        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_dx, moe_v2<0, true>, NT, SMEM2_FLOATS * sizeof(float)));
+        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_dx, moe_v2<0, 3>, NT, SMEM2_FLOATS * sizeof(float)));
         d.grid_dx = per_sm_dx < 1 ? -1 : per_sm_dx * nsm;
         if (g_debug) {
             fprintf(stderr, "occamy-fused: device %d: DOWNX variant %d blocks/SM -> grid %d\n", device, per_sm_dx, d.grid_dx);
@@ -571,14 +574,16 @@ void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cud
     P.eps  = m.eps;
     cudaStream_t st = ctx.stream();
     const size_t smem = SMEM2_FLOATS * sizeof(float);
-    // GGML_CUDA_MOE_DOWNX=1: reordered down prologue (see DX above); falls back if its occupancy is 0
-    static const bool dx = env_flag("GGML_CUDA_MOE_DOWNX");
+    // GGML_CUDA_MOE_DOWNX=1|2|3: bit 1 reordered down prologue, bit 2 warp-major down rows (see DX above); falls back if its occupancy is 0
+    static const int dx = getenv("GGML_CUDA_MOE_DOWNX") ? atoi(getenv("GGML_CUDA_MOE_DOWNX")) & 3 : 0;
     if (three) {
         moe_v2<1><<<d.grid, NT, smem, st>>>(P);
         moe_v2<2><<<d.grid, NT, smem, st>>>(P);
-        if (dx) { moe_v2<3, true><<<d.grid, NT, smem, st>>>(P); } else { moe_v2<3><<<d.grid, NT, smem, st>>>(P); }
+        switch (dx) { case 1: moe_v2<3, 1><<<d.grid, NT, smem, st>>>(P); break; case 2: moe_v2<3, 2><<<d.grid, NT, smem, st>>>(P); break;
+                      case 3: moe_v2<3, 3><<<d.grid, NT, smem, st>>>(P); break; default: moe_v2<3><<<d.grid, NT, smem, st>>>(P); }
     } else if (dx && d.grid_dx > 0) {
-        moe_v2<0, true><<<d.grid_dx, NT, smem, st>>>(P);
+        switch (dx) { case 1: moe_v2<0, 1><<<d.grid_dx, NT, smem, st>>>(P); break; case 2: moe_v2<0, 2><<<d.grid_dx, NT, smem, st>>>(P); break;
+                      default: moe_v2<0, 3><<<d.grid_dx, NT, smem, st>>>(P); }
     } else {
         moe_v2<0><<<d.grid, NT, smem, st>>>(P);
     }
