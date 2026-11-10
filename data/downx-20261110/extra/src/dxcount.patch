@@ -1,0 +1,61 @@
+diff --git a/ggml/src/ggml-cuda/occamy-fused.cu b/ggml/src/ggml-cuda/occamy-fused.cu
+index d385cdb..f67cb26 100644
+--- a/ggml/src/ggml-cuda/occamy-fused.cu
++++ b/ggml/src/ggml-cuda/occamy-fused.cu
+@@ -16,6 +16,21 @@
+ #include <mutex>
+ #include <set>
+ #include <string>
++#include <thread>
++#include <chrono>
++
++// C5 DEBUG-ONLY (never for timing): GGML_CUDA_DX_COUNT dispatch counters. Block 0 / thread 0 of every moe_v2<PHASE, DX>
++// launch increments slot PHASE*4+DX of a host-mapped (zero-copy) array, so kernels replayed from a CUDA graph are counted
++// too; host-side launch calls are counted separately (graph replay adds device counts without host launches).
++__device__ unsigned long long * g_dxcnt = nullptr;
++static unsigned long long * g_dxcnt_h = nullptr;
++static unsigned long long g_dxhost[16];
++static void dx_print(const char * tag) {
++    if (!g_dxcnt_h) return;
++    fprintf(stderr, "DXCOUNT %s", tag);
++    for (int i = 0; i < 16; ++i) if (g_dxcnt_h[i] || g_dxhost[i]) fprintf(stderr, " moe_v2<%d,%d>=dev:%llu/host:%llu", i / 4, i % 4, ((volatile unsigned long long *)g_dxcnt_h)[i], g_dxhost[i]);
++    fprintf(stderr, "\n"); fflush(stderr);
++}
+ 
+ namespace occamy {
+ 
+@@ -202,6 +217,7 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
+     const int gw = blockIdx.x * NW + warp, W = gridDim.x * NW;
+     Scratch * s = P.s;
+     const Layer & L = P.L;
++    if (threadIdx.x == 0 && blockIdx.x == 0 && g_dxcnt) { volatile unsigned long long * c = g_dxcnt; c[PHASE * 4 + DX] = c[PHASE * 4 + DX] + 1; __threadfence_system(); }
+ 
+     if (PHASE == 0 || PHASE == 1) {
+         float4 cw[4], nw[4];
+@@ -372,6 +388,18 @@ static DevState & dev_state(int device) {
+         if (g_debug) {
+             fprintf(stderr, "occamy-fused: device %d: DOWNX variant %d blocks/SM -> grid %d\n", device, per_sm_dx, d.grid_dx);
+         }
++        if (getenv("GGML_CUDA_DX_COUNT")) {
++            unsigned long long * dp = nullptr;
++            CUDA_CHECK(cudaHostAlloc((void **)&g_dxcnt_h, 16 * sizeof(unsigned long long), cudaHostAllocMapped));
++            memset(g_dxcnt_h, 0, 16 * sizeof(unsigned long long));
++            CUDA_CHECK(cudaHostGetDevicePointer((void **)&dp, g_dxcnt_h, 0));
++            CUDA_CHECK(cudaMemcpyToSymbol(g_dxcnt, &dp, sizeof(dp)));
++            atexit([] { dx_print("exit"); });
++            std::thread([] { unsigned long long last = ~0ull; for (;;) { std::this_thread::sleep_for(std::chrono::seconds(5));
++                unsigned long long t = 0; for (int i = 0; i < 16; ++i) t += ((volatile unsigned long long *)g_dxcnt_h)[i];
++                if (t != last) { last = t; dx_print("periodic"); } } }).detach();
++            fprintf(stderr, "occamy-fused: DXCOUNT armed (debug build)\n");
++        }
+     }
+     return d;
+ }
+@@ -576,6 +604,7 @@ void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cud
+     const size_t smem = SMEM2_FLOATS * sizeof(float);
+     // GGML_CUDA_MOE_DOWNX=1|2|3: bit 1 reordered down prologue, bit 2 warp-major down rows (see DX above); falls back if its occupancy is 0
+     static const int dx = getenv("GGML_CUDA_MOE_DOWNX") ? atoi(getenv("GGML_CUDA_MOE_DOWNX")) & 3 : 0;
++    if (three) { g_dxhost[4]++; g_dxhost[8]++; g_dxhost[12 + dx]++; } else if (dx && d.grid_dx > 0) g_dxhost[dx]++; else g_dxhost[0]++;
+     if (three) {
+         moe_v2<1><<<d.grid, NT, smem, st>>>(P);
+         moe_v2<2><<<d.grid, NT, smem, st>>>(P);

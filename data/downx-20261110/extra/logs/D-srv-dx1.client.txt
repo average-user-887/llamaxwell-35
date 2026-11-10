@@ -1,0 +1,15 @@
+short {"sha": "4ee1f467423a1a31", "ntok": 128, "prompt_n": 80, "cache_n": 0, "tg": 78.52, "pp": 143.5, "wall": 2.19, "head": " \u201cHis dear Mr. Bennet,\u201d replied his wife, \u201chave you heard th"}
+d16k_prompt_tokens 15681
+d16k {"sha": "abe5ff19335bd7d9", "ntok": 128, "prompt_n": 15681, "cache_n": 0, "tg": 70.499, "pp": 461.8, "wall": 35.78, "head": "  <think> Here's a thinking process:  1.  **Analyze User Inp"}
+d64k_prompt_tokens 62991
+d64k {"sha": "5e3941d499a4153f", "ntok": 128, "prompt_n": 62991, "cache_n": 0, "tg": 54.303, "pp": 269.2, "wall": 236.41, "head": "  <think> Here's a thinking process:  1.  **Analyze User Inp"}
+two_slot_rep1 {"slot0": {"sha": "d31165a9c9e25419", "ntok": 128, "prompt_n": 80, "cache_n": 0, "tg": 47.13, "pp": 90.6, "wall": 3.58, "head": " A. Praise B. Irony C. Satire D. Foreshadowing  <think> Here"}, "slot1": {"sha": "0435a5cc1bf2ee4c", "ntok": 128, "prompt_n": 80, "cache_n": 0, "tg": 47.146, "pp": 91.9, "wall": 3.58, "head": " My dear Mr. Bennet, said his lady to him one day, \u201chave you"}, "agg_tok_s": 71.51, "wall": 3.58}
+two_slot_rep2 {"slot0": {"sha": "d31165a9c9e25419", "ntok": 128, "prompt_n": 80, "cache_n": 0, "tg": 47.03, "pp": 91.2, "wall": 3.58, "head": " A. Praise B. Irony C. Satire D. Foreshadowing  <think> Here"}, "slot1": {"sha": "0435a5cc1bf2ee4c", "ntok": 128, "prompt_n": 80, "cache_n": 0, "tg": 47.031, "pp": 91.7, "wall": 3.58, "head": " My dear Mr. Bennet, said his lady to him one day, \u201chave you"}, "agg_tok_s": 71.52, "wall": 3.58}
+ss_direct {"sha": "860ff48b71df130b", "ntok": 64, "prompt_n": 230, "cache_n": 0, "tg": 78.362, "pp": 218.3, "wall": 1.86, "head": "  <think> Here's a thinking process:  1.  **Analyze User Inp"}
+ss_prime {"sha": "da8c326d8b17883e", "ntok": 1, "prompt_n": 4, "cache_n": 226, "tg": 0.0, "pp": 47.5, "wall": 0.09, "head": "  "}
+ss_save {"id_slot": 0, "filename": "s0.bin", "n_saved": 230, "n_written": 136446036, "timings": {"save_ms": 294.598}}
+ss_overwrite {"sha": "5a18368d9db104e5", "ntok": 8, "prompt_n": 12, "cache_n": 0, "tg": 77.702, "pp": 98.5, "wall": 0.21, "head": "  ```python # The following is"}
+ss_erase {"id_slot": 0, "n_erased": 19}
+ss_restore {"id_slot": 0, "filename": "s0.bin", "n_restored": 230, "n_read": 136446036, "timings": {"restore_ms": 50.685}}
+ss_cont {"sha": "860ff48b71df130b", "ntok": 64, "prompt_n": 4, "cache_n": 226, "tg": 78.216, "pp": 48.7, "wall": 0.89, "head": "  <think> Here's a thinking process:  1.  **Analyze User Inp"}
+client rc=0

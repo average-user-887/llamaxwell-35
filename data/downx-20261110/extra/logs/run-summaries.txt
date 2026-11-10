@@ -1,0 +1,129 @@
+== A-dx0-rep.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== A-dx0.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== A-dx1.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== A-dx2.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== A-dx3.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== B-bench-dx0.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+build_commit,build_number,cpu_info,gpu_info,backends,model_filename,model_type,model_size,model_n_params,n_batch,n_ubatch,n_threads,cpu_mask,cpu_strict,poll,type_k,type_v,n_gpu_layers,n_cpu_moe,split_mode,main_gpu,no_kv_offload,flash_attn,devices,tensor_split,tensor_buft_overrides,load_mode,lazy_mode,embeddings,no_op_offload,no_host,repack,fit_target,fit_min_ctx,n_prompt,n_gen,n_depth,test_time,avg_ns,stddev_ns,avg_ts,stddev_ts
+"unknown","0","AMD Ryzen 5 5600X 6-Core Processor","Quadro M6000 24GB","CUDA","/models/occamy-1.0-Q4_0-headq40b.gguf","qwen35moe 35B.A3B Q4_0","19572951552","34660610688","2048","512","6","0x0","0","50","f16","f16","999","0","layer","0","0","1","auto","0.00","none","auto","auto","0","0","0","1","0","0","0","64","0","2026-11-10T17:53:38Z","810484151","3059091","78.965709","0.298048"
+DXCOUNT exit moe_v2<0,0>=dev:5160/host:5160
+rc=0
+== B-bench-dx1.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+build_commit,build_number,cpu_info,gpu_info,backends,model_filename,model_type,model_size,model_n_params,n_batch,n_ubatch,n_threads,cpu_mask,cpu_strict,poll,type_k,type_v,n_gpu_layers,n_cpu_moe,split_mode,main_gpu,no_kv_offload,flash_attn,devices,tensor_split,tensor_buft_overrides,load_mode,lazy_mode,embeddings,no_op_offload,no_host,repack,fit_target,fit_min_ctx,n_prompt,n_gen,n_depth,test_time,avg_ns,stddev_ns,avg_ts,stddev_ts
+"unknown","0","AMD Ryzen 5 5600X 6-Core Processor","Quadro M6000 24GB","CUDA","/models/occamy-1.0-Q4_0-headq40b.gguf","qwen35moe 35B.A3B Q4_0","19572951552","34660610688","2048","512","6","0x0","0","50","f16","f16","999","0","layer","0","0","1","auto","0.00","none","auto","auto","0","0","0","1","0","0","0","64","0","2026-11-10T17:53:48Z","805646904","3528266","79.440029","0.347879"
+DXCOUNT exit moe_v2<0,1>=dev:5160/host:5160
+rc=0
+== B-bench-dx2.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+build_commit,build_number,cpu_info,gpu_info,backends,model_filename,model_type,model_size,model_n_params,n_batch,n_ubatch,n_threads,cpu_mask,cpu_strict,poll,type_k,type_v,n_gpu_layers,n_cpu_moe,split_mode,main_gpu,no_kv_offload,flash_attn,devices,tensor_split,tensor_buft_overrides,load_mode,lazy_mode,embeddings,no_op_offload,no_host,repack,fit_target,fit_min_ctx,n_prompt,n_gen,n_depth,test_time,avg_ns,stddev_ns,avg_ts,stddev_ts
+"unknown","0","AMD Ryzen 5 5600X 6-Core Processor","Quadro M6000 24GB","CUDA","/models/occamy-1.0-Q4_0-headq40b.gguf","qwen35moe 35B.A3B Q4_0","19572951552","34660610688","2048","512","6","0x0","0","50","f16","f16","999","0","layer","0","0","1","auto","0.00","none","auto","auto","0","0","0","1","0","0","0","64","0","2026-11-10T17:53:55Z","812139028","2149007","78.804517","0.208489"
+DXCOUNT exit moe_v2<0,2>=dev:5160/host:5160
+rc=0
+== B-bench-dx3.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+build_commit,build_number,cpu_info,gpu_info,backends,model_filename,model_type,model_size,model_n_params,n_batch,n_ubatch,n_threads,cpu_mask,cpu_strict,poll,type_k,type_v,n_gpu_layers,n_cpu_moe,split_mode,main_gpu,no_kv_offload,flash_attn,devices,tensor_split,tensor_buft_overrides,load_mode,lazy_mode,embeddings,no_op_offload,no_host,repack,fit_target,fit_min_ctx,n_prompt,n_gen,n_depth,test_time,avg_ns,stddev_ns,avg_ts,stddev_ts
+"unknown","0","AMD Ryzen 5 5600X 6-Core Processor","Quadro M6000 24GB","CUDA","/models/occamy-1.0-Q4_0-headq40b.gguf","qwen35moe 35B.A3B Q4_0","19572951552","34660610688","2048","512","6","0x0","0","50","f16","f16","999","0","layer","0","0","1","auto","0.00","none","auto","auto","0","0","0","1","0","0","0","64","0","2026-11-10T17:54:01Z","804106293","1580600","79.591621","0.156450"
+DXCOUNT exit moe_v2<0,3>=dev:5160/host:5160
+rc=0
+== B-h-3l-dx1.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DXCOUNT exit moe_v2<1,0>=dev:2560/host:2560 moe_v2<2,0>=dev:2560/host:2560 moe_v2<3,1>=dev:2560/host:2560
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== B-h-dx0.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DXCOUNT exit moe_v2<0,0>=dev:2560/host:2560
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== B-h-dx1.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DXCOUNT exit moe_v2<0,1>=dev:2560/host:2560
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== B-h-dx2.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DXCOUNT exit moe_v2<0,2>=dev:2560/host:2560
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== B-h-dx3.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DXCOUNT exit moe_v2<0,3>=dev:2560/host:2560
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== B-srv-dx1.client.txt
+== G-bench-dbg-dx0.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+build_commit,build_number,cpu_info,gpu_info,backends,model_filename,model_type,model_size,model_n_params,n_batch,n_ubatch,n_threads,cpu_mask,cpu_strict,poll,type_k,type_v,n_gpu_layers,n_cpu_moe,split_mode,main_gpu,no_kv_offload,flash_attn,devices,tensor_split,tensor_buft_overrides,load_mode,lazy_mode,embeddings,no_op_offload,no_host,repack,fit_target,fit_min_ctx,n_prompt,n_gen,n_depth,test_time,avg_ns,stddev_ns,avg_ts,stddev_ts
+"unknown","0","AMD Ryzen 5 5600X 6-Core Processor","Quadro M6000 24GB","CUDA","/models/occamy-1.0-Q4_0-headq40b.gguf","qwen35moe 35B.A3B Q4_0","19572951552","34660610688","2048","512","6","0x0","0","50","f16","f16","999","0","layer","0","0","1","auto","0.00","none","auto","auto","0","0","0","1","0","0","0","64","0","2026-11-10T18:10:45Z","810089509","6170485","79.005907","0.601791"
+DXCOUNT exit moe_v2<0,0>=dev:5160/host:280
+rc=0
+== G-bench-dbg-dx1.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+build_commit,build_number,cpu_info,gpu_info,backends,model_filename,model_type,model_size,model_n_params,n_batch,n_ubatch,n_threads,cpu_mask,cpu_strict,poll,type_k,type_v,n_gpu_layers,n_cpu_moe,split_mode,main_gpu,no_kv_offload,flash_attn,devices,tensor_split,tensor_buft_overrides,load_mode,lazy_mode,embeddings,no_op_offload,no_host,repack,fit_target,fit_min_ctx,n_prompt,n_gen,n_depth,test_time,avg_ns,stddev_ns,avg_ts,stddev_ts
+"unknown","0","AMD Ryzen 5 5600X 6-Core Processor","Quadro M6000 24GB","CUDA","/models/occamy-1.0-Q4_0-headq40b.gguf","qwen35moe 35B.A3B Q4_0","19572951552","34660610688","2048","512","6","0x0","0","50","f16","f16","999","0","layer","0","0","1","auto","0.00","none","auto","auto","0","0","0","1","0","0","0","64","0","2026-11-10T18:10:51Z","803125463","3162853","79.689288","0.313806"
+DXCOUNT exit moe_v2<0,1>=dev:5160/host:280
+rc=0
+== G-bench-dbg-dx2.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+build_commit,build_number,cpu_info,gpu_info,backends,model_filename,model_type,model_size,model_n_params,n_batch,n_ubatch,n_threads,cpu_mask,cpu_strict,poll,type_k,type_v,n_gpu_layers,n_cpu_moe,split_mode,main_gpu,no_kv_offload,flash_attn,devices,tensor_split,tensor_buft_overrides,load_mode,lazy_mode,embeddings,no_op_offload,no_host,repack,fit_target,fit_min_ctx,n_prompt,n_gen,n_depth,test_time,avg_ns,stddev_ns,avg_ts,stddev_ts
+"unknown","0","AMD Ryzen 5 5600X 6-Core Processor","Quadro M6000 24GB","CUDA","/models/occamy-1.0-Q4_0-headq40b.gguf","qwen35moe 35B.A3B Q4_0","19572951552","34660610688","2048","512","6","0x0","0","50","f16","f16","999","0","layer","0","0","1","auto","0.00","none","auto","auto","0","0","0","1","0","0","0","64","0","2026-11-10T18:10:56Z","813327877","5679798","78.690971","0.549531"
+DXCOUNT exit moe_v2<0,2>=dev:5160/host:280
+rc=0
+== G-h-dbg-dx0.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DXCOUNT exit moe_v2<0,0>=dev:2560/host:120
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== G-h-dbg-dx1.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DXCOUNT exit moe_v2<0,1>=dev:2560/host:120
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== G-h-dbg-dx2.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DXCOUNT exit moe_v2<0,2>=dev:2560/host:120
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== G-h-prod-dx0.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== G-h-prod-dx1.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== G-h-prod-dx2.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== G-h-prod-dx3.txt
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+DONE steps=64 values=15892480 nan=0 inf=0
+rc=0
+== B-srv-dx1.srv.log
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+0.04.159.906 I srv    load_model: initializing, n_slots = 2, n_ctx_slot = 98304, kv_unified = 'false'
+DXCOUNT exit moe_v2<0,1>=dev:7565/host:7565
+== D-srv-dx0.srv.log
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+0.04.203.089 I srv    load_model: initializing, n_slots = 2, n_ctx_slot = 98304, kv_unified = 'false'
+== D-srv-dx1.srv.log
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+0.04.242.310 I srv    load_model: initializing, n_slots = 2, n_ctx_slot = 98304, kv_unified = 'false'

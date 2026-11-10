@@ -1,0 +1,5 @@
+A-dx0.bin steps=64 values=15892480 per_step=248320 mismatches=0 steps_bitequal=64/64 nan=0 inf=0 file_sha256=bfba627714ddf7f38384d5399941ea7ea1bdafb0a2372b6e1f8443e0a039a4dc
+A-dx1.bin steps=64 values=15892480 per_step=248320 mismatches=0 steps_bitequal=64/64 nan=0 inf=0 file_sha256=bfba627714ddf7f38384d5399941ea7ea1bdafb0a2372b6e1f8443e0a039a4dc
+A-dx2.bin steps=64 values=15892480 per_step=248320 mismatches=0 steps_bitequal=64/64 nan=0 inf=0 file_sha256=bfba627714ddf7f38384d5399941ea7ea1bdafb0a2372b6e1f8443e0a039a4dc
+A-dx3.bin steps=64 values=15892480 per_step=248320 mismatches=0 steps_bitequal=64/64 nan=0 inf=0 file_sha256=bfba627714ddf7f38384d5399941ea7ea1bdafb0a2372b6e1f8443e0a039a4dc
+A-dx0-rep.bin steps=64 values=15892480 per_step=248320 mismatches=0 steps_bitequal=64/64 nan=0 inf=0 file_sha256=bfba627714ddf7f38384d5399941ea7ea1bdafb0a2372b6e1f8443e0a039a4dc

@@ -1,0 +1,4 @@
+quick0 {"sha": "3242f6c38955f5e4", "ntok": 64, "prompt_n": 80, "cache_n": 0, "tg": 78.03, "pp": 135.2, "wall": 1.42, "head": " \u201cHis dear Mr. Bennet,\u201d replied his wife, \u201chave you heard th"}
+quick1 {"sha": "1d5f4881b98de67e", "ntok": 64, "prompt_n": 80, "cache_n": 0, "tg": 77.773, "pp": 151.2, "wall": 1.34, "head": " My dear Mr. Bennet, said his lady to him one day, \u201chave you"}
+quick2 {"sha": "06cb9277523e3994", "ntok": 64, "prompt_n": 80, "cache_n": 0, "tg": 78.191, "pp": 151.9, "wall": 1.33, "head": " My dear Mr. Bennet, said his lady to him one day, have you "}
+client rc=0

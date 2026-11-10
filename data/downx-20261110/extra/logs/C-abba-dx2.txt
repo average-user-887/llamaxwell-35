@@ -1,0 +1,20 @@
+cycle=1 dx=0 tg128=79.190596 busy_n=15 sm_mhz_mean=1151 temp_max=68 pwr_mean=143.0 thr=     15 0x0000000000000000 
+cycle=1 dx=2 tg128=80.194314 busy_n=16 sm_mhz_mean=1151 temp_max=68 pwr_mean=140.5 thr=     16 0x0000000000000000 
+cycle=1 dx=2 tg128=80.266921 busy_n=14 sm_mhz_mean=1151 temp_max=67 pwr_mean=148.2 thr=     14 0x0000000000000000 
+cycle=1 dx=0 tg128=79.252927 busy_n=16 sm_mhz_mean=1151 temp_max=67 pwr_mean=142.6 thr=     16 0x0000000000000000 
+cycle=2 dx=0 tg128=79.243049 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=143.4 thr=     15 0x0000000000000000 
+cycle=2 dx=2 tg128=80.254893 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=143.6 thr=     15 0x0000000000000000 
+cycle=2 dx=2 tg128=79.958200 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=142.7 thr=     15 0x0000000000000000 
+cycle=2 dx=0 tg128=79.269990 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=141.9 thr=     15 0x0000000000000000 
+cycle=3 dx=0 tg128=79.237289 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=149.5 thr=     15 0x0000000000000000 
+cycle=3 dx=2 tg128=80.247436 busy_n=16 sm_mhz_mean=1151 temp_max=67 pwr_mean=138.9 thr=     16 0x0000000000000000 
+cycle=3 dx=2 tg128=80.227423 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=143.1 thr=     15 0x0000000000000000 
+cycle=3 dx=0 tg128=79.241048 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=142.6 thr=     15 0x0000000000000000 
+cycle=4 dx=0 tg128=79.240767 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=151.8 thr=     15 0x0000000000000000 
+cycle=4 dx=2 tg128=80.266899 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=143.0 thr=     15 0x0000000000000000 
+cycle=4 dx=2 tg128=80.221778 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=143.6 thr=     15 0x0000000000000000 
+cycle=4 dx=0 tg128=79.251608 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=143.1 thr=     15 0x0000000000000000 
+cycle=5 dx=0 tg128=79.247286 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=143.1 thr=     14 0x0000000000000000       1 0x0000000000000002 
+cycle=5 dx=2 tg128=80.275100 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=143.1 thr=     15 0x0000000000000000 
+cycle=5 dx=2 tg128=80.247568 busy_n=15 sm_mhz_mean=1151 temp_max=66 pwr_mean=142.9 thr=     15 0x0000000000000000 
+cycle=5 dx=0 tg128=79.278297 busy_n=15 sm_mhz_mean=1151 temp_max=67 pwr_mean=143.4 thr=     15 0x0000000000000000 
