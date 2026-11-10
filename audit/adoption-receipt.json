@@ -1,0 +1,173 @@
+{
+  "created_utc": "2026-10-15T12:40:05Z",
+  "evidence": {
+    "cold_result": {
+      "accepted": false,
+      "path": "/media/avg-usr/Storage/m6000-llama-cpp/native-occamy/norm-q8-pair-20261015-quick-gate/quick-comparison.json",
+      "reason": "criterion/full-wall regression; retained as negative evidence",
+      "sha256": "bfe100ed200fbc6477768919be1aa590a01e2e393909e8bc5e3e4ddcb6e1ef01"
+    },
+    "ledger": {
+      "entry_uuid": "9f2e2f96-4c4d-4c44-b704-796d820031d2",
+      "path": "/media/avg-usr/Storage/m6000-llama-cpp/codex-ws-20261012/reports/GOAL_AND_LEDGER.md",
+      "sha256": "f9f642021b25708327bc0c19f877af18913e4ac7ee7002419ac2701531f45951"
+    },
+    "warm_comparison": {
+      "48k": "not run",
+      "actual_user_traces": false,
+      "contexts": {
+        "1024": {
+          "baseline_aggregate_decode_tps": 89.48476624414361,
+          "cache_reuse": 0.99609375,
+          "candidate_aggregate_decode_tps": 89.74735729081674,
+          "exact_quality_pass": true,
+          "full_wall_no_regression": true,
+          "relative_gain": 0.0029344776512763016,
+          "relative_intrarun_spread": 0.00010513086403214498
+        },
+        "16384": {
+          "baseline_aggregate_decode_tps": 79.30941602844909,
+          "cache_reuse": 0.999755859375,
+          "candidate_aggregate_decode_tps": 79.93718586264897,
+          "exact_quality_pass": true,
+          "full_wall_no_regression": true,
+          "relative_gain": 0.007915451476463886,
+          "relative_intrarun_spread": 8.253359635508782e-05
+        }
+      },
+      "generated_production_shaped_fixture": true,
+      "n_per_arm": 2,
+      "path": "/media/avg-usr/Storage/m6000-llama-cpp/native-occamy/norm-q8-pair-20261015-warm-gate/quick-comparison.json",
+      "sha256": "44dfeb4f6b7f0aaa0785971442a4e3a72489f2bf87e07578f815ed2de7399b89"
+    }
+  },
+  "experiment_uuid": "9f2e2f96-4c4d-4c44-b704-796d820031d2",
+  "installed_artifact": {
+    "container_destination": "/app/libggml-cuda.so",
+    "gid": 1000,
+    "host_bind_source": "/media/avg-usr/Storage/m6000-llama-cpp/prod-libs/libggml-cuda-gate-copy-20261013.so",
+    "inode": 23763846,
+    "mode": "0o755",
+    "reviewed_source": "/media/avg-usr/Storage/m6000-llama-cpp/native-occamy/norm-q8-pair-20261015-integration-prep/isolated-build/debug-qualification/artifacts/release/libggml-cuda-candidate-release.so",
+    "reviewed_source_sha256": "d14a076e89dad41245d6e1b5c6709872930ed655394e775dae120243fec0a460",
+    "same_bytes_as_reviewed_staged_candidate": true,
+    "sha256": "d14a076e89dad41245d6e1b5c6709872930ed655394e775dae120243fec0a460",
+    "size": 37792760,
+    "uid": 1000
+  },
+  "limitations": [
+    "Two tasks per arm, generated production-shaped records; n=2 descriptive evidence.",
+    "Cold regime did not pass.",
+    "No 48k context result.",
+    "No overnight actual-user-task validation yet.",
+    "Do not infer all workloads or fleet-wide gain."
+  ],
+  "protection_checks": {
+    "1660_service": "not changed",
+    "hermes_local": "running, unchanged",
+    "kanban": "no task dispatch or queue mutation; existing holds preserved from preflight",
+    "labtelemetry_unit": "no matching systemd unit was listed at final check; no telemetry service was changed",
+    "zabbix_agent2": "active"
+  },
+  "proxy": {
+    "container_id": "517cc9b415a19b75d831e2c50a2cab5e772de7c0968ebd5bf3fd9151441848b4",
+    "final_state": "running, HTTP 200",
+    "inflight": {},
+    "lab_slots": [
+      1
+    ],
+    "maintenance_action": "paused only during replacement, then resumed",
+    "pins_after_smoke": 21,
+    "reserved_slot": 0,
+    "server_busy": [],
+    "wait_for_owner": true
+  },
+  "receipt_version": 1,
+  "result": "adopted after preregistered limited warm-cache acceptance; no full rollout claim",
+  "rollback": {
+    "backup_path": "/media/avg-usr/Storage/m6000-llama-cpp/native-occamy/norm-q8-pair-20261015-adoption/original-953-libggml-cuda.so",
+    "gid": 1000,
+    "instruction": "Stop only original container, copy backup bytes in-place to host bind source, preserve inode 23763846 and restore owner 1000:1000 mode 0755; verify SHA, start same container, verify health/library/proxy.",
+    "mode": "0o444",
+    "sha256": "953bda22ad2390c80e953e6fadef0c58c61d184be64b4de9bc0777eba199c8e8",
+    "size": 37784480,
+    "uid": 1000
+  },
+  "runtime": {
+    "actual_slots": [
+      {
+        "id": 0,
+        "n_ctx": 98304,
+        "processing": false
+      },
+      {
+        "id": 1,
+        "n_ctx": 98304,
+        "processing": false
+      }
+    ],
+    "config_digest": "be5114c1cbae0fb8674857f9be375bb80d5932e7764fc9f72fddfa3f5cf2c551",
+    "container_id": "27b21d1349cf154fa08212094ee6dd42144a889ce5724a145d4b319ac9f6f98b",
+    "container_name": "llamacpp-m6000",
+    "health": "HTTP 200 status ok; container healthy",
+    "host_gpu_uuid": "GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e",
+    "image_id": "sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+    "image_unchanged": true,
+    "launch_arguments": [
+      "-m",
+      "/models/occamy-1.0-Q4_0-headq40b.gguf",
+      "--alias",
+      "qwen36-moe",
+      "--override-kv",
+      "tokenizer.ggml.pre=str:qwen35",
+      "-ngl",
+      "999",
+      "-np",
+      "2",
+      "-c",
+      "196608",
+      "-b",
+      "4096",
+      "-ub",
+      "4096",
+      "--cache-ram",
+      "12288",
+      "--ctx-checkpoints",
+      "16",
+      "--checkpoint-min-step",
+      "2048",
+      "-fa",
+      "on",
+      "--host",
+      "0.0.0.0",
+      "--port",
+      "8080",
+      "--jinja",
+      "--metrics",
+      "--slot-save-path",
+      "/slots",
+      "-lv",
+      "4"
+    ],
+    "loaded_library_mapping": "/app/libggml-cuda.so; /proc/1/maps inode 23763846; SHA matches installed D14",
+    "model_alias": "qwen36-moe",
+    "model_path": "/models/occamy-1.0-Q4_0-headq40b.gguf",
+    "service_pid1_uid_gid": "0:0"
+  },
+  "smoke": {
+    "additional_model_calls": 0,
+    "completion_tokens": 3,
+    "endpoint": "http://m6kslots:8080/v1/chat/completions",
+    "executed_from": "hermes-local container, Python stdlib urllib only",
+    "gid": 10000,
+    "http_status": 200,
+    "max_tokens": 64,
+    "model": "qwen36-moe",
+    "prompt": "Reply with exactly LOCAL_OK",
+    "prompt_tokens": 17,
+    "temperature": 0,
+    "thinking": false,
+    "uid": 10000,
+    "visible_text": "LOCAL_OK"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "artifact": "artifacts/release/libggml-cuda-candidate-release.so",
+  "sha256": "d14a076e89dad41245d6e1b5c6709872930ed655394e775dae120243fec0a460",
+  "source": {
+    "norm.cu": "94383c9fea71137436895e8cc8a9a383fd87df35292d28fe4fb0df35ec175291",
+    "mmvq.cu": "585803e46976e6f8e2bb7dffb704d9a66aea3bd9f31f860ba8ef92682baa2e33"
+  },
+  "toolchain": "CUDA 12.8.93, GCC 14.2.0, CMake 3.28.3, sm_52, local/m6000-build-tools:20261013 image sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed",
+  "notes": "Fresh rebuild from the reviewed candidate sources. The former f64481... artifact was overwritten in the isolated prep build tree before an independent copy was made; it was not recovered. This d14a artifact is separate from the debug instrumentation and is not asserted byte-identical to f64481. The deployed/adopted 953bda... library remains unchanged."
+}

@@ -1,0 +1,5 @@
+/media/avg-usr/Storage/ollama-m6000/gguf -> /gguf
+/media/avg-usr/Storage/uroboros-models -> /models
+/media/avg-usr/Storage/llama-slots-m6000 -> /slots
+/media/avg-usr/Storage/m6000-llama-cpp/prod-libs/libggml-cuda-gate-copy-20261013.so -> /app/libggml-cuda.so
+

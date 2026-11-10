@@ -1,0 +1,63 @@
+--- a/ggml/src/ggml-cuda/norm.cu
++++ b/ggml/src/ggml-cuda/norm.cu
+@@ -575,6 +575,32 @@
+ }
+ 
+ 
++// Experimental two-row counterpart; only enabled for the exact microvalidated shape.
++template <int block_size>
++static __global__ void rms_norm_mul_q8_1_pair(const float * x, const float * mul, float * dst, block_q8_1 * q8,
++                                             const int ncols, const float eps) {
++    x += blockIdx.x*ncols; dst += blockIdx.x*ncols; q8 += blockIdx.x*(ncols/QK8_1);
++    extern __shared__ float s_sum[];
++    const int tid = threadIdx.x;
++    float tmp = 0.0f;
++    for (int col = tid; col < ncols; col += block_size) {
++        tmp += x[col] * x[col];
++    }
++    tmp = block_reduce<block_reduce_method::SUM, block_size>(tmp, s_sum);
++    const float scale = rsqrtf(tmp / ncols + eps);
++    for (int col = tid; col < ncols; col += block_size) {
++        const float xi = scale * x[col] * mul[col];
++        dst[col] = xi;
++        const float amax = warp_reduce_max<QK8_1>(fabsf(xi));
++        const float sum = warp_reduce_sum<QK8_1>(xi);
++        const float d = amax / 127.0f;
++        q8[col / QK8_1].qs[col % QK8_1] = amax == 0.0f ? 0 : roundf(xi / d);
++        if (col % QK8_1 == 0) {
++            q8[col / QK8_1].ds = make_half2(d, sum);
++        }
++    }
++}
++
+ // rms_norm * weight for a single row, also writing the q8_1 copy of the result (same arithmetic as quantize_q8_1).
+ // Used with GGML_CUDA_NORM_Q8=1 + GGML_CUDA_Q8_REUSE=1: the q8_1 copy lands in the MMVQ q8 reuse buffer.
+ template <int block_size>
+@@ -869,6 +895,27 @@
+         return a != nullptr && atoi(a) != 0 && b != nullptr && atoi(b) != 0;
+     }();
+     const size_t q8_size = ne00 / QK8_1 * sizeof(block_q8_1);
++    // Narrow candidate: two contiguous 2048-wide rows, one broadcast weight vector, and
++    // MMVQ's exact multi-row key/layout. Keep the accepted one-row branch below unchanged.
++    const bool pair_rows = norm_q8 && ctx.curr_stream_no == 0 && ne00 == 2048 &&
++        ne01 == 2 && ne02 == 1 && ne03 == 1 &&
++        s01 == ne00 && s02 == ne00 * ne01 && s03 == ne00 * ne01 * ne02 &&
++        mul_ncols == ne00 && (int64_t) mul_nrows*mul_nchannels*mul_nsamples == 1 &&
++        mul_tensor->nb[0] == sizeof(float) && mul_tensor->nb[1] == ne00*sizeof(float) &&
++        mul_tensor->nb[2] == ne00*ne01*sizeof(float) && mul_tensor->nb[3] == ne00*ne01*ne02*sizeof(float) &&
++        ctx.q8r_buf != nullptr && 2*q8_size <= ctx.q8r_cap;
++    if (pair_rows) {
++        block_q8_1 * q8 = (block_q8_1 *) ctx.q8r_buf;
++        rms_norm_mul_q8_1_pair<1024><<<2, 1024, 32*sizeof(float), stream>>>(src0_d, mul_d, dst_d, q8, ne00, eps);
++        CUDA_CHECK(cudaGetLastError());
++        const int64_t key[8] = {(int64_t) (uintptr_t) dst_d, ne00, 2, 1, 1, ne00, ne00*2, ne00*2};
++        memcpy(ctx.q8r_key, key, sizeof(key));
++        ctx.q8r_lo = (const char *) dst_d;
++        ctx.q8r_hi = ctx.q8r_lo + ggml_nbytes(mul_tensor);
++        ctx.q8r_valid = false;
++        ctx.q8r_pend = true;
++        return;
++    }
+     if (norm_q8 && ctx.curr_stream_no == 0 && ne01*ne02*ne03 == 1 && ne00 % MATRIX_ROW_PADDING == 0 &&
+         mul_ncols == ne00 && (int64_t) mul_nrows*mul_nchannels*mul_nsamples == 1 &&
+         ctx.q8r_buf != nullptr && q8_size <= ctx.q8r_cap) {
