@@ -182,7 +182,10 @@ __device__ __forceinline__ void route(const Scratch * s, int lane, int * sel, fl
     if (lane < TOPK) selw[lane] /= ws;
 }
 
-template <int PHASE>
+// DX (GGML_CUDA_MOE_DOWNX=1): down prologue reordered so the L2-resident activations (h_exp/h_sh/gpart) are
+// requested before the first down rows (DRAM), instead of queueing behind them; group sums straight from
+// registers (same lanes, same butterfly) -> one __syncthreads instead of two. Arithmetic is unchanged.
+template <int PHASE, bool DX = false>
 __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
     extern __shared__ float smem[];
     __shared__ int sel[TOPK];
@@ -245,6 +248,17 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
     if (PHASE == 0) grid_barrier(s);
     if (PHASE == 0 || PHASE == 3) {
         if (PHASE == 3) { if (warp == 0) route(s, lane, sel, selw); __syncthreads(); }
+        constexpr int NX = (TOPK * FF + FFS) / NT, NXE = TOPK * FF / NT;
+        float hv[DX ? NX : 1], gp[NQ];
+        if (DX) {
+#pragma unroll
+            for (int j = 0; j < NX; ++j) {
+                const int i = threadIdx.x + NT * j;
+                hv[j] = j < NXE ? __ldcg(&s->h_exp[i]) : __ldcg(&s->h_sh[i - TOPK * FF]);
+            }
+#pragma unroll
+            for (int q = 0; q < NQ; ++q) gp[q] = __ldcg(&s->gpart[q]);
+        }
         const uint8_t * cb[6];
 #pragma unroll
         for (int i = 0; i < 6; ++i) {
@@ -258,6 +272,20 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
             for (int i = 0; i < 5; ++i) cv[i] = __ldg((const uint4 *)(cb[i] + (size_t)r * ROW_D));
             if (lane < 2) cv[5] = __ldg((const uint4 *)(cb[5] + (size_t)r * ROW_D));
         }
+        float gl = 0.f;
+        if (DX) {
+            // thread (warp, lane) slot j holds element 256j + 32warp + lane = group 8j + warp, lane position lane
+#pragma unroll
+            for (int j = 0; j < NX; ++j) {
+                const int i = threadIdx.x + NT * j;
+                xs[(i >> 6) * CH + (i & 63)] = hv[j];
+                const float sm = wsum(hv[j]);
+                if (lane == 0) ((float *)sums)[NW * j + warp] = sm;
+            }
+            __syncthreads();
+#pragma unroll
+            for (int q = 0; q < NQ; ++q) gl += gp[q];
+        } else {
         for (int i = threadIdx.x; i < TOPK * FF + FFS; i += NT) {
             float val = i < TOPK * FF ? __ldcg(&s->h_exp[i]) : __ldcg(&s->h_sh[i - TOPK * FF]);
             xs[(i >> 6) * CH + (i & 63)] = val;
@@ -268,9 +296,9 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
             if (lane == 0) ((float *)sums)[b] = sm;
         }
         __syncthreads();
-        float gl = 0.f;
 #pragma unroll
         for (int q = 0; q < NQ; ++q) gl += __ldcg(&s->gpart[q]);
+        }
         const float gs = 1.f / (1.f + expf(-gl));
         const float w0 = selw[lane >> 3], w1 = selw[(lane >> 3) + 4];
         for (; r < H; r += W) {
@@ -297,6 +325,7 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
 struct DevState {
     Scratch * scratch = nullptr;
     int grid = 0;
+    int grid_dx = 0;   // co-resident grid of moe_v2<0, true> (GGML_CUDA_MOE_DOWNX)
 };
 static DevState g_dev[GGML_CUDA_MAX_DEVICES];
 static std::mutex g_mtx;
@@ -333,6 +362,12 @@ static DevState & dev_state(int device) {
         }
         if (per_sm < 1) {
             d.grid = -1;
+        }
+        int per_sm_dx = 0;
+        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_dx, moe_v2<0, true>, NT, SMEM2_FLOATS * sizeof(float)));
+        d.grid_dx = per_sm_dx < 1 ? -1 : per_sm_dx * nsm;
+        if (g_debug) {
+            fprintf(stderr, "occamy-fused: device %d: DOWNX variant %d blocks/SM -> grid %d\n", device, per_sm_dx, d.grid_dx);
         }
     }
     return d;
@@ -536,10 +571,14 @@ void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cud
     P.eps  = m.eps;
     cudaStream_t st = ctx.stream();
     const size_t smem = SMEM2_FLOATS * sizeof(float);
+    // GGML_CUDA_MOE_DOWNX=1: reordered down prologue (see DX above); falls back if its occupancy is 0
+    static const bool dx = env_flag("GGML_CUDA_MOE_DOWNX");
     if (three) {
         moe_v2<1><<<d.grid, NT, smem, st>>>(P);
         moe_v2<2><<<d.grid, NT, smem, st>>>(P);
-        moe_v2<3><<<d.grid, NT, smem, st>>>(P);
+        if (dx) { moe_v2<3, true><<<d.grid, NT, smem, st>>>(P); } else { moe_v2<3><<<d.grid, NT, smem, st>>>(P); }
+    } else if (dx && d.grid_dx > 0) {
+        moe_v2<0, true><<<d.grid_dx, NT, smem, st>>>(P);
     } else {
         moe_v2<0><<<d.grid, NT, smem, st>>>(P);
     }
