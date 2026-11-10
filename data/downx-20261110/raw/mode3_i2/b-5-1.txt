@@ -1,0 +1,18 @@
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 24463 MiB):
+  Device 0: Quadro M6000 24GB, compute capability 5.2, VMM: yes, VRAM: 24463 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-haswell.so
+occamy-gdn: device 0: 24 SMs x 2 blocks/SM -> grid 48, smem 36608 B
+occamy-gdn: fused GDN window 2..61 (60 nodes) norm-0 -> attn_residual-0; engaged 1, GDN windows rejected 0
+occamy-fused: device 0: 24 SMs x 2 blocks/SM -> grid 48, smem 41728 B
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+occamy-fused: fused MoE window 62..104 (43 nodes) norm-0 -> l_out-0
+occamy-fused: window rejected: ROPE
+ggml_cuda: occamy FA decode kernel mode 1
+occamy-fused: window rejected: no residual ADD within 128 nodes
+head-rowpack: engaged sm52 Q4_0 K2048 rows248320 columns1 rows_per_block4
+occamy-gdn: fused GDN window 3664..3723 (60 nodes) norm-38 -> attn_residual-38; engaged 3000, GDN windows rejected 0
+occamy-gdn: fused GDN window 3664..3723 (60 nodes) norm-38 -> attn_residual-38; engaged 6000, GDN windows rejected 0
+occamy-gdn: fused GDN window 3664..3723 (60 nodes) norm-38 -> attn_residual-38; engaged 9000, GDN windows rejected 0
+build_commit,build_number,cpu_info,gpu_info,backends,model_filename,model_type,model_size,model_n_params,n_batch,n_ubatch,n_threads,cpu_mask,cpu_strict,poll,type_k,type_v,n_gpu_layers,n_cpu_moe,split_mode,main_gpu,no_kv_offload,flash_attn,devices,tensor_split,tensor_buft_overrides,load_mode,lazy_mode,embeddings,no_op_offload,no_host,repack,fit_target,fit_min_ctx,n_prompt,n_gen,n_depth,test_time,avg_ns,stddev_ns,avg_ts,stddev_ts
+"unknown","0","AMD Ryzen 5 5600X 6-Core Processor","Quadro M6000 24GB","CUDA","/models/occamy-1.0-Q4_0-headq40b.gguf","qwen35moe 35B.A3B Q4_0","19572951552","34660610688","2048","512","6","0x0","0","50","f16","f16","999","0","layer","0","0","1","auto","0.00","none","auto","auto","0","0","0","1","0","0","0","128","0","2026-11-10T17:12:18Z","1602066172","1854327","79.896896","0.092373"

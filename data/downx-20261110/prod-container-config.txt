@@ -1,0 +1,6 @@
+# docker inspect llamacpp-m6000 (read-only inspect, 2026-11-10; state running, StartedAt 2026-11-10T17:21:38Z)
+image: sha256:3a0caa9a... (local/llama.cpp:server-cuda-b11552-sm52-normq8)
+bind: /media/avg-usr/Storage/m6000-llama-cpp/prod-libs/libggml-cuda-downx35-20261110.so -> /app/libggml-cuda.so (ro)
+GGML_CUDA_MOE_DOWNX=1 is set in Config.Env (see prod-container-env.txt; full GGML_* env, no secrets).
+Cmd: -m /models/occamy-1.0-Q4_0-headq40b.gguf --alias qwen36-moe --override-kv tokenizer.ggml.pre=str:qwen35 -ngl 999 -np 2 -c 196608 -b 2048 -ub 1024 --cache-ram 12288 --ctx-checkpoints 16 --checkpoint-min-step 2048 -fa on --host 0.0.0.0 --port 8080 --jinja --metrics --slot-save-path /slots -lv 4
+Note: env var present != kernel dispatched; see README section 4. The prod lib is the ITERATION-1 build (bool DX, mode 1 only).

@@ -1,0 +1,8 @@
+# Prod container llamacpp-m6000 (DOWNX=1, i1 lib) log excerpt; only timing/slot lines, no prompt text. SMOKE ONLY, not a verification.
+0.36.029.356 I srv    load_model: initializing, n_slots = 2, n_ctx_slot = 98304, kv_unified = 'false'
+0.36.029.716 I slot   load_model: id  1 | task -1 | new slot, n_ctx = 98304
+0.37.186.537 I slot print_timing: id  1 | task 0 | prompt eval time =     317.25 ms /    13 tokens (   24.40 ms per token,    40.98 tokens per second)
+0.37.186.549 I slot print_timing: id  1 | task 0 |        eval time =      91.21 ms /     8 tokens (   13.03 ms per token,    76.75 tokens per second)
+8.48.508.075 I slot print_timing: id  0 | task 64 |        eval time =     178.86 ms /    15 tokens (   12.78 ms per token,    78.27 tokens per second)
+23.47.627.652 I slot print_timing: id  0 | task 173 |        eval time =     598.86 ms /    48 tokens (   12.74 ms per token,    78.48 tokens per second)
+# Origin of the later requests (task 64, 173) is not known to this packet; short, ~15-48 token completions.

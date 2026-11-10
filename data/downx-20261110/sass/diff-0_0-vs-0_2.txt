@@ -1,0 +1,300 @@
+37d36
+< MOV R#, RZ ;
+39,40c38,40
+< ISETP.GE.U32.AND P3, PT, R#.reuse, X, PT ;
+< LEA.HI R#, R#, c[X][X], RZ, X ;
+---
+> LEA.HI R#, R#.reuse, c[X][X], RZ, X ;
+> ISETP.GE.U32.AND P3, PT, R#, X, PT ;
+> MOV R#, RZ ;
+120c120,121
+< LDS.U.128 R#, [X] ;
+---
+> MOV32I R#, X ;
+> LDS.U.128 R#, [X]
+125d125
+< MOV32I R#, X ;
+135,136c135
+< SSY X
+< MOV R#, R# ;
+---
+> MUFU.RSQ R#, R#
+137a137
+> SSY X
+139a140
+> MOV R#, R# ;
+141d141
+< MUFU.RSQ R#, R#
+184a185,188
+> XMAD R#, R#.reuse, X, R# ;
+> XMAD.PSL R#, R#.H1, X, R# ;
+> SHL R#, R#, X ;
+> FMUL.FTZ R#, R#.reuse, R# ;
+186d189
+< FMUL.FTZ R#, R#, R# ;
+190,194c193,195
+< XMAD R#, R#.reuse, X, R# ;
+< STS [R#+X], R#
+< XMAD.PSL R#, R#.H1, X, R# ;
+< LDS.U.32 R#, [R#+X]
+< IADD32I R#, R#, X ;
+---
+> STS [R#+X], R# ;
+> LDS.U.32 R#, [R#+X] ;
+> IADD32I R#, R#.reuse, X ;
+196d196
+< SHL R#, R#, X ;
+252,254c252,253
+< SHL R#, R#.reuse, X ;
+< SHR.U32 R#, R#, X ;
+< LOP32I.AND R#, R#, X ;
+---
+> SHR.U32 R#, R#.reuse, X ;
+> SHL R#, R#, X ;
+255a255,256
+> LOP32I.AND R#, R#, X ;
+> MOV R#, R# ;
+271d271
+< XMAD R#, R#.reuse, X, R#.reuse ;
+278c278
+< XMAD R#, R#.reuse, X, R# ;
+---
+> XMAD R#, R#, X, R# ;
+285a286,287
+> XMAD R#, R#.reuse, X, R# ;
+> FFMA.FTZ R#, R#, R#, R# ;
+288a291,292
+> LDS.U.128 R#, [R#+X] ;
+> FFMA.FTZ R#, R#, R#, R# ;
+290d293
+< LDS.U.128 R#, [R#+X]
+300,301d302
+< FFMA.FTZ R#, R#, R#, R# ;
+< FFMA.FTZ R#, R#, R#, R# ;
+309a311
+> SHR.U32 R#, R#, X ;
+312d313
+< SHR.U32 R#, R#, X ;
+387a389,390
+> DEPBAR.LE SB5, X ;
+> XMAD.PSL.CLO R#, R#.H1, X, RZ ;
+390,391c393
+< XMAD.PSL.CLO R#, R#.H1, X, RZ ;
+< BAR.SYNC X
+---
+> BAR.SYNC X ;
+402d403
+< DEPBAR.LE SB5, X
+413,415c414,415
+< XMAD.S16.U16.CHI R#, R#.H1.reuse, R#.reuse, R# ;
+< IADD3.RS R#, R#, R#, R# ;
+< XMAD.U16.S16 R#, R#.reuse, R#.H1.reuse, RZ ;
+---
+> XMAD.S16.U16.CHI R#, R#.H1.reuse, R#, R# ;
+> IADD3.RS R#, R#, R#.reuse, R#.reuse ;
+417d416
+< XMAD.S16.S16.CSFU R#, R#.H1, R#.H1, RZ ;
+419d417
+< IADD.X R#, R#, c[X][X] ;
+421d418
+< IADD R#.CC, R#, c[X][X] ;
+422a420,421
+> IADD.X R#, R#, c[X][X] ;
+> IADD R#.CC, R#, c[X][X] ;
+425c424
+< IADD R#.CC, R#, R#.reuse ;
+---
+> IADD R#.CC, R#, R# ;
+441,442c440
+< DEPBAR.LE SB5, X
+< SSY X ;
+---
+> SSY X
+545,546d542
+< FADD.FTZ R#, R#, -R# ;
+< RRO.EX2 R#, R# ;
+548d543
+< MUFU.EX2 R#, R#
+550,551c545
+< FADD.FTZ R#, R#, -R# ;
+< MUFU.EX2 R#, R#
+---
+> MUFU.EX2 R#, R# ;
+553c547
+< FMUL32I.FTZ R#, R#, 1.4426950216293334961 ;
+---
+> FADD.FTZ R#, R#, -R#.reuse ;
+556c550
+< LOP32I.OR R#, R#, X ;
+---
+> FADD.FTZ R#, R#, -R# ;
+558a553,554
+> MUFU.EX2 R#, R# ;
+> RRO.EX2 R#, R# ;
+563c559,561
+< MUFU.EX2 R#, R# ;
+---
+> FMUL32I.FTZ R#, R#, 1.4426950216293334961 ;
+> MUFU.EX2 R#, R#
+> LOP32I.OR R#, R#, X ;
+579,580c577
+< LOP32I.OR R#, R#, X ;
+< SHFL.BFLY PT, R#, R#, X, X
+---
+> SHFL.BFLY PT, R#, R#, X, X ;
+585,586c582
+< LOP32I.OR R#, R#, X ;
+< SHFL.BFLY PT, R#, R#, X, X
+---
+> SHFL.BFLY PT, R#, R#, X, X ;
+588c584,585
+< MUFU.RCP R#, R# ;
+---
+> LOP32I.OR R#, R#, X ;
+> MUFU.RCP R#, R#
+592a590
+> FMUL.FTZ R#, R#, R# ;
+595d592
+< FMUL.FTZ R#, R#, R# ;
+598a596
+> LOP32I.OR R#, R#, X ;
+604a603
+> SEL R#, R#, c[X][X], P6 ;
+605a605,608
+> SEL R#, R#, R#, P2 ;
+> SEL R#, R#, R#, P0 ;
+> PSETP.AND.AND P0, PT, PT, PT, PT ;
+> SEL R#, R#, R#, P5 ;
+608a612
+> SEL R#, R#, R#, P4 ;
+611c615
+< SEL R#, R#, c[X][X], P6 ;
+---
+> SEL R#, R#, R#, P3 ;
+613,615d616
+< SEL R#, R#, R#, P2 ;
+< SEL R#, R#, R#, P0 ;
+< PSETP.AND.AND P0, PT, PT, PT, PT ;
+617,621d617
+< SEL R#, R#, R#, P5 ;
+< FSETP.GT.FTZ.AND P2, PT, R#.reuse, R#.reuse, PT ;
+< SEL R#, R#, R#, P4 ;
+< SEL R#, R#, R#, P3 ;
+< SEL R#, R#, R#, P2 ;
+623c619
+< SHFL.BFLY PT, R#, R#, X, X
+---
+> FSETP.GT.FTZ.AND P2, PT, R#, R#, PT ;
+624a621,622
+> SEL R#, R#, R#, P2 ;
+> SHFL.BFLY PT, R#, R#, X, X
+698c696
+< ISCADD R#, R#, X, X ;
+---
+> ISCADD R#, R#.reuse, X, X ;
+700c698,699
+< NOP ;
+---
+> XMAD R#, R#, X, R# ;
+> S2R R#, SR_CTAID.X
+703d701
+< ISETP.GT.AND P0, PT, R#, X, PT ;
+705c703
+< XMAD R#, R#, X, R#.reuse ;
+---
+> ISCADD R#, R#, R#, X ;
+706a705
+> ISETP.GT.AND P0, PT, R#, X, PT ;
+711,714c710,711
+< S2R R#, SR_CTAID.X ;
+< DEPBAR.LE SB5, X ;
+< LDS.U.64 R#, [R#+X] ;
+< ISCADD R#, R#, R#, X ;
+---
+> MOV R#, R# ;
+> LDS.U.64 R#, [R#+X]
+780c777
+< LDG.E.CI.128 R#, [R#]
+---
+> LDG.E.CI.128 R#, [R#+X]
+783c780
+< LDG.E.CI.128 R#, [R#+X] ;
+---
+> LDG.E.CI.128 R#, [R#] ;
+789,790c786
+< DEPBAR.LE SB5, X
+< STS.128 [R#+X], R# ;
+---
+> STS.128 [R#+X], R#
+796c792
+< STS.128 [R#+X], R# ;
+---
+> STS.128 [R#+X], R#
+876c872
+< LDS.U.32 R#, [R#+X] ;
+---
+> LDS.U.128 R#, [R#+X] ;
+880c876
+< LDS.U.128 R#, [R#+X]
+---
+> LDS.U.32 R#, [R#+X]
+884c880
+< LDS.U.32 R#, [R#+X]
+---
+> LDS.U.128 R#, [R#+X]
+888,889c884
+< PRMT R#, R#.reuse, X, R#.reuse ;
+< PRMT R#, R#, X, R#.reuse ;
+---
+> PRMT R#, R#, X, R# ;
+892,893d886
+< PRMT R#, R#.reuse, X, R#.reuse ;
+< PRMT R#, R#, X, R# ;
+894a888,889
+> PRMT R#, R#.reuse, X, R#.reuse ;
+> PRMT R#, R#, X, R#.reuse ;
+895a891
+> F2F.F32.F16 R#, R#
+898,899d893
+< PRMT R#, R#.reuse, X, R#.reuse ;
+< FFMA.FTZ R#, R#, R#, R# ;
+900a895,896
+> LOP32I.AND R#, R#.reuse, X ;
+> SHR.U32 R#, R#, X ;
+903a900,901
+> LOP32I.OR R#, R#, X ;
+> LOP32I.AND R#, R#, X ;
+905c903
+< LDS.U.128 R#, [R#+X]
+---
+> PRMT R#, R#.reuse, X, R#.reuse ;
+906a905
+> PRMT R#, R#, X, R# ;
+907a907,908
+> PRMT R#, R#.reuse, X, R#.reuse ;
+> PRMT R#, R#.reuse, X, R#.reuse ;
+909d909
+< LOP32I.AND R#, R#.reuse, X ;
+911c911,913
+< SHR.U32 R#, R#, X ;
+---
+> PRMT R#, R#, X, R# ;
+> FFMA.FTZ R#, R#, R#, RZ ;
+> LOP32I.AND R#, R#.reuse, X ;
+912a915,918
+> PRMT R#, R#.reuse, X, R#.reuse ;
+> PRMT R#, R#.reuse, X, R#.reuse ;
+> SHR.U32 R#, R#, X ;
+> PRMT R#, R#, X, R# ;
+913a920
+> FFMA.FTZ R#, R#, R#, R# ;
+916,918d922
+< PRMT R#, R#, X, R#.reuse ;
+< LOP32I.AND R#, R#, X ;
+< PRMT R#, R#.reuse, X, R#.reuse ;
+920d923
+< LDS.U.128 R#, [R#+X]
+922a926
+> LDS.U.128 R#, [R#+X]
+925,926c929
+< PRMT R#, R#, X, R#.reuse ;

@@ -1,0 +1,21 @@
+0.03.654.605 I cmn          init: llama threadpool init, n_threads = 6
+occamy-gdn: device 0: 24 SMs x 2 blocks/SM -> grid 48, smem 36608 B
+occamy-gdn: fused GDN window 2..61 (60 nodes) norm-0 -> attn_residual-0; engaged 1, GDN windows rejected 0
+occamy-fused: device 0: 24 SMs x 2 blocks/SM -> grid 48, smem 41728 B
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+occamy-fused: fused MoE window 62..104 (43 nodes) norm-0 -> l_out-0
+occamy-fused: window rejected: ROPE
+ggml_cuda: occamy FA decode kernel mode 1
+occamy-fused: window rejected: no residual ADD within 128 nodes
+head-rowpack: engaged sm52 Q4_0 K2048 rows248320 columns1 rows_per_block4
+0.03.705.794 I 
+0.03.705.863 I system_info: n_threads = 6 (n_threads_batch = 6) / 12 | CUDA : ARCHS = 520 | USE_GRAPHS = 1 | FA_QUANTS = q4_0-q4_0,q8_0-q8_0,f16-f16,bf16-bf16 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+0.03.705.924 I perplexity: saving all logits to /o/logits-dx1.bin
+0.03.705.930 I perplexity: tokenizing the input ..
+0.03.772.442 I perplexity: tokenization took 66.506 ms
+0.03.772.494 I perplexity: calculating perplexity over 1 chunks, n_ctx=128, batch_size=1, n_seq=1
+occamy-gdn: fused GDN window 3664..3723 (60 nodes) norm-38 -> attn_residual-38; engaged 3000, GDN windows rejected 0
+0.05.330.485 I perplexity: 1.53 seconds per pass - ETA 0.02 minutes
+[1]15.8181,
+0.05.386.435 I Final estimate: PPL = 15.8181 +/- 4.88640
+

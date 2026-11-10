@@ -1,0 +1,15 @@
+# SHA-256 (computed 2026-11-10 with sha256sum)
+2b5d7a2ca6813e9cdd25fe9142e35bd732583679c52ee7888f9455df218d9cc0  occamy-1.0-Q4_0-headq40b.gguf (/media/avg-usr/Storage/uroboros-models/)
+7b4f304ae3facee48bac2a8cac7e356f31ef8540e8e3711df192645efe155f6e  libggml-cuda-downx-i1.so (mode-1 bench lib; ccc8539 code, built 18:02)
+7b4f304ae3facee48bac2a8cac7e356f31ef8540e8e3711df192645efe155f6e  prod-libs/libggml-cuda-downx35-20261110.so (IDENTICAL to i1; also /app/libggml-cuda.so inside running llamacpp-m6000)
+2d6412e3b0c21117b3ee3bd125bbcefc1d4d40109cb96cd3e292a6139ae11cd5  libggml-cuda-downx-i2.so (mode-3 bench lib; worktree built 18:09, 897a09c committed 18:12)
+d14a076e89dad41245d6e1b5c6709872930ed655394e775dae120243fec0a460  libggml-cuda-35b-deployed.so (earlier 13:49 lib; used here only as resource-usage reference, NOT proven to be the 81e5211 build)
+33f1f1596a341fb8fb46cd7239bf4d6c32a310bae6d5406d784bc781a5573f90  prof35/app/llama (bench executable used for ALL A/B runs, both modes)
+093f845fb764b9ed0af0dde00aa2fd599d4e55c4b9af7bff65520c6bee90a1bb  /app/llama-server in running llamacpp-m6000
+sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d  image local/llama.cpp:server-cuda-b11552-sm52-normq8 (prod container image id)
+0ddccd66a62f97f8b7da0e31a5a448d0ee1ab871f52e8be27baedda5327127f1  native-occamy/p3/raw/text.txt (perplexity input, 207042 B; public llama.cpp docs text, not copied here)
+47d21d9809b90fb60e4b77bed84f902c0ff228758954bd8f7932dffc87347fc2  logits-dx0.bin  mode1 run (31289356 B)
+47d21d9809b90fb60e4b77bed84f902c0ff228758954bd8f7932dffc87347fc2  logits-dx1.bin  mode1 run
+47d21d9809b90fb60e4b77bed84f902c0ff228758954bd8f7932dffc87347fc2  logits-dx0.bin  out-i2 run
+47d21d9809b90fb60e4b77bed84f902c0ff228758954bd8f7932dffc87347fc2  logits-dx1.bin  out-i2 run
+# All four KL-base files are byte-identical to each other (one hash). Files not copied (31 MB each).
