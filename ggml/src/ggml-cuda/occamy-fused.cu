@@ -188,6 +188,12 @@ __device__ __forceinline__ void route(const Scratch * s, int lane, int * sel, fl
 // Bit 2: down rows dealt warp-major (row = warp * grid + block + k * W) so the partial last row wave
 // (2048 rows over 384 warps) is spread over every block/SM instead of the first 16 blocks.
 // Rows are independent and each row's arithmetic is unchanged -> bit-identical output.
+// C07 (GGML_CUDA_MOE_DOWNH, default off; fused PHASE 0 only):
+// bit 4 (DOWNH=1): selected-expert down row bases cb[] (sel valid since route+__syncthreads in phase B) and the
+//   shexp gate gpart -> gl -> sigmoid (gpart final since barrier 1) are formed before barrier 2, not after it.
+// bit 8 (DOWNH=2, needs bit 4): the first down row of each warp (read-only weights, DRAM) is also issued before
+//   barrier 2, so its latency overlaps the barrier wait instead of the activation prologue.
+// No added global traffic, no added barrier/__syncthreads; same loads, same sum order, same FP32 ops.
 template <int PHASE, int DX = 0>
 __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
     extern __shared__ float smem[];
@@ -248,6 +254,29 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
             __syncwarp();
         }
     }
+    constexpr bool HS = PHASE == 0 && (DX & 4), PF = HS && (DX & 8);
+    const uint8_t * cb[6];
+    uint4 cv[6];
+    float gl = 0.f;
+    int r = 0;
+    if (HS) {
+        r = (DX & 2) ? warp * gridDim.x + blockIdx.x : gw;
+#pragma unroll
+        for (int i = 0; i < 6; ++i) {
+            const int uidx = lane + 32 * i, m = uidx / 18, w = uidx % 18;
+            cb[i] = (m < TOPK ? L.down_exps + (size_t)sel[m < TOPK ? m : 0] * H * ROW_D : L.down_sh) + w * 16;
+        }
+        if (PF && r < H) {
+#pragma unroll
+            for (int i = 0; i < 5; ++i) cv[i] = __ldg((const uint4 *)(cb[i] + (size_t)r * ROW_D));
+            if (lane < 2) cv[5] = __ldg((const uint4 *)(cb[5] + (size_t)r * ROW_D));
+        }
+        float gp[NQ];
+#pragma unroll
+        for (int q = 0; q < NQ; ++q) gp[q] = __ldcg(&s->gpart[q]);
+#pragma unroll
+        for (int q = 0; q < NQ; ++q) gl += gp[q];
+    }
     if (PHASE == 0) grid_barrier(s);
     if (PHASE == 0 || PHASE == 3) {
         if (PHASE == 3) { if (warp == 0) route(s, lane, sel, selw); __syncthreads(); }
@@ -260,22 +289,21 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
                 hv[j] = j < NXE ? __ldcg(&s->h_exp[i]) : __ldcg(&s->h_sh[i - TOPK * FF]);
             }
 #pragma unroll
-            for (int q = 0; q < NQ; ++q) gp[q] = __ldcg(&s->gpart[q]);
+            if (!HS) for (int q = 0; q < NQ; ++q) gp[q] = __ldcg(&s->gpart[q]);
         }
-        const uint8_t * cb[6];
+        if (!HS) {
 #pragma unroll
         for (int i = 0; i < 6; ++i) {
             const int uidx = lane + 32 * i, m = uidx / 18, w = uidx % 18;
             cb[i] = (m < TOPK ? L.down_exps + (size_t)sel[m < TOPK ? m : 0] * H * ROW_D : L.down_sh) + w * 16;
         }
-        uint4 cv[6];
-        int r = (DX & 2) ? warp * gridDim.x + blockIdx.x : gw;
-        if (r < H) {
+        }
+        if (!HS) r = (DX & 2) ? warp * gridDim.x + blockIdx.x : gw;
+        if (!PF && r < H) {
 #pragma unroll
             for (int i = 0; i < 5; ++i) cv[i] = __ldg((const uint4 *)(cb[i] + (size_t)r * ROW_D));
             if (lane < 2) cv[5] = __ldg((const uint4 *)(cb[5] + (size_t)r * ROW_D));
         }
-        float gl = 0.f;
         if (DX & 1) {
             // thread (warp, lane) slot j holds element 256j + 32warp + lane = group 8j + warp, lane position lane
 #pragma unroll
@@ -286,8 +314,10 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
                 if (lane == 0) ((float *)sums)[NW * j + warp] = sm;
             }
             __syncthreads();
+            if (!HS) {
 #pragma unroll
             for (int q = 0; q < NQ; ++q) gl += gp[q];
+            }
         } else {
         for (int i = threadIdx.x; i < TOPK * FF + FFS; i += NT) {
             float val = i < TOPK * FF ? __ldcg(&s->h_exp[i]) : __ldcg(&s->h_sh[i - TOPK * FF]);
@@ -299,8 +329,10 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
             if (lane == 0) ((float *)sums)[b] = sm;
         }
         __syncthreads();
+            if (!HS) {
 #pragma unroll
-        for (int q = 0; q < NQ; ++q) gl += __ldcg(&s->gpart[q]);
+            for (int q = 0; q < NQ; ++q) gl += __ldcg(&s->gpart[q]);
+            }
         }
         const float gs = 1.f / (1.f + expf(-gl));
         const float w0 = selw[lane >> 3], w1 = selw[(lane >> 3) + 4];
@@ -329,6 +361,7 @@ struct DevState {
     Scratch * scratch = nullptr;
     int grid = 0;
     int grid_dx = 0;   // co-resident grid of moe_v2<0, 3> (GGML_CUDA_MOE_DOWNX; >= that of <0, 1> / <0, 2>)
+    int grid_dh[2] = { 0, 0 };   // C07: co-resident grids of moe_v2<0, 1|4> and moe_v2<0, 1|4|8> (GGML_CUDA_MOE_DOWNH=1|2)
 };
 static DevState g_dev[GGML_CUDA_MAX_DEVICES];
 static std::mutex g_mtx;
@@ -371,6 +404,15 @@ static DevState & dev_state(int device) {
         d.grid_dx = per_sm_dx < 1 ? -1 : per_sm_dx * nsm;
         if (g_debug) {
             fprintf(stderr, "occamy-fused: device %d: DOWNX variant %d blocks/SM -> grid %d\n", device, per_sm_dx, d.grid_dx);
+        }
+        int per_sm_dh[2] = { 0, 0 };
+        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_dh[0], moe_v2<0, 5>,  NT, SMEM2_FLOATS * sizeof(float)));
+        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_dh[1], moe_v2<0, 13>, NT, SMEM2_FLOATS * sizeof(float)));
+        for (int k = 0; k < 2; ++k) {
+            d.grid_dh[k] = per_sm_dh[k] < 1 ? -1 : per_sm_dh[k] * nsm;
+            if (g_debug) {
+                fprintf(stderr, "occamy-fused: device %d: DOWNH=%d variant %d blocks/SM -> grid %d\n", device, k + 1, per_sm_dh[k], d.grid_dh[k]);
+            }
         }
     }
     return d;
@@ -576,7 +618,16 @@ void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cud
     const size_t smem = SMEM2_FLOATS * sizeof(float);
     // GGML_CUDA_MOE_DOWNX=1|2|3: bit 1 reordered down prologue, bit 2 warp-major down rows (see DX above); falls back if its occupancy is 0
     static const int dx = getenv("GGML_CUDA_MOE_DOWNX") ? atoi(getenv("GGML_CUDA_MOE_DOWNX")) & 3 : 0;
-    if (three) {
+    // C07 GGML_CUDA_MOE_DOWNH=1|2 (default 0 = off): only with DOWNX=1, fused single launch; else ignored
+    static const int dh = getenv("GGML_CUDA_MOE_DOWNH") ? atoi(getenv("GGML_CUDA_MOE_DOWNH")) : 0;
+    if (!three && dx == 1 && (dh == 1 || dh == 2) && d.grid_dh[dh - 1] > 0) {
+        if (dh == 1) { moe_v2<0, 5><<<d.grid_dh[0], NT, smem, st>>>(P); } else { moe_v2<0, 13><<<d.grid_dh[1], NT, smem, st>>>(P); }
+        if (g_debug) {   // C07 G3 dispatch counter (host side, debug only)
+            static unsigned long long n_dh = 0;
+            ++n_dh;
+            if ((n_dh & (n_dh - 1)) == 0) { fprintf(stderr, "occamy-fused: DOWNH=%d launches %llu\n", dh, n_dh); }
+        }
+    } else if (three) {
         moe_v2<1><<<d.grid, NT, smem, st>>>(P);
         moe_v2<2><<<d.grid, NT, smem, st>>>(P);
         switch (dx) { case 1: moe_v2<3, 1><<<d.grid, NT, smem, st>>>(P); break; case 2: moe_v2<3, 2><<<d.grid, NT, smem, st>>>(P); break;
