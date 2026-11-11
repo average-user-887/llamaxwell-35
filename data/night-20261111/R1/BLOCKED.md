@@ -1,3 +1,4 @@
+# superseded: runs completed, see profile.md and analysis files
 # R1 status (11 Nov, runner)
 Tasks 1 (G4 ABBA) and 2 (profile) NOT run: GPU-684f... holds 22.9 GB from docker `llamacpp-m6000` (prod, direct container,
 not swap-managed; llama-swap /running is empty so no per-model unload exists). Harness aborts on compute apps; stopping prod is
