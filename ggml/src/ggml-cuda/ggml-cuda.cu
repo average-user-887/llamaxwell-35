@@ -2819,7 +2819,9 @@ static bool ggml_backend_cuda_cpy_tensor_async(ggml_backend_t backend_src, ggml_
 static void ggml_backend_cuda_synchronize(ggml_backend_t backend) {
     ggml_backend_cuda_context * cuda_ctx = (ggml_backend_cuda_context *)backend->context;
 
-    ggml_cuda_hg_flush(cuda_ctx->device, cuda_ctx->stream(), false);
+    // HOSTGAP: no flush here. The scheduler calls synchronize before every graph-input upload
+    // (single-GPU, no sched events); flushing here would launch one gather per input. Pending
+    // uploads stay staged and are flushed by every consumer (graph_compute, async/cpy, get, ...).
     CUDA_CHECK(cudaStreamSynchronize(cuda_ctx->stream()));
 
     GGML_UNUSED(backend);
