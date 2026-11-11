@@ -1,0 +1,16 @@
+   https://docs.nvidia.com/datacenter/cloud-native/ .
+gdn<0> pin=1920 c24=1920 identical=Y
+gdn<1> pin=648 c24=648 identical=Y
+gdn<2> pin=390 c24=390 identical=Y
+gdn<3> pin=828 c24=828 identical=Y
+moe_v2<0ELi0> pin=2502 c24=2502 identical=Y
+moe_v2<0ELi1> pin=2724 c24=2724 identical=Y
+moe_v2<0ELi2> pin=2496 c24=2496 identical=Y
+moe_v2<0ELi3> pin=2724 c24=2724 identical=Y
+moe_v2<1ELi0> pin=366 c24=366 identical=Y
+moe_v2<2ELi0> pin=1146 c24=1146 identical=Y
+moe_v2<3ELi0> pin=1446 c24=1446 identical=Y
+moe_v2<3ELi1> pin=1704 c24=1704 identical=Y
+moe_v2<3ELi2> pin=1452 c24=1452 identical=Y
+moe_v2<3ELi3> pin=1704 c24=1704 identical=Y
+14

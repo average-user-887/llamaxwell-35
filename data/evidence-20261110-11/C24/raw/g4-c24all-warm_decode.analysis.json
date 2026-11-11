@@ -1,0 +1,355 @@
+{
+ "warm_decode": {
+  "schema_version": "c02.1",
+  "mode": "warm_decode",
+  "arms": [
+   "A",
+   "B"
+  ],
+  "min_cycles": 5,
+  "n_trials_total": 22,
+  "n_valid": 22,
+  "n_invalid": 0,
+  "n_warmup": 2,
+  "per_cycle": [
+   {
+    "cycle": 1,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 79.94364350000001,
+    "mean_b": 83.9340085,
+    "delta": 3.990364999999997,
+    "delta_pct": 4.991472524016238
+   },
+   {
+    "cycle": 2,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 79.941299,
+    "mean_b": 83.95033000000001,
+    "delta": 4.009031000000007,
+    "delta_pct": 5.014968545857634
+   },
+   {
+    "cycle": 3,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 79.9471315,
+    "mean_b": 83.9476215,
+    "delta": 4.000489999999999,
+    "delta_pct": 5.003919371391086
+   },
+   {
+    "cycle": 4,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 79.938887,
+    "mean_b": 83.942012,
+    "delta": 4.003125000000011,
+    "delta_pct": 5.007731718856689
+   },
+   {
+    "cycle": 5,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 79.964027,
+    "mean_b": 83.95846399999999,
+    "delta": 3.9944369999999907,
+    "delta_pct": 4.995292445689348
+   }
+  ],
+  "excluded_cycles": [],
+  "delta": {
+   "n": 5,
+   "mean": 3.9994896000000013,
+   "median": 4.000489999999999,
+   "stdev": 0.007315092945417183,
+   "ci95": [
+    3.99040816856732,
+    4.008571031432682
+   ],
+   "ci95_halfwidth": 0.009081431432681034
+  },
+  "delta_pct": {
+   "n": 5,
+   "mean": 5.002676921162199,
+   "median": 5.003919371391086,
+   "stdev": 0.009463716148671138,
+   "ci95": [
+    4.9909280493510275,
+    5.014425792973371
+   ],
+   "ci95_halfwidth": 0.011748871811171737
+  },
+  "min_detectable_delta_95": 0.009081431432681034,
+  "verdict": "GAIN",
+  "identity_invalid_trials": [],
+  "invalid_trials": [],
+  "all_trials": [
+   {
+    "trial_id": "c24all-warm_decode-c00-p0-A-1c64e127",
+    "mode": "warm_decode",
+    "cycle": 0,
+    "position": 0,
+    "arm": "A",
+    "warmup": true,
+    "rc": 0,
+    "value": 80.291137,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c00-p0-A-1c64e127.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c00-p1-B-065deb37",
+    "mode": "warm_decode",
+    "cycle": 0,
+    "position": 1,
+    "arm": "B",
+    "warmup": true,
+    "rc": 0,
+    "value": 83.914472,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c00-p1-B-065deb37.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c01-p0-A-fea6018c",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.94562,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c01-p0-A-fea6018c.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c01-p1-B-48d628e5",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.914889,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c01-p1-B-48d628e5.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c01-p2-B-44c13aa5",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.953128,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c01-p2-B-44c13aa5.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c01-p3-A-d10d19e8",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.941667,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c01-p3-A-d10d19e8.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c02-p0-A-3b1f2de0",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.94655,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c02-p0-A-3b1f2de0.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c02-p1-B-0a8e1543",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.942638,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c02-p1-B-0a8e1543.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c02-p2-B-a2015a0c",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.958022,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c02-p2-B-a2015a0c.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c02-p3-A-c8ab69ab",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.936048,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c02-p3-A-c8ab69ab.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c03-p0-A-37814107",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.939422,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c03-p0-A-37814107.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c03-p1-B-58dfc873",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.972099,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c03-p1-B-58dfc873.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c03-p2-B-18c12342",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.923144,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c03-p2-B-18c12342.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c03-p3-A-c10a29f5",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.954841,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c03-p3-A-c10a29f5.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c04-p0-A-30d634cb",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.95017,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c04-p0-A-30d634cb.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c04-p1-B-ca93a724",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.944062,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c04-p1-B-ca93a724.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c04-p2-B-89c28d50",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.939962,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c04-p2-B-89c28d50.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c04-p3-A-5a768af9",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.927604,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c04-p3-A-5a768af9.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c05-p0-A-c463677c",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.974531,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c05-p0-A-c463677c.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c05-p1-B-ee10fda5",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.973629,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c05-p1-B-ee10fda5.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c05-p2-B-179b41c7",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.943299,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c05-p2-B-179b41c7.log"
+   },
+   {
+    "trial_id": "c24all-warm_decode-c05-p3-A-c34d9343",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.953523,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/C24/raw/g4-c24all/c24all-warm_decode-c05-p3-A-c34d9343.log"
+   }
+  ]
+ }
+}

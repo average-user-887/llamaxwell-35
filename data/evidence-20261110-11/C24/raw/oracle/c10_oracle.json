@@ -1,0 +1,233 @@
+{
+ "nonzero_state/G48/in1out1": {
+  "out_bits": 0,
+  "state_bits": 0,
+  "conv_bits": 0,
+  "untouched_row_ok": true,
+  "ref_out_scaled": 1.4909836863807868e-05,
+  "ref_state_scaled": 1.1762490430555772e-06,
+  "ref_conv_bits": 0,
+  "nan_match": true,
+  "qk_evals": [
+   256,
+   48
+  ],
+  "gate_evals": [
+   256,
+   64
+  ],
+  "ok": true
+ },
+ "nonzero_state/G48/in2out0": {
+  "out_bits": 0,
+  "state_bits": 0,
+  "conv_bits": 0,
+  "untouched_row_ok": true,
+  "ref_out_scaled": 1.4909836863807868e-05,
+  "ref_state_scaled": 1.1762490430555772e-06,
+  "ref_conv_bits": 0,
+  "nan_match": true,
+  "qk_evals": [
+   256,
+   48
+  ],
+  "gate_evals": [
+   256,
+   64
+  ],
+  "ok": true
+ },
+ "nonzero_state/G7/in1out1": {
+  "out_bits": 0,
+  "state_bits": 0,
+  "conv_bits": 0,
+  "untouched_row_ok": true,
+  "ref_out_scaled": 1.4909836863807868e-05,
+  "ref_state_scaled": 1.1762490430555772e-06,
+  "ref_conv_bits": 0,
+  "nan_match": true,
+  "qk_evals": [
+   256,
+   22
+  ],
+  "gate_evals": [
+   256,
+   38
+  ],
+  "ok": true
+ },
+ "nonzero_state/G256/in1out1": {
+  "out_bits": 0,
+  "state_bits": 0,
+  "conv_bits": 0,
+  "untouched_row_ok": true,
+  "ref_out_scaled": 1.4909836863807868e-05,
+  "ref_state_scaled": 1.1762490430555772e-06,
+  "ref_conv_bits": 0,
+  "nan_match": true,
+  "qk_evals": [
+   256,
+   256
+  ],
+  "gate_evals": [
+   256,
+   256
+  ],
+  "ok": true
+ },
+ "nonzero_state/G300/in1out1": {
+  "out_bits": 0,
+  "state_bits": 0,
+  "conv_bits": 0,
+  "untouched_row_ok": true,
+  "ref_out_scaled": 1.4909836863807868e-05,
+  "ref_state_scaled": 1.1762490430555772e-06,
+  "ref_conv_bits": 0,
+  "nan_match": true,
+  "qk_evals": [
+   256,
+   256
+  ],
+  "gate_evals": [
+   256,
+   256
+  ],
+  "ok": true
+ },
+ "gate_extremes/G48/in1out1": {
+  "out_bits": 0,
+  "state_bits": 0,
+  "conv_bits": 0,
+  "untouched_row_ok": true,
+  "ref_out_scaled": 2.5932254175131675e-06,
+  "ref_state_scaled": 8.848933248373214e-07,
+  "ref_conv_bits": 0,
+  "nan_match": true,
+  "qk_evals": [
+   256,
+   48
+  ],
+  "gate_evals": [
+   256,
+   64
+  ],
+  "ok": true
+ },
+ "qk_zero_tiny_huge/G48/in1out1": {
+  "out_bits": 0,
+  "state_bits": 0,
+  "conv_bits": 0,
+  "untouched_row_ok": true,
+  "ref_out_scaled": 8.506754056725185e-07,
+  "ref_state_scaled": 9.86488544185704e-07,
+  "ref_conv_bits": 0,
+  "nan_match": true,
+  "qk_evals": [
+   256,
+   48
+  ],
+  "gate_evals": [
+   256,
+   64
+  ],
+  "ok": true
+ },
+ "large_state/G48/in1out1": {
+  "out_bits": 0,
+  "state_bits": 0,
+  "conv_bits": 0,
+  "untouched_row_ok": true,
+  "ref_out_scaled": 2.9285060918482486e-06,
+  "ref_state_scaled": 8.751353016123176e-05,
+  "ref_conv_bits": 0,
+  "nan_match": true,
+  "qk_evals": [
+   256,
+   48
+  ],
+  "gate_evals": [
+   256,
+   64
+  ],
+  "ok": true
+ },
+ "recurrence16/G48/total_bit_mismatch": {
+  "value": 0,
+  "ok": true
+ },
+ "negative_control/stale_cache_never_retag_G7": {
+  "out_bits": 3456,
+  "state_bits": 387072,
+  "ref_out_scaled": 25.452543258666992,
+  "ok": true
+ },
+ "negative_control/early_qk_conv_write_with_reuse_G48": {
+  "out_bits": 4096,
+  "state_bits": 350208,
+  "ref_out_scaled": 30.328561782836914,
+  "ok": true
+ },
+ "work_model": [
+  {
+   "G": 48,
+   "qk_head_evals_base": 256,
+   "qk_head_evals_reuse": 48,
+   "qk_bytes_base": 2097152,
+   "qk_bytes_reuse": 393216,
+   "qk_unique_bytes": 131072,
+   "gate_evals_base": 256,
+   "gate_evals_reuse": 64,
+   "items_per_block_base": [
+    5,
+    6
+   ],
+   "items_per_block_reuse": [
+    5,
+    6
+   ],
+   "state_bytes_rw": 4194304
+  },
+  {
+   "G": 24,
+   "qk_head_evals_base": 256,
+   "qk_head_evals_reuse": 32,
+   "qk_bytes_base": 2097152,
+   "qk_bytes_reuse": 262144,
+   "qk_unique_bytes": 131072,
+   "gate_evals_base": 256,
+   "gate_evals_reuse": 48,
+   "items_per_block_base": [
+    10,
+    11
+   ],
+   "items_per_block_reuse": [
+    10,
+    11
+   ],
+   "state_bytes_rw": 4194304
+  },
+  {
+   "G": 72,
+   "qk_head_evals_base": 256,
+   "qk_head_evals_reuse": 80,
+   "qk_bytes_base": 2097152,
+   "qk_bytes_reuse": 655360,
+   "qk_unique_bytes": 131072,
+   "gate_evals_base": 256,
+   "gate_evals_reuse": 88,
+   "items_per_block_base": [
+    3,
+    4
+   ],
+   "items_per_block_reuse": [
+    3,
+    4
+   ],
+   "state_bytes_rw": 4194304
+  }
+ ],
+ "_summary": {
+  "failed": [],
+  "n_checks": 11
+ }
+}

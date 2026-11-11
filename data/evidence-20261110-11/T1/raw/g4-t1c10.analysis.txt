@@ -1,0 +1,355 @@
+{
+ "warm_decode": {
+  "schema_version": "c02.1",
+  "mode": "warm_decode",
+  "arms": [
+   "A",
+   "B"
+  ],
+  "min_cycles": 5,
+  "n_trials_total": 22,
+  "n_valid": 22,
+  "n_invalid": 0,
+  "n_warmup": 2,
+  "per_cycle": [
+   {
+    "cycle": 1,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 79.73044949999999,
+    "mean_b": 81.669247,
+    "delta": 1.9387975000000068,
+    "delta_pct": 2.4316901662519985
+   },
+   {
+    "cycle": 2,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 79.742926,
+    "mean_b": 81.6912085,
+    "delta": 1.9482825000000048,
+    "delta_pct": 2.4432041783869485
+   },
+   {
+    "cycle": 3,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 79.741169,
+    "mean_b": 81.68382600000001,
+    "delta": 1.9426570000000112,
+    "delta_pct": 2.43620331174228
+   },
+   {
+    "cycle": 4,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 79.717098,
+    "mean_b": 81.67188150000001,
+    "delta": 1.954783500000019,
+    "delta_pct": 2.452150854763957
+   },
+   {
+    "cycle": 5,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 79.7196265,
+    "mean_b": 81.672274,
+    "delta": 1.9526474999999976,
+    "delta_pct": 2.449393688516599
+   }
+  ],
+  "excluded_cycles": [],
+  "delta": {
+   "n": 5,
+   "mean": 1.9474336000000079,
+   "median": 1.9482825000000048,
+   "stdev": 0.006695605745562525,
+   "ci95": [
+    1.9391212402074114,
+    1.9557459597926043
+   ],
+   "ci95_halfwidth": 0.008312359792596384
+  },
+  "delta_pct": {
+   "n": 5,
+   "mean": 2.4425284399323566,
+   "median": 2.4432041783869485,
+   "stdev": 0.00862633396590211,
+   "ci95": [
+    2.431819148743401,
+    2.453237731121312
+   ],
+   "ci95_halfwidth": 0.010709291188955593
+  },
+  "min_detectable_delta_95": 0.008312359792596384,
+  "verdict": "GAIN",
+  "identity_invalid_trials": [],
+  "invalid_trials": [],
+  "all_trials": [
+   {
+    "trial_id": "t1c10-warm_decode-c00-p0-A-08e62a37",
+    "mode": "warm_decode",
+    "cycle": 0,
+    "position": 0,
+    "arm": "A",
+    "warmup": true,
+    "rc": 0,
+    "value": 80.103016,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c00-p0-A-08e62a37.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c00-p1-B-f345e931",
+    "mode": "warm_decode",
+    "cycle": 0,
+    "position": 1,
+    "arm": "B",
+    "warmup": true,
+    "rc": 0,
+    "value": 81.660913,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c00-p1-B-f345e931.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c01-p0-A-7dae14df",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.717689,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c01-p0-A-7dae14df.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c01-p1-B-b8ba61cc",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.659671,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c01-p1-B-b8ba61cc.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c01-p2-B-28d9d86e",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.678823,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c01-p2-B-28d9d86e.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c01-p3-A-1deebe6e",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.74321,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c01-p3-A-1deebe6e.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c02-p0-A-0d488ce0",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.72726,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c02-p0-A-0d488ce0.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c02-p1-B-18673173",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.693638,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c02-p1-B-18673173.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c02-p2-B-14bae70e",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.688779,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c02-p2-B-14bae70e.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c02-p3-A-c16f6592",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.758592,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c02-p3-A-c16f6592.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c03-p0-A-7d3f7843",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.72354,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c03-p0-A-7d3f7843.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c03-p1-B-6bb2e3c9",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.708222,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c03-p1-B-6bb2e3c9.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c03-p2-B-4d041c1a",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.65943,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c03-p2-B-4d041c1a.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c03-p3-A-cf34a016",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.758798,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c03-p3-A-cf34a016.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c04-p0-A-10943c09",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.709811,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c04-p0-A-10943c09.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c04-p1-B-130a7826",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.672244,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c04-p1-B-130a7826.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c04-p2-B-de028550",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.671519,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c04-p2-B-de028550.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c04-p3-A-ebc7609d",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.724385,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c04-p3-A-ebc7609d.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c05-p0-A-8650cd09",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.713517,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c05-p0-A-8650cd09.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c05-p1-B-174d625a",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.692207,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c05-p1-B-174d625a.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c05-p2-B-6ee023e6",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.652341,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c05-p2-B-6ee023e6.log"
+   },
+   {
+    "trial_id": "t1c10-warm_decode-c05-p3-A-aeaf8378",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 79.725736,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c05-p3-A-aeaf8378.log"
+   }
+  ]
+ }
+}

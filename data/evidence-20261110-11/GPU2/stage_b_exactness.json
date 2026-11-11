@@ -1,0 +1,159 @@
+{
+  "c11h": {
+    "id": "c11h",
+    "desc": "GDN Phase-C PCSHARE=1 (lib c11h, Patch H1)",
+    "lib_key": "c11h",
+    "vs_clean_match": true,
+    "vs_clean_prob_cmp": {
+      "mismatch": false,
+      "max_logprob_diff": 0.0,
+      "nan_count": 0,
+      "top1_mismatches": 0
+    },
+    "exact": true,
+    "passed": true,
+    "tokens_512_match": true,
+    "first_mismatch_idx": null,
+    "prob_cmp_512": {
+      "mismatch": false,
+      "max_logprob_diff": 0.0,
+      "nan_count": 0,
+      "top1_mismatches": 0
+    },
+    "long_run_1_match": true,
+    "long_run_1_mismatch": null,
+    "long_run_2_match": true,
+    "long_run_2_mismatch": null,
+    "concurrency_passed": true
+  },
+  "c1011h_b": {
+    "id": "c1011h_b",
+    "desc": "GDN Phase-B QKREUSE=1 (lib c1011h)",
+    "lib_key": "c1011h",
+    "vs_clean_match": true,
+    "vs_clean_prob_cmp": {
+      "mismatch": false,
+      "max_logprob_diff": 0.0,
+      "nan_count": 0,
+      "top1_mismatches": 0
+    },
+    "exact": true,
+    "passed": true,
+    "tokens_512_match": true,
+    "first_mismatch_idx": null,
+    "prob_cmp_512": {
+      "mismatch": false,
+      "max_logprob_diff": 0.0,
+      "nan_count": 0,
+      "top1_mismatches": 0
+    }
+  },
+  "c1011h_c": {
+    "id": "c1011h_c",
+    "desc": "GDN Phase-C PCSHARE=1 (lib c1011h)",
+    "lib_key": "c1011h",
+    "vs_clean_match": true,
+    "vs_clean_prob_cmp": {
+      "mismatch": false,
+      "max_logprob_diff": 0.0,
+      "nan_count": 0,
+      "top1_mismatches": 0
+    },
+    "exact": true,
+    "passed": true,
+    "tokens_512_match": true,
+    "first_mismatch_idx": null,
+    "prob_cmp_512": {
+      "mismatch": false,
+      "max_logprob_diff": 0.0,
+      "nan_count": 0,
+      "top1_mismatches": 0
+    },
+    "long_run_1_match": true,
+    "long_run_1_mismatch": null,
+    "long_run_2_match": true,
+    "long_run_2_mismatch": null,
+    "concurrency_passed": true
+  },
+  "c1011h_bc": {
+    "id": "c1011h_bc",
+    "desc": "GDN Phase-B QKREUSE=1 + Phase-C PCSHARE=1 (lib c1011h)",
+    "lib_key": "c1011h",
+    "vs_clean_match": true,
+    "vs_clean_prob_cmp": {
+      "mismatch": false,
+      "max_logprob_diff": 0.0,
+      "nan_count": 0,
+      "top1_mismatches": 0
+    },
+    "exact": true,
+    "passed": true,
+    "tokens_512_match": true,
+    "first_mismatch_idx": null,
+    "prob_cmp_512": {
+      "mismatch": false,
+      "max_logprob_diff": 0.0,
+      "nan_count": 0,
+      "top1_mismatches": 0
+    },
+    "long_run_1_match": true,
+    "long_run_1_mismatch": null,
+    "long_run_2_match": true,
+    "long_run_2_mismatch": null,
+    "concurrency_passed": true
+  },
+  "call_dh2": {
+    "id": "call_dh2",
+    "desc": "Combo: GDN (QKREUSE+PCSHARE) + MoE DOWNH=2 (lib call)",
+    "lib_key": "call",
+    "vs_clean_match": true,
+    "vs_clean_prob_cmp": {
+      "mismatch": false,
+      "max_logprob_diff": 0.0,
+      "nan_count": 0,
+      "top1_mismatches": 0
+    },
+    "exact": true,
+    "passed": true,
+    "tokens_512_match": true,
+    "first_mismatch_idx": null,
+    "prob_cmp_512": {
+      "mismatch": false,
+      "max_logprob_diff": 0.0,
+      "nan_count": 0,
+      "top1_mismatches": 0
+    },
+    "long_run_1_match": true,
+    "long_run_1_mismatch": null,
+    "long_run_2_match": true,
+    "long_run_2_mismatch": null,
+    "concurrency_passed": true
+  },
+  "call_dh1": {
+    "id": "call_dh1",
+    "desc": "Combo: GDN (QKREUSE+PCSHARE) + MoE DOWNH=1 (lib call)",
+    "lib_key": "call",
+    "vs_clean_match": true,
+    "vs_clean_prob_cmp": {
+      "mismatch": false,
+      "max_logprob_diff": 0.0,
+      "nan_count": 0,
+      "top1_mismatches": 0
+    },
+    "exact": true,
+    "passed": true,
+    "tokens_512_match": true,
+    "first_mismatch_idx": null,
+    "prob_cmp_512": {
+      "mismatch": false,
+      "max_logprob_diff": 0.0,
+      "nan_count": 0,
+      "top1_mismatches": 0
+    },
+    "long_run_1_match": true,
+    "long_run_1_mismatch": null,
+    "long_run_2_match": true,
+    "long_run_2_mismatch": null,
+    "concurrency_passed": true
+  }
+}

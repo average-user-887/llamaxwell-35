@@ -1,0 +1,145 @@
+[
+ {
+  "name": "nonzero",
+  "kind": "nonzero",
+  "G": 48,
+  "steps": 3,
+  "control": null,
+  "bitequal": true,
+  "max_abs_diff": 0.0,
+  "hcnt_mod_ok": true,
+  "pass": true
+ },
+ {
+  "name": "extremes",
+  "kind": "extremes",
+  "G": 48,
+  "steps": 3,
+  "control": null,
+  "bitequal": true,
+  "max_abs_diff": 0.0,
+  "hcnt_mod_ok": true,
+  "pass": true
+ },
+ {
+  "name": "state_x1e3",
+  "kind": "state_x1e3",
+  "G": 48,
+  "steps": 3,
+  "control": null,
+  "bitequal": true,
+  "max_abs_diff": 0.0,
+  "hcnt_mod_ok": true,
+  "pass": true
+ },
+ {
+  "name": "zero_head",
+  "kind": "zero_head",
+  "G": 48,
+  "steps": 3,
+  "control": null,
+  "bitequal": true,
+  "max_abs_diff": 0.0,
+  "hcnt_mod_ok": true,
+  "pass": true
+ },
+ {
+  "name": "grid7",
+  "kind": "nonzero",
+  "G": 7,
+  "steps": 3,
+  "control": null,
+  "bitequal": true,
+  "max_abs_diff": 0.0,
+  "hcnt_mod_ok": true,
+  "pass": true
+ },
+ {
+  "name": "grid48",
+  "kind": "nonzero",
+  "G": 48,
+  "steps": 3,
+  "control": null,
+  "bitequal": true,
+  "max_abs_diff": 0.0,
+  "hcnt_mod_ok": true,
+  "pass": true
+ },
+ {
+  "name": "grid256",
+  "kind": "nonzero",
+  "G": 256,
+  "steps": 3,
+  "control": null,
+  "bitequal": true,
+  "max_abs_diff": 0.0,
+  "hcnt_mod_ok": true,
+  "pass": true
+ },
+ {
+  "name": "grid300",
+  "kind": "nonzero",
+  "G": 300,
+  "steps": 3,
+  "control": null,
+  "bitequal": true,
+  "max_abs_diff": 0.0,
+  "hcnt_mod_ok": true,
+  "pass": true
+ },
+ {
+  "name": "carry16",
+  "kind": "nonzero",
+  "G": 48,
+  "steps": 16,
+  "control": null,
+  "bitequal": true,
+  "max_abs_diff": 0.0,
+  "hcnt_mod_ok": true,
+  "pass": true
+ },
+ {
+  "name": "wrap2p32",
+  "kind": "nonzero",
+  "G": 48,
+  "steps": 4,
+  "control": null,
+  "bitequal": true,
+  "max_abs_diff": 0.0,
+  "hcnt_mod_ok": true,
+  "pass": true
+ },
+ {
+  "name": "neg_premature",
+  "kind": "nonzero",
+  "G": 48,
+  "steps": 3,
+  "control": "premature",
+  "bitequal": false,
+  "max_abs_diff": 111.5371322631836,
+  "hcnt_mod_ok": true,
+  "pass": true
+ },
+ {
+  "name": "neg_reassoc",
+  "kind": "nonzero",
+  "G": 48,
+  "steps": 3,
+  "control": "reassoc",
+  "bitequal": false,
+  "max_abs_diff": 1.9073486328125e-06,
+  "hcnt_mod_ok": true,
+  "pass": true
+ },
+ {
+  "name": "neg_nonmodular_counter",
+  "kind": "nonzero",
+  "G": 48,
+  "steps": 3,
+  "control": "reset_missing_nonmod",
+  "bitequal": false,
+  "max_abs_diff": 51.376564025878906,
+  "hcnt_mod_ok": true,
+  "pass": true
+ }
+]
