@@ -695,6 +695,113 @@ static __device__ __forceinline__ void mmvq_sm52_q4_0_dot(
     }
 }
 
+// OCCAMY_ATTN_QKV_BEGIN
+// Attention-layer Q/K/V decode matvec fusion (GGML_CUDA_OCCAMY_ATTN_QKV=1, default off), sm52 Q4_0 x Q8_1, one column.
+// The rows of up to three weight matrices that share one q8_1 activation are concatenated logically in one grid.
+// Each output row is computed by one warp with exactly the per-lane schedule of mul_mat_vec_q<Q4_0, 1, ..., sm52>
+// (nwarps 1, rows_per_block 1): lane l accumulates blocks kbx = l/2 + 16*it, kqs = 2*(l%2), in increasing it, through
+// the same mmvq_sm52_q4_0_load_y/_dot helpers, then the same warp_reduce_sum butterfly. Only the memory schedule
+// differs: R rows per warp, W warps per block, the row bytes and the activation are staged through shared memory with
+// 128-bit coalesced loads (STAGE=1) or loaded directly with the loop fully unrolled (STAGE=0).
+struct occamy_attn_qkv_args {
+    const void * x[3];      // Q4_0 weights, row-contiguous
+    float      * dst[3];
+    int          row_end[3]; // cumulative row ends of the concatenated row space
+    const void * y;          // q8_1 activation, one column
+};
+
+template <int NIT, int R, int W, int STAGE>
+__launch_bounds__(W*32, 1)
+static __global__ void occamy_attn_qkv_q4_0(const occamy_attn_qkv_args a) {
+    constexpr int vdr  = 2;              // get_vdr_mmvq(Q4_0)
+    constexpr int NB   = NIT*16;         // q4_0 blocks per row (blocks_per_iter = 16 for one warp)
+    constexpr int ROWV = NB*18/16;       // uint4 per row
+    static_assert(NB*18 % 16 == 0, "row bytes must be a multiple of 16");
+    static_assert(NB*36 % 16 == 0, "activation bytes must be a multiple of 16");
+
+    const int lane = threadIdx.x;
+    const int w    = threadIdx.y;
+    const int row0 = (blockIdx.x*W + w)*R;
+
+    const block_q4_0 * gx[R];
+    float * dr[R];
+    bool ok[R];
+#pragma unroll
+    for (int r = 0; r < R; ++r) {
+        const int row = row0 + r;
+        // select without dynamic indexing of the parameter struct (keeps it out of local memory)
+        const bool s0 = row < a.row_end[0];
+        const bool s1 = !s0 && row < a.row_end[1];
+        ok[r] = row < a.row_end[2];
+        const int beg = s0 ? 0 : s1 ? a.row_end[0] : a.row_end[1];
+        const int lr  = ok[r] ? row - beg : 0;
+        const void * xs = (s0 || !ok[r]) ? a.x[0] : s1 ? a.x[1] : a.x[2];
+        float      * ds = s0 ? a.dst[0] : s1 ? a.dst[1] : a.dst[2];
+        gx[r] = (const block_q4_0 *) xs + (size_t) lr*NB;
+        dr[r] = ds + lr;
+    }
+
+    float tmp[R];
+#pragma unroll
+    for (int r = 0; r < R; ++r) {
+        tmp[r] = 0.0f;
+    }
+    const int kqs = vdr * (lane % (QI4_0/vdr));
+    const int kb0 = lane / (QI4_0/vdr);
+
+    if constexpr (STAGE == 1) {
+        __shared__ uint4 sx[W][R][ROWV];
+        __shared__ uint4 sy4[NB*36/16];
+        const uint4 * gy4 = (const uint4 *) a.y;
+        for (int i = w*32 + lane; i < NB*36/16; i += W*32) {
+            sy4[i] = gy4[i];
+        }
+#pragma unroll
+        for (int r = 0; r < R; ++r) {
+            const uint4 * g4 = (const uint4 *) gx[r];
+#pragma unroll
+            for (int v = lane; v < ROWV; v += 32) {
+                sx[w][r][v] = g4[v];
+            }
+        }
+        __syncthreads();
+        const block_q8_1 * y = (const block_q8_1 *) sy4;
+#pragma unroll
+        for (int it = 0; it < NIT; ++it) {
+            const int kbx = kb0 + 16*it;
+            ggml_cuda_sm52_i16x4 pu[1][2*vdr];
+            float2 dsy[1];
+            mmvq_sm52_q4_0_load_y<1, vdr>(y, 0, kbx, kqs, pu, dsy);
+#pragma unroll
+            for (int r = 0; r < R; ++r) {
+                mmvq_sm52_q4_0_dot<1, vdr>((const block_q4_0 *) &sx[w][r][0] + kbx, kqs, pu, dsy, &tmp[r], 0);
+            }
+        }
+    } else {
+        const block_q8_1 * y = (const block_q8_1 *) a.y;
+#pragma unroll
+        for (int it = 0; it < NIT; ++it) {
+            const int kbx = kb0 + 16*it;
+            ggml_cuda_sm52_i16x4 pu[1][2*vdr];
+            float2 dsy[1];
+            mmvq_sm52_q4_0_load_y<1, vdr>(y, 0, kbx, kqs, pu, dsy);
+#pragma unroll
+            for (int r = 0; r < R; ++r) {
+                mmvq_sm52_q4_0_dot<1, vdr>(gx[r] + kbx, kqs, pu, dsy, &tmp[r], 0);
+            }
+        }
+    }
+
+#pragma unroll
+    for (int r = 0; r < R; ++r) {
+        tmp[r] = warp_reduce_sum<32>(tmp[r]);
+        if (lane == 0 && ok[r]) {
+            *dr[r] = tmp[r];
+        }
+    }
+}
+// OCCAMY_ATTN_QKV_END
+
 template <ggml_type type, int ncols_dst, bool has_fusion, bool small_k = false, bool halve_iters = false, bool pipe = false, bool sm52 = false>
 __launch_bounds__(calc_nwarps(type, ncols_dst, get_device_table_id(), small_k, halve_iters)*ggml_cuda_get_physical_warp_size(), pipe ? GGML_CUDA_MMVQ_PIPE_MIN_BLOCKS : 1)
 static __global__ void mul_mat_vec_q(
@@ -1972,4 +2079,117 @@ void ggml_cuda_op_mul_mat_vec_q(
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, stream);
 
     GGML_UNUSED_VARS(src1, dst, src1_ddf_i, src1_ncols, src1_padded_row_size);
+}
+
+// OCCAMY_ATTN_QKV host side (GGML_CUDA_OCCAMY_ATTN_QKV=1 -> R2W4 staged, =2 -> R4W4 staged, =3 -> R2W2 staged, =4 -> 1 row/block direct).
+static int occamy_attn_qkv_mode() {
+    static const int mode = [] {
+        const char * e = getenv("GGML_CUDA_OCCAMY_ATTN_QKV");
+        return e != nullptr ? atoi(e) : 0;
+    }();
+    return mode;
+}
+
+bool ggml_cuda_occamy_attn_qkv_enabled() {
+    return occamy_attn_qkv_mode() >= 1 && occamy_attn_qkv_mode() <= 4 && mmvq_sm52_enabled() && !mmvq_pipe_enabled();
+}
+
+bool ggml_cuda_occamy_attn_qkv_eligible(const ggml_tensor * mm) {
+    if (mm->op != GGML_OP_MUL_MAT || (mm->flags & GGML_TENSOR_FLAG_COMPUTE) == 0) {
+        return false;
+    }
+    const ggml_tensor * x = mm->src[0];
+    const ggml_tensor * y = mm->src[1];
+    if (x == nullptr || y == nullptr || x->type != GGML_TYPE_Q4_0 || y->type != GGML_TYPE_F32 || mm->type != GGML_TYPE_F32) {
+        return false;
+    }
+    if (x->ne[0] != 2048 || x->ne[1] <= 0 || x->ne[1] > 16384 || x->ne[2] != 1 || x->ne[3] != 1 ||
+            !ggml_is_contiguous(x) || x->nb[1] != 2048/QK4_0*sizeof(block_q4_0) || ((uintptr_t) x->data % 16) != 0) {
+        return false;
+    }
+    if (x->buffer == nullptr || ggml_backend_buffer_get_usage(x->buffer) == GGML_BACKEND_BUFFER_USAGE_COMPUTE) {
+        return false;
+    }
+    if (y->ne[0] != 2048 || y->ne[1] != 1 || y->ne[2] != 1 || y->ne[3] != 1 || y->nb[0] != sizeof(float)) {
+        return false;
+    }
+    if (mm->ne[0] != x->ne[1] || mm->ne[1] != 1 || mm->ne[2] != 1 || mm->ne[3] != 1 || mm->nb[0] != sizeof(float)) {
+        return false;
+    }
+    const int device = ggml_cuda_get_device();
+    return ggml_cuda_info().devices[device].cc == 520 && ggml_cuda_info().devices[device].warp_size == 32;
+}
+
+bool ggml_cuda_occamy_attn_qkv(ggml_backend_cuda_context & ctx, const ggml_tensor * const * mm, int n) {
+    GGML_ASSERT(n >= 1 && n <= 3);
+    static const bool q8r_enabled = [] { const char * e = getenv("GGML_CUDA_Q8_REUSE"); return e != nullptr && atoi(e) != 0; }();
+    if (!q8r_enabled || ctx.curr_stream_no != 0) {
+        return false;
+    }
+    cudaStream_t stream = ctx.stream();
+    const ggml_tensor * src1 = mm[0]->src[1];
+    const int64_t ne10 = src1->ne[0];
+    const int64_t ne10_padded = GGML_PAD(ne10, MATRIX_ROW_PADDING);
+    const size_t  q8_1_size   = ne10_padded * sizeof(block_q8_1)/QK8_1;
+    if (q8_1_size > ctx.q8r_cap) {
+        cudaStreamCaptureStatus capture_status = cudaStreamCaptureStatusNone;
+        CUDA_CHECK(cudaStreamIsCapturing(stream, &capture_status));
+        if (ctx.q8r_cap == 0 && capture_status == cudaStreamCaptureStatusNone) {
+            CUDA_CHECK(cudaMalloc(&ctx.q8r_buf, 1u << 20));
+            ctx.q8r_cap = 1u << 20;
+        } else {
+            return false;
+        }
+    }
+    // same key as ggml_cuda_mul_mat_vec_q for a single row, so the cached activation is exactly the one K/V would use
+    const float * src1_d = (const float *) src1->data;
+    const int64_t key[8] = {(int64_t) (uintptr_t) src1_d, ne10, 1, 1, 1, 0, 0, 0};
+    char * src1_q8_1 = (char *) ctx.q8r_buf;
+    if (!(ctx.q8r_valid && memcmp(key, ctx.q8r_key, sizeof(key)) == 0)) {
+        const int64_t s11 = src1->nb[1] / sizeof(float);
+        const int64_t s12 = src1->nb[2] / sizeof(float);
+        const int64_t s13 = src1->nb[3] / sizeof(float);
+        quantize_row_q8_1_cuda(src1_d, nullptr, src1_q8_1, GGML_TYPE_Q4_0, ne10, s11, s12, s13, ne10_padded, 1, 1, 1, stream);
+        memcpy(ctx.q8r_key, key, sizeof(key));
+        ctx.q8r_lo    = (const char *) src1->data;
+        ctx.q8r_hi    = ctx.q8r_lo + ggml_nbytes(src1);
+        ctx.q8r_valid = true;
+    }
+
+    occamy_attn_qkv_args a{};
+    int rows = 0;
+    for (int s = 0; s < 3; ++s) {
+        const int k = s < n ? s : n - 1;
+        if (s < n) {
+            rows += (int) mm[s]->ne[0];
+        }
+        a.x[s]       = mm[k]->src[0]->data;
+        a.dst[s]     = (float *) mm[k]->data;
+        a.row_end[s] = rows;
+    }
+    a.y = src1_q8_1;
+
+    static std::atomic<bool> reported{false};
+    if (!reported.exchange(true)) {
+        fprintf(stderr, "occamy-attn-qkv: engaged mode %d, %d matrices, %d rows, K 2048\n", occamy_attn_qkv_mode(), n, rows);
+    }
+    switch (occamy_attn_qkv_mode()) {
+        case 2: {
+            const ggml_cuda_kernel_launch_params p(dim3((rows + 15)/16), dim3(32, 4), 0, stream);
+            ggml_cuda_kernel_launch(occamy_attn_qkv_q4_0<4, 4, 4, 1>, p, a);
+        } break;
+        case 4: {
+            const ggml_cuda_kernel_launch_params p(dim3(rows), dim3(32, 1), 0, stream);
+            ggml_cuda_kernel_launch(occamy_attn_qkv_q4_0<4, 1, 1, 0>, p, a);
+        } break;
+        case 3: {
+            const ggml_cuda_kernel_launch_params p(dim3((rows + 3)/4), dim3(32, 2), 0, stream);
+            ggml_cuda_kernel_launch(occamy_attn_qkv_q4_0<4, 2, 2, 1>, p, a);
+        } break;
+        default: {
+            const ggml_cuda_kernel_launch_params p(dim3((rows + 7)/8), dim3(32, 4), 0, stream);
+            ggml_cuda_kernel_launch(occamy_attn_qkv_q4_0<4, 2, 4, 1>, p, a);
+        } break;
+    }
+    return true;
 }

@@ -4584,6 +4584,83 @@ static int ggml_cuda_try_fuse(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph 
     return 0;
 }
 
+// GGML_CUDA_OCCAMY_ATTN_QKV=1: at an eligible single-column Q4_0 MUL_MAT, find up to two later MUL_MAT nodes that read
+// the same activation and compute all of them in one launch; the later nodes are skipped when the loop reaches them.
+// Their outputs are written early, so they must not share memory with anything the nodes in between touch.
+static bool occamy_ranges_overlap(const ggml_tensor * a, const ggml_tensor * b) {
+    if (a == nullptr || b == nullptr || a->data == nullptr || b->data == nullptr) {
+        return false;
+    }
+    const char * alo = (const char *) a->data;
+    const char * blo = (const char *) b->data;
+    return alo < blo + ggml_nbytes(b) && blo < alo + ggml_nbytes(a);
+}
+
+static bool occamy_attn_qkv_try(ggml_backend_cuda_context * ctx, ggml_cgraph * g, const int i) {
+    const ggml_tensor * q = g->nodes[i];
+    const ggml_tensor * y = q->src[1];
+    const ggml_tensor * mm[3] = {q, nullptr, nullptr};
+    int pos[3] = {i, -1, -1};
+    int n = 1;
+    const int jmax = std::min(g->n_nodes, i + 48);
+    for (int j = i + 1; j < jmax && n < 3; ++j) {
+        const ggml_tensor * t = g->nodes[j];
+        if (t->op == GGML_OP_MUL_MAT && t->src[1] != nullptr && t->src[1]->data == y->data &&
+                ggml_are_same_shape(t->src[1], y) && ggml_are_same_stride(t->src[1], y) &&
+                ggml_cuda_occamy_attn_qkv_eligible(t)) {
+            mm[n] = t;
+            pos[n] = j;
+            n++;
+        }
+    }
+    if (n < 2) {
+        return false;
+    }
+    static const bool dbg = getenv("GGML_CUDA_OCCAMY_DEBUG") != nullptr;
+    auto is_mm = [&](const ggml_tensor * t) { return t == mm[0] || t == mm[1] || t == mm[2]; };
+    for (int k = 0; k < n; ++k) {
+        if (occamy_ranges_overlap(mm[k], y)) {
+            return false;
+        }
+        for (int k2 = k + 1; k2 < n; ++k2) {
+            if (occamy_ranges_overlap(mm[k], mm[k2])) {
+                return false;
+            }
+        }
+    }
+    for (int j = i + 1; j < pos[n - 1]; ++j) {
+        const ggml_tensor * m = g->nodes[j];
+        if (is_mm(m)) {
+            continue;
+        }
+        // the activation must stay intact until the last fused node would have read it
+        if (!ggml_cuda_is_view_or_noop(m) && occamy_ranges_overlap(m, y)) {
+            if (dbg) { fprintf(stderr, "occamy-attn-qkv: fallback, %s writes the activation\n", m->name); }
+            return false;
+        }
+        for (int k = 1; k < n; ++k) {
+            if (j >= pos[k]) {
+                continue;
+            }
+            bool clash = occamy_ranges_overlap(m, mm[k]);
+            for (int s = 0; s < GGML_MAX_SRC && !clash; ++s) {
+                clash = occamy_ranges_overlap(m->src[s], mm[k]);
+            }
+            if (clash) {
+                if (dbg) { fprintf(stderr, "occamy-attn-qkv: fallback, %s shares memory with %s\n", m->name, mm[k]->name); }
+                return false;
+            }
+        }
+    }
+    if (!ggml_cuda_occamy_attn_qkv(*ctx, mm, n)) {
+        return false;
+    }
+    for (int k = 1; k < n; ++k) {
+        ctx->aqkv_done[k - 1] = mm[k];
+    }
+    return true;
+}
+
 static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph * cgraph, const bool use_cuda_graph, const bool cuda_graph_update_required, const void * graph_key) {
     bool graph_evaluated_or_captured = false;
 
@@ -4683,6 +4760,9 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
             }
 
             cuda_ctx->q8r_valid = false; // q8_1 reuse never spans graph evaluations
+            cuda_ctx->aqkv_done[0] = nullptr;
+            cuda_ctx->aqkv_done[1] = nullptr;
+            const bool aqkv_on = ggml_cuda_occamy_attn_qkv_enabled() && stream_ctx.concurrent_events.empty();
             for (int i = 0; i < cgraph->n_nodes; i++) {
                 ggml_tensor * node = cgraph->nodes[i];
                 if (is_concurrent_event_active) {
@@ -4725,6 +4805,13 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
                     continue;
                 }
 
+                if (aqkv_on && (cuda_ctx->aqkv_done[0] == node || cuda_ctx->aqkv_done[1] == node)) {
+                    // already computed by the fused Q/K/V launch
+                    cuda_ctx->aqkv_done[cuda_ctx->aqkv_done[0] == node ? 0 : 1] = nullptr;
+                    cuda_ctx->q8r_invalidate_if_overlaps(node);
+                    continue;
+                }
+
                 cuda_ctx->q8r_invalidate_if_overlaps(node);
                 int nodes_to_skip = ggml_cuda_try_fuse(cuda_ctx, cgraph, i);
 
@@ -4762,7 +4849,10 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
                 GGML_UNUSED(integrated);
 #endif  // NDEBUG
 
-                bool ok = ggml_cuda_compute_forward(*cuda_ctx, node);
+                bool ok = (aqkv_on && !is_concurrent_event_active && cuda_ctx->curr_stream_no == 0 &&
+                           cuda_ctx->aqkv_done[0] == nullptr && cuda_ctx->aqkv_done[1] == nullptr &&
+                           ggml_cuda_occamy_attn_qkv_eligible(node) && occamy_attn_qkv_try(cuda_ctx, cgraph, i)) ||
+                          ggml_cuda_compute_forward(*cuda_ctx, node);
                 if (!ok) {
                     GGML_LOG_ERROR("%s: op not supported %s (%s)\n", __func__, node->name, ggml_op_name(node->op));
                 }

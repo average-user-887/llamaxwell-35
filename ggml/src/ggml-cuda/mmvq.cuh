@@ -16,3 +16,8 @@ void ggml_cuda_op_mul_mat_vec_q(
     const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst, const char * src0_dd_i, const float * src1_ddf_i,
     const char * src1_ddq_i, float * dst_dd_i, const int64_t row_low, const int64_t row_high, const int64_t src1_ncols,
     const int64_t src1_padded_row_size, cudaStream_t stream);
+
+// GGML_CUDA_OCCAMY_ATTN_QKV=1 (default off): one launch for up to three single-column Q4_0 MUL_MAT nodes sharing src1.
+bool ggml_cuda_occamy_attn_qkv_enabled();
+bool ggml_cuda_occamy_attn_qkv_eligible(const ggml_tensor * mm);
+bool ggml_cuda_occamy_attn_qkv(ggml_backend_cuda_context & ctx, const ggml_tensor * const * mm, int n);

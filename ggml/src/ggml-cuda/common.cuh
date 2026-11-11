@@ -1463,6 +1463,8 @@ struct ggml_backend_cuda_context {
     const char * q8r_lo    = nullptr; // byte range of the cached src1 tensor
     const char * q8r_hi    = nullptr;
     int64_t      q8r_key[8] = {0};
+    // GGML_CUDA_OCCAMY_ATTN_QKV=1: K/V mul_mat nodes already computed by the fused Q/K/V launch, skipped when reached
+    const ggml_tensor * aqkv_done[2] = {nullptr, nullptr};
     bool         q8r_pend  = false; // set by the fused rms_norm+mul+q8_1 kernel (GGML_CUDA_NORM_Q8=1), committed after fused-node invalidation
     void q8r_invalidate_if_overlaps(const ggml_tensor * t) {
         if (q8r_valid && t->data != nullptr) {
