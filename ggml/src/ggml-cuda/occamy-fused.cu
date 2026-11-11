@@ -89,6 +89,14 @@ __device__ __forceinline__ Q9 lds9(const unsigned * p) { Q9 q;
 #pragma unroll
     for (int i = 0; i < 9; ++i) q.w[i] = p[i];
     return q; }
+// MOE1 (GGML_CUDA_MOE_LOP3=1, DX bit 16): nibble unpack (v & 0x0F0F0F0F) | 0x80808080 as one LOP3 instead of
+// AND + OR (LOP32I x2). Same bits -> same nibble floats, same FMA order -> bit-identical.
+__device__ __forceinline__ unsigned unpk(unsigned v) {
+    unsigned r;
+    asm("lop3.b32 %0, %1, 0x0F0F0F0F, 0x80808080, 0xEA;" : "=r"(r) : "r"(v));
+    return r;
+}
+template <bool L3 = false>
 __device__ __forceinline__ float dot2c(const Q9 & q, const float * xc, float2 sx) {
     const unsigned w0 = q.w[0], w1 = q.w[1], w2 = q.w[2], w3 = q.w[3], w4 = q.w[4];
     float d0 = __half2float(__ushort_as_half((unsigned short)(w0 & 0xFFFF)));
@@ -98,11 +106,11 @@ __device__ __forceinline__ float dot2c(const Q9 & q, const float * xc, float2 sx
     float a0 = 0.f, a1 = 0.f;
 #pragma unroll
     for (int i = 0; i < 4; ++i) {
-        unsigned lo = (q0[i] & 0x0F0F0F0Fu) | 0x80808080u, hi = ((q0[i] >> 4) & 0x0F0F0F0Fu) | 0x80808080u;
+        unsigned lo = L3 ? unpk(q0[i]) : (q0[i] & 0x0F0F0F0Fu) | 0x80808080u, hi = L3 ? unpk(q0[i] >> 4) : ((q0[i] >> 4) & 0x0F0F0F0Fu) | 0x80808080u;
         float4 xl = *(const float4 *)(xc + 4 * i), xh = *(const float4 *)(xc + 16 + 4 * i);
         a0 = fmaf(nib(lo, 0), xl.x, a0); a0 = fmaf(nib(lo, 1), xl.y, a0); a0 = fmaf(nib(lo, 2), xl.z, a0); a0 = fmaf(nib(lo, 3), xl.w, a0);
         a0 = fmaf(nib(hi, 0), xh.x, a0); a0 = fmaf(nib(hi, 1), xh.y, a0); a0 = fmaf(nib(hi, 2), xh.z, a0); a0 = fmaf(nib(hi, 3), xh.w, a0);
-        lo = (q1[i] & 0x0F0F0F0Fu) | 0x80808080u; hi = ((q1[i] >> 4) & 0x0F0F0F0Fu) | 0x80808080u;
+        lo = L3 ? unpk(q1[i]) : (q1[i] & 0x0F0F0F0Fu) | 0x80808080u; hi = L3 ? unpk(q1[i] >> 4) : ((q1[i] >> 4) & 0x0F0F0F0Fu) | 0x80808080u;
         xl = *(const float4 *)(xc + 32 + 4 * i); xh = *(const float4 *)(xc + 48 + 4 * i);
         a1 = fmaf(nib(lo, 0), xl.x, a1); a1 = fmaf(nib(lo, 1), xl.y, a1); a1 = fmaf(nib(lo, 2), xl.z, a1); a1 = fmaf(nib(lo, 3), xl.w, a1);
         a1 = fmaf(nib(hi, 0), xh.x, a1); a1 = fmaf(nib(hi, 1), xh.y, a1); a1 = fmaf(nib(hi, 2), xh.z, a1); a1 = fmaf(nib(hi, 3), xh.w, a1);
@@ -248,8 +256,8 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
             __syncwarp();
             const int tn = t + W; have = tn < NTB;
             if (have) { rowB(L, sel, tn, g, u); ldB(g, u, lane, cv); }
-            float gg = wsum(dot2c(lds9(stg + lane * 9), xc, sx));
-            float uu = wsum(dot2c(lds9(stg + 288 + lane * 9), xc, sx));
+            float gg = wsum(dot2c<(DX & 16) != 0>(lds9(stg + lane * 9), xc, sx));
+            float uu = wsum(dot2c<(DX & 16) != 0>(lds9(stg + 288 + lane * 9), xc, sx));
             if (lane == 0) { if (t < FFS) s->h_sh[t] = silu(gg) * uu; else s->h_exp[t - FFS] = silu(gg) * uu; }
             __syncwarp();
         }
@@ -347,9 +355,9 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
                 for (int i = 0; i < 5; ++i) cv[i] = __ldg((const uint4 *)(cb[i] + (size_t)rn * ROW_D));
                 if (lane < 2) cv[5] = __ldg((const uint4 *)(cb[5] + (size_t)rn * ROW_D));
             }
-            float acc = w0 * dot2c(lds9(stg + lane * 9), xs + lane * CH, sums[lane])
-                      + w1 * dot2c(lds9(stg + (lane + 32) * 9), xs + (lane + 32) * CH, sums[lane + 32]);
-            if (lane < 8) acc += gs * dot2c(lds9(stg + (lane + 64) * 9), xs + (lane + 64) * CH, sums[lane + 64]);
+            float acc = w0 * dot2c<(DX & 16) != 0>(lds9(stg + lane * 9), xs + lane * CH, sums[lane])
+                      + w1 * dot2c<(DX & 16) != 0>(lds9(stg + (lane + 32) * 9), xs + (lane + 32) * CH, sums[lane + 32]);
+            if (lane < 8) acc += gs * dot2c<(DX & 16) != 0>(lds9(stg + (lane + 64) * 9), xs + (lane + 64) * CH, sums[lane + 64]);
             acc = wsum(acc);
             if (lane == 0) P.out[r] = P.h[r] + acc;
             __syncwarp();
@@ -361,7 +369,8 @@ struct DevState {
     Scratch * scratch = nullptr;
     int grid = 0;
     int grid_dx = 0;   // co-resident grid of moe_v2<0, 3> (GGML_CUDA_MOE_DOWNX; >= that of <0, 1> / <0, 2>)
-    int grid_dh[2] = { 0, 0 };   // C07: co-resident grids of moe_v2<0, 1|4> and moe_v2<0, 1|4|8> (GGML_CUDA_MOE_DOWNH=1|2)
+    int grid_dh[2] = { 0, 0 };
+    int grid_l3 = 0;   // MOE1: co-resident grid of moe_v2<0, 1|4|8|16> (GGML_CUDA_MOE_LOP3=1 with DOWNH=2)   // C07: co-resident grids of moe_v2<0, 1|4> and moe_v2<0, 1|4|8> (GGML_CUDA_MOE_DOWNH=1|2)
 };
 static DevState g_dev[GGML_CUDA_MAX_DEVICES];
 static std::mutex g_mtx;
@@ -408,6 +417,9 @@ static DevState & dev_state(int device) {
         int per_sm_dh[2] = { 0, 0 };
         CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_dh[0], moe_v2<0, 5>,  NT, SMEM2_FLOATS * sizeof(float)));
         CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_dh[1], moe_v2<0, 13>, NT, SMEM2_FLOATS * sizeof(float)));
+        int per_sm_l3 = 0;
+        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_l3, moe_v2<0, 29>, NT, SMEM2_FLOATS * sizeof(float)));
+        d.grid_l3 = per_sm_l3 < 1 ? -1 : per_sm_l3 * nsm;
         for (int k = 0; k < 2; ++k) {
             d.grid_dh[k] = per_sm_dh[k] < 1 ? -1 : per_sm_dh[k] * nsm;
             if (g_debug) {
@@ -621,7 +633,17 @@ void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cud
     // C07 GGML_CUDA_MOE_DOWNH=1|2 (default 0 = off): only with DOWNX=1, fused single launch; else ignored
     static const int dh = getenv("GGML_CUDA_MOE_DOWNH") ? atoi(getenv("GGML_CUDA_MOE_DOWNH")) : 0;
     if (!three && dx == 1 && (dh == 1 || dh == 2) && d.grid_dh[dh - 1] > 0) {
-        if (dh == 1) { moe_v2<0, 5><<<d.grid_dh[0], NT, smem, st>>>(P); } else { moe_v2<0, 13><<<d.grid_dh[1], NT, smem, st>>>(P); }
+        static const bool l3 = env_flag("GGML_CUDA_MOE_LOP3");
+        if (dh == 1) { moe_v2<0, 5><<<d.grid_dh[0], NT, smem, st>>>(P); }
+        else if (l3 && d.grid_l3 > 0) {
+            moe_v2<0, 29><<<d.grid_l3, NT, smem, st>>>(P);
+            if (g_debug) {
+                static unsigned long long n_l3 = 0;
+                ++n_l3;
+                if ((n_l3 & (n_l3 - 1)) == 0) { fprintf(stderr, "occamy-fused: MOE_LOP3 launches %llu\n", n_l3); }
+            }
+        }
+        else { moe_v2<0, 13><<<d.grid_dh[1], NT, smem, st>>>(P); }
         if (g_debug) {   // C07 G3 dispatch counter (host side, debug only)
             static unsigned long long n_dh = 0;
             ++n_dh;
