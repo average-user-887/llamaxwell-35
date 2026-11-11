@@ -6,6 +6,11 @@
 //        GGML_CUDA_OCCAMY_FA_PIPE (E07, default 0 = off): 1 -> register-prefetch the next unit's K and V rows
 //        while the current unit is computed; 2 -> prefetch K only (V still issued at step start).
 //        Same split/warp/unit assignment and same arithmetic -> bitwise-identical output; only load timing moves.
+//        3 -> head-split kernel: 8 warps/block, warp (u-lane w, head-group g) owns q-heads [4g,4g+4) of the
+//        units the flag-off warp w owns (both head groups re-read the same K/V rows, mostly L1/L2 hits).
+//        Half the q/o registers -> 2x resident warps. The per-value lane reduction tree (xor 16,8,4,2,1),
+//        per-token softmax order and warp combine order are unchanged -> bitwise-identical output.
+//        4 -> head-split + K prefetch (as 2).
 // Design: one block = (kv-head, stream, KV split); 4 warps; each warp streams 4 KV tokens per step,
 // lane l owns dims [8l, 8l+8) of a 256-dim row (one 16-B LDG per row), all 8 q-heads of that kv-head live
 // in registers (64 fp32) and so does the output accumulator (64 fp32). K/V are read exactly once per block,
@@ -233,6 +238,177 @@ __global__ void __launch_bounds__(OFA_NT, 2) ofa_decode_kernel(const ofa_params 
     }
 }
 
+template <int n, int x>
+static __device__ __forceinline__ void ofa_rs_step_x(float * s, const int lane) {
+    const bool up = lane & x;
+#pragma unroll
+    for (int i = 0; i < n; ++i) {
+        const float send = up ? s[i] : s[i + n];
+        const float keep = up ? s[i + n] : s[i];
+        s[i] = keep + __shfl_xor_sync(0xFFFFFFFF, send, x, 32);
+    }
+}
+
+#define OFA_HG 4   // q-heads per warp in the head-split kernel
+
+template <bool PFK>
+__global__ void __launch_bounds__(2*OFA_NT, 2) ofa_decode_hs_kernel(const ofa_params p) {
+    const int split = blockIdx.x;
+    const int kvh   = blockIdx.y;
+    const int i3    = blockIdx.z;
+    const int wid   = threadIdx.x >> 5;
+    const int warp  = wid & (OFA_NW - 1);   // unit lane, same role as the flag-off warp index
+    const int hg    = wid / OFA_NW;         // head group
+    const int lane  = threadIdx.x & 31;
+
+    __shared__ __align__(16) float s_p[2*OFA_NW][OFA_T*OFA_HG];
+    __shared__ __align__(16) float s_a[2*OFA_NW][OFA_HG];
+    __shared__ float  s_o[OFA_NW][OFA_G][OFA_D];
+    __shared__ float  s_m[OFA_NW][OFA_G];
+    __shared__ float  s_l[OFA_NW][OFA_G];
+
+    float q[OFA_HG][8];
+#pragma unroll
+    for (int h = 0; h < OFA_HG; ++h) {
+        const float4 * qp = (const float4 *) (p.Q + i3*p.nbq3 + (size_t)(kvh*OFA_G + hg*OFA_HG + h)*p.nbq2) + 2*lane;
+        const float4 a = qp[0], b = qp[1];
+        q[h][0] = a.x*p.scale_log2; q[h][1] = a.y*p.scale_log2; q[h][2] = a.z*p.scale_log2; q[h][3] = a.w*p.scale_log2;
+        q[h][4] = b.x*p.scale_log2; q[h][5] = b.y*p.scale_log2; q[h][6] = b.z*p.scale_log2; q[h][7] = b.w*p.scale_log2;
+    }
+    float o[OFA_HG][8];
+#pragma unroll
+    for (int h = 0; h < OFA_HG; ++h) {
+#pragma unroll
+        for (int i = 0; i < 8; ++i) o[h][i] = 0.0f;
+    }
+    // after the reduce-scatter lane l holds value index l>>1 = token*4 + head (lanes l, l^1 duplicate)
+    const int   jl = lane >> 3;
+    float m_run = -FLT_MAX/2.0f;
+    float l_run = 0.0f;
+
+    const char * Kb = p.K + i3*p.nbk3 + kvh*p.nbk2 + lane*16;
+    const char * Vb = p.V + i3*p.nbv3 + kvh*p.nbv2 + lane*16;
+    const half * Mb = (const half *) (p.mask + (i3 % p.mask_ne3)*p.nbm3);
+
+    const int nunits = p.n_kv / OFA_T;
+    const int u0 = (int) (((long long) split      * nunits) / p.nsplit);
+    const int u1 = (int) (((long long)(split + 1) * nunits) / p.nsplit);
+
+    uint4 kn[OFA_T];
+    if constexpr (PFK) {
+        const int u = u0 + warp;
+        if (u < u1) {
+#pragma unroll
+            for (int j = 0; j < OFA_T; ++j) kn[j] = __ldg((const uint4 *) (Kb + (size_t)(u*OFA_T + j)*p.nbk1));
+        }
+    }
+    for (int u = u0 + warp; u < u1; u += OFA_NW) {
+        const int t0 = u*OFA_T;
+        uint4 kr[OFA_T], vr[OFA_T];
+        if constexpr (PFK) {
+#pragma unroll
+            for (int j = 0; j < OFA_T; ++j) kr[j] = kn[j];
+        } else {
+#pragma unroll
+            for (int j = 0; j < OFA_T; ++j) kr[j] = __ldg((const uint4 *) (Kb + (size_t)(t0 + j)*p.nbk1));
+        }
+#pragma unroll
+        for (int j = 0; j < OFA_T; ++j) vr[j] = __ldg((const uint4 *) (Vb + (size_t)(t0 + j)*p.nbv1));
+        if constexpr (PFK) {
+            const int un = u + OFA_NW;
+            if (un < u1) {
+#pragma unroll
+                for (int j = 0; j < OFA_T; ++j) kn[j] = __ldg((const uint4 *) (Kb + (size_t)(un*OFA_T + j)*p.nbk1));
+            }
+        }
+        const float mk = __half2float(Mb[t0 + jl]);
+
+        float s[OFA_T*OFA_HG];
+#pragma unroll
+        for (int j = 0; j < OFA_T; ++j) {
+            float k[8];
+            ofa_cvt8(kr[j], k);
+#pragma unroll
+            for (int h = 0; h < OFA_HG; ++h) {
+                float acc = q[h][0]*k[0];
+#pragma unroll
+                for (int i = 1; i < 8; ++i) acc = fmaf(q[h][i], k[i], acc);
+                s[j*OFA_HG + h] = acc;
+            }
+        }
+        // same lane pairing order as the flag-off kernel (xor 16, 8, 4, 2, 1)
+        ofa_rs_step_x<8, 16>(s, lane);
+        ofa_rs_step_x<4,  8>(s, lane);
+        ofa_rs_step_x<2,  4>(s, lane);
+        ofa_rs_step_x<1,  2>(s, lane);
+        s[0] = s[0] + __shfl_xor_sync(0xFFFFFFFF, s[0], 1, 32);
+        const float sc = s[0] + mk*1.4426950408889634f;
+        float gm = fmaxf(sc, __shfl_xor_sync(0xFFFFFFFF, sc, 8, 32));
+        gm = fmaxf(gm, __shfl_xor_sync(0xFFFFFFFF, gm, 16, 32));
+        const float m_new = fmaxf(m_run, gm);
+        const float alpha = exp2f(m_run - m_new);
+        const float pr    = exp2f(sc - m_new);
+        m_run = m_new;
+        l_run = l_run*alpha + pr;
+        if (!(lane & 1)) s_p[wid][lane >> 1] = pr;
+        if (lane < 2*OFA_HG && !(lane & 1)) s_a[wid][lane >> 1] = alpha;
+        __syncwarp();
+        float a[OFA_HG];
+        {
+            const float4 a0 = *(const float4 *) &s_a[wid][0];
+            a[0] = a0.x; a[1] = a0.y; a[2] = a0.z; a[3] = a0.w;
+        }
+#pragma unroll
+        for (int h = 0; h < OFA_HG; ++h) {
+#pragma unroll
+            for (int i = 0; i < 8; ++i) o[h][i] *= a[h];
+        }
+#pragma unroll
+        for (int j = 0; j < OFA_T; ++j) {
+            float v[8];
+            ofa_cvt8(vr[j], v);
+            const float4 p0 = *(const float4 *) &s_p[wid][j*OFA_HG];
+            const float pj[4] = {p0.x, p0.y, p0.z, p0.w};
+#pragma unroll
+            for (int h = 0; h < OFA_HG; ++h) {
+#pragma unroll
+                for (int i = 0; i < 8; ++i) o[h][i] = fmaf(pj[h], v[i], o[h][i]);
+            }
+        }
+        __syncwarp();
+    }
+
+    l_run += __shfl_xor_sync(0xFFFFFFFF, l_run, 8, 32);
+    l_run += __shfl_xor_sync(0xFFFFFFFF, l_run, 16, 32);
+    if (lane < 2*OFA_HG && !(lane & 1)) { s_m[warp][hg*OFA_HG + (lane >> 1)] = m_run; s_l[warp][hg*OFA_HG + (lane >> 1)] = l_run; }
+#pragma unroll
+    for (int h = 0; h < OFA_HG; ++h) {
+        float4 * dp = (float4 *) &s_o[warp][hg*OFA_HG + h][8*lane];
+        dp[0] = make_float4(o[h][0], o[h][1], o[h][2], o[h][3]);
+        dp[1] = make_float4(o[h][4], o[h][5], o[h][6], o[h][7]);
+    }
+    __syncthreads();
+
+    const int blk = (i3*p.nkvh + kvh)*p.nsplit + split;
+    float * po = p.part_o + (size_t) blk*OFA_G*OFA_D;
+    for (int idx = threadIdx.x; idx < OFA_G*OFA_D; idx += 2*OFA_NT) {
+        const int h = idx / OFA_D, d = idx % OFA_D;
+        float M = s_m[0][h];
+#pragma unroll
+        for (int w = 1; w < OFA_NW; ++w) M = fmaxf(M, s_m[w][h]);
+        float acc = 0.0f;
+#pragma unroll
+        for (int w = 0; w < OFA_NW; ++w) acc += s_o[w][h][d]*exp2f(s_m[w][h] - M);
+        po[idx] = acc;
+        if (d == 0) {
+            float L = 0.0f;
+#pragma unroll
+            for (int w = 0; w < OFA_NW; ++w) L += s_l[w][h]*exp2f(s_m[w][h] - M);
+            p.part_ml[(size_t) blk*OFA_G + h] = make_float2(M, L);
+        }
+    }
+}
+
 // grid (nkvh*8 q-heads, ns), block 256 = one thread per dim
 __global__ void __launch_bounds__(OFA_D) ofa_combine_kernel(const float * __restrict__ part_o, const float2 * __restrict__ part_ml,
         char * __restrict__ dst, const int nsplit, const int nkvh, const size_t nbd1, const size_t nbd3) {
@@ -325,11 +501,16 @@ static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst,
         if (s) waves = std::max(1, atoi(s));
         const char * sp = getenv("GGML_CUDA_OCCAMY_FA_PIPE");
         pipe = sp ? atoi(sp) : 0;
-        if (pipe < 0 || pipe > 2) pipe = 0;
+        if (pipe < 0 || pipe > 4) pipe = 0;
         if (pipe) {
             int nbp = 0;
-            CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nbp,
-                pipe == 1 ? ofa_decode_kernel<1> : ofa_decode_kernel<2>, OFA_NT, 0));
+            if (pipe <= 2) {
+                CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nbp,
+                    pipe == 1 ? ofa_decode_kernel<1> : ofa_decode_kernel<2>, OFA_NT, 0));
+            } else {
+                CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nbp,
+                    pipe == 3 ? ofa_decode_hs_kernel<false> : ofa_decode_hs_kernel<true>, 2*OFA_NT, 0));
+            }
             fprintf(stderr, "ggml_cuda: occamy FA pipe mode %d (blocks/SM %d, flag-off %d)\n", pipe, nbp, nb);
         }
     }
@@ -359,6 +540,8 @@ static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst,
     switch (pipe) {
         case 1:  ofa_decode_kernel<1><<<dim3(nsplit, nkvh, ns), OFA_NT, 0, stream>>>(p); break;
         case 2:  ofa_decode_kernel<2><<<dim3(nsplit, nkvh, ns), OFA_NT, 0, stream>>>(p); break;
+        case 3:  ofa_decode_hs_kernel<false><<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p); break;
+        case 4:  ofa_decode_hs_kernel<true ><<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p); break;
         default: ofa_decode_kernel<0><<<dim3(nsplit, nkvh, ns), OFA_NT, 0, stream>>>(p); break;
     }
     CUDA_CHECK(cudaGetLastError());
