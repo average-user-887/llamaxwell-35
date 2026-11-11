@@ -3,6 +3,9 @@
 // Env gate (default off): GGML_CUDA_OCCAMY_FA=1 (or GGML_CUDA_NATIVE_FA_SM52=1) -> use this kernel when applicable;
 //                         GGML_CUDA_OCCAMY_FA=2 -> run this kernel AND the stock kernel, log max abs/rel diff, keep stock output.
 // Knobs: GGML_CUDA_OCCAMY_FA_WAVES (blocks = waves * resident blocks, default 1).
+//        GGML_CUDA_OCCAMY_FA_PIPE (E07, default 0 = off): 1 -> register-prefetch the next unit's K and V rows
+//        while the current unit is computed; 2 -> prefetch K only (V still issued at step start).
+//        Same split/warp/unit assignment and same arithmetic -> bitwise-identical output; only load timing moves.
 // Design: one block = (kv-head, stream, KV split); 4 warps; each warp streams 4 KV tokens per step,
 // lane l owns dims [8l, 8l+8) of a 256-dim row (one 16-B LDG per row), all 8 q-heads of that kv-head live
 // in registers (64 fp32) and so does the output accumulator (64 fp32). K/V are read exactly once per block,
@@ -54,6 +57,7 @@ struct ofa_params {
     size_t nbm1, nbm3;
 };
 
+template <int PIPE>
 __global__ void __launch_bounds__(OFA_NT, 2) ofa_decode_kernel(const ofa_params p) {
     const int split = blockIdx.x;
     const int kvh   = blockIdx.y;
@@ -95,13 +99,48 @@ __global__ void __launch_bounds__(OFA_NT, 2) ofa_decode_kernel(const ofa_params 
     const int u0 = (int) (((long long) split      * nunits) / p.nsplit);
     const int u1 = (int) (((long long)(split + 1) * nunits) / p.nsplit);
 
+    uint4 kn[OFA_T], vn[OFA_T];   // PIPE: rows of the next unit, loaded one step ahead
+    if constexpr (PIPE != 0) {
+        const int u = u0 + warp;
+        if (u < u1) {
+            const int t0 = u*OFA_T;
+#pragma unroll
+            for (int j = 0; j < OFA_T; ++j) kn[j] = __ldg((const uint4 *) (Kb + (size_t)(t0 + j)*p.nbk1));
+            if constexpr (PIPE == 1) {
+#pragma unroll
+                for (int j = 0; j < OFA_T; ++j) vn[j] = __ldg((const uint4 *) (Vb + (size_t)(t0 + j)*p.nbv1));
+            }
+        }
+    }
     for (int u = u0 + warp; u < u1; u += OFA_NW) {
         const int t0 = u*OFA_T;
         uint4 kr[OFA_T], vr[OFA_T];
+        if constexpr (PIPE == 0) {
 #pragma unroll
-        for (int j = 0; j < OFA_T; ++j) kr[j] = __ldg((const uint4 *) (Kb + (size_t)(t0 + j)*p.nbk1));
+            for (int j = 0; j < OFA_T; ++j) kr[j] = __ldg((const uint4 *) (Kb + (size_t)(t0 + j)*p.nbk1));
 #pragma unroll
-        for (int j = 0; j < OFA_T; ++j) vr[j] = __ldg((const uint4 *) (Vb + (size_t)(t0 + j)*p.nbv1));
+            for (int j = 0; j < OFA_T; ++j) vr[j] = __ldg((const uint4 *) (Vb + (size_t)(t0 + j)*p.nbv1));
+        } else {
+#pragma unroll
+            for (int j = 0; j < OFA_T; ++j) kr[j] = kn[j];
+            if constexpr (PIPE == 1) {
+#pragma unroll
+                for (int j = 0; j < OFA_T; ++j) vr[j] = vn[j];
+            } else {
+#pragma unroll
+                for (int j = 0; j < OFA_T; ++j) vr[j] = __ldg((const uint4 *) (Vb + (size_t)(t0 + j)*p.nbv1));
+            }
+            const int un = u + OFA_NW;
+            if (un < u1) {
+                const int tn = un*OFA_T;
+#pragma unroll
+                for (int j = 0; j < OFA_T; ++j) kn[j] = __ldg((const uint4 *) (Kb + (size_t)(tn + j)*p.nbk1));
+                if constexpr (PIPE == 1) {
+#pragma unroll
+                    for (int j = 0; j < OFA_T; ++j) vn[j] = __ldg((const uint4 *) (Vb + (size_t)(tn + j)*p.nbv1));
+                }
+            }
+        }
         const float mk = __half2float(Mb[t0 + jl]);
 
         float s[OFA_T*OFA_G];
@@ -275,12 +314,24 @@ static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst,
 
     static int resident = 0;
     static int waves = 1;
+    static int pipe = 0;
     if (resident == 0) {
         int nb = 0;
-        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nb, ofa_decode_kernel, OFA_NT, 0));
+        // occupancy of the flag-OFF kernel decides nsplit for every PIPE mode (same split -> same reduction);
+        // the PIPE kernels must keep >= that occupancy, checked below.
+        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nb, ofa_decode_kernel<0>, OFA_NT, 0));
         resident = std::max(1, nb) * ggml_cuda_info().devices[id].nsm;
         const char * s = getenv("GGML_CUDA_OCCAMY_FA_WAVES");
         if (s) waves = std::max(1, atoi(s));
+        const char * sp = getenv("GGML_CUDA_OCCAMY_FA_PIPE");
+        pipe = sp ? atoi(sp) : 0;
+        if (pipe < 0 || pipe > 2) pipe = 0;
+        if (pipe) {
+            int nbp = 0;
+            CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nbp,
+                pipe == 1 ? ofa_decode_kernel<1> : ofa_decode_kernel<2>, OFA_NT, 0));
+            fprintf(stderr, "ggml_cuda: occamy FA pipe mode %d (blocks/SM %d, flag-off %d)\n", pipe, nbp, nb);
+        }
     }
     const int nkvh = (int) K->ne[2];
     const int ns   = (int) Q->ne[3];
@@ -305,7 +356,11 @@ static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst,
     p.nbv1 = V->nb[1]; p.nbv2 = V->nb[2]; p.nbv3 = V->nb[3];
     p.nbm1 = mask->nb[1]; p.nbm3 = mask->nb[3];
 
-    ofa_decode_kernel<<<dim3(nsplit, nkvh, ns), OFA_NT, 0, stream>>>(p);
+    switch (pipe) {
+        case 1:  ofa_decode_kernel<1><<<dim3(nsplit, nkvh, ns), OFA_NT, 0, stream>>>(p); break;
+        case 2:  ofa_decode_kernel<2><<<dim3(nsplit, nkvh, ns), OFA_NT, 0, stream>>>(p); break;
+        default: ofa_decode_kernel<0><<<dim3(nsplit, nkvh, ns), OFA_NT, 0, stream>>>(p); break;
+    }
     CUDA_CHECK(cudaGetLastError());
     ofa_combine_kernel<<<dim3(nkvh*OFA_G, ns), OFA_D, 0, stream>>>(part_o.get(), part_ml.get(), out, nsplit, nkvh, dst->nb[1], dst->nb[3]);
     CUDA_CHECK(cudaGetLastError());
