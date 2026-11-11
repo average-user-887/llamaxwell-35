@@ -96,7 +96,9 @@ __device__ __forceinline__ unsigned unpk(unsigned v) {
     asm("lop3.b32 %0, %1, 0x0F0F0F0F, 0x80808080, 0xEA;" : "=r"(r) : "r"(v));
     return r;
 }
-template <bool L3 = false>
+// EX (MOE2 tail only): the main-loop contraction fma(d0, P, d1 * Q), P/Q = fma(a, 128, -136 * sx) (from PTX+SASS), spelled out
+// so a different call site cannot contract the same expression the other way round.
+template <bool L3 = false, bool EX = false>
 __device__ __forceinline__ float dot2c(const Q9 & q, const float * xc, float2 sx) {
     const unsigned w0 = q.w[0], w1 = q.w[1], w2 = q.w[2], w3 = q.w[3], w4 = q.w[4];
     float d0 = __half2float(__ushort_as_half((unsigned short)(w0 & 0xFFFF)));
@@ -115,6 +117,7 @@ __device__ __forceinline__ float dot2c(const Q9 & q, const float * xc, float2 sx
         a1 = fmaf(nib(lo, 0), xl.x, a1); a1 = fmaf(nib(lo, 1), xl.y, a1); a1 = fmaf(nib(lo, 2), xl.z, a1); a1 = fmaf(nib(lo, 3), xl.w, a1);
         a1 = fmaf(nib(hi, 0), xh.x, a1); a1 = fmaf(nib(hi, 1), xh.y, a1); a1 = fmaf(nib(hi, 2), xh.z, a1); a1 = fmaf(nib(hi, 3), xh.w, a1);
     }
+    if (EX) return __fmaf_rn(d0, __fmaf_rn(a0, 128.f, -__fmul_rn(sx.x, 136.f)), __fmul_rn(d1, __fmaf_rn(a1, 128.f, -__fmul_rn(sx.y, 136.f))));
     return d0 * (128.f * a0 - 136.f * sx.x) + d1 * (128.f * a1 - 136.f * sx.y);
 }
 __device__ __forceinline__ void load_norm(float * xs, float2 * sums, const float * h, const float * w, float * red, float eps) {
@@ -344,16 +347,35 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
         }
         const float gs = 1.f / (1.f + expf(-gl));
         const float w0 = selw[lane >> 3], w1 = selw[(lane >> 3) + 4];
-        for (; r < H; r += W) {
+        // MOE2 bit 32 (GGML_CUDA_MOE_TAILBAL): rows >= HF (the partial last wave) are dealt block-wise instead of to
+        // the first blocks' warps; their loads take the last main-loop prefetch slot (same bytes, no extra traffic).
+        constexpr bool TB = (DX & 32) != 0;
+#ifndef MOE2_DBG
+#define MOE2_DBG 0
+#endif
+        const int HF = TB && !MOE2_DBG ? (H / W) * W : H;
+        const int TT = H - (H / W) * W, tper = TT / (int)gridDim.x, tex = TT % (int)gridDim.x, bx = blockIdx.x;
+        const int tn = TB ? tper + (bx < tex) : 0, tbase = (H / W) * W + bx * tper + min(bx, tex);
+        for (; r < HF; r += W) {
 #pragma unroll
             for (int i = 0; i < 5; ++i) stg4[lane + 32 * i] = cv[i];
             if (lane < 2) stg4[160 + lane] = cv[5];
             __syncwarp();
             const int rn = r + W;
-            if (rn < H) {
+            if (rn < HF) {
 #pragma unroll
                 for (int i = 0; i < 5; ++i) cv[i] = __ldg((const uint4 *)(cb[i] + (size_t)rn * ROW_D));
                 if (lane < 2) cv[5] = __ldg((const uint4 *)(cb[5] + (size_t)rn * ROW_D));
+            } else if (TB) {
+#pragma unroll
+                for (int i = 0; i < 2; ++i) {
+                    const int k = threadIdx.x + NT * i;
+                    if (k < tn * 162) {
+                        const int j = k / 162, u = k % 162, m = u / 18, w = u % 18;
+                        const uint8_t * b = (m < TOPK ? L.down_exps + (size_t)sel[m < TOPK ? m : 0] * H * ROW_D : L.down_sh) + w * 16;
+                        cv[i] = __ldg((const uint4 *)(b + (size_t)(tbase + j) * ROW_D));
+                    }
+                }
             }
             float acc = w0 * dot2c<(DX & 16) != 0>(lds9(stg + lane * 9), xs + lane * CH, sums[lane])
                       + w1 * dot2c<(DX & 16) != 0>(lds9(stg + (lane + 32) * 9), xs + (lane + 32) * CH, sums[lane + 32]);
@@ -361,6 +383,37 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
             acc = wsum(acc);
             if (lane == 0) P.out[r] = P.h[r] + acc;
             __syncwarp();
+        }
+        if (TB && MOE2_DBG) {
+#pragma unroll
+                for (int i = 0; i < 2; ++i) {
+                    const int k = threadIdx.x + NT * i;
+                    if (k < tn * 162) {
+                        const int j = k / 162, u = k % 162, m = u / 18, w = u % 18;
+                        const uint8_t * b = (m < TOPK ? L.down_exps + (size_t)sel[m < TOPK ? m : 0] * H * ROW_D : L.down_sh) + w * 16;
+                        cv[i] = __ldg((const uint4 *)(b + (size_t)(tbase + j) * ROW_D));
+                    }
+                }
+        }
+        if (TB && tn > 0) {   // tn is block-uniform -> barriers are uniform
+            unsigned * bst = (unsigned *)(smem + SMEM_FLOATS);
+            float * dts = (float *)(bst + 3 * STW);
+            __syncthreads();
+#pragma unroll
+            for (int i = 0; i < 2; ++i) { const int k = threadIdx.x + NT * i; if (k < tn * 162) ((uint4 *)bst)[k] = cv[i]; }
+            __syncthreads();
+            if (threadIdx.x < tn * 72) {
+                const int j = threadIdx.x / 72, q = threadIdx.x % 72;
+                dts[threadIdx.x] = dot2c<(DX & 16) != 0, true>(lds9(bst + j * STW + q * 9), xs + q * CH, sums[q]);
+            }
+            __syncthreads();
+            if (warp < tn) {
+                const float * dw = dts + warp * 72;
+                float acc = __fmaf_rn(w0, dw[lane], __fmul_rn(w1, dw[lane + 32]));
+                if (lane < 8) acc = __fmaf_rn(gs, dw[lane + 64], acc);
+                acc = wsum(acc);
+                if (lane == 0) P.out[tbase + warp] = P.h[tbase + warp] + acc;
+            }
         }
     }
 }
@@ -370,6 +423,7 @@ struct DevState {
     int grid = 0;
     int grid_dx = 0;   // co-resident grid of moe_v2<0, 3> (GGML_CUDA_MOE_DOWNX; >= that of <0, 1> / <0, 2>)
     int grid_dh[2] = { 0, 0 };
+    int grid_tb = 0;   // MOE2: co-resident grid of moe_v2<0, 61> (GGML_CUDA_MOE_TAILBAL=1 with LOP3)
     int grid_l3 = 0;   // MOE1: co-resident grid of moe_v2<0, 1|4|8|16> (GGML_CUDA_MOE_LOP3=1 with DOWNH=2)   // C07: co-resident grids of moe_v2<0, 1|4> and moe_v2<0, 1|4|8> (GGML_CUDA_MOE_DOWNH=1|2)
 };
 static DevState g_dev[GGML_CUDA_MAX_DEVICES];
@@ -420,6 +474,14 @@ static DevState & dev_state(int device) {
         int per_sm_l3 = 0;
         CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_l3, moe_v2<0, 29>, NT, SMEM2_FLOATS * sizeof(float)));
         d.grid_l3 = per_sm_l3 < 1 ? -1 : per_sm_l3 * nsm;
+        int per_sm_tb = 0;
+        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_tb, moe_v2<0, 61>, NT, SMEM2_FLOATS * sizeof(float)));
+        d.grid_tb = per_sm_tb < 1 ? -1 : per_sm_tb * nsm;
+        if (d.grid_tb > 0) {   // tail rows per block must fit 3 staged rows + dots (72 * 3 <= NT)
+            const int Wt = d.grid_tb * NW, T = H - (H / Wt) * Wt;
+            if ((T + d.grid_tb - 1) / d.grid_tb > 3) { d.grid_tb = -1; }
+        }
+        if (g_debug) { fprintf(stderr, "occamy-fused: device %d: TAILBAL variant %d blocks/SM -> grid %d\n", device, per_sm_tb, d.grid_tb); }
         for (int k = 0; k < 2; ++k) {
             d.grid_dh[k] = per_sm_dh[k] < 1 ? -1 : per_sm_dh[k] * nsm;
             if (g_debug) {
@@ -634,7 +696,16 @@ void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cud
     static const int dh = getenv("GGML_CUDA_MOE_DOWNH") ? atoi(getenv("GGML_CUDA_MOE_DOWNH")) : 0;
     if (!three && dx == 1 && (dh == 1 || dh == 2) && d.grid_dh[dh - 1] > 0) {
         static const bool l3 = env_flag("GGML_CUDA_MOE_LOP3");
+        static const bool tb = env_flag("GGML_CUDA_MOE_TAILBAL");   // MOE2, needs LOP3
         if (dh == 1) { moe_v2<0, 5><<<d.grid_dh[0], NT, smem, st>>>(P); }
+        else if (l3 && tb && d.grid_tb > 0) {
+            moe_v2<0, 61><<<d.grid_tb, NT, smem, st>>>(P);
+            if (g_debug) {
+                static unsigned long long n_tb = 0;
+                ++n_tb;
+                if ((n_tb & (n_tb - 1)) == 0) { fprintf(stderr, "occamy-fused: MOE_TAILBAL launches %llu\n", n_tb); }
+            }
+        }
         else if (l3 && d.grid_l3 > 0) {
             moe_v2<0, 29><<<d.grid_l3, NT, smem, st>>>(P);
             if (g_debug) {
