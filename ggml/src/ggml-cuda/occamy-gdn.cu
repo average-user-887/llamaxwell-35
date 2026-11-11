@@ -40,6 +40,9 @@ struct Layer {
 struct Scratch {
     float qkv[NQKV], z[DI], ab[2 * NVH], attn[DI], ssq[NVH * NCG];
     unsigned bar_count, bar_gen;
+    // C11 (PCS): shared phase-C preparation, written once per head in phase B by the last contributing block
+    alignas(16) float xg[DI]; alignas(16) float sg[DI / 32];   // gated/normalised phase-C input and its 32-element block sums
+    unsigned hcnt[NVH];          // per-head phase-B contribution counter, +NCG per launch (multiple of NCG between launches)
 };
 struct Params {
     Layer L;
@@ -119,10 +122,23 @@ constexpr int SMEM_FLOATS = DI / 64 * CH + DI / 32 + 64;
 constexpr int STW = ROW_O / 4;   // 576 stage words per warp
 constexpr int SMEM2_FLOATS = SMEM_FLOATS + NW * STW;
 
-template <int PHASE>
+// RQK (C10, opt-in GGML_CUDA_OCCAMY_GDN_QKREUSE=1): phase-B items are handed out as contiguous per-block chunks in
+// (k head, v head of that k head, column group) order and the block keeps the l2-normalised q/k (smem qn/kn + the two
+// scale registers) and the gate/beta scalars while the k head / v head is unchanged. Same per-item arithmetic and order,
+// same item->output indices, no new sync point; q/k conv state is still only read in phase B (written in phase C).
+// PCS (C11, opt-in GGML_CUDA_OCCAMY_GDN_PCSHARE=1): the phase-C input xs = attn*fac*ssm_norm*silu(z) and its block sums
+// are built once per head instead of once per block. Each block counts its phase-B items per head (smem hc); after its
+// item loop it publishes (lane-0 writers fence once, one atomicAdd per touched head). The block whose add completes the
+// head's NCG items builds that head's 128 xs values and 4 sums (same expressions/order as phase C) into Scratch xg/sg.
+// The existing phase-B->C grid barrier (or the kernel boundary in 3-launch mode) orders them before phase C, which then
+// only copies xg/sg into smem. No new grid barrier, no new launch. Counting is mapping-agnostic (works with RQK chunks).
+// C24: RQK and PCS are independent flags; any combination is a separate instantiation <PHASE, RQK, PCS>.
+static_assert((NCG & (NCG - 1)) == 0, "PCS counter wrap at 2^32 needs NCG to be a power of two");
+template <int PHASE, int RQK = 0, int PCS = 0>
 __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
     extern __shared__ float smem[];
     __shared__ float qn[SD], kn[SD], vv[CGC], red[NW], fac[NVH];
+    __shared__ unsigned hc[PCS ? NVH : 1], fin[PCS ? NVH + 1 : 1];
     float * xs = smem;
     float2 * sums = (float2 *)(smem + DI / 64 * CH);
     unsigned * stg = (unsigned *)(smem + SMEM_FLOATS) + (threadIdx.x >> 5) * STW; uint4 * stg4 = (uint4 *)stg;
@@ -165,10 +181,19 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
     if (PHASE == 0) grid_barrier(s);
     if (PHASE == 0 || PHASE == 2) {
         // ---- phase B: conv + l2norm + gates + delta rule, item = (v head, column group) ----
-        for (int it = blockIdx.x; it < NVH * NCG; it += gridDim.x) {
-            const int hv = it / NCG, cg = it % NCG, kh = hv % NKH;   // ggml-cuda: q/k head = v head mod n_k_heads
+        const int it_lo = RQK ? (int)(((long long)blockIdx.x * (NVH * NCG)) / gridDim.x) : (int)blockIdx.x;
+        const int it_hi = RQK ? (int)(((long long)(blockIdx.x + 1) * (NVH * NCG)) / gridDim.x) : NVH * NCG;
+        const int it_st = RQK ? 1 : (int)gridDim.x;
+        int kh_c = -1, hv_c = -1;                                   // block-uniform cache tags (RQK only)
+        float qs = 0.f, ks = 0.f, gexp = 0.f, beta = 0.f;
+        if (PCS && threadIdx.x < NVH) { hc[threadIdx.x] = 0; if (threadIdx.x == 0) fin[NVH] = 0; }   // first use after a sync
+        for (int it = it_lo; it < it_hi; it += it_st) {
+            const int hv = RQK ? it / (2 * NCG) + NKH * ((it / NCG) & 1) : it / NCG;
+            const int cg = it % NCG, kh = hv % NKH;   // ggml-cuda: q/k head = v head mod n_k_heads
+            const bool need_qk = !RQK || kh != kh_c;   // block-uniform
             {
                 const int t = threadIdx.x;
+                if (need_qk) {
                 const int c = t < SD ? kh * SD + t : H + kh * SD + (t - SD);
                 const float * ci = conv_in + c * 3; const float * w = L.conv_w + c * 4;
                 float xnew = __ldcg(&s->qkv[c]);
@@ -177,6 +202,7 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
                 float sq = warp_sum(y * y);
                 if (lane == 0) red[warp] = sq;
                 if (t < SD) qn[t] = y; else kn[t - SD] = y;
+                }
                 if (t < CGC) {
                     const int cv = 2 * H + hv * SD + cg * CGC + t;   // unique owner -> conv state written here
                     const float * cvi = conv_in + cv * 3; const float * wv = L.conv_w + cv * 4;
@@ -189,12 +215,18 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
             }
             __syncthreads();
             // l2 norm as ggml: rms_norm(x, eps/n) * 1/sqrt(n)
-            const float qs = rsqrtf((red[0] + red[1] + red[2] + red[3]) / SD + P.eps_l2) * P.scale_l2;
-            const float ks = rsqrtf((red[4] + red[5] + red[6] + red[7]) / SD + P.eps_l2) * P.scale_l2;
+            if (need_qk) {
+            qs = rsqrtf((red[0] + red[1] + red[2] + red[3]) / SD + P.eps_l2) * P.scale_l2;
+            ks = rsqrtf((red[4] + red[5] + red[6] + red[7]) / SD + P.eps_l2) * P.scale_l2;
+            kh_c = kh;
+            }
+            if (!RQK || hv != hv_c) {
             const float al = __ldcg(&s->ab[hv]) + __ldg(L.dt_bias + hv);
             const float sp = al > 20.f ? al : logf(1.f + expf(al));
-            const float gexp = expf(sp * __ldg(L.ssm_a + hv));
-            const float beta = 1.f / (1.f + expf(-__ldcg(&s->ab[NVH + hv])));
+            gexp = expf(sp * __ldg(L.ssm_a + hv));
+            beta = 1.f / (1.f + expf(-__ldcg(&s->ab[NVH + hv])));
+            hv_c = hv;
+            }
             const float4 q4 = *(const float4 *)(qn + 4 * lane), k4r = *(const float4 *)(kn + 4 * lane);
             const float4 qv = make_float4(q4.x * qs, q4.y * qs, q4.z * qs, q4.w * qs);
             const float4 kv4 = make_float4(k4r.x * ks, k4r.y * ks, k4r.z * ks, k4r.w * ks);
@@ -218,8 +250,34 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
             __syncthreads();   // everyone done with red/qn/kn/vv
             if (lane == 0) red[warp] = ssq;
             __syncthreads();
-            if (threadIdx.x == 0) { float t = 0.f; for (int i = 0; i < NW; ++i) t += red[i]; s->ssq[hv * NCG + cg] = t; }
+            if (threadIdx.x == 0) { float t = 0.f; for (int i = 0; i < NW; ++i) t += red[i]; s->ssq[hv * NCG + cg] = t; if (PCS) hc[hv]++; }
             __syncthreads();
+        }
+        if (PCS) {
+            // publish: every attn/ssq writer (lane 0 of each warp, incl. thread 0) fences once, then one add per touched head
+            if (lane == 0) __threadfence();
+            __syncthreads();
+            if (threadIdx.x < NVH && hc[threadIdx.x] != 0) {
+                const unsigned c = hc[threadIdx.x];
+                const unsigned old = atomicAdd(&s->hcnt[threadIdx.x], c);
+                if ((old % NCG) + c == NCG) { fin[atomicAdd(&fin[NVH], 1u)] = threadIdx.x; }   // this block completed the head
+            }
+            __syncthreads();
+            const unsigned nf = fin[NVH];
+            if (nf) {
+                __threadfence();   // acquire side: other blocks' attn/ssq for the finished heads
+                for (unsigned f = threadIdx.x >> 7; f < nf; f += NT / SD) {   // two heads at a time (threads 0-127, 128-255)
+                    const int hv = fin[f], t = threadIdx.x & (SD - 1), i = hv * SD + t;
+                    float tt = 0.f;
+#pragma unroll
+                    for (int k = 0; k < NCG; ++k) tt += __ldcg(&s->ssq[hv * NCG + k]);
+                    const float fh = rsqrtf(tt / SD + P.eps_gated);
+                    const float v = __ldcg(&s->attn[i]) * fh * __ldg(L.ssm_norm + t) * silu(__ldcg(&s->z[i]));
+                    s->xg[i] = v;
+                    const float bs = warp_sum(v);            // == block_sums(): sum b = elements 32b..32b+31, same lanes
+                    if (lane == 0) s->sg[i >> 5] = bs;
+                }
+            }
         }
     }
     if (PHASE == 0) grid_barrier(s);
@@ -231,6 +289,12 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
             co[0] = a; co[1] = b; co[2] = __ldcg(&s->qkv[c]);
         }
         // ---- phase C: o = rmsnorm_head(attn)*ssm_norm*silu(z) -> ssm_out GEMV + residual ----
+        if (PCS) {
+            for (int i = 4 * threadIdx.x; i < DI; i += 4 * NT)
+                *(float4 *)(xs + (i >> 6) * CH + (i & 63)) = __ldcg((const float4 *)(s->xg + i));
+            if (threadIdx.x < DI / 128) ((float4 *)sums)[threadIdx.x] = __ldcg((const float4 *)(s->sg) + threadIdx.x);
+            __syncthreads();
+        } else {
         if (threadIdx.x < NVH) {
             float t = 0.f;
 #pragma unroll
@@ -242,6 +306,7 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
             xs[(i >> 6) * CH + (i & 63)] = __ldcg(&s->attn[i]) * fac[i >> 7] * __ldg(L.ssm_norm + (i & 127)) * silu(__ldcg(&s->z[i]));
         __syncthreads();
         block_sums(xs, sums, DI);
+        }
         uint4 c[5];
         int r = gw;
         if (r < H) { const uint4 * p = (const uint4 *)(L.out + (size_t)r * ROW_O);
@@ -278,6 +343,10 @@ static bool env_flag(const char * name) {
     return e != nullptr && atoi(e) != 0;
 }
 static bool g_debug = env_flag("GGML_CUDA_OCCAMY_DEBUG");
+static bool qk_reuse() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_QKREUSE"); return on; }   // C10, default OFF
+static long g_launch_rqk = 0;   // C10 dispatch counter (launches of the reuse variant)
+static bool pc_share() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_PCSHARE"); return on; }   // C11, default OFF
+static long g_launch_pcs = 0;   // C11 dispatch counter (launches of the shared phase-C variant)
 static long g_engaged = 0, g_rejected_gdn = 0;   // windows fused / GDN-layer windows rejected (DEBUG counter)
 
 static void reject(const char * why) {
@@ -297,11 +366,17 @@ static DevState & dev_state(int device) {
         CUDA_CHECK(cudaMemset(d.scratch, 0, sizeof(Scratch)));
         int per_sm = 0;
         CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm, gdn_fused<0>, NT, SMEM2_FLOATS * sizeof(float)));
+        if (qk_reuse() || pc_share()) {   // C10/C11: the engaged fused variant must fit the same grid (persistent grid barrier)
+            void (*kv)(Params) = qk_reuse() ? (pc_share() ? gdn_fused<0, 1, 1> : gdn_fused<0, 1, 0>) : gdn_fused<0, 0, 1>;
+            int per_sm_v = 0;
+            CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_v, kv, NT, SMEM2_FLOATS * sizeof(float)));
+            per_sm = std::min(per_sm, per_sm_v);
+        }
         const int nsm = ggml_cuda_info().devices[device].nsm;
         d.grid = std::max(1, per_sm) * nsm;   // all blocks co-resident -> grid barrier is safe
         if (g_debug) {
-            fprintf(stderr, "occamy-gdn: device %d: %d SMs x %d blocks/SM -> grid %d, smem %zu B\n",
-                    device, nsm, per_sm, d.grid, SMEM2_FLOATS * sizeof(float));
+            fprintf(stderr, "occamy-gdn: device %d: %d SMs x %d blocks/SM -> grid %d, smem %zu B, qk_reuse %d, pc_share %d\n",
+                    device, nsm, per_sm, d.grid, SMEM2_FLOATS * sizeof(float), (int) qk_reuse(), (int) pc_share());
         }
         if (per_sm < 1) { d.grid = -1; }
     }
@@ -616,12 +691,26 @@ void ggml_cuda_occamy_gdn_launch(ggml_backend_cuda_context & ctx, const ggml_cud
     if (m.zero_conv) { CUDA_CHECK(cudaMemsetAsync(m.zero_conv, 0, CONV_N * sizeof(float), st)); }
     if (m.zero_ssm)  { CUDA_CHECK(cudaMemsetAsync(m.zero_ssm,  0, SSM_N  * sizeof(float), st)); }
     const size_t smem = SMEM2_FLOATS * sizeof(float);
+    const bool rqk = qk_reuse(), pcs = pc_share();
     if (three) {
         gdn_fused<1><<<d.grid, NT, smem, st>>>(P);
-        gdn_fused<2><<<d.grid, NT, smem, st>>>(P);
-        gdn_fused<3><<<d.grid, NT, smem, st>>>(P);
+        if (rqk && pcs)  { gdn_fused<2, 1, 1><<<d.grid, NT, smem, st>>>(P); }
+        else if (rqk)    { gdn_fused<2, 1, 0><<<d.grid, NT, smem, st>>>(P); }
+        else if (pcs)    { gdn_fused<2, 0, 1><<<d.grid, NT, smem, st>>>(P); }
+        else             { gdn_fused<2><<<d.grid, NT, smem, st>>>(P); }
+        if (pcs) { gdn_fused<3, 0, 1><<<d.grid, NT, smem, st>>>(P); } else { gdn_fused<3><<<d.grid, NT, smem, st>>>(P); }
+    } else if (rqk && pcs) {
+        gdn_fused<0, 1, 1><<<d.grid, NT, smem, st>>>(P);
+    } else if (rqk) {
+        gdn_fused<0, 1, 0><<<d.grid, NT, smem, st>>>(P);
+    } else if (pcs) {
+        gdn_fused<0, 0, 1><<<d.grid, NT, smem, st>>>(P);
     } else {
         gdn_fused<0><<<d.grid, NT, smem, st>>>(P);
+    }
+    if (g_debug) {
+        if (rqk && (++g_launch_rqk == 1 || g_launch_rqk % 3000 == 0)) { fprintf(stderr, "occamy-gdn: qk_reuse launches %ld\n", g_launch_rqk); }
+        if (pcs && (++g_launch_pcs == 1 || g_launch_pcs % 3000 == 0)) { fprintf(stderr, "occamy-gdn: pc_share launches %ld\n", g_launch_pcs); }
     }
     CUDA_CHECK(cudaGetLastError());
 }
