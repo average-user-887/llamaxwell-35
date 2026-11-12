@@ -949,3 +949,217 @@ void ggml_cuda_op_rms_norm_mul_rope_fused(ggml_backend_cuda_context & ctx,
         GGML_ABORT("fatal error");
     }
 }
+
+// GGML_CUDA_OCCAMY_SMALLFUSE bit 1: decode-time Q/K RMS_NORM+MUL+ROPE(multi) plus the K and V SET_ROWS in one launch.
+// Each norm/rope block repeats rms_norm_f32<256,true> and rope_multi<true,false,float> arithmetic exactly.
+struct occamy_qkrs_args {
+    const float * xq; int64_t sq; const float * wq; float eps_q; float * dq; int nq;
+    const float * xk; int64_t sk; const float * wk; float eps_k; float * dk; int nk;
+    half * kc; const int64_t * kidx; int64_t ks1;
+    half * vc; const int64_t * vidx; int64_t vs1; const float * xv; int nv;
+    int n_dims; int n_offs; const int32_t * pos; int ne02;
+    float freq_scale; float ext_factor; float attn_factor; rope_corr_dims corr_dims; float theta_scale;
+    mrope_sections sections; bool is_imrope;
+};
+
+static __global__ void __launch_bounds__(256) occamy_qk_norm_rope_set(const occamy_qkrs_args a) {
+    constexpr int ncols = 256;
+    __shared__ float s_sum[32];
+    __shared__ float s_row[ncols];
+    const int tid = threadIdx.x;
+    const int b   = blockIdx.x;
+
+    if (b == a.nq + a.nk) {
+        const int64_t vrow = a.vidx[0];
+        for (int i = tid; i < a.nv; i += 256) {
+            a.vc[vrow*a.vs1 + i] = ggml_cuda_cast<half>(a.xv[i]);
+        }
+        return;
+    }
+
+    const bool is_q = b < a.nq;
+    const int  head = is_q ? b : b - a.nq;
+    const float * xc  = is_q ? a.xq + head*a.sq : a.xk + head*a.sk;
+    const float * mul = is_q ? a.wq : a.wk;
+    const float   eps = is_q ? a.eps_q : a.eps_k;
+
+    float tmp = 0.0f;
+    for (int col = tid; col < ncols; col += 256) {
+        const float xi = xc[col];
+        tmp += xi * xi;
+    }
+    tmp = block_reduce<block_reduce_method::SUM, 256>(tmp, s_sum);
+
+    const float mean  = tmp / ncols;
+    const float scale = rsqrtf(mean + eps);
+
+    for (int col = tid; col < ncols; col += 256) {
+        s_row[col] = scale * xc[col] * mul[col];
+    }
+    __syncthreads();
+
+    const int i0 = 2*tid;
+    if (i0 >= ncols) {
+        return;
+    }
+    float * dst = (is_q ? a.dq : a.dk) + head*ncols;
+    half  * kcr = is_q ? nullptr : a.kc + a.kidx[0]*a.ks1 + head*ncols;
+    const int n_dims = a.n_dims;
+    const int n_offs = a.n_offs;
+    const int idst = i0/2;
+    const int ix   = i0/2;
+
+    if (i0 < n_offs || i0 >= n_offs + n_dims) {
+        const float v0 = s_row[ix + i0/2 + 0];
+        const float v1 = s_row[ix + i0/2 + 1];
+        dst[idst + i0/2 + 0] = v0;
+        dst[idst + i0/2 + 1] = v1;
+        if (kcr) {
+            kcr[idst + i0/2 + 0] = ggml_cuda_cast<half>(v0);
+            kcr[idst + i0/2 + 1] = ggml_cuda_cast<half>(v1);
+        }
+        return;
+    }
+
+    const int iw = i0 - n_offs;
+    const mrope_sections sections = a.sections;
+    const float theta_scale = a.theta_scale;
+    const int ne02 = a.ne02;
+    const int i2 = 0;
+    const int32_t * pos = a.pos;
+
+    const int sect_dims = sections.v[0] + sections.v[1] + sections.v[2] + sections.v[3];
+    const int sec_w = sections.v[1] + sections.v[0];
+    const int sector = (iw / 2) % sect_dims;
+
+    float theta_base = 0.0;
+    if (a.is_imrope) {
+        if (sector % 3 == 1 && sector < 3 * sections.v[1]) {
+            theta_base = pos[i2 + ne02 * 1] * powf(theta_scale, iw / 2.0f);
+        } else if (sector % 3 == 2 && sector < 3 * sections.v[2]) {
+            theta_base = pos[i2 + ne02 * 2] * powf(theta_scale, iw / 2.0f);
+        } else if (sector % 3 == 0 && sector < 3 * sections.v[0]) {
+            theta_base = pos[i2] * powf(theta_scale, iw / 2.0f);
+        } else {
+            theta_base = pos[i2 + ne02 * 3] * powf(theta_scale, iw / 2.0f);
+        }
+    } else {
+        if (sector < sections.v[0]) {
+            theta_base = pos[i2] * powf(theta_scale, iw / 2.0f);
+        } else if (sector >= sections.v[0] && sector < sec_w) {
+            theta_base = pos[i2 + ne02 * 1] * powf(theta_scale, iw / 2.0f);
+        } else if (sector >= sec_w && sector < sec_w + sections.v[2]) {
+            theta_base = pos[i2 + ne02 * 2] * powf(theta_scale, iw / 2.0f);
+        } else if (sector >= sec_w + sections.v[2]) {
+            theta_base = pos[i2 + ne02 * 3] * powf(theta_scale, iw / 2.0f);
+        }
+    }
+
+    const float freq_factor = 1.0f;
+
+    float cos_theta;
+    float sin_theta;
+
+    rope_yarn<true>(theta_base/freq_factor, a.freq_scale, a.corr_dims, iw, a.ext_factor, a.attn_factor, cos_theta, sin_theta);
+
+    const float x0 = s_row[ix + n_offs/2 + 0];
+    const float x1 = s_row[ix + n_offs/2 + n_dims/2];
+
+    const float r0 = x0*cos_theta - x1*sin_theta;
+    const float r1 = x0*sin_theta + x1*cos_theta;
+    dst[idst + n_offs/2 + 0]        = r0;
+    dst[idst + n_offs/2 + n_dims/2] = r1;
+    if (kcr) {
+        kcr[idst + n_offs/2 + 0]        = ggml_cuda_cast<half>(r0);
+        kcr[idst + n_offs/2 + n_dims/2] = ggml_cuda_cast<half>(r1);
+    }
+}
+
+static bool occamy_qkrs_rope_ok(const ggml_tensor * r) {
+    const int mode = ((const int32_t *) r->op_params)[2];
+    return r->op == GGML_OP_ROPE && (mode & GGML_ROPE_TYPE_MROPE) && mode != GGML_ROPE_TYPE_VISION &&
+           r->src[2] == nullptr && r->type == GGML_TYPE_F32 && r->src[0]->type == GGML_TYPE_F32 &&
+           r->ne[0] == 256 && r->ne[2] == 1 && r->ne[3] == 1 && ggml_is_contiguous(r) &&
+           r->src[1]->type == GGML_TYPE_I32;
+}
+
+static bool occamy_qkrs_norm_ok(const ggml_tensor * n, const ggml_tensor * m) {
+    const ggml_tensor * x = n->src[0];
+    const ggml_tensor * w = m->src[0] == n ? m->src[1] : m->src[0];
+    return n->op == GGML_OP_RMS_NORM && m->op == GGML_OP_MUL && x->type == GGML_TYPE_F32 && x->ne[0] == 256 &&
+           x->nb[0] == sizeof(float) && x->ne[2] == 1 && x->ne[3] == 1 &&
+           w->type == GGML_TYPE_F32 && ggml_is_contiguous(w) && ggml_nelements(w) == 256 &&
+           ggml_are_same_shape(m, n) && m->type == GGML_TYPE_F32;
+}
+
+static bool occamy_qkrs_set_ok(const ggml_tensor * s, const ggml_tensor * src) {
+    return s->op == GGML_OP_SET_ROWS && s->type == GGML_TYPE_F16 && s->nb[0] == sizeof(half) &&
+           s->src[0]->type == GGML_TYPE_F32 && ggml_is_contiguous(s->src[0]) && s->src[0]->data == src->data &&
+           ggml_nelements(s->src[0]) == ggml_nelements(src) && s->src[0]->ne[0] == ggml_nelements(src) &&
+           s->ne[0] == s->src[0]->ne[0] && s->src[1]->type == GGML_TYPE_I64 && ggml_nelements(s->src[1]) == 1;
+}
+
+bool ggml_cuda_occamy_qk_rope_set_ok(ggml_tensor * const * g) {
+    // g: q_norm, q_mul, q_rope, k_norm, k_mul, k_rope, set_rows K, set_rows V
+    const ggml_tensor * qn = g[0]; const ggml_tensor * qm = g[1]; const ggml_tensor * qr = g[2];
+    const ggml_tensor * kn = g[3]; const ggml_tensor * km = g[4]; const ggml_tensor * kr = g[5];
+    const ggml_tensor * sk = g[6]; const ggml_tensor * sv = g[7];
+    if (!occamy_qkrs_norm_ok(qn, qm) || !occamy_qkrs_norm_ok(kn, km) || !occamy_qkrs_rope_ok(qr) || !occamy_qkrs_rope_ok(kr) ||
+        qr->src[0] != qm || kr->src[0] != km || qr->src[1] != kr->src[1] ||
+        memcmp(qr->op_params, kr->op_params, sizeof(qr->op_params)) != 0 ||
+        !ggml_are_same_shape(qr, qm) || !ggml_are_same_shape(kr, km) ||
+        !occamy_qkrs_set_ok(sk, kr) || !occamy_qkrs_set_ok(sv, sv->src[0]) || sv->src[0]->ne[0] > 4096) {
+        return false;
+    }
+    const int ne02 = (int) qr->src[0]->ne[2];
+    if (qr->src[1]->ne[0] != 4*ne02) {
+        return false;
+    }
+    return true;
+}
+
+bool ggml_cuda_occamy_qk_rope_set(ggml_backend_cuda_context & ctx, ggml_tensor * const * g) {
+    if (!ggml_cuda_occamy_qk_rope_set_ok(g)) {
+        return false;
+    }
+    const ggml_tensor * qn = g[0]; const ggml_tensor * qm = g[1]; const ggml_tensor * qr = g[2];
+    const ggml_tensor * kn = g[3]; const ggml_tensor * km = g[4]; const ggml_tensor * kr = g[5];
+    const ggml_tensor * sk = g[6]; const ggml_tensor * sv = g[7];
+    const int ne02 = (int) qr->src[0]->ne[2];
+
+    occamy_qkrs_args a;
+    a.xq = (const float *) qn->src[0]->data; a.sq = qn->src[0]->nb[1]/sizeof(float);
+    a.wq = (const float *) (qm->src[0] == qn ? qm->src[1] : qm->src[0])->data;
+    memcpy(&a.eps_q, qn->op_params, sizeof(float));
+    a.dq = (float *) qr->data; a.nq = (int) qr->ne[1];
+    a.xk = (const float *) kn->src[0]->data; a.sk = kn->src[0]->nb[1]/sizeof(float);
+    a.wk = (const float *) (km->src[0] == kn ? km->src[1] : km->src[0])->data;
+    memcpy(&a.eps_k, kn->op_params, sizeof(float));
+    a.dk = (float *) kr->data; a.nk = (int) kr->ne[1];
+    a.kc = (half *) sk->data; a.kidx = (const int64_t *) sk->src[1]->data; a.ks1 = sk->nb[1]/sizeof(half);
+    a.vc = (half *) sv->data; a.vidx = (const int64_t *) sv->src[1]->data; a.vs1 = sv->nb[1]/sizeof(half);
+    a.xv = (const float *) sv->src[0]->data; a.nv = (int) sv->src[0]->ne[0];
+
+    const int n_dims     = ((const int32_t *) qr->op_params)[1];
+    const int mode       = ((const int32_t *) qr->op_params)[2];
+    const int n_ctx_orig = ((const int32_t *) qr->op_params)[4];
+    float freq_base, beta_fast, beta_slow;
+    memcpy(&freq_base,     (const int32_t *) qr->op_params +  5, sizeof(float));
+    memcpy(&a.freq_scale,  (const int32_t *) qr->op_params +  6, sizeof(float));
+    memcpy(&a.ext_factor,  (const int32_t *) qr->op_params +  7, sizeof(float));
+    memcpy(&a.attn_factor, (const int32_t *) qr->op_params +  8, sizeof(float));
+    memcpy(&beta_fast,     (const int32_t *) qr->op_params +  9, sizeof(float));
+    memcpy(&beta_slow,     (const int32_t *) qr->op_params + 10, sizeof(float));
+    memcpy(&a.sections.v,  (const int32_t *) qr->op_params + 11, sizeof(int)*4);
+    a.n_dims = n_dims;
+    a.n_offs = ((const int32_t *) qr->op_params)[15];
+    a.pos = (const int32_t *) qr->src[1]->data;
+    a.ne02 = ne02;
+    a.is_imrope = mode == GGML_ROPE_TYPE_IMROPE;
+    ggml_rope_yarn_corr_dims(n_dims, n_ctx_orig, freq_base, beta_fast, beta_slow, a.corr_dims.v);
+    a.theta_scale = powf(freq_base, -2.0f / n_dims);
+
+    occamy_qk_norm_rope_set<<<a.nq + a.nk + 1, 256, 0, ctx.stream()>>>(a);
+    CUDA_CHECK(cudaGetLastError());
+    return true;
+}
