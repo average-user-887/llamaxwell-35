@@ -1,0 +1,83 @@
+INDEPENDENT PUBLICATION-STAGE REVIEW — 2026-11-12, 17:42 CET
+
+Decision
+No unresolved privacy, inventory, hash or numeric/semantic fidelity blocker was
+identified in the exact final snapshot below. It is suitable for root's
+owner-authorized experimental publication within the explicitly reviewed scope.
+This is not deployment approval, quality equivalence or proof that arbitrary
+future files are secret-free. Do not publish the superseded initial stage.
+
+Reviewed final snapshot
+publication-final/MANIFEST.json SHA256:
+0e227c8a9fcc7f55cd66adf1d5e4be17b2878635b7786b1b4bcf7a8148e79acb
+All 70 archives were independently opened and every member read without writing
+into the stage or extracting executable content. All 774 payload records match
+the manifest paths, sizes and SHA256 values: 869,977,179 published raw bytes.
+There are no missing, unexpected, duplicate or unsafe archive members, no
+unexpected staged files, and no filesystem symlinks outside the archives.
+All tar identity metadata is normalized. All archives are below 45 MiB.
+Thirteen explicitly declared plain JSON mirrors also match their archived
+published bytes and hashes exactly: 1,053,226 additional physical bytes.
+
+Privacy checks
+Scanned all 740 UTF-8 text payloads, 758,232,825 bytes, using 15 credential/private
+identifier rule families. Also scanned decoded strings from all 490 JSON files,
+672 valid JSONL rows and the manifest. Sixty-nine non-JSON lines in JSONL files
+were retained and raw-text scanned, not silently discarded. No scanner hit was
+found. Runtime binary inspection found no embedded personal path/GPU UUID; its
+identity is additionally frozen by per-library hashes. No GGUF weights, saved
+slot binaries, private rollout excerpts, bytecode backup/incident files, router
+configuration/logs or root operational HANDOFF.md are present.
+
+All 40 identity receipts retain only reviewed top-level fields and numeric GGML
+environment values. Preserved timing, offload flags, runtime hash strings and
+environment values were independently compared with originals; host, port,
+slot-save-path and API-key argument flags are absent. This checks the actual
+snapshot, not arbitrary future values accepted by the packager's broader GGML
+key predicate.
+
+Some operational metadata intentionally remains, as explicitly confirmed by
+root: generic slot0/slot1 names, sizes and mtimes prove preservation; production
+image hash/status and ownership-event timestamps/statuses prove closeout. These
+receipts contain no slot contents, user conversations, thread IDs, PIDs, IPs or
+private configuration. This is a bounded authorized exception, not complete
+anonymization or blanket approval of other cleanup schemas.
+
+Evidence fidelity and composition
+All 24 large full-vocabulary JSON vectors remain byte-identical to originals.
+For all 23 transformed non-identity JSON files, independent fingerprints of
+numeric values and semantic content/prompt/token-piece fields are identical.
+No selected original changed after the final snapshot. Corpus bytes and MIT
+notice are retained; the earlier corpus audit proves every byte is already-
+public llama.cpp/ggml source, with constructed benchmark tasks added separately.
+
+Runtime has 22 regular ELF components and 10 safe internal relative symlinks,
+matching the scheduler runtime inventory except the deliberately omitted test
+parser. The only overlaid component is libggml-cuda.so from frozen v4:
+0c7ffbde334686f17f5ed6a1676c0cd966ec931eaa388900befb06af493330d5
+Every other runtime component matches its scheduler source hash. Probe binaries,
+model weights and saved slot caches are not bundled. Binary identity is not an
+independent runtime execution or ABI-compatibility test.
+
+Final delta and material caveat
+Relative to the initial reviewed stage, 755 payloads are unchanged, 18 are added,
+root HANDOFF.md is removed, and PUBLIC_RESULTS.md changes. Added data includes
+all 14 q8/v2 source/receipt files, closing the missing stabilized-Q8 evidence gap,
+plus cleanup/final mixed analysis and stopped telemetry. The final snapshot was
+fully rescanned; the conclusion does not merely inherit the initial review.
+
+PUBLIC_RESULTS.md and QUALITY-GRID-V4.txt preserve the material negative result:
+at 65,536 tokens, normalized API-distribution KL is 0.293615 nats and total
+variation is 20.8524%, despite 64/64 top-1 agreement. The candidate remains
+experimental/default-off and not quality-equivalent or production-qualified.
+
+Receipts and limits
+Local machine-readable receipts: staging-review/final-review.json,
+staging-review/final-delta.json and staging-review/final-summary.json.
+Reviewer: staging-review/review_stage.py, with six bounded rule/fidelity checks.
+No network, git mutation, GPU, model or service action occurred in this review.
+No publication-stage/final file was changed. Pattern scanning cannot prove
+absence of every possible secret; fixture provenance, explicit scope and
+schema review complement it. Existing public repository history and any later
+publication edits are outside this exact final-stage hash. Root owns final
+repository assembly and must preserve this snapshot's bytes and limitations.
