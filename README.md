@@ -11,3 +11,5 @@ This separate branch contains a **default-off experimental** packed-GQA prefill 
 Read the [results and limitations](experiments/codex-20261112/PUBLIC_RESULTS.md), [build notes](experiments/codex-20261112/BUILD.md), and [artifact manifest](experiments/codex-20261112/MANIFEST.json). The evidence package includes the tested runtime, sanitized receipts and rejected experiments. Extract its category archives into one directory to resolve the report's evidence links.
 
 The [publication receipt](experiments/codex-20261112/PUBLICATION_RECEIPT.json) records successful downloads and matching hashes for the published runtime, manifest, report and independent package review. Main and production remain unchanged.
+
+For durable review of every benchmark result, start with the [auditor evidence index](experiments/codex-20261112/AUDITOR_INDEX.txt). Its additive completeness supplement includes an earlier prefill variant, wrapper failure logs and the initial routed measurement; the combined manifests cover 42 model-run folders and the operator experiments. Nothing is merged or deployed by this archive update.

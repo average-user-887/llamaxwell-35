@@ -1,0 +1,49 @@
+AUDITOR EVIDENCE INDEX - 12 November 2026
+
+This branch is an archival review candidate, not a merge or deployment decision.
+The final tested runtime and all new code paths remain experimental/default-off.
+
+START HERE
+PUBLIC_RESULTS.md: measured gains, exact workload boundaries and negative results.
+BUILD.md: tested runtime, source build recipe, hashes and incompatible graph flag.
+MANIFEST.json: original package, 774 payload records and 70 archives.
+PACKAGE_REVIEW.txt: independent privacy, inventory and numeric-fidelity review.
+PUBLICATION_RECEIPT.json: download verification of the original published bundle.
+AUDITOR_SUPPLEMENT_MANIFEST.json: additive coverage audit and 36 further records.
+
+COMPLETENESS FOLLOW-UP
+The follow-up inventory found an omitted earlier prefill/v2 experiment, root-level
+benchmark wrapper logs, and the initial routed square-function response/timing.
+All are now included in archives/auditor-supplement-01.tar.gz. Failures and tracebacks
+remain failures; numeric measurements and model output were not rewritten.
+
+The combined manifests index 810 payload records and 71 archives. The follow-up
+checks all 42 model-run directories (514 measurement files) plus 133 operator and
+analysis artifacts outside inherited source/build trees. No unarchived measurement
+artifact remains within that declared scope. The supplement records individual
+original/published hashes and redactions. Original local evidence is preserved.
+
+One reporting refinement: the earlier occupancy variants span approximately
+37-72% slower, not only the 40-72% shorthand in the original report. The newly
+included prefill/v2 mode3 is approximately 37% slower. This does not change the
+rejection or the independently measured GEMM prefill improvements.
+
+ACCESS
+Small linked receipts and summaries can be read directly on GitHub. To inspect
+all detailed receipts, extract every archives/*.tar.gz into this experiment
+directory, preserving member paths. Archive hashes are in the two manifests.
+The runtime archive is the same verified v4 build; this supplement changes no
+code, runtime bytes, model measurements, main branch or production deployment.
+
+EXCLUSIONS AND LIMITS
+No model weights, user slot binaries/conversations, credentials, private routing
+configuration, private incident backups or inherited source/build trees are
+published. Probe sources, patches, build logs and the final runtime are retained;
+disposable standalone probe executables are not required to read the evidence.
+Redacted copies have their own hashes. The original package's independent review
+does not silently certify this later supplement; its separate checks are recorded
+in the supplemental manifest and subsequent publication receipt.
+
+The reproducible 65K probability drift, graph-capture failure, SSE observability
+limits and rejected speculation results remain part of the evidence. No general
+quality-equivalence claim or internet-wide speed ranking is established.

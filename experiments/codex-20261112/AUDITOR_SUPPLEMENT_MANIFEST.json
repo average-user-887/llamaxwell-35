@@ -1,0 +1,763 @@
+{
+  "status": "additive-auditor-completeness-supplement",
+  "base_manifest_sha256": "0e227c8a9fcc7f55cd66adf1d5e4be17b2878635b7786b1b4bcf7a8148e79acb",
+  "base_evidence_commit": "6d072275d60654615b6c650e6d8ecdad59a1ae75",
+  "files": [
+    {
+      "source": "model-adaptive-off-a1.log",
+      "public": "model-adaptive-off-a1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "eee631c085a3b90c6c3cfd01e1975ba6a5ccb4e952e7d2c6352af44b7a2f93fd",
+      "published_sha256": "eee631c085a3b90c6c3cfd01e1975ba6a5ccb4e952e7d2c6352af44b7a2f93fd",
+      "original_bytes": 1644,
+      "published_bytes": 1644,
+      "transforms": {},
+      "source_mtime_ns": 1794494584719512504,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-adaptive-on-b1.log",
+      "public": "model-adaptive-on-b1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "9c324b4c8593564ae256eb41f4b169f74c4b0c97295eb7472a1605e54c464b72",
+      "published_sha256": "9c324b4c8593564ae256eb41f4b169f74c4b0c97295eb7472a1605e54c464b72",
+      "original_bytes": 1642,
+      "published_bytes": 1642,
+      "transforms": {},
+      "source_mtime_ns": 1794494827275030751,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-batch1024-b1.log",
+      "public": "model-batch1024-b1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "0d4622df3b7ac64c2dc754affbdbceb2f26a6b27a7dfb7be8d8063c65b25ad63",
+      "published_sha256": "0d4622df3b7ac64c2dc754affbdbceb2f26a6b27a7dfb7be8d8063c65b25ad63",
+      "original_bytes": 1645,
+      "published_bytes": 1645,
+      "transforms": {},
+      "source_mtime_ns": 1794494448811591991,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-batch2048-a1.log",
+      "public": "model-batch2048-a1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "ffc25fd98e7a317c787b0eeeecdb9b8eed66436f4e26314edbd579a97c292a8c",
+      "published_sha256": "066eaf65bdd89a050d3430fbd214ea851ccdf57d0649215d1b443623636dabfe",
+      "original_bytes": 1277,
+      "published_bytes": 1089,
+      "transforms": {
+        "investigation-root": 4
+      },
+      "source_mtime_ns": 1794493888871692560,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-batch2048-a2.log",
+      "public": "model-batch2048-a2.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "1a4a9a09ad579ca79216621a94ea1bb950e7f136feb0447700aa4058f4876d8c",
+      "published_sha256": "4996470c357f6b4d53a2aaad5be8f0c78b13453cb017ec5253eda18c03b2cbae",
+      "original_bytes": 604,
+      "published_bytes": 463,
+      "transforms": {
+        "investigation-root": 3
+      },
+      "source_mtime_ns": 1794494100315251024,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-batch2048-a3.log",
+      "public": "model-batch2048-a3.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "b463b3574a228633129d54d6b17a70680fdece01cf039ab48bcf98e0ddb6b102",
+      "published_sha256": "b463b3574a228633129d54d6b17a70680fdece01cf039ab48bcf98e0ddb6b102",
+      "original_bytes": 1601,
+      "published_bytes": 1601,
+      "transforms": {},
+      "source_mtime_ns": 1794494235545308234,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-deep-mixed-off-a1.log",
+      "public": "model-deep-mixed-off-a1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "04782376c57762b091cd0a562f7ad0860f916efea0f7e25d61a966d2c1174f74",
+      "published_sha256": "04782376c57762b091cd0a562f7ad0860f916efea0f7e25d61a966d2c1174f74",
+      "original_bytes": 335,
+      "published_bytes": 335,
+      "transforms": {},
+      "source_mtime_ns": 1794498038116370606,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-deep-mixed-on-b1.log",
+      "public": "model-deep-mixed-on-b1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "0b9f44537c860ee6274c4afac41e9a44f06ecc62aa981a666a615150e288e411",
+      "published_sha256": "0b9f44537c860ee6274c4afac41e9a44f06ecc62aa981a666a615150e288e411",
+      "original_bytes": 587,
+      "published_bytes": 587,
+      "transforms": {},
+      "source_mtime_ns": 1794498082731569703,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-deep-mixed-on-cap1024-c1.log",
+      "public": "model-deep-mixed-on-cap1024-c1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "57b969b0ce84b20e4e353980d8a0696d77bce96b0a465589b0cc82c939f00f8e",
+      "published_sha256": "57b969b0ce84b20e4e353980d8a0696d77bce96b0a465589b0cc82c939f00f8e",
+      "original_bytes": 590,
+      "published_bytes": 590,
+      "transforms": {},
+      "source_mtime_ns": 1794498128755236699,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-gemm-off-a1.log",
+      "public": "model-gemm-off-a1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "e39bd5041931ad6985ea2763ad918c5e999c016ce78ad6b62386afca5cf070ae",
+      "published_sha256": "843a5ab70890382c1ddb15053ef47b87a9ae6b0e7a036ebc11e8149f99dca6ea",
+      "original_bytes": 962,
+      "published_bytes": 966,
+      "transforms": {
+        "internal-ipv4": 1
+      },
+      "source_mtime_ns": 1794495538287306450,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-gemm-on-b1.log",
+      "public": "model-gemm-on-b1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "a3fd6323ade14318c879175213a211116c8a48c7d934b769beb0c40bb46f7b21",
+      "published_sha256": "534416f9a23936c72ffb990f3f85607f277f6c9fe0dce891cc8e318c53eb80e3",
+      "original_bytes": 955,
+      "published_bytes": 959,
+      "transforms": {
+        "internal-ipv4": 1
+      },
+      "source_mtime_ns": 1794495658964435655,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-gemm3-off-a2.log",
+      "public": "model-gemm3-off-a2.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "c2d71709ee6ba75b2c105374a99a8acd79835382c817ab14caedd542a730b251",
+      "published_sha256": "14473a156aab6fb2aa7acf47a585833000e72a7580851c8cf8327e6ae4f02485",
+      "original_bytes": 961,
+      "published_bytes": 965,
+      "transforms": {
+        "internal-ipv4": 1
+      },
+      "source_mtime_ns": 1794495965519150519,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-gemm3-on-c1.log",
+      "public": "model-gemm3-on-c1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "44f5a083e728fd9cc39b28f9cbb8668349eb9547761159cb0ee928cdb4481a1c",
+      "published_sha256": "32c29c03dea8019accf772989c6ca0bf73d4f40253decdbd9fc135631e10c1f2",
+      "original_bytes": 965,
+      "published_bytes": 969,
+      "transforms": {
+        "internal-ipv4": 1
+      },
+      "source_mtime_ns": 1794495880895400890,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-long-task-off-a1.log",
+      "public": "model-long-task-off-a1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "fcd94b2051cbb37d3051c333cc02671e1be8bced7c049bb020374b93564de17f",
+      "published_sha256": "fcd94b2051cbb37d3051c333cc02671e1be8bced7c049bb020374b93564de17f",
+      "original_bytes": 1875,
+      "published_bytes": 1875,
+      "transforms": {},
+      "source_mtime_ns": 1794497891030941710,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-long-task-on-b1.log",
+      "public": "model-long-task-on-b1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "b98a48cbf97912279cfabcbf20c5f73d919626610a0fc8a557f8589c109f3af9",
+      "published_sha256": "b98a48cbf97912279cfabcbf20c5f73d919626610a0fc8a557f8589c109f3af9",
+      "original_bytes": 2039,
+      "published_bytes": 2039,
+      "transforms": {},
+      "source_mtime_ns": 1794497983305139612,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-prodcp-off-a1.log",
+      "public": "model-prodcp-off-a1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "5211f46f3cb9a7323c58c4c517125a7d434fee82ccba3e08f0428ce389a0ecd7",
+      "published_sha256": "eac65f058d8d700a4d6c68a24b0e0520ae5ba2f2adf54acc13ee48d7b3fb2ec1",
+      "original_bytes": 969,
+      "published_bytes": 973,
+      "transforms": {
+        "internal-ipv4": 1
+      },
+      "source_mtime_ns": 1794497665822528790,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-prodcp-on-b1.log",
+      "public": "model-prodcp-on-b1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "a9ba16d222a333f18dd25753e584d3d0d5027724b052a71041e65cfb4074dda2",
+      "published_sha256": "2cb642ca9e32bdbb7c86aa2728d89715e72c5b2df405295330a92ec6bf027e34",
+      "original_bytes": 967,
+      "published_bytes": 971,
+      "transforms": {
+        "internal-ipv4": 1
+      },
+      "source_mtime_ns": 1794497736291551002,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-quality16-off-a1.log",
+      "public": "model-quality16-off-a1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "c82c668c6a35f716e1aa9d4497abcb7826792692a06baf723624f908bef7ffc1",
+      "published_sha256": "c82c668c6a35f716e1aa9d4497abcb7826792692a06baf723624f908bef7ffc1",
+      "original_bytes": 6490,
+      "published_bytes": 6490,
+      "transforms": {},
+      "source_mtime_ns": 1794496054206378864,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-quality16-on-b1.log",
+      "public": "model-quality16-on-b1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "2005645f6192ce77fba41eb1b1c8345b9754843d109c28097c8d7424a74ab1ed",
+      "published_sha256": "2005645f6192ce77fba41eb1b1c8345b9754843d109c28097c8d7424a74ab1ed",
+      "original_bytes": 6502,
+      "published_bytes": 6502,
+      "transforms": {},
+      "source_mtime_ns": 1794496103350047984,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-spec-head9-off-a2.log",
+      "public": "model-spec-head9-off-a2.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "0b7c6e204aa3807cda780ad2614f7c9c96033ea1c79ca6700559f44ed4826c1c",
+      "published_sha256": "0b7c6e204aa3807cda780ad2614f7c9c96033ea1c79ca6700559f44ed4826c1c",
+      "original_bytes": 2342,
+      "published_bytes": 2342,
+      "transforms": {},
+      "source_mtime_ns": 1794497589144212332,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-spec-off-a1.log",
+      "public": "model-spec-off-a1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "f4dd735bde25fd3ecd5730bda888cd32c59409e502c654460709f0b765028b18",
+      "published_sha256": "f4dd735bde25fd3ecd5730bda888cd32c59409e502c654460709f0b765028b18",
+      "original_bytes": 2635,
+      "published_bytes": 2635,
+      "transforms": {},
+      "source_mtime_ns": 1794494891072017579,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-spec-on-b1.log",
+      "public": "model-spec-on-b1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "c0abc6e82aea6ea4247e5930d73e6f195cd203b60f628a347f77f12d3611a9d5",
+      "published_sha256": "463d93c01420a98acca7733dfe2a325cbe3d2282c29cc8555b8aa7a61a4591eb",
+      "original_bytes": 1621,
+      "published_bytes": 1480,
+      "transforms": {
+        "investigation-root": 3
+      },
+      "source_mtime_ns": 1794494953002418088,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-spec4-on-b2.log",
+      "public": "model-spec4-on-b2.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "c8a9ac7e2288ea80dfe8d6fac774a4a42f93a2e9b9d59174213a37d63209bc4f",
+      "published_sha256": "c8a9ac7e2288ea80dfe8d6fac774a4a42f93a2e9b9d59174213a37d63209bc4f",
+      "original_bytes": 2784,
+      "published_bytes": 2784,
+      "transforms": {},
+      "source_mtime_ns": 1794495290971649359,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "model-spec8-head9-on-c1.log",
+      "public": "model-spec8-head9-on-c1.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "dd4f943ce4e223a25b97a5a406f6ee711b967d0b228cd6c06887e26b885d3e60",
+      "published_sha256": "dd4f943ce4e223a25b97a5a406f6ee711b967d0b228cd6c06887e26b885d3e60",
+      "original_bytes": 2445,
+      "published_bytes": 2445,
+      "transforms": {},
+      "source_mtime_ns": 1794497571011021028,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "route-first-sample.json",
+      "public": "route-first-sample.json",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "036ddfbbf5e094aad2633c97feb649358eedd3b29dff5a93d48fceb9d622ba92",
+      "published_sha256": "036ddfbbf5e094aad2633c97feb649358eedd3b29dff5a93d48fceb9d622ba92",
+      "original_bytes": 874,
+      "published_bytes": 874,
+      "transforms": {},
+      "source_mtime_ns": 1794492510492917467,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "prefill/v2/HANDOFF.txt",
+      "public": "prefill/v2/HANDOFF.txt",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "6c1f21270700d09d7156772bbfdca9bd5f84363f59c8da54e0daf1fef327ef05",
+      "published_sha256": "26ec5374e8d1d6c5c0bcbfd09857da3c588ae4ae42f4db5bb25bd63384c7ce91",
+      "original_bytes": 3423,
+      "published_bytes": 3299,
+      "transforms": {
+        "gpu-uuid": 1,
+        "investigation-root": 2
+      },
+      "source_mtime_ns": 1794493470100127832,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "prefill/v2/RECEIPT.json",
+      "public": "prefill/v2/RECEIPT.json",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "874cd4601a45194a48249bfa56f01ce201219931e01f61056bdbf30a00a7142c",
+      "published_sha256": "874cd4601a45194a48249bfa56f01ce201219931e01f61056bdbf30a00a7142c",
+      "original_bytes": 1424,
+      "published_bytes": 1424,
+      "transforms": {},
+      "source_mtime_ns": 1794493470100127832,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "prefill/v2/RESULTS.txt",
+      "public": "prefill/v2/RESULTS.txt",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "95d226e1f085925f14594c18e0e01618041c939b3f36fb96e6084efe47a094c7",
+      "published_sha256": "95d226e1f085925f14594c18e0e01618041c939b3f36fb96e6084efe47a094c7",
+      "original_bytes": 1721,
+      "published_bytes": 1721,
+      "transforms": {},
+      "source_mtime_ns": 1794493510727182834,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "prefill/v2/build-library.log",
+      "public": "prefill/v2/build-library.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "f419839000c876a65c717f2167051f4ecc067016b7114a1707abee5e5d59b12d",
+      "published_sha256": "f419839000c876a65c717f2167051f4ecc067016b7114a1707abee5e5d59b12d",
+      "original_bytes": 370060,
+      "published_bytes": 370060,
+      "transforms": {},
+      "source_mtime_ns": 1794493376595697767,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "prefill/v2/build-probe.log",
+      "public": "prefill/v2/build-probe.log",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "7fea892f0208c217103f5ec5448b81402d85103490d4c0ac86910f40ab012c27",
+      "published_sha256": "7fea892f0208c217103f5ec5448b81402d85103490d4c0ac86910f40ab012c27",
+      "original_bytes": 3471,
+      "published_bytes": 3471,
+      "transforms": {},
+      "source_mtime_ns": 1794493253809118094,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "prefill/v2/build.sh",
+      "public": "prefill/v2/build.sh.archival.txt",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "12f25207b0951b7f27466d7389f95bc4a524b795f610dc4e6fe3aba863bcc2f0",
+      "published_sha256": "29efde3d72479287cdc1a4ffec71465cae014a153f9f860d489e57f64c64d72a",
+      "original_bytes": 705,
+      "published_bytes": 820,
+      "transforms": {
+        "archival-non-executable-wrapper": 1
+      },
+      "source_mtime_ns": 1794492959711815168,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "prefill/v2/gpu-1024-98k-mode3.jsonl",
+      "public": "prefill/v2/gpu-1024-98k-mode3.jsonl",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "a2dfcccf252f8577e6da27c10b34160b2e40173dff25ffd20d8674b764ed9065",
+      "published_sha256": "a2dfcccf252f8577e6da27c10b34160b2e40173dff25ffd20d8674b764ed9065",
+      "original_bytes": 2004,
+      "published_bytes": 2004,
+      "transforms": {},
+      "source_mtime_ns": 1794493431021112563,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "prefill/v2/gpu-1024-98k-mode4.jsonl",
+      "public": "prefill/v2/gpu-1024-98k-mode4.jsonl",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "dbc4025e167b5f18b059b4d5f5a80dd22cb25f7fd22027f2cab4cacaf6ab6c0b",
+      "published_sha256": "dbc4025e167b5f18b059b4d5f5a80dd22cb25f7fd22027f2cab4cacaf6ab6c0b",
+      "original_bytes": 2004,
+      "published_bytes": 2004,
+      "transforms": {},
+      "source_mtime_ns": 1794493443589439139,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "prefill/v2/gpu-1024-98k-mode5.jsonl",
+      "public": "prefill/v2/gpu-1024-98k-mode5.jsonl",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "09d97c73d6113edfd065eb2788a7c0dda6ae0503286d38aa3966b8c87978d17d",
+      "published_sha256": "09d97c73d6113edfd065eb2788a7c0dda6ae0503286d38aa3966b8c87978d17d",
+      "original_bytes": 2010,
+      "published_bytes": 2010,
+      "transforms": {},
+      "source_mtime_ns": 1794493457552801905,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "prefill/v2/prefill-kernel-probe.cu",
+      "public": "prefill/v2/prefill-kernel-probe.cu",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "fbc20feb3ef8d4b47a8ad332b5aa420c46b7715545f0de2dd85c55cffe5fd034",
+      "published_sha256": "fbc20feb3ef8d4b47a8ad332b5aa420c46b7715545f0de2dd85c55cffe5fd034",
+      "original_bytes": 10945,
+      "published_bytes": 10945,
+      "transforms": {},
+      "source_mtime_ns": 1794493247685342260,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    },
+    {
+      "source": "prefill/v2/prefill.patch",
+      "public": "prefill/v2/prefill.patch",
+      "category": "auditor-supplement",
+      "plain": false,
+      "symlink": null,
+      "original_sha256": "53b5a997b06cab053d6e8c41d57e15fcb331424d893c6cebc06d4b15c42bd615",
+      "published_sha256": "53b5a997b06cab053d6e8c41d57e15fcb331424d893c6cebc06d4b15c42bd615",
+      "original_bytes": 4393,
+      "published_bytes": 4393,
+      "transforms": {},
+      "source_mtime_ns": 1794493405482448808,
+      "destination": "archives/auditor-supplement-01.tar.gz"
+    }
+  ],
+  "archive": {
+    "path": "archives/auditor-supplement-01.tar.gz",
+    "bytes": 35733,
+    "sha256": "216cbca66e3aa370c139c7522d996e9c65b65998a65ec6c4cbb4df6448bcdb62"
+  },
+  "model_runs": [
+    {
+      "run": "adaptive-off-a1",
+      "measurement_files": 4,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "adaptive-on-b1",
+      "measurement_files": 4,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "batch1024-b1",
+      "measurement_files": 4,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "batch2048-a1",
+      "measurement_files": 1,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "batch2048-a2",
+      "measurement_files": 1,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "batch2048-a3",
+      "measurement_files": 4,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "deep-graphs-off-v5-a1",
+      "measurement_files": 14,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "deep-graphs-on-v5-b1",
+      "measurement_files": 6,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "deep-mixed-off-a1",
+      "measurement_files": 5,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "deep-mixed-off-cap0-a2",
+      "measurement_files": 7,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "deep-mixed-on-b1",
+      "measurement_files": 5,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "deep-mixed-on-cap0-b2",
+      "measurement_files": 7,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "deep-mixed-on-cap1024-c1",
+      "measurement_files": 5,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "deep-mixed-on-cap1024-c2",
+      "measurement_files": 7,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "deep-mixed-on-cap512-d1",
+      "measurement_files": 7,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "deep-retrieval-off-a1",
+      "measurement_files": 7,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "deep-retrieval-on-b1",
+      "measurement_files": 7,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "gemm-off-a1",
+      "measurement_files": 5,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "gemm-on-b1",
+      "measurement_files": 6,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "gemm3-off-a2",
+      "measurement_files": 5,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "gemm3-on-c1",
+      "measurement_files": 5,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "gemm4-on-d1",
+      "measurement_files": 5,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "long-retrieval-nothink-off-a2",
+      "measurement_files": 4,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "long-retrieval-nothink-on-b2",
+      "measurement_files": 4,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "long-task-off-a1",
+      "measurement_files": 6,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "long-task-on-b1",
+      "measurement_files": 6,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "prodcp-off-a1",
+      "measurement_files": 5,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "prodcp-on-b1",
+      "measurement_files": 5,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "quality-grid-off-a1",
+      "measurement_files": 73,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "quality-grid-on-b1",
+      "measurement_files": 73,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "quality16-off-a1",
+      "measurement_files": 20,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "quality16-off-a2",
+      "measurement_files": 20,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "quality16-off-ub512",
+      "measurement_files": 20,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "quality16-on-b1",
+      "measurement_files": 20,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "quality16-on-b2",
+      "measurement_files": 20,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "quality98-off-a1",
+      "measurement_files": 37,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "quality98-on-b1",
+      "measurement_files": 37,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "spec-head9-off-a2",
+      "measurement_files": 7,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "spec-off-a1",
+      "measurement_files": 13,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "spec-on-b1",
+      "measurement_files": 3,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "spec4-on-b2",
+      "measurement_files": 13,
+      "unarchived_measurement_files": []
+    },
+    {
+      "run": "spec8-head9-on-c1",
+      "measurement_files": 7,
+      "unarchived_measurement_files": []
+    }
+  ],
+  "coverage": {
+    "model_run_directories": 42,
+    "model_run_measurement_files": 514,
+    "operator_analysis_files_inspected": 133,
+    "unarchived_measurement_files": []
+  },
+  "limits": [
+    "Coverage is campaign-root measurement artifacts, not inherited source/build trees or shell-session transcripts.",
+    "Private routing/control files, user cache binaries and bytecode incident backups remain excluded.",
+    "Standalone probe executables and copied toolchain/source trees are excluded; probe sources, patches, build logs and the final tested runtime are retained.",
+    "The independent package review covers the original manifest; this additive supplement has separate hash, privacy and numerical-fidelity checks."
+  ]
+}
