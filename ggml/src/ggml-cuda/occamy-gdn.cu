@@ -140,7 +140,12 @@ constexpr int SMEM2_FLOATS = SMEM_FLOATS + NW * STW;
 //      the S_in/S_out alias of the in-place row is safe). After the first item the first ssm_out row is staged into the
 //      warp's (phase-B-idle) stg buffer and the second row requested, so phase C starts with two rows in flight/staged.
 //   Every dot product, reduction and store is the same expression in the same order -> bit-identical results.
-template <int PHASE, int RQK = 0, int PCS = 0, int PF = 0>
+// CT (GDN2, opt-in GGML_CUDA_OCCAMY_GDN_CTAIL=1, fused single launch only): phase C's last, partial row round (H % W
+//   rows, done by 1/3 of the warps) is split by chunk halves over warp pairs of every block. A row's per-lane value is
+//   dot2w(chunk lane) + dot2w(chunk lane+32) in both paths; the odd warp computes the second term, passes it through
+//   its own (unused) stg words, the even warp adds it to the first term and does the same warp_sum -> bit-identical.
+//   The tail half-row is prefetched during the warp's last full row.
+template <int PHASE, int RQK = 0, int PCS = 0, int PF = 0, int CT = 0>
 __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
     extern __shared__ float smem[];
     __shared__ float qn[SD], kn[SD], vv[CGC], red[NW], fac[NVH];
@@ -367,6 +372,12 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
         }
         uint4 c[5];
         int r = gw;
+        // CT: block-uniform engagement; tail rows j=0..T-1 -> block j % grid, pair slot j / grid, half = warp & 1
+        const int nfull = (H / W) * W, ntail = H - nfull;
+        const bool ctok = CT && PHASE == 0 && ntail > 0 && ntail <= (int)gridDim.x * (NW / 2) && nfull >= 2 * W;
+        const int rend = ctok ? nfull : H;
+        const int tq = warp >> 1, thf = warp & 1, tj = tq * (int)gridDim.x + (int)blockIdx.x;
+        const bool tvalid = ctok && tj < ntail;
         if (PFX) {
 #pragma unroll
             for (int i = 0; i < 5; ++i) c[i] = cpf[i];   // row gw is staged in stg, c = row gw + W (if any)
@@ -374,22 +385,43 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
 #pragma unroll
             for (int i = 0; i < 4; ++i) c[i] = __ldg(p + lane + 32 * i);
             if (lane < 16) c[4] = __ldg(p + lane + 128); }
-        for (; r < H; r += W) {
+        for (; r < rend; r += W) {
             if (!(PFX && r == gw)) {
 #pragma unroll
             for (int i = 0; i < 4; ++i) stg4[lane + 32 * i] = c[i];
             if (lane < 16) stg4[lane + 128] = c[4];
             __syncwarp();
             const int rn = r + W;
-            if (rn < H) { const uint4 * p = (const uint4 *)(L.out + (size_t)rn * ROW_O);
+            if (rn < rend) { const uint4 * p = (const uint4 *)(L.out + (size_t)rn * ROW_O);
 #pragma unroll
                 for (int i = 0; i < 4; ++i) c[i] = __ldg(p + lane + 32 * i);
                 if (lane < 16) c[4] = __ldg(p + lane + 128); }
+            else if (tvalid) {   // CT: this warp's tail half-row (72 uint4)
+                const uint4 * p = (const uint4 *)(L.out + (size_t)(nfull + tj) * ROW_O) + thf * 72;
+                c[0] = __ldg(p + lane); c[1] = __ldg(p + lane + 32); if (lane < 8) c[2] = __ldg(p + lane + 64); }
             }
             float acc = dot2w(stg + lane * 9, xs + lane * CH, sums[lane]) + dot2w(stg + (lane + 32) * 9, xs + (lane + 32) * CH, sums[lane + 32]);
             acc = warp_sum(acc);
             if (lane == 0) P.out[r] = P.h[r] + acc;
             __syncwarp();
+        }
+        if (ctok) {
+            float part = 0.f;
+            if (tvalid) {
+                uint4 * sb = stg4 + thf * 72;
+                sb[lane] = c[0]; sb[lane + 32] = c[1]; if (lane < 8) sb[lane + 64] = c[2];
+                __syncwarp();
+                const int ch = lane + 32 * thf;
+                part = dot2w(stg + ch * 9, xs + ch * CH, sums[ch]);
+                if (thf) ((float *)stg)[lane] = part;   // words 0..31 are unused by the second-half warp
+            }
+            __syncthreads();
+            if (tvalid && !thf) {
+                float acc = part + ((const float *)(stg + STW))[lane];   // partner warp (warp + 1) stg words
+                acc = warp_sum(acc);
+                const int rt = nfull + tj;
+                if (lane == 0) P.out[rt] = P.h[rt] + acc;
+            }
         }
     }
 }
@@ -411,6 +443,9 @@ static bool pc_share() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_P
 // GDN1, default OFF; engaged only with QKREUSE=1 PCSHARE=1 and the fused single launch (not GDN_3L)
 static bool pref() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_PREF") && qk_reuse() && pc_share() && !env_flag("GGML_CUDA_OCCAMY_GDN_3L"); return on; }
 static long g_launch_pf = 0;    // GDN1 dispatch counter
+// GDN2, default OFF; same engagement rule as PREF (fused single launch with QKREUSE+PCSHARE), independent of PREF
+static bool ctail() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_CTAIL") && qk_reuse() && pc_share() && !env_flag("GGML_CUDA_OCCAMY_GDN_3L"); return on; }
+static long g_launch_ct = 0;
 static long g_launch_rqk = 0;   // C10 dispatch counter (launches of the reuse variant)
 static long g_launch_pcs = 0;   // C11 dispatch counter (launches of the shared phase-C variant)
 static long g_engaged = 0, g_rejected_gdn = 0;   // windows fused / GDN-layer windows rejected (DEBUG counter)
@@ -442,6 +477,12 @@ static DevState & dev_state(int device) {
                 CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_pf, gdn_fused<0, 1, 1, 1>, NT, SMEM2_FLOATS * sizeof(float)));
                 per_sm = std::min(per_sm, per_sm_pf);
             }
+            if (ctail()) {
+                int per_sm_ct = 0;
+                if (pref()) CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_ct, gdn_fused<0, 1, 1, 1, 1>, NT, SMEM2_FLOATS * sizeof(float)));
+                else        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_ct, gdn_fused<0, 1, 1, 0, 1>, NT, SMEM2_FLOATS * sizeof(float)));
+                per_sm = std::min(per_sm, per_sm_ct);
+            }
         } else if (rqk) {
             int per_sm_r = 0;
             CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_r, gdn_fused<0, 1, 0>, NT, SMEM2_FLOATS * sizeof(float)));
@@ -454,8 +495,8 @@ static DevState & dev_state(int device) {
         const int nsm = ggml_cuda_info().devices[device].nsm;
         d.grid = std::max(1, per_sm) * nsm;   // all blocks co-resident -> grid barrier is safe
         if (g_debug) {
-            fprintf(stderr, "occamy-gdn: device %d: %d SMs x %d blocks/SM -> grid %d, smem %zu B, qk_reuse %d, pc_share %d, pref %d\n",
-                    device, nsm, per_sm, d.grid, SMEM2_FLOATS * sizeof(float), (int) rqk, (int) pcs, (int) pref());
+            fprintf(stderr, "occamy-gdn: device %d: %d SMs x %d blocks/SM -> grid %d, smem %zu B, qk_reuse %d, pc_share %d, pref %d, ctail %d\n",
+                    device, nsm, per_sm, d.grid, SMEM2_FLOATS * sizeof(float), (int) rqk, (int) pcs, (int) pref(), (int) ctail());
         }
         if (per_sm < 1) { d.grid = -1; }
     }
@@ -788,7 +829,13 @@ void ggml_cuda_occamy_gdn_launch(ggml_backend_cuda_context & ctx, const ggml_cud
             gdn_fused<3, 0, 0><<<d.grid, NT, smem, st>>>(P);
         }
     } else {
-        if (rqk && pcs && pref()) {
+        if (rqk && pcs && ctail()) {
+            if (pref()) gdn_fused<0, 1, 1, 1, 1><<<d.grid, NT, smem, st>>>(P);
+            else        gdn_fused<0, 1, 1, 0, 1><<<d.grid, NT, smem, st>>>(P);
+            if (g_debug && (++g_launch_ct == 1 || g_launch_ct % 3000 == 0)) {
+                fprintf(stderr, "occamy-gdn: ctail launches %ld (pref %d)\n", g_launch_ct, (int) pref());
+            }
+        } else if (rqk && pcs && pref()) {
             gdn_fused<0, 1, 1, 1><<<d.grid, NT, smem, st>>>(P);
             if (g_debug && (++g_launch_pf == 1 || g_launch_pf % 3000 == 0)) {
                 fprintf(stderr, "occamy-gdn: pref launches %ld\n", g_launch_pf);
