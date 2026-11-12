@@ -458,6 +458,11 @@ static DevState & dev_state(int device) {
                     device, nsm, per_sm, d.grid, SMEM2_FLOATS * sizeof(float), (int) rqk, (int) pcs, (int) pref());
         }
         if (per_sm < 1) { d.grid = -1; }
+        // GDN3 card A (measurement only): GGML_CUDA_OCCAMY_GDN_GRID=N caps the grid at N (fewer co-resident blocks stay safe)
+        if (const char * e = getenv("GGML_CUDA_OCCAMY_GDN_GRID")) {
+            const int cap = atoi(e);
+            if (cap > 0 && d.grid > cap) { d.grid = cap; fprintf(stderr, "occamy-gdn: grid cap -> %d\n", d.grid); }
+        }
     }
     return d;
 }
