@@ -1,0 +1,242 @@
+[New LWP 75]
+[New LWP 74]
+[New LWP 73]
+[New LWP 72]
+[New LWP 71]
+[New LWP 70]
+[New LWP 69]
+[New LWP 68]
+[New LWP 67]
+[New LWP 66]
+[New LWP 65]
+[New LWP 64]
+[New LWP 63]
+[New LWP 62]
+[New LWP 61]
+[New LWP 60]
+[New LWP 59]
+[New LWP 58]
+To enable execution of this file add
+	add-auto-load-safe-path /usr/lib/x86_64-linux-gnu/libthread_db.so.1
+line to your configuration file "/root/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/root/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+0x000077cfa428ba9a in __internal_statvfs64 (buf=0x1f, fsbuf=0x77cee4130fe7) at ../sysdeps/unix/sysv/linux/internal_statvfs.c:76
+
+Thread 19 (LWP 58 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420b7dd in ?? () at ./nptl/allocatestack.c:605 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000001 in ?? ()
+#3  0x000056a238415714 in ?? ()
+#4  0x000077cfa2f26170 in ?? ()
+#5  0x00000000a41d63f6 in ?? ()
+#6  0x0000000000000004 in ?? ()
+#7  0x000000000000001f in ?? ()
+#8  0x000000000000000f in ?? ()
+#9  0x0000000000000001 in ?? ()
+#10 0x000077cfa420b4a0 in __pthread_condattr_getclock (attr=0x56a23841572c, clock_id=0x189) at ./nptl/pthread_condattr_getclock.c:27
+#11 0x000077cfa2f26190 in ?? ()
+#12 0x000077cf9c0008e0 in ?? ()
+#13 0x0000000000000000 in ?? ()
+
+Thread 18 (LWP 59 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420c106 in __pthread_create_2_1 (newthread=<optimized out>, attr=<optimized out>, start_routine=<optimized out>, arg=<optimized out>) at ./nptl/pthread_create.c:684
+#2  0x000077cfa47a9fdf in stream_session_manager::gc_loop() () from /candidate/libllama-server-impl.so
+#3  0x000077cfa446edb4 in ?? () from /lib/x86_64-linux-gnu/libstdc++.so.6
+#4  0x000077cfa420ca94 in allocate_stack (stacksize=<synthetic pointer>, stack=<synthetic pointer>, pdp=<synthetic pointer>, attr=0x77cfa272e6c0) at ./nptl/allocatestack.c:375
+#5  __pthread_create_2_1 (newthread=<optimized out>, attr=<optimized out>, start_routine=<optimized out>, arg=<optimized out>) at ./nptl/pthread_create.c:655
+#6  0x000077cfa4299a34 in signalfd (fd=-1530332720, mask=0x89, flags=0) at ../sysdeps/unix/sysv/linux/signalfd.c:26
+#7  0x0000000000000000 in ?? ()
+
+Thread 17 (LWP 60 "cuda00001400006"):
+#0  0x000077cfa428b4cd in __GI___ttyname_r (fd=<optimized out>, buf=0x0, buflen=18446744073709551607) at ../sysdeps/unix/sysv/linux/ttyname_r.c:156
+#1  0x000077cf8d119fa7 in ?? () from /lib/x86_64-linux-gnu/libcuda.so.1
+#2  0x000077cf8d2069e7 in ?? () from /lib/x86_64-linux-gnu/libcuda.so.1
+#3  0x000077cf8d106de3 in ?? () from /lib/x86_64-linux-gnu/libcuda.so.1
+#4  0x000077cfa420ca94 in allocate_stack (stacksize=<synthetic pointer>, stack=<synthetic pointer>, pdp=<synthetic pointer>, attr=0x77cfa1bff6c0) at ./nptl/allocatestack.c:375
+#5  __pthread_create_2_1 (newthread=<optimized out>, attr=<optimized out>, start_routine=<optimized out>, arg=<optimized out>) at ./nptl/pthread_create.c:655
+#6  0x000077cfa4299a34 in signalfd (fd=951778928, mask=0x3, flags=-1) at ../sysdeps/unix/sysv/linux/signalfd.c:26
+#7  0x0000000000000000 in ?? ()
+
+Thread 16 (LWP 61 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420b7dd in ?? () at ./nptl/allocatestack.c:605 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000001 in ?? ()
+#3  0x000056a23843defc in ?? ()
+#4  0x000077cfa0ece110 in ?? ()
+#5  0xd2ea6d9e647d2200 in ?? ()
+#6  0x0000000000000004 in ?? ()
+#7  0x0000000000000017 in ?? ()
+#8  0x000000000000000b in ?? ()
+#9  0x0000000000000001 in ?? ()
+#10 0x000077cfa420b4a0 in __pthread_condattr_getclock (attr=0x56a23843df14, clock_id=0x189) at ./nptl/pthread_condattr_getclock.c:27
+#11 0x000077cfa0ece130 in ?? ()
+#12 0x302e37312e323731 in ?? ()
+#13 0x0000000000000000 in ?? ()
+
+Thread 15 (LWP 62 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420b7dd in ?? () at ./nptl/allocatestack.c:605 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000001 in ?? ()
+#3  0x000056a23843defc in ?? ()
+#4  0x000077cf429d5110 in ?? ()
+#5  0xd2ea6d9e647d2200 in ?? ()
+#6  0x0000000000000004 in ?? ()
+#7  0x0000000000000019 in ?? ()
+#8  0x000000000000000c in ?? ()
+#9  0x0000000000000001 in ?? ()
+#10 0x000077cfa420b4a0 in __pthread_condattr_getclock (attr=0x56a23843df14, clock_id=0x189) at ./nptl/pthread_condattr_getclock.c:27
+#11 0x000077cf429d5130 in ?? ()
+#12 0x302e37312e323731 in ?? ()
+#13 0x0000000000000000 in ?? ()
+
+Thread 14 (LWP 63 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420b7dd in ?? () at ./nptl/allocatestack.c:605 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000001 in ?? ()
+#3  0x000056a23843defc in ?? ()
+#4  0x000077cf421d4110 in ?? ()
+#5  0xd2ea6d9e647d2200 in ?? ()
+#6  0x0000000000000004 in ?? ()
+#7  0x000000000000001b in ?? ()
+#8  0x000000000000000d in ?? ()
+#9  0x0000000000000001 in ?? ()
+#10 0x000077cfa420b4a0 in __pthread_condattr_getclock (attr=0x56a23843df14, clock_id=0x189) at ./nptl/pthread_condattr_getclock.c:27
+#11 0x000077cf421d4130 in ?? ()
+#12 0x302e37312e323731 in ?? ()
+#13 0x0000000000000000 in ?? ()
+
+Thread 13 (LWP 64 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420b7dd in ?? () at ./nptl/allocatestack.c:605 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000001 in ?? ()
+#3  0x000056a23843defc in ?? ()
+#4  0x000077cf419d3110 in ?? ()
+#5  0xd2ea6d9e647d2200 in ?? ()
+#6  0x0000000000000004 in ?? ()
+#7  0x000000000000001d in ?? ()
+#8  0x000000000000000e in ?? ()
+#9  0x0000000000000001 in ?? ()
+#10 0x000077cfa420b4a0 in __pthread_condattr_getclock (attr=0x56a23843df14, clock_id=0x189) at ./nptl/pthread_condattr_getclock.c:27
+#11 0x000077cf419d3130 in ?? ()
+#12 0x302e37312e323731 in ?? ()
+#13 0x0000000000000000 in ?? ()
+
+Thread 12 (LWP 65 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420b7dd in ?? () at ./nptl/allocatestack.c:605 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000001 in ?? ()
+#3  0x000056a23843defc in ?? ()
+#4  0x000077cf411d2110 in ?? ()
+#5  0xd2ea6d9e647d2200 in ?? ()
+#6  0x0000000000000004 in ?? ()
+#7  0x000000000000001f in ?? ()
+#8  0x000000000000000f in ?? ()
+#9  0x0000000000000001 in ?? ()
+#10 0x000077cfa420b4a0 in __pthread_condattr_getclock (attr=0x56a23843df14, clock_id=0x189) at ./nptl/pthread_condattr_getclock.c:27
+#11 0x000077cf411d2130 in ?? ()
+#12 0x302e37312e323731 in ?? ()
+#13 0x0000000000000000 in ?? ()
+
+Thread 11 (LWP 66 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420b7dd in ?? () at ./nptl/allocatestack.c:605 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000001 in ?? ()
+#3  0x000056a23843defc in ?? ()
+#4  0x000077cf409d1110 in ?? ()
+#5  0xd2ea6d9e647d2200 in ?? ()
+#6  0x0000000000000004 in ?? ()
+#7  0x0000000000000021 in ?? ()
+#8  0x0000000000000010 in ?? ()
+#9  0x0000000000000001 in ?? ()
+#10 0x000077cfa420b4a0 in __pthread_condattr_getclock (attr=0x56a23843df14, clock_id=0x189) at ./nptl/pthread_condattr_getclock.c:27
+#11 0x000077cf409d1130 in ?? ()
+#12 0x302e37312e323731 in ?? ()
+#13 0x0000000000000000 in ?? ()
+
+Thread 10 (LWP 67 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420b7dd in ?? () at ./nptl/allocatestack.c:605 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000000 in ?? ()
+
+Thread 9 (LWP 68 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420b7dd in ?? () at ./nptl/allocatestack.c:605 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000000 in ?? ()
+
+Thread 8 (LWP 69 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420b7dd in ?? () at ./nptl/allocatestack.c:605 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000000 in ?? ()
+
+Thread 7 (LWP 70 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420c106 in __pthread_create_2_1 (newthread=<optimized out>, attr=<optimized out>, start_routine=<optimized out>, arg=<optimized out>) at ./nptl/pthread_create.c:684
+#2  0x000077cfa472a4de in server_response::recv_with_timeout(std::unordered_set<int, std::hash<int>, std::equal_to<int>, std::allocator<int> > const&, int) () from /candidate/libllama-server-impl.so
+#3  0x000077cfa472f452 in server_response_reader::next(std::function<bool ()> const&) () from /candidate/libllama-server-impl.so
+#4  0x000077cfa47624da in server_routes::handle_slots_restore(server_http_req const&, int) () from /candidate/libllama-server-impl.so
+#5  0x000077cfa4762c26 in server_routes::init_routes()::{lambda(server_http_req const&)#4}::operator()(server_http_req const&) const () from /candidate/libllama-server-impl.so
+#6  0x000077cfa4762db2 in std::_Function_handler<std::unique_ptr<server_http_res, std::default_delete<server_http_res> > (server_http_req const&), server_routes::init_routes()::{lambda(server_http_req const&)#4}>::_M_invoke(std::_Any_data const&, server_http_req const&) () from /candidate/libllama-server-impl.so
+#7  0x000077cfa46daefc in ex_wrapper(std::function<std::unique_ptr<server_http_res, std::default_delete<server_http_res> > (server_http_req const&)>)::{lambda(server_http_req const&)#1}::operator()(server_http_req const&) const () from /candidate/libllama-server-impl.so
+#8  0x000077cfa46daf72 in std::_Function_handler<std::unique_ptr<server_http_res, std::default_delete<server_http_res> > (server_http_req const&), ex_wrapper(std::function<std::unique_ptr<server_http_res, std::default_delete<server_http_res> > (server_http_req const&)>)::{lambda(server_http_req const&)#1}>::_M_invoke(std::_Any_data const&, server_http_req const&) () from /candidate/libllama-server-impl.so
+#9  0x000077cfa46ee8c9 in server_http_context::post(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::function<std::unique_ptr<server_http_res, std::default_delete<server_http_res> > (server_http_req const&)> const&) const::{lambda(httplib::Request const&, httplib::Response&)#1}::operator()(httplib::Request const&, httplib::Response&) const () from /candidate/libllama-server-impl.so
+#10 0x000077cfa48b6552 in httplib::Server::dispatch_request(httplib::Request&, httplib::Response&, std::vector<std::pair<std::unique_ptr<httplib::detail::MatcherBase, std::default_delete<httplib::detail::MatcherBase> >, std::function<void (httplib::Request const&, httplib::Response&)> >, std::allocator<std::pair<std::unique_ptr<httplib::detail::MatcherBase, std::default_delete<httplib::detail::MatcherBase> >, std::function<void (httplib::Request const&, httplib::Response&)> > > > const&, httplib::Stream&) () from /candidate/libllama-server-impl.so
+#11 0x000077cfa48be2c0 in httplib::Server::process_request(httplib::Stream&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, int, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, int, bool, bool&, std::function<void (httplib::Request&)> const&, bool*) () from /candidate/libllama-server-impl.so
+#12 0x000077cfa48bf9f6 in httplib::Server::process_and_close_socket(int) () from /candidate/libllama-server-impl.so
+#13 0x000077cfa489da01 in httplib::ThreadPool::worker(bool) () from /candidate/libllama-server-impl.so
+#14 0x000077cfa446edb4 in ?? () from /lib/x86_64-linux-gnu/libstdc++.so.6
+#15 0x000077cfa420ca94 in allocate_stack (stacksize=<synthetic pointer>, stack=<synthetic pointer>, pdp=<synthetic pointer>, attr=0x77cf3e9d66c0) at ./nptl/allocatestack.c:375
+#16 __pthread_create_2_1 (newthread=<optimized out>, attr=<optimized out>, start_routine=<optimized out>, arg=<optimized out>) at ./nptl/pthread_create.c:655
+#17 0x000077cfa4299a34 in signalfd (fd=952056748, mask=0x89, flags=0) at ../sysdeps/unix/sysv/linux/signalfd.c:26
+#18 0x0000000000000000 in ?? ()
+
+Thread 6 (LWP 71 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420b7dd in ?? () at ./nptl/allocatestack.c:605 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000000 in ?? ()
+
+Thread 5 (LWP 72 "llama-server"):
+#0  0x000077cfa429b8e4 in __semctl (semid=14, semnum=0, cmd=0) at ../sysdeps/unix/sysv/linux/semctl.c:162
+#1  0x000077cfa4881bd6 in httplib::Server::listen_internal() () from /candidate/libllama-server-impl.so
+#2  0x000077cfa46e8901 in std::thread::_State_impl<std::thread::_Invoker<std::tuple<server_http_context::start()::{lambda()#1}> > >::_M_run() () from /candidate/libllama-server-impl.so
+#3  0x000077cfa446edb4 in ?? () from /lib/x86_64-linux-gnu/libstdc++.so.6
+#4  0x000077cfa420ca94 in allocate_stack (stacksize=<synthetic pointer>, stack=<synthetic pointer>, pdp=<synthetic pointer>, attr=0x77cf3d9d46c0) at ./nptl/allocatestack.c:375
+#5  __pthread_create_2_1 (newthread=<optimized out>, attr=<optimized out>, start_routine=<optimized out>, arg=<optimized out>) at ./nptl/pthread_create.c:655
+#6  0x000077cfa4299a34 in signalfd (fd=14, mask=0x0, flags=0) at ../sysdeps/unix/sysv/linux/signalfd.c:26
+#7  0x0000000000000000 in ?? ()
+
+Thread 4 (LWP 73 "cuda-EvtHandlr"):
+#0  0x000077cfa428b4cd in __GI___ttyname_r (fd=<optimized out>, buf=0x0, buflen=18446744073709551607) at ../sysdeps/unix/sysv/linux/ttyname_r.c:156
+#1  0x000077cf8d119fa7 in ?? () from /lib/x86_64-linux-gnu/libcuda.so.1
+#2  0x000077cf8d2069e7 in ?? () from /lib/x86_64-linux-gnu/libcuda.so.1
+#3  0x000077cf8d106de3 in ?? () from /lib/x86_64-linux-gnu/libcuda.so.1
+#4  0x000077cfa420ca94 in allocate_stack (stacksize=<synthetic pointer>, stack=<synthetic pointer>, pdp=<synthetic pointer>, attr=0x77cf37fff6c0) at ./nptl/allocatestack.c:375
+#5  __pthread_create_2_1 (newthread=<optimized out>, attr=<optimized out>, start_routine=<optimized out>, arg=<optimized out>) at ./nptl/pthread_create.c:655
+#6  0x000077cfa4299a34 in signalfd (fd=805309392, mask=0x8, flags=100) at ../sysdeps/unix/sysv/linux/signalfd.c:26
+#7  0x0000000000000000 in ?? ()
+
+Thread 3 (LWP 74 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420bc7e in ?? () at ./nptl/pthread_create.c:479 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000000 in ?? ()
+
+Thread 2 (LWP 75 "llama-server"):
+#0  0x000077cfa4208d61 in __pthread_cond_wait_2_0 (cond=<optimized out>, mutex=0x0) at ./nptl/old_pthread_cond_wait.c:42
+#1  0x000077cfa420b7dd in ?? () at ./nptl/allocatestack.c:605 from /lib/x86_64-linux-gnu/libc.so.6
+#2  0x0000000000000000 in ?? ()
+
+Thread 1 (LWP 1 "llama-server"):
+#0  0x000077cfa428ba9a in __internal_statvfs64 (buf=0x1f, fsbuf=0x77cee4130fe7) at ../sysdeps/unix/sysv/linux/internal_statvfs.c:76
+#1  0x00007ffc20fbfe20 in ?? ()
+#2  0x0000000003ece315 in ?? ()
+#3  0x000077cee4130fe7 in ?? ()
+#4  0x000000000000001f in ?? ()
+#5  0x00007ffc20fbfd80 in ?? ()
+#6  0x000077cfa447b15f in std::__basic_file<char>::xsgetn(char*, long) () from /lib/x86_64-linux-gnu/libstdc++.so.6
+Backtrace stopped: frame did not save the PC
+[Inferior 1 (process 1) detached]

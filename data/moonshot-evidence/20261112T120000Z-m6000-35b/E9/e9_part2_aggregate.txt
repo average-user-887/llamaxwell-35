@@ -1,0 +1,26 @@
+samples 100
+phase of main thread: {'decode': 80, 'non-decode: __internal_statvfs64': 13, 'non-decode: __strcasecmp_l_avx2': 3, 'non-decode: ??': 1, 'non-decode: __GI___sbrk': 1, 'non-decode: IO_validate_vtable': 1, 'non-decode: cuMemcpyHtoDAsync_v2': 1}
+TOP inclusive presence on main thread, decode-phase samples (n=80):
+  100.0%  llama_server(common_params&,
+  100.0%  server_context_impl::update_slots()
+  100.0%  llama_server(int,
+  100.0%  server_queue::yield_to_queue(std::function<void
+  100.0%  server_queue::start_loop(long)
+  100.0%  server_context_impl::decode(int&,
+   97.5%  ggml_backend_cuda_synchronize(ggml_backend*)
+   97.5%  cuStreamSynchronize
+   97.5%  ggml_backend_sched_synchronize
+   97.5%  cudaStreamSynchronize
+   97.5%  llama_context::synchronize()
+    2.5%  std::_Function_handler<void
+    2.5%  llama_context::decode(llama_batch_ext
+    2.5%  llama_context::process_ubatch(llama_ubatch
+    1.2%  llm_graph_result::set_inputs(llama_ubatch
+    1.2%  void
+    1.2%  llm_graph_input_mem_hybrid::set_input(llama_ubatch
+    1.2%  llama_kv_cache::set_input_kq_mask(ggml_tensor*,
+Classification of decode-phase samples:
+   97.5%  cudaStreamSynchronize wait
+    1.2%  other decode-path: void
+    1.2%  ggml_backend_sched_graph_compute/launch
+Other threads, ggml/llama/cuda frames, share of all samples:
