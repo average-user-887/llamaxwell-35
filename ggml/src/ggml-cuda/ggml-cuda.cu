@@ -3809,6 +3809,11 @@ static int ggml_cuda_try_fuse(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph 
     if (!inside_state_direct && node->op == GGML_OP_RMS_NORM && ggml_cuda_occamy_gdn_enabled() && cuda_ctx->stream_context().concurrent_events.empty()) {
         ggml_cuda_occamy_gdn_match m;
         if (ggml_cuda_occamy_gdn_match_window(*cuda_ctx, cgraph, i, m)) {
+            if(m.n_seqs==2 && ggml_cuda_occamy_n2split() && ggml_cuda_occamy_gdn_split2(*cuda_ctx, m)) {
+                cuda_ctx->q8r_valid = false;
+                cuda_ctx->q8r_pend  = false;
+                return m.n_nodes - 1;
+            }
             if(m.n_seqs==2) {
                 struct Guard {bool&v;Guard(bool&x):v(x){v=true;}~Guard(){v=false;}} guard(inside_state_direct);
                 static int checks=getenv("GGML_CUDA_STATE_DIRECT_CHECK")?atoi(getenv("GGML_CUDA_STATE_DIRECT_CHECK")):0;
@@ -3952,6 +3957,13 @@ static int ggml_cuda_try_fuse(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph 
     if (node->op == GGML_OP_RMS_NORM && ggml_cuda_occamy_enabled() && cuda_ctx->stream_context().concurrent_events.empty()) {
         ggml_cuda_occamy_moe_match m;
         if (ggml_cuda_occamy_moe_match_window(*cuda_ctx, cgraph, i, m)) {
+            if (m.nt == 2) {   // D1b N2SPLIT: MoE is per-token independent; one fused launch per row
+                ggml_cuda_occamy_moe_launch(*cuda_ctx, m, nullptr, 0);
+                ggml_cuda_occamy_moe_launch(*cuda_ctx, m, nullptr, 1);
+                cuda_ctx->q8r_valid = false;
+                cuda_ctx->q8r_pend  = false;
+                return m.n_nodes - 1;
+            }
             if (ggml_cuda_occamy_check_budget() > 0) {
                 const int64_t n = ggml_nelements(m.out);
                 ggml_cuda_pool_alloc<float> tmp(cuda_ctx->pool(), n);
@@ -5262,6 +5274,7 @@ static enum ggml_status ggml_backend_cuda_graph_compute(ggml_backend_t backend, 
 
     // apply staged input uploads before any kernel (and outside any CUDA graph capture)
     ggml_cuda_hg_flush(cuda_ctx->device, cuda_ctx->stream(), false);
+    ggml_cuda_occamy_gdn_graph_begin();   // D1b: new graph, s_copy host cache stale
 
     bool use_cuda_graph             = false;
     bool cuda_graph_update_required = false;

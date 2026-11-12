@@ -860,7 +860,61 @@ static const uint8_t * rp_lookup(int device, const ggml_tensor * w, cudaStream_t
     return (const uint8_t *) dst;
 }
 
+struct gdn_row_ov {   // D1b per-row override of the state rows and residual row
+    int row; const int32_t * s_copy; const float * conv_base; const float * ssm_base; float * conv_out; float * S_out;
+};
+static void gdn_launch_impl(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m, float * out_override, const gdn_row_ov * ov);
 void ggml_cuda_occamy_gdn_launch(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m, float * out_override) {
+    gdn_launch_impl(ctx, m, out_override, nullptr);
+}
+
+static uint64_t g_graph_gen = 1;
+void ggml_cuda_occamy_gdn_graph_begin() { ++g_graph_gen; }
+
+bool ggml_cuda_occamy_gdn_split2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m) {
+    if (m.n_seqs != 2 || m.conv_stride != (size_t) CONV_N || m.ssm_stride != (size_t) SSM_N) { return false; }
+    const ptrdiff_t dc = m.conv_out - m.conv_base, ds = m.state_out - m.ssm_base;
+    if (dc < 0 || ds < 0 || dc % CONV_N || ds % SSM_N || dc / CONV_N != ds / SSM_N) { return false; }
+    const int64_t head = dc / CONV_N;
+    cudaStream_t st = ctx.stream();
+    // s_copy is a graph input uploaded before compute and shared by every GDN layer: read it once per graph
+    static uint64_t gen = 0; static const void * ptr = nullptr; static int32_t sv[2] = { 0, 0 };
+    if (gen != g_graph_gen || ptr != m.s_copy->data) {
+        CUDA_CHECK(cudaMemcpyAsync(sv, m.s_copy->data, 2 * sizeof(int32_t), cudaMemcpyDeviceToHost, st));
+        CUDA_CHECK(cudaStreamSynchronize(st));
+        gen = g_graph_gen; ptr = m.s_copy->data;
+    }
+    if (sv[0] < 0 || sv[1] < 0) { return false; }
+    static int32_t * dzero[GGML_CUDA_MAX_DEVICES] = {};
+    if (!dzero[ctx.device]) {
+        CUDA_CHECK(cudaMalloc(&dzero[ctx.device], sizeof(int32_t)));
+        CUDA_CHECK(cudaMemsetAsync(dzero[ctx.device], 0, sizeof(int32_t), st));
+    }
+    // build_rs state_zero rows first (once: a later memset could clobber a row the first launch already wrote)
+    if (m.zero_conv) { CUDA_CHECK(cudaMemsetAsync(m.zero_conv, 0, CONV_N * sizeof(float), st)); }
+    if (m.zero_ssm)  { CUDA_CHECK(cudaMemsetAsync(m.zero_ssm,  0, SSM_N  * sizeof(float), st)); }
+    if (!(sv[0] == head && sv[1] == head + 1)) {
+        // general gather (reorder, copy/fork [r,r], zeroed joiner): read every source row, then write the destination rows
+        ggml_cuda_pool_alloc<float> tmp(ctx.pool(), 2 * (size_t) (CONV_N + SSM_N));
+        float * tc = tmp.get(), * ts = tmp.get() + 2 * (size_t) CONV_N;
+        for (int k = 0; k < 2; ++k) {
+            CUDA_CHECK(cudaMemcpyAsync(tc + (size_t) k * CONV_N, m.conv_base + (size_t) sv[k] * CONV_N, CONV_N * sizeof(float), cudaMemcpyDeviceToDevice, st));
+            CUDA_CHECK(cudaMemcpyAsync(ts + (size_t) k * SSM_N,  m.ssm_base  + (size_t) sv[k] * SSM_N,  SSM_N  * sizeof(float), cudaMemcpyDeviceToDevice, st));
+        }
+        CUDA_CHECK(cudaMemcpyAsync(m.conv_out,  tc, 2 * CONV_N * sizeof(float), cudaMemcpyDeviceToDevice, st));
+        CUDA_CHECK(cudaMemcpyAsync(m.state_out, ts, 2 * SSM_N  * sizeof(float), cudaMemcpyDeviceToDevice, st));
+        if (g_debug) { static long n_g = 0; ++n_g; if ((n_g & (n_g - 1)) == 0) { fprintf(stderr, "occamy-gdn: N2SPLIT gather s_copy=[%d,%d] head=%ld (%ld)\n", sv[0], sv[1], (long) head, n_g); } }
+    }
+    for (int k = 0; k < 2; ++k) {
+        const gdn_row_ov ov = { k, dzero[ctx.device], m.conv_out + (size_t) k * CONV_N, m.state_out + (size_t) k * SSM_N,
+                                m.conv_out + (size_t) k * CONV_N, m.state_out + (size_t) k * SSM_N };
+        gdn_launch_impl(ctx, m, nullptr, &ov);
+    }
+    if (g_debug) { static long n_s = 0; ++n_s; if ((n_s & (n_s - 1)) == 0) { fprintf(stderr, "occamy-gdn: N2SPLIT windows %ld\n", n_s); } }
+    return true;
+}
+
+static void gdn_launch_impl(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m, float * out_override, const gdn_row_ov * ov) {
     static const bool three = env_flag("GGML_CUDA_OCCAMY_GDN_3L");
     DevState & d = dev_state(ctx.device);
     Params P;
@@ -879,11 +933,15 @@ void ggml_cuda_occamy_gdn_launch(ggml_backend_cuda_context & ctx, const ggml_cud
     P.s_copy = (const int32_t *) m.s_copy->data;
     P.conv_base = m.conv_base; P.conv_stride = m.conv_stride; P.conv_out = m.conv_out;
     P.ssm_base  = m.ssm_base;  P.ssm_stride  = m.ssm_stride;  P.S_out    = m.state_out;
+    if (ov) {
+        P.h += (size_t) ov->row * H; P.out += (size_t) ov->row * H; P.s_copy = ov->s_copy;
+        P.conv_base = ov->conv_base; P.conv_out = ov->conv_out; P.ssm_base = ov->ssm_base; P.S_out = ov->S_out;
+    }
     P.s = d.scratch;
     P.eps_attn = m.eps_attn; P.eps_l2 = m.eps_l2; P.scale_l2 = m.scale_l2; P.eps_gated = m.eps_gated;
     cudaStream_t st = ctx.stream();
-    if (m.zero_conv) { CUDA_CHECK(cudaMemsetAsync(m.zero_conv, 0, CONV_N * sizeof(float), st)); }
-    if (m.zero_ssm)  { CUDA_CHECK(cudaMemsetAsync(m.zero_ssm,  0, SSM_N  * sizeof(float), st)); }
+    if (m.zero_conv && !ov) { CUDA_CHECK(cudaMemsetAsync(m.zero_conv, 0, CONV_N * sizeof(float), st)); }
+    if (m.zero_ssm && !ov)  { CUDA_CHECK(cudaMemsetAsync(m.zero_ssm,  0, SSM_N  * sizeof(float), st)); }
     const size_t smem = SMEM2_FLOATS * sizeof(float);
     const bool rqk = qk_reuse();
     if (!three && repack() && d.grid_rp > 0) {
