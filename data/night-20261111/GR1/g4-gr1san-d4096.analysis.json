@@ -1,0 +1,121 @@
+{
+ "d4096": {
+  "schema_version": "c02.1",
+  "mode": "d4096",
+  "arms": [
+   "A",
+   "B"
+  ],
+  "min_cycles": 5,
+  "n_trials_total": 6,
+  "n_valid": 6,
+  "n_invalid": 0,
+  "n_warmup": 2,
+  "per_cycle": [
+   {
+    "cycle": 1,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 82.24317400000001,
+    "mean_b": 82.3804735,
+    "delta": 0.13729949999998325,
+    "delta_pct": 0.16694333805742367
+   }
+  ],
+  "excluded_cycles": [],
+  "delta": {
+   "n": 1,
+   "mean": 0.13729949999998325,
+   "median": 0.13729949999998325,
+   "stdev": null,
+   "ci95": null,
+   "ci95_halfwidth": null
+  },
+  "delta_pct": {
+   "n": 1,
+   "mean": 0.16694333805742367,
+   "median": 0.16694333805742367,
+   "stdev": null,
+   "ci95": null,
+   "ci95_halfwidth": null
+  },
+  "min_detectable_delta_95": null,
+  "verdict": "INSUFFICIENT_CYCLES",
+  "identity_invalid_trials": [],
+  "invalid_trials": [],
+  "all_trials": [
+   {
+    "trial_id": "gr1san-d4096-c00-p0-A-bea0b2f3",
+    "mode": "d4096",
+    "cycle": 0,
+    "position": 0,
+    "arm": "A",
+    "warmup": true,
+    "rc": 0,
+    "value": 82.473083,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GR1/g4-gr1san/gr1san-d4096-c00-p0-A-bea0b2f3.log"
+   },
+   {
+    "trial_id": "gr1san-d4096-c00-p1-B-3303c0e3",
+    "mode": "d4096",
+    "cycle": 0,
+    "position": 1,
+    "arm": "B",
+    "warmup": true,
+    "rc": 0,
+    "value": 82.346129,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GR1/g4-gr1san/gr1san-d4096-c00-p1-B-3303c0e3.log"
+   },
+   {
+    "trial_id": "gr1san-d4096-c01-p0-A-d6e39e01",
+    "mode": "d4096",
+    "cycle": 1,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 82.180802,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GR1/g4-gr1san/gr1san-d4096-c01-p0-A-d6e39e01.log"
+   },
+   {
+    "trial_id": "gr1san-d4096-c01-p1-B-5a1bbc06",
+    "mode": "d4096",
+    "cycle": 1,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 82.403607,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GR1/g4-gr1san/gr1san-d4096-c01-p1-B-5a1bbc06.log"
+   },
+   {
+    "trial_id": "gr1san-d4096-c01-p2-B-a7931f97",
+    "mode": "d4096",
+    "cycle": 1,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 82.35734,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GR1/g4-gr1san/gr1san-d4096-c01-p2-B-a7931f97.log"
+   },
+   {
+    "trial_id": "gr1san-d4096-c01-p3-A-f37289a3",
+    "mode": "d4096",
+    "cycle": 1,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 82.305546,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GR1/g4-gr1san/gr1san-d4096-c01-p3-A-f37289a3.log"
+   }
+  ]
+ }
+}

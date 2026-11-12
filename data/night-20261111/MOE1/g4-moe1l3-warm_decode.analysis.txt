@@ -1,0 +1,355 @@
+{
+ "warm_decode": {
+  "schema_version": "c02.1",
+  "mode": "warm_decode",
+  "arms": [
+   "A",
+   "B"
+  ],
+  "min_cycles": 5,
+  "n_trials_total": 22,
+  "n_valid": 22,
+  "n_invalid": 0,
+  "n_warmup": 2,
+  "per_cycle": [
+   {
+    "cycle": 1,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 84.0830565,
+    "mean_b": 84.1956615,
+    "delta": 0.11260500000000206,
+    "delta_pct": 0.1339211544956198
+   },
+   {
+    "cycle": 2,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 83.903527,
+    "mean_b": 84.0881755,
+    "delta": 0.18464850000000865,
+    "delta_pct": 0.22007239338104334
+   },
+   {
+    "cycle": 3,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 84.049413,
+    "mean_b": 84.3709025,
+    "delta": 0.32148949999999843,
+    "delta_pct": 0.3825005892664546
+   },
+   {
+    "cycle": 4,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 83.977757,
+    "mean_b": 84.09959699999999,
+    "delta": 0.12183999999999173,
+    "delta_pct": 0.14508603748488724
+   },
+   {
+    "cycle": 5,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 84.0048765,
+    "mean_b": 84.324635,
+    "delta": 0.31975850000000605,
+    "delta_pct": 0.3806427832793835
+   }
+  ],
+  "excluded_cycles": [],
+  "delta": {
+   "n": 5,
+   "mean": 0.21206830000000138,
+   "median": 0.18464850000000865,
+   "stdev": 0.1029030098992512,
+   "ci95": [
+    0.08431782087560358,
+    0.3398187791243992
+   ],
+   "ci95_halfwidth": 0.1277504791243978
+  },
+  "delta_pct": {
+   "n": 5,
+   "mean": 0.2524445915814777,
+   "median": 0.22007239338104334,
+   "stdev": 0.1224448471569259,
+   "ci95": [
+    0.10043360661684095,
+    0.4044555765461144
+   ],
+   "ci95_halfwidth": 0.15201098496463675
+  },
+  "min_detectable_delta_95": 0.1277504791243978,
+  "verdict": "GAIN",
+  "identity_invalid_trials": [],
+  "invalid_trials": [],
+  "all_trials": [
+   {
+    "trial_id": "moe1l3-warm_decode-c00-p0-A-e9bb0e59",
+    "mode": "warm_decode",
+    "cycle": 0,
+    "position": 0,
+    "arm": "A",
+    "warmup": true,
+    "rc": 0,
+    "value": 83.974728,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c00-p0-A-e9bb0e59.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c00-p1-B-7a016885",
+    "mode": "warm_decode",
+    "cycle": 0,
+    "position": 1,
+    "arm": "B",
+    "warmup": true,
+    "rc": 0,
+    "value": 84.565091,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c00-p1-B-7a016885.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c01-p0-A-7ff068e4",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.204918,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c01-p0-A-7ff068e4.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c01-p1-B-0e4ff859",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.295046,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c01-p1-B-0e4ff859.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c01-p2-B-fa06d80a",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.096277,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c01-p2-B-fa06d80a.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c01-p3-A-ff417f1f",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.961195,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c01-p3-A-ff417f1f.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c02-p0-A-88f4f5ef",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.883257,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c02-p0-A-88f4f5ef.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c02-p1-B-b72b9897",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.057414,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c02-p1-B-b72b9897.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c02-p2-B-d6503780",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.118937,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c02-p2-B-d6503780.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c02-p3-A-ed6d8f95",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.923797,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c02-p3-A-ed6d8f95.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c03-p0-A-46477a11",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.994485,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c03-p0-A-46477a11.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c03-p1-B-34cf461e",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.348457,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c03-p1-B-34cf461e.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c03-p2-B-13814935",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.393348,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c03-p2-B-13814935.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c03-p3-A-c9b0c7d6",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.104341,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c03-p3-A-c9b0c7d6.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c04-p0-A-041441f5",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.983746,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c04-p0-A-041441f5.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c04-p1-B-0d6c2ca4",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.107142,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c04-p1-B-0d6c2ca4.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c04-p2-B-ac96ecec",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.092052,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c04-p2-B-ac96ecec.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c04-p3-A-842dc623",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.971768,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c04-p3-A-842dc623.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c05-p0-A-ea1ca9c9",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 83.805067,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c05-p0-A-ea1ca9c9.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c05-p1-B-16928590",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.284832,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c05-p1-B-16928590.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c05-p2-B-d721425f",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.364438,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c05-p2-B-d721425f.log"
+   },
+   {
+    "trial_id": "moe1l3-warm_decode-c05-p3-A-ea199b75",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.204686,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c05-p3-A-ea199b75.log"
+   }
+  ]
+ }
+}

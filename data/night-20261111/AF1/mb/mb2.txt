@@ -1,0 +1,20 @@
+0, 5725 MiB, 21 %
+1, 16 MiB, 0 %
+tr: misaligned [:upper:] and/or [:lower:] construct
+ref 3 launches 946.64 us  (11.2 GB/s)  Q-only 783.08 us (12.1 GB/s)  K-only 82.03 us (7.2 GB/s)
+R1W1S0         794.02 us  13.4 GB/s  bitdiff=0  speedup 1.192x
+R1W4S0         796.07 us  13.3 GB/s  bitdiff=0  speedup 1.189x
+R2W4S0         460.69 us  23.0 GB/s  bitdiff=0  speedup 2.055x
+R4W4S0         291.78 us  36.4 GB/s  bitdiff=0  speedup 3.244x
+R2W2S0         458.86 us  23.1 GB/s  bitdiff=0  speedup 2.063x
+R4W2S0         290.41 us  36.6 GB/s  bitdiff=0  speedup 3.260x
+R8W1S0         210.60 us  50.4 GB/s  bitdiff=0  speedup 4.495x
+R1W4S1         73.53 us  144.4 GB/s  bitdiff=0  speedup 12.874x
+R2W4S1         59.73 us  177.8 GB/s  bitdiff=0  speedup 15.849x
+R4W4S1         62.91 us  168.8 GB/s  bitdiff=0  speedup 15.047x
+R2W2S1         68.90 us  154.1 GB/s  bitdiff=0  speedup 13.739x
+R1W8S1         71.80 us  147.9 GB/s  bitdiff=0  speedup 13.184x
+R2W8S1         69.21 us  153.4 GB/s  bitdiff=0  speedup 13.677x
+R4W2S1         65.47 us  162.2 GB/s  bitdiff=0  speedup 14.459x
+R4W1S1         75.78 us  140.1 GB/s  bitdiff=0  speedup 12.491x
+R8W1S1         90.29 us  117.6 GB/s  bitdiff=0  speedup 10.485x

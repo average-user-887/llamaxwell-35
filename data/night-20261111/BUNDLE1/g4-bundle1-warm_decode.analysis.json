@@ -1,0 +1,355 @@
+{
+ "warm_decode": {
+  "schema_version": "c02.1",
+  "mode": "warm_decode",
+  "arms": [
+   "A",
+   "B"
+  ],
+  "min_cycles": 5,
+  "n_trials_total": 22,
+  "n_valid": 22,
+  "n_invalid": 0,
+  "n_warmup": 2,
+  "per_cycle": [
+   {
+    "cycle": 1,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 84.853967,
+    "mean_b": 86.815846,
+    "delta": 1.9618789999999962,
+    "delta_pct": 2.312065150707676
+   },
+   {
+    "cycle": 2,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 84.81569300000001,
+    "mean_b": 87.03548,
+    "delta": 2.2197869999999966,
+    "delta_pct": 2.61718901477348
+   },
+   {
+    "cycle": 3,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 84.8072305,
+    "mean_b": 86.7256295,
+    "delta": 1.9183989999999937,
+    "delta_pct": 2.2620700955444883
+   },
+   {
+    "cycle": 4,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 85.058503,
+    "mean_b": 86.742704,
+    "delta": 1.6842010000000016,
+    "delta_pct": 1.9800501309081397
+   },
+   {
+    "cycle": 5,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 84.8541535,
+    "mean_b": 86.736732,
+    "delta": 1.8825785000000081,
+    "delta_pct": 2.218605009123098
+   }
+  ],
+  "excluded_cycles": [],
+  "delta": {
+   "n": 5,
+   "mean": 1.9333688999999992,
+   "median": 1.9183989999999937,
+   "stdev": 0.19218256869328473,
+   "ci95": [
+    1.6947809786752288,
+    2.1719568213247697
+   ],
+   "ci95_halfwidth": 0.2385879213247704
+  },
+  "delta_pct": {
+   "n": 5,
+   "mean": 2.2779958802113764,
+   "median": 2.2620700955444883,
+   "stdev": 0.22845419313287021,
+   "ci95": [
+    1.994378008787829,
+    2.561613751634924
+   ],
+   "ci95_halfwidth": 0.28361787142354766
+  },
+  "min_detectable_delta_95": 0.2385879213247704,
+  "verdict": "GAIN",
+  "identity_invalid_trials": [],
+  "invalid_trials": [],
+  "all_trials": [
+   {
+    "trial_id": "bundle1-warm_decode-c00-p0-A-59ce516a",
+    "mode": "warm_decode",
+    "cycle": 0,
+    "position": 0,
+    "arm": "A",
+    "warmup": true,
+    "rc": 0,
+    "value": 84.884056,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c00-p0-A-59ce516a.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c00-p1-B-2d0ea39b",
+    "mode": "warm_decode",
+    "cycle": 0,
+    "position": 1,
+    "arm": "B",
+    "warmup": true,
+    "rc": 0,
+    "value": 86.785527,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c00-p1-B-2d0ea39b.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c01-p0-A-157b04ed",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.845332,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c01-p0-A-157b04ed.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c01-p1-B-6fe5ce34",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 86.828973,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c01-p1-B-6fe5ce34.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c01-p2-B-874d5081",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 86.802719,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c01-p2-B-874d5081.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c01-p3-A-a16093f7",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.862602,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c01-p3-A-a16093f7.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c02-p0-A-44e7226c",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.840477,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c02-p0-A-44e7226c.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c02-p1-B-3a084892",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 87.061047,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c02-p1-B-3a084892.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c02-p2-B-ad00c760",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 87.009913,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c02-p2-B-ad00c760.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c02-p3-A-bff9843f",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.790909,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c02-p3-A-bff9843f.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c03-p0-A-be6e1a27",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.746613,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c03-p0-A-be6e1a27.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c03-p1-B-80682e66",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 86.731519,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c03-p1-B-80682e66.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c03-p2-B-0c286346",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 86.71974,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c03-p2-B-0c286346.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c03-p3-A-83b01a98",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.867848,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c03-p3-A-83b01a98.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c04-p0-A-679b0c64",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.949506,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c04-p0-A-679b0c64.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c04-p1-B-9da7f053",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 86.707841,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c04-p1-B-9da7f053.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c04-p2-B-c63bb6be",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 86.777567,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c04-p2-B-c63bb6be.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c04-p3-A-37467d62",
+    "mode": "warm_decode",
+    "cycle": 4,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 85.1675,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c04-p3-A-37467d62.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c05-p0-A-aea96046",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 85.145403,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c05-p0-A-aea96046.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c05-p1-B-0c311fed",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 86.860585,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c05-p1-B-0c311fed.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c05-p2-B-0deafc32",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 86.612879,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c05-p2-B-0deafc32.log"
+   },
+   {
+    "trial_id": "bundle1-warm_decode-c05-p3-A-797bd686",
+    "mode": "warm_decode",
+    "cycle": 5,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.562904,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c05-p3-A-797bd686.log"
+   }
+  ]
+ }
+}

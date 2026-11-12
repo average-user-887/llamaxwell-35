@@ -1,0 +1,562 @@
+[
+ {
+  "kind": "logits",
+  "ref": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE2/dumps/g1-A1.bin",
+  "arm": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE2/dumps/g1-D1.bin",
+  "ref_sha256": "bfba627714ddf7f38384d5399941ea7ea1bdafb0a2372b6e1f8443e0a039a4dc",
+  "arm_sha256": "cefad3a3a2fbebf5dc19a66b57be773bff1a993cac9dfa52d68c026b2a0cbe86",
+  "units": "step",
+  "n_units": 64,
+  "per_unit_size": 248320,
+  "compared_values": 15892480,
+  "nan_ref": 0,
+  "nan_arm": 0,
+  "inf_ref": 0,
+  "inf_arm": 0,
+  "atol": 0.001,
+  "rtol": 0.0001,
+  "per_unit": [
+   {
+    "unit": 0,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246218,
+    "max_abs": 0.5453462600708008,
+    "argmax_ref": 579,
+    "argmax_arm": 579
+   },
+   {
+    "unit": 1,
+    "bit_mismatch": 248319,
+    "tol_mismatch": 244197,
+    "max_abs": 0.3323476314544678,
+    "argmax_ref": 264,
+    "argmax_arm": 264
+   },
+   {
+    "unit": 2,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 244420,
+    "max_abs": 0.3290562629699707,
+    "argmax_ref": 3750,
+    "argmax_arm": 3750
+   },
+   {
+    "unit": 3,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247293,
+    "max_abs": 0.984722375869751,
+    "argmax_ref": 58391,
+    "argmax_arm": 58391
+   },
+   {
+    "unit": 4,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246763,
+    "max_abs": 0.8974860906600952,
+    "argmax_ref": 24687,
+    "argmax_arm": 24687
+   },
+   {
+    "unit": 5,
+    "bit_mismatch": 248318,
+    "tol_mismatch": 246562,
+    "max_abs": 0.8247954845428467,
+    "argmax_ref": 421,
+    "argmax_arm": 421
+   },
+   {
+    "unit": 6,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247223,
+    "max_abs": 0.9538795948028564,
+    "argmax_ref": 421,
+    "argmax_arm": 421
+   },
+   {
+    "unit": 7,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246091,
+    "max_abs": 0.5666835308074951,
+    "argmax_ref": 264,
+    "argmax_arm": 264
+   },
+   {
+    "unit": 8,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246837,
+    "max_abs": 0.9272544384002686,
+    "argmax_ref": 3074,
+    "argmax_arm": 3074
+   },
+   {
+    "unit": 9,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246835,
+    "max_abs": 0.9492621421813965,
+    "argmax_ref": 855,
+    "argmax_arm": 855
+   },
+   {
+    "unit": 10,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247012,
+    "max_abs": 0.8125309944152832,
+    "argmax_ref": 303,
+    "argmax_arm": 303
+   },
+   {
+    "unit": 11,
+    "bit_mismatch": 248319,
+    "tol_mismatch": 246746,
+    "max_abs": 0.8312785625457764,
+    "argmax_ref": 18158,
+    "argmax_arm": 18158
+   },
+   {
+    "unit": 12,
+    "bit_mismatch": 248319,
+    "tol_mismatch": 246706,
+    "max_abs": 1.856673240661621,
+    "argmax_ref": 314,
+    "argmax_arm": 314
+   },
+   {
+    "unit": 13,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246573,
+    "max_abs": 0.7342367172241211,
+    "argmax_ref": 264,
+    "argmax_arm": 264
+   },
+   {
+    "unit": 14,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247004,
+    "max_abs": 1.5659937858581543,
+    "argmax_ref": 1603,
+    "argmax_arm": 1603
+   },
+   {
+    "unit": 15,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246963,
+    "max_abs": 0.923393964767456,
+    "argmax_ref": 31249,
+    "argmax_arm": 31249
+   },
+   {
+    "unit": 16,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246734,
+    "max_abs": 0.8561100959777832,
+    "argmax_ref": 11,
+    "argmax_arm": 11
+   },
+   {
+    "unit": 17,
+    "bit_mismatch": 248319,
+    "tol_mismatch": 246774,
+    "max_abs": 0.8976774215698242,
+    "argmax_ref": 1902,
+    "argmax_arm": 1902
+   },
+   {
+    "unit": 18,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247461,
+    "max_abs": 1.6496193408966064,
+    "argmax_ref": 381,
+    "argmax_arm": 381
+   },
+   {
+    "unit": 19,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247414,
+    "max_abs": 1.3843975067138672,
+    "argmax_ref": 303,
+    "argmax_arm": 303
+   },
+   {
+    "unit": 20,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247161,
+    "max_abs": 1.3193910121917725,
+    "argmax_ref": 1318,
+    "argmax_arm": 1318
+   },
+   {
+    "unit": 21,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246962,
+    "max_abs": 0.844517707824707,
+    "argmax_ref": 314,
+    "argmax_arm": 314
+   },
+   {
+    "unit": 22,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247194,
+    "max_abs": 1.3123650550842285,
+    "argmax_ref": 264,
+    "argmax_arm": 264
+   },
+   {
+    "unit": 23,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247409,
+    "max_abs": 1.3623647689819336,
+    "argmax_ref": 7168,
+    "argmax_arm": 7168
+   },
+   {
+    "unit": 24,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247337,
+    "max_abs": 1.2308077812194824,
+    "argmax_ref": 13,
+    "argmax_arm": 13
+   },
+   {
+    "unit": 25,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247483,
+    "max_abs": 1.2101542949676514,
+    "argmax_ref": 198,
+    "argmax_arm": 198
+   },
+   {
+    "unit": 26,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247504,
+    "max_abs": 1.8549189567565918,
+    "argmax_ref": 11,
+    "argmax_arm": 11
+   },
+   {
+    "unit": 27,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247352,
+    "max_abs": 1.4454598426818848,
+    "argmax_ref": 466,
+    "argmax_arm": 466
+   },
+   {
+    "unit": 28,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247978,
+    "max_abs": 1.8867597579956055,
+    "argmax_ref": 279,
+    "argmax_arm": 279
+   },
+   {
+    "unit": 29,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247783,
+    "max_abs": 1.9075279235839844,
+    "argmax_ref": 15191,
+    "argmax_arm": 15191
+   },
+   {
+    "unit": 30,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247064,
+    "max_abs": 1.292780876159668,
+    "argmax_ref": 466,
+    "argmax_arm": 466
+   },
+   {
+    "unit": 31,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247441,
+    "max_abs": 1.4534187316894531,
+    "argmax_ref": 6001,
+    "argmax_arm": 6001
+   },
+   {
+    "unit": 32,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247278,
+    "max_abs": 1.4693737030029297,
+    "argmax_ref": 314,
+    "argmax_arm": 314
+   },
+   {
+    "unit": 33,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246995,
+    "max_abs": 1.0844342708587646,
+    "argmax_ref": 1680,
+    "argmax_arm": 1680
+   },
+   {
+    "unit": 34,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246979,
+    "max_abs": 1.0328335762023926,
+    "argmax_ref": 264,
+    "argmax_arm": 264
+   },
+   {
+    "unit": 35,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247800,
+    "max_abs": 1.4007573127746582,
+    "argmax_ref": 855,
+    "argmax_arm": 855
+   },
+   {
+    "unit": 36,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247980,
+    "max_abs": 1.4947319030761719,
+    "argmax_ref": 1189,
+    "argmax_arm": 1189
+   },
+   {
+    "unit": 37,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247661,
+    "max_abs": 1.7929530143737793,
+    "argmax_ref": 381,
+    "argmax_arm": 381
+   },
+   {
+    "unit": 38,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247860,
+    "max_abs": 1.8476476669311523,
+    "argmax_ref": 383,
+    "argmax_arm": 383
+   },
+   {
+    "unit": 39,
+    "bit_mismatch": 248319,
+    "tol_mismatch": 247868,
+    "max_abs": 1.6210241317749023,
+    "argmax_ref": 780,
+    "argmax_arm": 780
+   },
+   {
+    "unit": 40,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247543,
+    "max_abs": 1.303764820098877,
+    "argmax_ref": 1118,
+    "argmax_arm": 1118
+   },
+   {
+    "unit": 41,
+    "bit_mismatch": 248319,
+    "tol_mismatch": 247629,
+    "max_abs": 2.4093236923217773,
+    "argmax_ref": 15783,
+    "argmax_arm": 15783
+   },
+   {
+    "unit": 42,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247072,
+    "max_abs": 0.7691097259521484,
+    "argmax_ref": 264,
+    "argmax_arm": 264
+   },
+   {
+    "unit": 43,
+    "bit_mismatch": 248319,
+    "tol_mismatch": 246873,
+    "max_abs": 0.8636283874511719,
+    "argmax_ref": 38041,
+    "argmax_arm": 38041
+   },
+   {
+    "unit": 44,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247017,
+    "max_abs": 0.8130447864532471,
+    "argmax_ref": 11,
+    "argmax_arm": 11
+   },
+   {
+    "unit": 45,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247215,
+    "max_abs": 1.0307114124298096,
+    "argmax_ref": 411,
+    "argmax_arm": 411
+   },
+   {
+    "unit": 46,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247636,
+    "max_abs": 1.7882213592529297,
+    "argmax_ref": 7793,
+    "argmax_arm": 7793
+   },
+   {
+    "unit": 47,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247620,
+    "max_abs": 1.199502944946289,
+    "argmax_ref": 369,
+    "argmax_arm": 369
+   },
+   {
+    "unit": 48,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247514,
+    "max_abs": 1.2960963249206543,
+    "argmax_ref": 748,
+    "argmax_arm": 748
+   },
+   {
+    "unit": 49,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246925,
+    "max_abs": 1.1077494621276855,
+    "argmax_ref": 8097,
+    "argmax_arm": 1575
+   },
+   {
+    "unit": 50,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247208,
+    "max_abs": 0.9591464996337891,
+    "argmax_ref": 8097,
+    "argmax_arm": 8097
+   },
+   {
+    "unit": 51,
+    "bit_mismatch": 248319,
+    "tol_mismatch": 247316,
+    "max_abs": 1.2863819599151611,
+    "argmax_ref": 303,
+    "argmax_arm": 303
+   },
+   {
+    "unit": 52,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247688,
+    "max_abs": 2.2583961486816406,
+    "argmax_ref": 279,
+    "argmax_arm": 279
+   },
+   {
+    "unit": 53,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247235,
+    "max_abs": 1.5322656631469727,
+    "argmax_ref": 19451,
+    "argmax_arm": 19451
+   },
+   {
+    "unit": 54,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246193,
+    "max_abs": 0.7109135389328003,
+    "argmax_ref": 314,
+    "argmax_arm": 314
+   },
+   {
+    "unit": 55,
+    "bit_mismatch": 248319,
+    "tol_mismatch": 246658,
+    "max_abs": 0.9822182655334473,
+    "argmax_ref": 279,
+    "argmax_arm": 279
+   },
+   {
+    "unit": 56,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247031,
+    "max_abs": 1.157710075378418,
+    "argmax_ref": 14170,
+    "argmax_arm": 14170
+   },
+   {
+    "unit": 57,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246913,
+    "max_abs": 1.0464518070220947,
+    "argmax_ref": 8259,
+    "argmax_arm": 8259
+   },
+   {
+    "unit": 58,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 246988,
+    "max_abs": 1.3794136047363281,
+    "argmax_ref": 11,
+    "argmax_arm": 11
+   },
+   {
+    "unit": 59,
+    "bit_mismatch": 248319,
+    "tol_mismatch": 247341,
+    "max_abs": 0.8523252010345459,
+    "argmax_ref": 421,
+    "argmax_arm": 421
+   },
+   {
+    "unit": 60,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247233,
+    "max_abs": 1.3290784358978271,
+    "argmax_ref": 551,
+    "argmax_arm": 551
+   },
+   {
+    "unit": 61,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247275,
+    "max_abs": 1.226747989654541,
+    "argmax_ref": 369,
+    "argmax_arm": 369
+   },
+   {
+    "unit": 62,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247245,
+    "max_abs": 1.5694057941436768,
+    "argmax_ref": 6306,
+    "argmax_arm": 6306
+   },
+   {
+    "unit": 63,
+    "bit_mismatch": 248320,
+    "tol_mismatch": 247291,
+    "max_abs": 1.273869514465332,
+    "argmax_ref": 279,
+    "argmax_arm": 279
+   }
+  ],
+  "nonfinite_pattern_mismatch": 0,
+  "bit_mismatch": 15892468,
+  "tol_mismatch": 15813574,
+  "units_bitequal": 0,
+  "max_abs": 2.4093236923217773,
+  "max_scaled": 57.79029083251953,
+  "first_bad_unit": 0,
+  "argmax_mismatch_units": 1,
+  "top1_ref": [
+   579,
+   264,
+   3750,
+   58391,
+   24687,
+   421,
+   421,
+   264
+  ],
+  "top1_arm": [
+   579,
+   264,
+   3750,
+   58391,
+   24687,
+   421,
+   421,
+   264
+  ],
+  "verdict": "MISMATCH"
+ }
+]

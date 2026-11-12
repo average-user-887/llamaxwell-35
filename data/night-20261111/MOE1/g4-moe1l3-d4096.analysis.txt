@@ -1,0 +1,355 @@
+{
+ "d4096": {
+  "schema_version": "c02.1",
+  "mode": "d4096",
+  "arms": [
+   "A",
+   "B"
+  ],
+  "min_cycles": 5,
+  "n_trials_total": 22,
+  "n_valid": 22,
+  "n_invalid": 0,
+  "n_warmup": 2,
+  "per_cycle": [
+   {
+    "cycle": 1,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 81.2946025,
+    "mean_b": 81.50222049999999,
+    "delta": 0.20761799999999653,
+    "delta_pct": 0.2553896490237406
+   },
+   {
+    "cycle": 2,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 81.28523849999999,
+    "mean_b": 81.4706385,
+    "delta": 0.18540000000001555,
+    "delta_pct": 0.22808569356662645
+   },
+   {
+    "cycle": 3,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 81.313812,
+    "mean_b": 81.553819,
+    "delta": 0.24000700000000563,
+    "delta_pct": 0.2951614173493766
+   },
+   {
+    "cycle": 4,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 81.3977555,
+    "mean_b": 81.457169,
+    "delta": 0.059413499999990904,
+    "delta_pct": 0.07299157038793691
+   },
+   {
+    "cycle": 5,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 81.53386549999999,
+    "mean_b": 81.8007615,
+    "delta": 0.2668960000000027,
+    "delta_pct": 0.3273437342425467
+   }
+  ],
+  "excluded_cycles": [],
+  "delta": {
+   "n": 5,
+   "mean": 0.19186690000000226,
+   "median": 0.20761799999999653,
+   "stdev": 0.08028177905540436,
+   "ci95": [
+    0.0921998858929486,
+    0.2915339141070559
+   ],
+   "ci95_halfwidth": 0.09966701410705366
+  },
+  "delta_pct": {
+   "n": 5,
+   "mean": 0.23579441291404546,
+   "median": 0.2553896490237406,
+   "stdev": 0.09855694117880115,
+   "ci95": [
+    0.11343942573773198,
+    0.35814940009035895
+   ],
+   "ci95_halfwidth": 0.12235498717631348
+  },
+  "min_detectable_delta_95": 0.09966701410705366,
+  "verdict": "GAIN",
+  "identity_invalid_trials": [],
+  "invalid_trials": [],
+  "all_trials": [
+   {
+    "trial_id": "moe1l3-d4096-c00-p0-A-abc300a2",
+    "mode": "d4096",
+    "cycle": 0,
+    "position": 0,
+    "arm": "A",
+    "warmup": true,
+    "rc": 0,
+    "value": 81.55056,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c00-p0-A-abc300a2.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c00-p1-B-13296fb0",
+    "mode": "d4096",
+    "cycle": 0,
+    "position": 1,
+    "arm": "B",
+    "warmup": true,
+    "rc": 0,
+    "value": 81.650606,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c00-p1-B-13296fb0.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c01-p0-A-4fd567ad",
+    "mode": "d4096",
+    "cycle": 1,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.310975,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c01-p0-A-4fd567ad.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c01-p1-B-25af486b",
+    "mode": "d4096",
+    "cycle": 1,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.56952,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c01-p1-B-25af486b.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c01-p2-B-5fcef5b4",
+    "mode": "d4096",
+    "cycle": 1,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.434921,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c01-p2-B-5fcef5b4.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c01-p3-A-b932a7a1",
+    "mode": "d4096",
+    "cycle": 1,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.27823,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c01-p3-A-b932a7a1.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c02-p0-A-5720fbdb",
+    "mode": "d4096",
+    "cycle": 2,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.303845,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c02-p0-A-5720fbdb.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c02-p1-B-eba1c165",
+    "mode": "d4096",
+    "cycle": 2,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.498572,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c02-p1-B-eba1c165.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c02-p2-B-2efb0730",
+    "mode": "d4096",
+    "cycle": 2,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.442705,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c02-p2-B-2efb0730.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c02-p3-A-cb99c50b",
+    "mode": "d4096",
+    "cycle": 2,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.266632,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c02-p3-A-cb99c50b.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c03-p0-A-dc2be7e0",
+    "mode": "d4096",
+    "cycle": 3,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.334418,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c03-p0-A-dc2be7e0.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c03-p1-B-b2960fb1",
+    "mode": "d4096",
+    "cycle": 3,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.537063,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c03-p1-B-b2960fb1.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c03-p2-B-a32d78f0",
+    "mode": "d4096",
+    "cycle": 3,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.570575,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c03-p2-B-a32d78f0.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c03-p3-A-5081bde7",
+    "mode": "d4096",
+    "cycle": 3,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.293206,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c03-p3-A-5081bde7.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c04-p0-A-f1a99425",
+    "mode": "d4096",
+    "cycle": 4,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.213212,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c04-p0-A-f1a99425.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c04-p1-B-685b7383",
+    "mode": "d4096",
+    "cycle": 4,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.488178,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c04-p1-B-685b7383.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c04-p2-B-6e843c29",
+    "mode": "d4096",
+    "cycle": 4,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.42616,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c04-p2-B-6e843c29.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c04-p3-A-4d22737e",
+    "mode": "d4096",
+    "cycle": 4,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.582299,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c04-p3-A-4d22737e.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c05-p0-A-900a434d",
+    "mode": "d4096",
+    "cycle": 5,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.583154,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c05-p0-A-900a434d.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c05-p1-B-4ee5c7e0",
+    "mode": "d4096",
+    "cycle": 5,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.800265,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c05-p1-B-4ee5c7e0.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c05-p2-B-d9baab9e",
+    "mode": "d4096",
+    "cycle": 5,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.801258,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c05-p2-B-d9baab9e.log"
+   },
+   {
+    "trial_id": "moe1l3-d4096-c05-p3-A-d5f762ec",
+    "mode": "d4096",
+    "cycle": 5,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 81.484577,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-d4096-c05-p3-A-d5f762ec.log"
+   }
+  ]
+ }
+}

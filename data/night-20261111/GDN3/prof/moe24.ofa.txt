@@ -1,0 +1,2 @@
+ofa_decode_hs_kernel<bool=0> grid=4x2x1 regs=124: n=70 last50 median=24.0us mean=24.0us
+ofa_combine_kernel grid=16x1x1 regs=32: n=70 last50 median=5.7us mean=5.7us

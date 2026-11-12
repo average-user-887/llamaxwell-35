@@ -1,0 +1,32 @@
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 24463 MiB):
+  Device 0: Quadro M6000 24GB, compute capability 5.2, VMM: yes, VRAM: 24463 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-haswell.so
+occamy-gdn: device 0: 24 SMs x 2 blocks/SM -> grid 48, smem 36608 B, qk_reuse 1, pc_share 1, pref 0
+occamy-gdn: fused GDN window 2..61 (60 nodes) norm-0 -> attn_residual-0; engaged 1, GDN windows rejected 0
+occamy-gdn: qk_reuse launches 1
+occamy-gdn: pc_share launches 1
+occamy-fused: device 0: 24 SMs x 2 blocks/SM -> grid 48, smem 41728 B
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+occamy-fused: device 0: DOWNH=1 variant 2 blocks/SM -> grid 48
+occamy-fused: device 0: DOWNH=2 variant 2 blocks/SM -> grid 48
+occamy-fused: fused MoE window 62..104 (43 nodes) norm-0 -> l_out-0
+occamy-fused: DOWNH=2 launches 1
+occamy-fused: DOWNH=2 launches 2
+occamy-fused: window rejected: ROPE
+ggml_cuda: occamy FA decode kernel mode 1
+ggml_cuda: occamy FA pipe mode 3 (blocks/SM 2, flag-off 2)
+occamy-fused: DOWNH=2 launches 4
+occamy-fused: DOWNH=2 launches 8
+occamy-fused: DOWNH=2 launches 16
+occamy-fused: DOWNH=2 launches 32
+occamy-fused: window rejected: no residual ADD within 128 nodes
+head-rowpack: engaged sm52 Q4_0 K2048 rows248320 columns1 rows_per_block4
+occamy-fused: DOWNH=2 launches 64
+occamy-fused: DOWNH=2 launches 128
+occamy-fused: DOWNH=2 launches 256
+| model                          |       size |     params | backend    | ngl | n_ubatch |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -------: | --: | --------------: | -------------------: |
+| qwen35moe 35B.A3B Q4_0         |  18.23 GiB |    34.66 B | CUDA       | 999 |     1024 |   1 |             tg6 |         80.38 ± 0.00 |
+
+build: unknown (0)

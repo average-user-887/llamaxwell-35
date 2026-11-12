@@ -1,0 +1,4 @@
+d0-off.csv tokens 25 period_ms median 11.9700 mean 12.0528 htod_total 982 gather 0
+d0-off.csv dtoh_end->first_compute_kernel us median 186.0 mean 211.6 | period ms trimmed-mean 12.0393
+d0-on.csv tokens 25 period_ms median 11.9860 mean 12.0865 htod_total 982 gather 0
+d0-on.csv dtoh_end->first_compute_kernel us median 308.6 mean 382.5 | period ms trimmed-mean 12.0068
