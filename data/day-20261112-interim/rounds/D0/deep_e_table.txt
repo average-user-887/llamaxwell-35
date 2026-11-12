@@ -1,0 +1,38 @@
+runs [1, 24, 24, 24, 1, 1, 2, 1]
+big runs [24, 24, 24]
+
+== 16k: 21 tokens; period ms median 13.123 trimmed 13.127; busy ms/tok mean 12.274 (median 12.273) busy/period 0.934
+      4.603 ms/tok  37.5%   40.0 calls/tok  occamy::moe_v2<int=0, int=61>
+      3.606 ms/tok  29.4%   30.0 calls/tok  occamy_gdn::gdn_fused<int=0, int=1, int=1, int=0, int=1>
+      1.469 ms/tok  12.0%   10.0 calls/tok  ofa_decode_hs_kernel<bool=0>
+      1.191 ms/tok   9.7%    1.0 calls/tok  head_rowpack_sm52
+      0.896 ms/tok   7.3%   40.0 calls/tok  mul_mat_vec_q<ggml_type=2, int=1, bool=0, bool=0, bool=0, bool=0, bool
+      0.098 ms/tok   0.8%   20.0 calls/tok  rms_norm_f32<int=256, bool=1, bool=0, bool=0>
+      0.091 ms/tok   0.7%   10.0 calls/tok  ofa_combine_kernel
+      0.075 ms/tok   0.6%   11.0 calls/tok  rms_norm_mul_q8_1_row<int=1024>
+      0.073 ms/tok   0.6%   20.0 calls/tok  rope_multi<bool=1, bool=0, float>
+      0.069 ms/tok   0.6%   20.0 calls/tok  k_set_rows<float, long, __half>
+
+== 64k: 21 tokens; period ms median 16.817 trimmed 16.835; busy ms/tok mean 15.892 (median 15.890) busy/period 0.944
+      5.074 ms/tok  31.9%   10.0 calls/tok  ofa_decode_hs_kernel<bool=0>
+      4.603 ms/tok  29.0%   40.0 calls/tok  occamy::moe_v2<int=0, int=61>
+      3.606 ms/tok  22.7%   30.0 calls/tok  occamy_gdn::gdn_fused<int=0, int=1, int=1, int=0, int=1>
+      1.192 ms/tok   7.5%    1.0 calls/tok  head_rowpack_sm52
+      0.895 ms/tok   5.6%   40.0 calls/tok  mul_mat_vec_q<ggml_type=2, int=1, bool=0, bool=0, bool=0, bool=0, bool
+      0.098 ms/tok   0.6%   20.0 calls/tok  rms_norm_f32<int=256, bool=1, bool=0, bool=0>
+      0.092 ms/tok   0.6%   10.0 calls/tok  ofa_combine_kernel
+      0.075 ms/tok   0.5%   11.0 calls/tok  rms_norm_mul_q8_1_row<int=1024>
+      0.073 ms/tok   0.5%   20.0 calls/tok  rope_multi<bool=1, bool=0, float>
+      0.069 ms/tok   0.4%   20.0 calls/tok  k_set_rows<float, long, __half>
+
+== 96k: 21 tokens; period ms median 19.376 trimmed 19.408; busy ms/tok mean 18.255 (median 18.257) busy/period 0.940
+      7.427 ms/tok  40.7%   10.0 calls/tok  ofa_decode_hs_kernel<bool=0>
+      4.603 ms/tok  25.2%   40.0 calls/tok  occamy::moe_v2<int=0, int=61>
+      3.607 ms/tok  19.8%   30.0 calls/tok  occamy_gdn::gdn_fused<int=0, int=1, int=1, int=0, int=1>
+      1.191 ms/tok   6.5%    1.0 calls/tok  head_rowpack_sm52
+      0.895 ms/tok   4.9%   40.0 calls/tok  mul_mat_vec_q<ggml_type=2, int=1, bool=0, bool=0, bool=0, bool=0, bool
+      0.098 ms/tok   0.5%   20.0 calls/tok  rms_norm_f32<int=256, bool=1, bool=0, bool=0>
+      0.092 ms/tok   0.5%   10.0 calls/tok  ofa_combine_kernel
+      0.075 ms/tok   0.4%   11.0 calls/tok  rms_norm_mul_q8_1_row<int=1024>
+      0.073 ms/tok   0.4%   20.0 calls/tok  rope_multi<bool=1, bool=0, float>
+      0.070 ms/tok   0.4%   20.0 calls/tok  k_set_rows<float, long, __half>

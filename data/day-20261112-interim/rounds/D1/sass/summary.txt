@@ -1,0 +1,5 @@
+old 6889 new 6891
+added ['_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi2EEEvNS_6ParamsE', '_ZN10occamy_gdn7ra_packEPKjS1_S1_S1_Pj']
+removed []
+changed []
+VERDICT IDENT_PLUS_ADDED

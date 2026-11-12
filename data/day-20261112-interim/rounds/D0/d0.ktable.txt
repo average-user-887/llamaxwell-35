@@ -1,0 +1,22 @@
+tokens 31 period ms median 11.5210 trimmed 11.5851 mean 11.6321
+busy ms/tok median 11.0428 mean 11.1044 busy/period 0.955
+total busy us 344235 per token us 11104.4
+%busy | calls/tok | total_us/tok | mean_us | grid | block | reg | sSM KB | dSM KB | kernel
+41.58%  40.00   4616.8  115.42 48x1x1 256x1x1 104 0.093750 40.750000 occamy::moe_v2<int=0, int=61>
+33.52%  30.00   3722.5  124.08 72x1x1 256x1x1 62 1.359375 26.750000 occamy_gdn::gdn_fused<int=0, int=1, int=1, int=0, int=1>
+10.68%   1.00   1185.5 1185.46 62080x1x1 128x1x1 29 0.000000 0.000000 head_rowpack_sm52
+ 4.52%  10.00    501.9   50.19 8192x1x1 32x1x1 31 0.000000 0.000000 mul_mat_vec_q<ggml_type=2, int=1, bool=0, bool=0, bool=0, bool=0, bool=1>
+ 2.31%  10.00    256.6   25.66 2048x1x1 32x1x1 31 0.000000 0.000000 mul_mat_vec_q<ggml_type=2, int=1, bool=0, bool=0, bool=0, bool=0, bool=1>
+ 2.15%  10.00    238.3   23.83 4x2x1 256x1x1 124 32.875000 0.000000 ofa_decode_hs_kernel<bool=0>
+ 1.06%  20.00    117.9    5.89 512x1x1 32x1x1 31 0.000000 0.000000 mul_mat_vec_q<ggml_type=2, int=1, bool=0, bool=0, bool=0, bool=0, bool=1>
+ 0.69%  11.00     76.4    6.94 1x1x1 1024x1x1 28 0.000000 0.125000 rms_norm_mul_q8_1_row<int=1024>
+ 0.63%  10.00     70.1    7.01 16x1x1 256x1x1 38 0.000000 0.125000 rms_norm_f32<int=256, bool=1, bool=0, bool=0>
+ 0.56%  20.00     61.8    3.09 2x1x1 256x1x1 24 0.000000 0.000000 k_set_rows<float, long, __half>
+ 0.52%  10.00     57.2    5.72 16x1x1 256x1x1 32 0.000000 0.000000 ofa_combine_kernel
+ 0.45%  10.00     50.1    5.01 16x1x1 1x256x1 20 0.000000 0.000000 rope_multi<bool=1, bool=0, float>
+ 0.42%  10.00     46.6    4.66 8x1x1 128x1x1 23 0.000000 0.000000 _Z11k_bin_bcastIXadL_ZN42_INTERNAL_dee15d3c_11_binbcast_cu_6840010b6op_addEffEEfffJPKfEEvPKT0_PKT1_PT2_jjj5uin
+ 0.28%  10.00     31.0    3.10 2x1x1 256x1x1 38 0.000000 0.125000 rms_norm_f32<int=256, bool=1, bool=0, bool=0>
+ 0.28%  10.00     31.0    3.10 16x1x1 256x1x1 14 0.000000 0.000000 occamy_gate_sig_mul_q8
+ 0.21%  10.00     23.4    2.34 2x1x1 1x256x1 20 0.000000 0.000000 rope_multi<bool=1, bool=0, float>
+ 0.08%   2.00      8.9    4.47 1x8x1 256x1x1 40 0.000000 0.000000 k_get_rows_float<float, float>
+ 0.08%   1.00      8.4    8.43 10x8x1 256x1x1 15 0.000000 0.000000 ggml_cuda_hg_gather

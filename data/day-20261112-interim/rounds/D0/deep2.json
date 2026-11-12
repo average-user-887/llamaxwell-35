@@ -1,0 +1,64 @@
+{
+ "s0_16k": {
+  "t0": 1794469821.182575,
+  "wall": 36.77134418487549,
+  "s0": {
+   "prompt_n": 16384,
+   "prompt_ms": 36455.798,
+   "prompt_per_second": 449.42096727659066,
+   "predicted_n": 24,
+   "predicted_per_second": 75.0209569412325
+  }
+ },
+ "s0_64k": {
+  "t0": 1794469857.9541595,
+  "wall": 216.00766348838806,
+  "s0": {
+   "prompt_n": 49156,
+   "prompt_ms": 215592.988,
+   "prompt_per_second": 228.0037048329234,
+   "predicted_n": 24,
+   "predicted_per_second": 59.08100776786815
+  }
+ },
+ "s0_96k": {
+  "t0": 1794470073.9620967,
+  "wall": 230.57678723335266,
+  "s0": {
+   "prompt_n": 32468,
+   "prompt_ms": 230096.435,
+   "prompt_per_second": 141.10605407684827,
+   "predicted_n": 24,
+   "predicted_per_second": 51.3081343470036
+  }
+ },
+ "s1_90k_prefill": {
+  "t0": 1794470306.9168742,
+  "wall": 418.5348312854767,
+  "s1": {
+   "prompt_n": 90000,
+   "prompt_ms": 418506.913,
+   "prompt_per_second": 215.05021112996528,
+   "predicted_n": 1,
+   "predicted_per_second": 0.0
+  }
+ },
+ "both_deep_decode": {
+  "t0": 1794470726.9730177,
+  "wall": 2.0403482913970947,
+  "s0": {
+   "prompt_n": 4,
+   "prompt_ms": 126.979,
+   "prompt_per_second": 31.501271863851503,
+   "predicted_n": 48,
+   "predicted_per_second": 25.185407467741243
+  },
+  "s1": {
+   "prompt_n": 4,
+   "prompt_ms": 151.825,
+   "prompt_per_second": 26.346122180141613,
+   "predicted_n": 48,
+   "predicted_per_second": 27.065937230060463
+  }
+ }
+}

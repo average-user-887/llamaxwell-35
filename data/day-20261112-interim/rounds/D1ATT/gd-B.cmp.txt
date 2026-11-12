@@ -1,0 +1,2 @@
+gd-B.bin steps=64 compared=15892480 nan=0/0 inf=0/0 bit_mismatch=0 tol_mismatch=0 bitequal_units=64/64 max_abs=0 verdict=BITEQUAL
+state .state: A=10ff1ab38373 B=10ff1ab38373 diffbytes=0

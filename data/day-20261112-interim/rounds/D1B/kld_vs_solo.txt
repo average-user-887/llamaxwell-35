@@ -1,0 +1,15 @@
+e1 0 kl=0.00077 top=1.000 kl=0.00028 top=1.000
+e1 1 kl=0.00129 top=1.000 kl=0.00041 top=1.000
+ea 0 kl=0.00075 top=1.000 kl=0.00025 top=1.000
+ea 1 kl=0.00072 top=1.000 kl=0.00055 top=1.000
+eb 0 kl=0.00125 top=1.000 kl=0.00049 top=1.000
+eb 1 kl=0.00161 top=1.000 kl=0.00052 top=1.000
+ec 0 kl=0.00107 top=1.000 kl=0.00031 top=0.972
+ec 1 kl=0.01272 top=0.944 kl=0.00223 top=0.944
+ed 0 kl=0.00235 top=0.938 kl=0.00196 top=0.969
+ed 1 kl=0.00777 top=1.000 kl=0.00199 top=1.000
+ef 0 na kl=0.00010 top=1.000
+ef 1 na kl=0.00012 top=1.000
+ARM0 N2SPLIT=0: rows=336 meanKL=0.00306 p99=0.0525 same_top=98.81%
+ARM1 N2SPLIT=1: rows=372 meanKL=0.00082 p99=0.0189 same_top=98.92%
+dmean(B-A)=-0.00224  dtop=+0.12pt

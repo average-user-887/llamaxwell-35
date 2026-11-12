@@ -1,0 +1,410 @@
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 24463 MiB):
+  Device 0: Quadro M6000 24GB, compute capability 5.2, VMM: yes, VRAM: 24463 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-haswell.so
+occamy-gdn: device 0: 24 SMs x 2 blocks/SM -> grid 48, smem 36608 B, qk_reuse 1, pc_share 1, pref 1
+occamy-gdn: repack variant 3 blocks/SM -> grid 72 (smem 27392 B dyn)
+occamy-gdn: arepack variant 56 regs, 1392 B static smem, 4 blocks/SM -> grid 72 (smem 18176 B dyn)
+occamy-gdn: fused GDN window 2..61 (60 nodes) norm-0 -> attn_residual-0; engaged 1, GDN windows rejected 0
+occamy-gdn: repacked ssm_out blk.0.ssm_out.weight (1/1073741824) 4718592 B, VRAM free 5840 -> 5835 MiB, unpack mismatches 0
+occamy-gdn: arepacked ssm_in blk.0.attn_qkv.weight (1/1) 14229504 B, VRAM free 5835 -> 5822 MiB, words checked 3557376, mismatches 0
+occamy-gdn: arepack launches 1
+occamy-fused: device 0: 24 SMs x 2 blocks/SM -> grid 48, smem 41728 B
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+occamy-fused: device 0: TAILBAL variant 2 blocks/SM -> grid 48
+occamy-fused: device 0: DOWNH=1 variant 2 blocks/SM -> grid 48
+occamy-fused: device 0: DOWNH=2 variant 2 blocks/SM -> grid 48
+occamy-fused: fused MoE window 62..104 (43 nodes) norm-0 -> l_out-0
+occamy-fused: MOE_TAILBAL launches 1
+occamy-fused: DOWNH=2 launches 1
+occamy-gdn: repacked ssm_out blk.1.ssm_out.weight (2/1073741824) 4718592 B, VRAM free 5822 -> 5817 MiB, unpack mismatches 0
+occamy-gdn: repack launches 1
+occamy-fused: MOE_TAILBAL launches 2
+occamy-fused: DOWNH=2 launches 2
+occamy-gdn: repacked ssm_out blk.2.ssm_out.weight (3/1073741824) 4718592 B, VRAM free 5817 -> 5813 MiB, unpack mismatches 0
+occamy-fused: window rejected: ROPE
+ggml_cuda: occamy FA decode kernel mode 1
+ggml_cuda: occamy FA pipe mode 3 (blocks/SM 2, flag-off 2)
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-fused: MOE_TAILBAL launches 4
+occamy-fused: DOWNH=2 launches 4
+occamy-gdn: repacked ssm_out blk.4.ssm_out.weight (4/1073741824) 4718592 B, VRAM free 5798 -> 5794 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.5.ssm_out.weight (5/1073741824) 4718592 B, VRAM free 5794 -> 5789 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.6.ssm_out.weight (6/1073741824) 4718592 B, VRAM free 5789 -> 5785 MiB, unpack mismatches 0
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-fused: MOE_TAILBAL launches 8
+occamy-fused: DOWNH=2 launches 8
+occamy-gdn: repacked ssm_out blk.8.ssm_out.weight (7/1073741824) 4718592 B, VRAM free 5785 -> 5780 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.9.ssm_out.weight (8/1073741824) 4718592 B, VRAM free 5780 -> 5776 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.10.ssm_out.weight (9/1073741824) 4718592 B, VRAM free 5776 -> 5771 MiB, unpack mismatches 0
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-gdn: repacked ssm_out blk.12.ssm_out.weight (10/1073741824) 4718592 B, VRAM free 5771 -> 5767 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.13.ssm_out.weight (11/1073741824) 4718592 B, VRAM free 5767 -> 5762 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.14.ssm_out.weight (12/1073741824) 4718592 B, VRAM free 5762 -> 5758 MiB, unpack mismatches 0
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-fused: MOE_TAILBAL launches 16
+occamy-fused: DOWNH=2 launches 16
+occamy-gdn: repacked ssm_out blk.16.ssm_out.weight (13/1073741824) 4718592 B, VRAM free 5758 -> 5753 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.17.ssm_out.weight (14/1073741824) 4718592 B, VRAM free 5753 -> 5749 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.18.ssm_out.weight (15/1073741824) 4718592 B, VRAM free 5749 -> 5744 MiB, unpack mismatches 0
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-gdn: repacked ssm_out blk.20.ssm_out.weight (16/1073741824) 4718592 B, VRAM free 5744 -> 5740 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.21.ssm_out.weight (17/1073741824) 4718592 B, VRAM free 5740 -> 5735 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.22.ssm_out.weight (18/1073741824) 4718592 B, VRAM free 5735 -> 5731 MiB, unpack mismatches 0
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-gdn: repacked ssm_out blk.24.ssm_out.weight (19/1073741824) 4718592 B, VRAM free 5731 -> 5726 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.25.ssm_out.weight (20/1073741824) 4718592 B, VRAM free 5726 -> 5722 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.26.ssm_out.weight (21/1073741824) 4718592 B, VRAM free 5722 -> 5717 MiB, unpack mismatches 0
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-gdn: repacked ssm_out blk.28.ssm_out.weight (22/1073741824) 4718592 B, VRAM free 5717 -> 5713 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.29.ssm_out.weight (23/1073741824) 4718592 B, VRAM free 5713 -> 5708 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.30.ssm_out.weight (24/1073741824) 4718592 B, VRAM free 5708 -> 5704 MiB, unpack mismatches 0
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-fused: MOE_TAILBAL launches 32
+occamy-fused: DOWNH=2 launches 32
+occamy-gdn: repacked ssm_out blk.32.ssm_out.weight (25/1073741824) 4718592 B, VRAM free 5704 -> 5699 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.33.ssm_out.weight (26/1073741824) 4718592 B, VRAM free 5699 -> 5695 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.34.ssm_out.weight (27/1073741824) 4718592 B, VRAM free 5695 -> 5690 MiB, unpack mismatches 0
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-gdn: repacked ssm_out blk.36.ssm_out.weight (28/1073741824) 4718592 B, VRAM free 5690 -> 5686 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.37.ssm_out.weight (29/1073741824) 4718592 B, VRAM free 5686 -> 5681 MiB, unpack mismatches 0
+occamy-gdn: repacked ssm_out blk.38.ssm_out.weight (30/1073741824) 4718592 B, VRAM free 5681 -> 5677 MiB, unpack mismatches 0
+occamy-fused: window rejected: no residual ADD within 128 nodes
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+head-rowpack: engaged sm52 Q4_0 K2048 rows248320 columns1 rows_per_block4
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-fused: MOE_TAILBAL launches 64
+occamy-fused: DOWNH=2 launches 64
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-fused: MOE_TAILBAL launches 128
+occamy-fused: DOWNH=2 launches 128
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-fused: MOE_TAILBAL launches 256
+occamy-fused: DOWNH=2 launches 256
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-fused: MOE_TAILBAL launches 512
+occamy-fused: DOWNH=2 launches 512
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-fused: MOE_TAILBAL launches 1024
+occamy-fused: DOWNH=2 launches 1024
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+occamy-sf2: i=338 last=340 gate_reshaped-3 gate_sigmoid-3 attn_gated-3
+occamy-sf2: i=722 last=724 gate_reshaped-7 gate_sigmoid-7 attn_gated-7
+occamy-sf2: i=1106 last=1108 gate_reshaped-11 gate_sigmoid-11 attn_gated-11
+occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15
+occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19
+occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23
+occamy-sf2: i=2642 last=2644 gate_reshaped-27 gate_sigmoid-27 attn_gated-27
+occamy-sf2: i=3026 last=3028 gate_reshaped-31 gate_sigmoid-31 attn_gated-31
+occamy-sf2: i=3410 last=3412 gate_reshaped-35 gate_sigmoid-35 attn_gated-35
+occamy-sf2: i=3794 last=3796 gate_reshaped-39 gate_sigmoid-39 attn_gated-39
+| model                          |       size |     params | backend    | ngl | n_batch | n_ubatch |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ------: | -------: | --: | --------------: | -------------------: |
+| qwen35moe 35B.A3B Q4_0         |  18.23 GiB |    34.66 B | CUDA       | 999 |    4096 |     4096 |   1 |            tg32 |         85.54 ± 0.00 |
+ggml_cuda_hostgap: deferred=330 flushes=33
+
+build: unknown (0)

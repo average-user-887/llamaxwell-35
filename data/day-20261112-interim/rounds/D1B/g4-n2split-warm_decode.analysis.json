@@ -1,0 +1,241 @@
+{
+ "warm_decode": {
+  "schema_version": "c02.1",
+  "mode": "warm_decode",
+  "arms": [
+   "A",
+   "B"
+  ],
+  "min_cycles": 5,
+  "n_trials_total": 14,
+  "n_valid": 14,
+  "n_invalid": 0,
+  "n_warmup": 2,
+  "per_cycle": [
+   {
+    "cycle": 1,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 87.9937015,
+    "mean_b": 88.0538095,
+    "delta": 0.060107999999999606,
+    "delta_pct": 0.06830943462470263
+   },
+   {
+    "cycle": 2,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 88.227024,
+    "mean_b": 88.14233949999999,
+    "delta": -0.08468450000000871,
+    "delta_pct": -0.09598476312655535
+   },
+   {
+    "cycle": 3,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 88.164652,
+    "mean_b": 88.2152125,
+    "delta": 0.05056050000000312,
+    "delta_pct": 0.05734781327102478
+   }
+  ],
+  "excluded_cycles": [],
+  "delta": {
+   "n": 3,
+   "mean": 0.008661333333331337,
+   "median": 0.05056050000000312,
+   "stdev": 0.08098068991793202,
+   "ci95": [
+    -0.19252208876614105,
+    0.2098447554328037
+   ],
+   "ci95_halfwidth": 0.20118342209947238
+  },
+  "delta_pct": {
+   "n": 3,
+   "mean": 0.009890828256390686,
+   "median": 0.05734781327102478,
+   "stdev": 0.09185461296903803,
+   "ci95": [
+    -0.21830709635330817,
+    0.23808875286608952
+   ],
+   "ci95_halfwidth": 0.22819792460969884
+  },
+  "min_detectable_delta_95": 0.20118342209947238,
+  "verdict": "INSUFFICIENT_CYCLES",
+  "identity_invalid_trials": [],
+  "invalid_trials": [],
+  "all_trials": [
+   {
+    "trial_id": "n2split-warm_decode-c00-p0-A-7b0b0c5b",
+    "mode": "warm_decode",
+    "cycle": 0,
+    "position": 0,
+    "arm": "A",
+    "warmup": true,
+    "rc": 0,
+    "value": 88.458668,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c00-p0-A-7b0b0c5b.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c00-p1-B-0564594d",
+    "mode": "warm_decode",
+    "cycle": 0,
+    "position": 1,
+    "arm": "B",
+    "warmup": true,
+    "rc": 0,
+    "value": 88.069842,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c00-p1-B-0564594d.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c01-p0-A-7f24dc78",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 87.914682,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c01-p0-A-7f24dc78.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c01-p1-B-ea16f410",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 87.951946,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c01-p1-B-ea16f410.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c01-p2-B-1129fc50",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.155673,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c01-p2-B-1129fc50.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c01-p3-A-24e21ed6",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.072721,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c01-p3-A-24e21ed6.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c02-p0-A-a7827a39",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.219567,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c02-p0-A-a7827a39.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c02-p1-B-044b623a",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.149521,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c02-p1-B-044b623a.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c02-p2-B-53a6dced",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.135158,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c02-p2-B-53a6dced.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c02-p3-A-4da3ddb2",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.234481,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c02-p3-A-4da3ddb2.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c03-p0-A-b0a63025",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.427413,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c03-p0-A-b0a63025.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c03-p1-B-f596b00c",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.315408,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c03-p1-B-f596b00c.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c03-p2-B-63ac280a",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.115017,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c03-p2-B-63ac280a.log"
+   },
+   {
+    "trial_id": "n2split-warm_decode-c03-p3-A-16989333",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 87.901891,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1B/g4-n2split/n2split-warm_decode-c03-p3-A-16989333.log"
+   }
+  ]
+ }
+}

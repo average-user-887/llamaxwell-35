@@ -1,0 +1,241 @@
+{
+ "warm_decode": {
+  "schema_version": "c02.1",
+  "mode": "warm_decode",
+  "arms": [
+   "A",
+   "B"
+  ],
+  "min_cycles": 5,
+  "n_trials_total": 14,
+  "n_valid": 14,
+  "n_invalid": 0,
+  "n_warmup": 2,
+  "per_cycle": [
+   {
+    "cycle": 1,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 88.199162,
+    "mean_b": 88.107865,
+    "delta": -0.0912969999999973,
+    "delta_pct": -0.10351232135289434
+   },
+   {
+    "cycle": 2,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 88.041427,
+    "mean_b": 88.05848599999999,
+    "delta": 0.017058999999989055,
+    "delta_pct": 0.019376105750756878
+   },
+   {
+    "cycle": 3,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 88.12287749999999,
+    "mean_b": 88.337436,
+    "delta": 0.21455850000000964,
+    "delta_pct": 0.24347650245535313
+   }
+  ],
+  "excluded_cycles": [],
+  "delta": {
+   "n": 3,
+   "mean": 0.04677350000000047,
+   "median": 0.017058999999989055,
+   "stdev": 0.1550777558283314,
+   "ci95": [
+    -0.3384920940653018,
+    0.4320390940653027
+   ],
+   "ci95_halfwidth": 0.38526559406530225
+  },
+  "delta_pct": {
+   "n": 3,
+   "mean": 0.053113428951071885,
+   "median": 0.019376105750756878,
+   "stdev": 0.17593739282625406,
+   "ci95": [
+    -0.3839745583199169,
+    0.4902014162220607
+   ],
+   "ci95_halfwidth": 0.4370879872709888
+  },
+  "min_detectable_delta_95": 0.38526559406530225,
+  "verdict": "INSUFFICIENT_CYCLES",
+  "identity_invalid_trials": [],
+  "invalid_trials": [],
+  "all_trials": [
+   {
+    "trial_id": "b3-warm_decode-c00-p0-A-d84d2b50",
+    "mode": "warm_decode",
+    "cycle": 0,
+    "position": 0,
+    "arm": "A",
+    "warmup": true,
+    "rc": 0,
+    "value": 88.288604,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c00-p0-A-d84d2b50.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c00-p1-B-7446c8ec",
+    "mode": "warm_decode",
+    "cycle": 0,
+    "position": 1,
+    "arm": "B",
+    "warmup": true,
+    "rc": 0,
+    "value": 88.358049,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c00-p1-B-7446c8ec.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c01-p0-A-2a650804",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.324914,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c01-p0-A-2a650804.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c01-p1-B-b52a3cf2",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.102046,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c01-p1-B-b52a3cf2.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c01-p2-B-7417ae4c",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.113684,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c01-p2-B-7417ae4c.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c01-p3-A-d90d41bb",
+    "mode": "warm_decode",
+    "cycle": 1,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.07341,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c01-p3-A-d90d41bb.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c02-p0-A-857cbeb7",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.017246,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c02-p0-A-857cbeb7.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c02-p1-B-06285cd9",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.099066,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c02-p1-B-06285cd9.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c02-p2-B-4176214b",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.017906,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c02-p2-B-4176214b.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c02-p3-A-8b2a2a2c",
+    "mode": "warm_decode",
+    "cycle": 2,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.065608,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c02-p3-A-8b2a2a2c.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c03-p0-A-7eed8497",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.024976,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c03-p0-A-7eed8497.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c03-p1-B-8687af3b",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.376259,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c03-p1-B-8687af3b.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c03-p2-B-fbaa9b4b",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.298613,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c03-p2-B-fbaa9b4b.log"
+   },
+   {
+    "trial_id": "b3-warm_decode-c03-p3-A-eab0dcd0",
+    "mode": "warm_decode",
+    "cycle": 3,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 88.220779,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c03-p3-A-eab0dcd0.log"
+   }
+  ]
+ }
+}

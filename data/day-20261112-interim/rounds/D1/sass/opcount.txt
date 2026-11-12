@@ -1,0 +1,2 @@
+Li1ELi1ELi0ELi1EEEvNS_6ParamsE total 2112 {'LDS': 81, 'STS': 30, 'LDG': 76, 'STG': 17, 'BAR': 14, 'SHFL': 51, 'FFMA': 240, 'PRMT': 0}
+Li1ELi1ELi0ELi2EEEvNS_6ParamsE total 2004 {'LDS': 71, 'STS': 27, 'LDG': 76, 'STG': 17, 'BAR': 14, 'SHFL': 51, 'FFMA': 240, 'PRMT': 0}

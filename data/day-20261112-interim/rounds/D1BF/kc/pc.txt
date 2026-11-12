@@ -1,0 +1,49 @@
+        // pass 1: chunks 0..31 (words 0..8 of each lane) of every row of this warp, both sequences; partials -> smem
+        const uint4 * const rp0 = (const uint4 *)(L.out + (size_t)gw * ROW_O);
+        const size_t rstep = (size_t)W * (ROW_O / 16);   // uint4 per W rows
+        float * const pa = (float *)stg + lane;          // [ri][seq][lane] in the warp's phase-C-idle stage words
+        uint4 c0, c1, c2;
+        if (gw < H) { c0 = __ldg(rp0 + lane); c1 = __ldg(rp0 + 32 + lane); c2 = __ldg(rp0 + 64 + lane); }
+        for (int k = 0; k < 2; ++k) {
+            const Scratch * s = PP.p[k].s;
+            for (int i = 4 * threadIdx.x; i < H; i += 4 * NT)
+                *(float4 *)(xs + k * XS_HALF + (i >> 6) * CH + (i & 63)) = __ldcg((const float4 *)(s->xg + i));
+        }
+        if (threadIdx.x < 32) ((float4 *)(sums + 32 * (threadIdx.x >> 4)))[threadIdx.x & 15] = __ldcg((const float4 *)(PP.p[threadIdx.x >> 4].s->sg) + (threadIdx.x & 15));
+        __syncthreads();
+        {
+            const uint4 * p = rp0;
+            for (int r = gw, ri = 0; r < H; r += W, ++ri, p += rstep) {
+                const uint4 a0 = c0, a1 = c1, a2 = c2;
+                if (r + W < H) { c0 = __ldg(p + rstep + lane); c1 = __ldg(p + rstep + 32 + lane); c2 = __ldg(p + rstep + 64 + lane); }
+                float v = dot2v(a0.x, a0.y, a0.z, a0.w, a1.x, a1.y, a1.z, a1.w, a2.x, xs + lane * CH, sums[lane]);
+                asm volatile("" ::: "memory");   // schedule fence only (keeps the two smem-fed chains apart)
+                pa[ri * 64] = v;
+                v = dot2v(a0.x, a0.y, a0.z, a0.w, a1.x, a1.y, a1.z, a1.w, a2.x, xs + XS_HALF + lane * CH, sums[32 + lane]);
+                pa[ri * 64 + 32] = v;
+            }
+        }
+        // pass 2: chunks 32..63 (words 9..17): word-group 2 is re-read (9..11), then 3 and the tail
+        uint4 d2, d3; uint2 dt;
+        if (gw < H) { d2 = __ldg(rp0 + 64 + lane); d3 = __ldg(rp0 + 96 + lane); dt = __ldg((const uint2 *)(rp0 + 128) + lane); }
+        __syncthreads();   // every warp is done with the first-half inputs
+        for (int k = 0; k < 2; ++k) {
+            const Scratch * s = PP.p[k].s;
+            for (int i = 4 * threadIdx.x; i < H; i += 4 * NT)
+                *(float4 *)(xs + k * XS_HALF + (i >> 6) * CH + (i & 63)) = __ldcg((const float4 *)(s->xg + H + i));
+        }
+        if (threadIdx.x < 32) ((float4 *)(sums + 32 * (threadIdx.x >> 4)))[threadIdx.x & 15] = __ldcg((const float4 *)(PP.p[threadIdx.x >> 4].s->sg) + 16 + (threadIdx.x & 15));
+        __syncthreads();
+        {
+            const uint4 * p = rp0;
+            for (int r = gw, ri = 0; r < H; r += W, ++ri, p += rstep) {
+                const uint4 b2 = d2, b3 = d3; const uint2 bt = dt;
+                if (r + W < H) { d2 = __ldg(p + rstep + 64 + lane); d3 = __ldg(p + rstep + 96 + lane); dt = __ldg((const uint2 *)(p + rstep + 128) + lane); }
+                float acc0 = pa[ri * 64] + dot2v(b2.y, b2.z, b2.w, b3.x, b3.y, b3.z, b3.w, bt.x, bt.y, xs + lane * CH, sums[lane]);
+                asm volatile("" ::: "memory");
+                float acc1 = pa[ri * 64 + 32] + dot2v(b2.y, b2.z, b2.w, b3.x, b3.y, b3.z, b3.w, bt.x, bt.y, xs + XS_HALF + lane * CH, sums[32 + lane]);
+                acc0 = warp_sum(acc0);
+                acc1 = warp_sum(acc1);
+                if (lane == 0) { PP.p[0].out[r] = PP.p[0].h[r] + acc0; PP.p[1].out[r] = PP.p[1].h[r] + acc1; }
+            }
+        }

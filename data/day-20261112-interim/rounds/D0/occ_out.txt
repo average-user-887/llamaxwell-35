@@ -1,0 +1,23 @@
+libggml-cuda-gdn4-20261112.1.sm_52.cubin
+libggml-cuda-gdn4-20261112.10.sm_52.cubin
+libggml-cuda-gdn4-20261112.100.sm_52.cubin
+libggml-cuda-gdn4-20261112.101.sm_52.cubin
+libggml-cuda-gdn4-20261112.102.sm_52.cubin
+libggml-cuda-gdn4-20261112.103.sm_52.cubin
+libggml-cuda-gdn4-20261112.104.sm_52.cubin
+libggml-cuda-gdn4-20261112.105.sm_52.cubin
+libggml-cuda-gdn4-20261112.106.sm_52.cubin
+libggml-cuda-gdn4-20261112.107.sm_52.cubin
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+dev Quadro M6000 24GB SMs 24 smem/SM 98304 regs/SM 65536
+label | regs | static_smem_B | local_B | threads | dyn_B | blocks/SM | (limit-notes)
+moe_v2<0,61> NOT FOUND
+gdn_fused<0,1,1,0,1> NOT FOUND
+head_rowpack_sm52 NOT FOUND
+mmvq<q4_0,1,..,1> NOT FOUND
+ofa_decode_hs<0> NOT FOUND
+ofa_combine NOT FOUND
+rms_norm_mul_q8_1_row<1024> NOT FOUND
+rope_multi NOT FOUND
+gate_sig_mul_q8 NOT FOUND
+k_set_rows<f,l,half> NOT FOUND

@@ -1,0 +1,241 @@
+{
+ "d4096": {
+  "schema_version": "c02.1",
+  "mode": "d4096",
+  "arms": [
+   "A",
+   "B"
+  ],
+  "min_cycles": 5,
+  "n_trials_total": 14,
+  "n_valid": 14,
+  "n_invalid": 0,
+  "n_warmup": 2,
+  "per_cycle": [
+   {
+    "cycle": 1,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 84.984963,
+    "mean_b": 85.3226325,
+    "delta": 0.33766950000000406,
+    "delta_pct": 0.39732852504743565
+   },
+   {
+    "cycle": 2,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 84.9750405,
+    "mean_b": 85.0318575,
+    "delta": 0.05681699999999523,
+    "delta_pct": 0.06686316318966767
+   },
+   {
+    "cycle": 3,
+    "n_a": 2,
+    "n_b": 2,
+    "mean_a": 85.19334599999999,
+    "mean_b": 85.40535750000001,
+    "delta": 0.2120115000000169,
+    "delta_pct": 0.24885922428732332
+   }
+  ],
+  "excluded_cycles": [],
+  "delta": {
+   "n": 3,
+   "mean": 0.2021660000000054,
+   "median": 0.2120115000000169,
+   "stdev": 0.14068486802691826,
+   "ci95": [
+    -0.14734279297214076,
+    0.5516747929721515
+   ],
+   "ci95_halfwidth": 0.34950879297214615
+  },
+  "delta_pct": {
+   "n": 3,
+   "mean": 0.23768363750814223,
+   "median": 0.24885922428732332,
+   "stdev": 0.16551588791364,
+   "ci95": [
+    -0.17351380692021398,
+    0.6488810819364984
+   ],
+   "ci95_halfwidth": 0.4111974444283562
+  },
+  "min_detectable_delta_95": 0.34950879297214615,
+  "verdict": "INSUFFICIENT_CYCLES",
+  "identity_invalid_trials": [],
+  "invalid_trials": [],
+  "all_trials": [
+   {
+    "trial_id": "att1-d4096-c00-p0-A-363d26bb",
+    "mode": "d4096",
+    "cycle": 0,
+    "position": 0,
+    "arm": "A",
+    "warmup": true,
+    "rc": 0,
+    "value": 84.968403,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c00-p0-A-363d26bb.log"
+   },
+   {
+    "trial_id": "att1-d4096-c00-p1-B-f0dc54ce",
+    "mode": "d4096",
+    "cycle": 0,
+    "position": 1,
+    "arm": "B",
+    "warmup": true,
+    "rc": 0,
+    "value": 85.173515,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c00-p1-B-f0dc54ce.log"
+   },
+   {
+    "trial_id": "att1-d4096-c01-p0-A-02e9c5ea",
+    "mode": "d4096",
+    "cycle": 1,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 85.017392,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c01-p0-A-02e9c5ea.log"
+   },
+   {
+    "trial_id": "att1-d4096-c01-p1-B-913de08b",
+    "mode": "d4096",
+    "cycle": 1,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 85.300335,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c01-p1-B-913de08b.log"
+   },
+   {
+    "trial_id": "att1-d4096-c01-p2-B-d920c8f3",
+    "mode": "d4096",
+    "cycle": 1,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 85.34493,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c01-p2-B-d920c8f3.log"
+   },
+   {
+    "trial_id": "att1-d4096-c01-p3-A-c1dfdd6a",
+    "mode": "d4096",
+    "cycle": 1,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.952534,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c01-p3-A-c1dfdd6a.log"
+   },
+   {
+    "trial_id": "att1-d4096-c02-p0-A-52fb0294",
+    "mode": "d4096",
+    "cycle": 2,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.8536,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c02-p0-A-52fb0294.log"
+   },
+   {
+    "trial_id": "att1-d4096-c02-p1-B-19fdab02",
+    "mode": "d4096",
+    "cycle": 2,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 84.940946,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c02-p1-B-19fdab02.log"
+   },
+   {
+    "trial_id": "att1-d4096-c02-p2-B-d9f05614",
+    "mode": "d4096",
+    "cycle": 2,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 85.122769,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c02-p2-B-d9f05614.log"
+   },
+   {
+    "trial_id": "att1-d4096-c02-p3-A-efe70917",
+    "mode": "d4096",
+    "cycle": 2,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 85.096481,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c02-p3-A-efe70917.log"
+   },
+   {
+    "trial_id": "att1-d4096-c03-p0-A-633625ea",
+    "mode": "d4096",
+    "cycle": 3,
+    "position": 0,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 85.086961,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c03-p0-A-633625ea.log"
+   },
+   {
+    "trial_id": "att1-d4096-c03-p1-B-2362128f",
+    "mode": "d4096",
+    "cycle": 3,
+    "position": 1,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 85.224735,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c03-p1-B-2362128f.log"
+   },
+   {
+    "trial_id": "att1-d4096-c03-p2-B-4d4a049b",
+    "mode": "d4096",
+    "cycle": 3,
+    "position": 2,
+    "arm": "B",
+    "warmup": false,
+    "rc": 0,
+    "value": 85.58598,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c03-p2-B-4d4a049b.log"
+   },
+   {
+    "trial_id": "att1-d4096-c03-p3-A-b3dda4ee",
+    "mode": "d4096",
+    "cycle": 3,
+    "position": 3,
+    "arm": "A",
+    "warmup": false,
+    "rc": 0,
+    "value": 85.299731,
+    "status": "VALID",
+    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/g4-att1/att1-d4096-c03-p3-A-b3dda4ee.log"
+   }
+  ]
+ }
+}
