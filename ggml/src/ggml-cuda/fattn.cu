@@ -5,6 +5,7 @@
 #include "fattn-vec.cuh"
 #include "fattn.cuh"
 #include "fattn-occamy.cuh"
+#include "fattn-maxwell-gemm.cuh"
 
 #if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA)
 // one list per group of ncols1 queries: a column is selected if any query of the group can see it
@@ -784,6 +785,9 @@ static void ggml_cuda_flash_attn_ext_stock(ggml_backend_cuda_context & ctx, ggml
 
 void ggml_cuda_flash_attn_ext(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
     ggml_cuda_set_device(ctx.device);
+    if (ggml_cuda_flash_attn_ext_maxwell_gemm(ctx, dst)) {
+        return;
+    }
     // Track F: occamy GQA split-K decode kernel (env-gated, default off)
     const int ofa = ggml_cuda_occamy_fa_mode();
     if (ofa != 0 && ggml_cuda_occamy_fa_applicable(dst)) {
