@@ -1,0 +1,43 @@
+{
+  "status": "download-verified",
+  "verified_utc": "2026-11-12T16:52:31.970159+00:00",
+  "supplement_artifact_commit": "37c17c0c8e8f256188be926a3554a1249d461f77",
+  "branch": "codex/maxwell-gqa-investigation-20261112",
+  "main_commit": "f410f991bff88c2abdc7040ba0b01efed06764f1",
+  "main_unchanged": true,
+  "downloads": [
+    {
+      "path": "experiments/codex-20261112/AUDITOR_SUPPLEMENT_MANIFEST.json",
+      "bytes": 26949,
+      "sha256": "63606439bcbecaf023863b4a64a47dbd4bf7c84f02f1200f3b62b61b7c57fe1b",
+      "http_status": 200,
+      "matches_local": true,
+      "immutable_url": "https://raw.githubusercontent.com/average-user-887/llamaxwell-35/37c17c0c8e8f256188be926a3554a1249d461f77/experiments/codex-20261112/AUDITOR_SUPPLEMENT_MANIFEST.json"
+    },
+    {
+      "path": "experiments/codex-20261112/AUDITOR_INDEX.txt",
+      "bytes": 2955,
+      "sha256": "f248c99aeaf9667ff0d14241656562e4c14cf0bd40f634f74e6ff9ec39058992",
+      "http_status": 200,
+      "matches_local": true,
+      "immutable_url": "https://raw.githubusercontent.com/average-user-887/llamaxwell-35/37c17c0c8e8f256188be926a3554a1249d461f77/experiments/codex-20261112/AUDITOR_INDEX.txt"
+    },
+    {
+      "path": "experiments/codex-20261112/archives/auditor-supplement-01.tar.gz",
+      "bytes": 35733,
+      "sha256": "216cbca66e3aa370c139c7522d996e9c65b65998a65ec6c4cbb4df6448bcdb62",
+      "http_status": 200,
+      "matches_local": true,
+      "immutable_url": "https://raw.githubusercontent.com/average-user-887/llamaxwell-35/37c17c0c8e8f256188be926a3554a1249d461f77/experiments/codex-20261112/archives/auditor-supplement-01.tar.gz"
+    }
+  ],
+  "downloaded_member_hashes_verified": 36,
+  "coverage": {
+    "model_run_directories": 42,
+    "model_run_measurement_files": 514,
+    "operator_analysis_files_inspected": 133,
+    "unarchived_measurement_files": []
+  },
+  "candidate_library_unchanged": true,
+  "production_deployed": false
+}
