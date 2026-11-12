@@ -1,0 +1,102 @@
+BLOCKED FP32 GEMM ATTENTION MICROPROTOTYPE
+Built 2026-11-12 14:34:29 UTC. Root owns all GPU execution.
+
+Purpose
+Test a materially different compute strategy after all five tile-configuration
+variants failed. Compare exact full-context causal attention using FP32 cuBLAS
+with the retained generic four-query attention tile. This is a standalone
+operator prototype, not a serving integration or deployable backend library.
+
+Algorithm
+1. Convert both FP16 KV heads to FP32 once per timed attention call.
+2. For each 64-query tile and GQA group of eight query heads, form QK scores
+   with batched FP32 SGEMM. Every one of the 98,304 context positions is retained.
+3. Apply causal softmax independently over the full context for each query.
+4. Compute V*P as 24 independent 4,096-key segments per query head, using a
+   single batched SGEMM call with 192 matrices per group. Each output matrix
+   has shape 256 x 64; splitting K supplies enough independent GPU work.
+5. Sum all segment outputs in FP32 into the reference's [query, head, dim] order.
+
+Actual model shape
+16 query heads, 2 KV heads, head dimension 256, GQA ratio 8.
+F32 queries, F16 keys and values, no softcap, bias, sinks, or noncausal masks.
+Input generation is deterministic but seed-controlled; arbitrary nonzero seeds
+are accepted. Default seed is 0x12345678. No tensor-core or native FP16 arithmetic
+assumptions: both matrix products explicitly use cublasSgemmBatched.
+
+Bounded root-run command
+Acquire the existing GPU benchmark lock and complete ownership/admission first.
+The container name has the cxm6k- prefix for the root's deadline cleanup guard.
+The image needs -w /w because its historical default working directory is absent
+from our read-only mount. The host does not expose cuBLAS in its linker cache.
+
+docker run --rm --name cxm6k-gemm-probe \
+  --gpus device=<GPU_UUID> \
+  --network none --cpuset-cpus 6-8 --cpus 2 --memory 3g --memory-swap 3g \
+  -v <INVESTIGATION_ROOT>/prefill/gemm:/w:ro \
+  -v <INVESTIGATION_ROOT>/prefill/src/build/bin:/base:ro \
+  -e LD_LIBRARY_PATH=/base -w /w local/m6000-build-tools:20261013 \
+  timeout 180 /w/gemm-attention-probe 1024 98304 2 64 4096
+
+Arguments
+query_count, key_count, ABBA rounds, query tile, split-K length, optional seed.
+Query count: 64..1024 in multiples of 64. History: 4096..131072 in multiples
+of 4096. Rounds: 1..5. Query tile: 32 or 64. Split K: 2048, 4096, or 8192,
+and it must divide the history exactly. The device must be SM52.
+Default representative case: 1024 98304 2 64 4096.
+
+Timing contract
+Steady-state candidate total includes FP16->FP32 KV conversion, both GEMMs,
+causal masking/softmax, split reduction, all launches, and gaps between stages.
+Each stage is separately CUDA-event timed; other_ms is total minus stage sums.
+Each ABBA round is reference/candidate/candidate/reference. The first untimed
+candidate call establishes numerical comparison and warms cuBLAS; its total is
+also reported as cold_candidate_ms. Input transfer, allocation, handle creation,
+and shape-specific pointer-table setup are outside steady-state timing for both
+methods. They are not included in any claimed serving latency. The reference
+uses KV split=1, appropriate to this large-prefill query count.
+
+Memory contract at default shape
+Base device inputs, output, and reference mask: 436,207,616 B (416 MiB).
+FP32 KV scratch: 402,653,184 B (384 MiB).
+Score tile: 201,326,592 B (192 MiB).
+Split-product scratch: 12,582,912 B (12 MiB).
+Shape pointer tables: 153,600 B.
+Explicit cuBLAS workspace: 4,194,304 B (4 MiB).
+Total explicit scratch: 620,910,592 B (592.146484375 MiB), below 1 GiB.
+Total tracked allocation including reference inputs: 1,057,118,208 B.
+CUDA/cuBLAS module and handle overhead is additional. The probe measures the
+before/after free-memory delta across candidate setup and first execution;
+this is NOT a transient peak-memory measurement. Peak remains unknown.
+No full score matrix for all 1024 queries is allocated.
+
+Numerical audit
+QK scores are column-major [key, local_query] per query head. PV split pointers
+advance key rows but retain leading dimension key_count. Partials are stored
+as [head, split, query, dim] and reduced to [query, head, dim]. All heads, queries,
+splits, and context positions are covered; bounds require exact tiling.
+Causal limit is key_count - total_query_count + query_start + local_query,
+exactly matching the reference mask. Future positions are set to probability 0.
+Every output is checked for finiteness, bit differences, maximum absolute error,
+maximum relative error with denominator floor 1e-5, and root-mean-squared error.
+Timing is stopped if any nonfinite occurs, max absolute error exceeds 1e-4,
+or RMSE exceeds 1e-5. These are loose safety stops, not model-quality acceptance.
+FP32 GEMM, non-online softmax, and split summation change arithmetic order, so
+bit equality is not expected. No precision or context truncation is introduced.
+The reference is the existing kernel, not an independent FP64 implementation.
+
+Unsupported integration concerns
+This prototype only handles one contiguous causal sequence and current shape.
+Real serving would need allocation planning, actual mask/layout support, backend
+routing, and model-level quality/latency checks. It is not suitable for direct
+production library replacement. A micro win is only a reason to investigate.
+
+Artifacts and validation
+Binary SHA256: 3d3f52844efb73545433420d59a836df37516a14051f643e9ca056fc14660843
+Source SHA256: db3a6725840ad9980ef9407c00ecc15c850dd442078137a689dece78d7de7a3c
+Build: bash build.sh; the baseline source is mounted read-only from ../src.
+Build image: local/m6000-build-tools:20261013, CUDA 12.8.93 and g++14.
+CPU set 6-8, CPU quota 2, memory limit 6 GiB, one compiler invocation, no GPU,
+no network, no swap. Compile/link passed. Invalid-argument rejection passed
+inside the same image without exposing a GPU. Source/shape/layout review passed.
+No model, service, routing, or original source files were changed by this worker.

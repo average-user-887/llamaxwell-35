@@ -1,0 +1,44 @@
+16K DETERMINISM AND MICROBATCH CONTROLS - 2026-11-12
+
+All scored positions, teacher labels, fixed-token hashes and cache boundaries
+match. Full GPU offload and serving arguments are recorded. These controls
+intentionally use the old isolated checkpoint profile, defaults 32 / 8192,
+not production 16 / 2048. Every run uses the same v3 library SHA256:
+a5dbc3682541ecb4ec5035273a624cd4c6295fdf0aadb856c98e849fcd32a6ed.
+
+1. Original OFF a1 versus repeated OFF a2:
+   All 16 teacher logprobs and every retained probability entry are exactly
+   equal. Both full-vocabulary normalized KL and TV are exactly zero.
+2. Original ON b1 versus repeated ON b2:
+   All 16 teacher logprobs and every retained probability entry are exactly
+   equal. Both full-vocabulary normalized KL and TV are exactly zero.
+3. Baseline OFF microbatch 1024 versus 512:
+   All 16 teacher logprobs and every retained probability entry are exactly
+   equal. Both full-vocabulary normalized KL and TV are exactly zero.
+   Serving arguments match except the intentional -ub 1024 versus -ub 512;
+   both retain GEMM 0. Server logs confirm actual n_ubatch 1024 and 512 at
+   line 168, and actual checkpoint defaults 32 / 8192 at line 207.
+   This does not imply all inputs are microbatch-insensitive.
+4. Repeated OFF a2 versus repeated ON b2:
+   Reproduces the original GEMM numerical difference exactly. Raw top1 agrees
+   16 / 16, but all 16 teacher probabilities change. Mean absolute NLL change
+   is 0.03040851316 nats, maximum 0.30984020233 at position 16390. Mean signed
+   candidate-minus-baseline NLL is +0.02235164955. Full row at position 16384
+   has normalized API KL 0.00737165529 and TV 0.05673073193; the next row has
+   KL 0.00005413148 and TV 0.00070202615.
+
+Interpretation: the observed GEMM drift is deterministic for this fixture,
+not run-to-run noise, and exceeds the observed zero baseline sensitivity
+to the tested 512-versus-1024 microbatch change at every one of 16 labels.
+A numerical ratio is undefined because the control denominator is zero;
+the report uses null, not a fabricated finite improvement factor.
+No arbitrary equivalence threshold is applied. This establishes a real
+implementation-dependent distribution change, not broad task-quality loss.
+
+Only two positions retain full vocabulary; the other 14 retain top 128 plus
+the forced teacher logprob. Therefore exact retained-entry agreement is
+not a claim that every vocabulary probability at every position was saved.
+
+Receipts: quality16-controls-summary.json; quality16-off-repeat-analysis.json;
+quality16-on-repeat-analysis.json; quality16-ubatch512-analysis.json;
+quality16-current-gemm-analysis.json. CPU analyzer: analyze_controls.py.

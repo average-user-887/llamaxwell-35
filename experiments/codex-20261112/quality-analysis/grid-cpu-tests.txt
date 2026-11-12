@@ -1,0 +1,11 @@
+test_bias_preflight_retains_raw_receipts_and_erases (__main__.GridTests.test_bias_preflight_retains_raw_receipts_and_erases) ... ok
+test_cache_skip_is_rejected_before_saving (__main__.GridTests.test_cache_skip_is_rejected_before_saving) ... ok
+test_every_teacher_label_and_prefix_is_exact (__main__.GridTests.test_every_teacher_label_and_prefix_is_exact) ... ok
+test_truncation_is_rejected (__main__.GridTests.test_truncation_is_rejected) ... ok
+test_wrong_cached_prefix_length_is_rejected (__main__.GridTests.test_wrong_cached_prefix_length_is_rejected) ... ok
+test_wrong_selected_label_is_rejected_before_saving (__main__.GridTests.test_wrong_selected_label_is_rejected_before_saving) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.007s
+
+OK

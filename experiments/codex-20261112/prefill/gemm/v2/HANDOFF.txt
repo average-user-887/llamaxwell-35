@@ -1,0 +1,54 @@
+PACKED-GQA FP32 GEMM ATTENTION V2
+Built and frozen 2026-11-12 14:41:22 UTC. No GPU use by this worker.
+
+Change from v1
+The eight query heads sharing each KV head are packed into one contiguous
+matrix per query tile. Default 64-query tile becomes 512 GEMM columns.
+QK is one SGEMM per group rather than eight skinny batched SGEMMs.
+PV uses 24 split GEMMs with output shape256x512, rather than192 GEMMs256x64.
+This preserves exactly the same score and partial-product storage sizes.
+Softmax implementation, query shape, precision, masks, safety thresholds,
+and ABBA methodology are unchanged from v1, allowing attribution.
+
+Packing is performed once per timed candidate call and reported as packing_ms.
+Conversion, packing, QK, softmax, PV, reduction, and submission gaps are all
+included in milliseconds. Setup/allocation/input transfer remain excluded.
+Steady-state-only kernel timings are not end-to-end serving claims.
+
+Actual shape and layout
+16Q heads,2KV heads,D256, full causal context.
+Packed Q layout: [query_tile,KV_group,local_head,local_query,dimension].
+Scores: [local_head,local_query,key], as in v1.
+Partials: [split,local_head,local_query,dimension].
+Reduction output: [global_query,global_head,dimension], as in reference.
+CPU checks proved packing is bijective for64/128/1024queries and32/64tiles,
+and checked split-product addressing for2/24/32splits and boundary dimensions.
+The upcoming GPU comparison remains the numerical acceptance evidence.
+
+Default explicit scratch
+FP32 KV384MiB, scores192MiB, partials12MiB, packed Q16MiB,
+cuBLAS workspace4MiB, pointer tables18KiB.
+Total scratch637,552,640B (608.017578125MiB), below1GiB.
+Including reference inputs/output/mask:1,073,760,256B (1024.017578125MiB).
+CUDA/cuBLAS internal overhead is additional. Memory delta is measured after
+first execution, not a true transient peak. Peak remains unknown.
+
+Root-only bounded invocation after admission/ownership and benchmark lock
+docker run --rm --name cxm6k-gemm-v2-probe \
+  --gpus device=<GPU_UUID> \
+  --network none --cpuset-cpus 6-8 --cpus 2 --memory 3g --memory-swap 3g \
+  -v <INVESTIGATION_ROOT>/prefill/gemm/v2:/w:ro \
+  -v <INVESTIGATION_ROOT>/prefill/src/build/bin:/base:ro \
+  -e LD_LIBRARY_PATH=/base -w /w local/m6000-build-tools:20261013 \
+  timeout 180 /w/gemm-attention-probe 1024 98304 2 64 4096
+
+Arguments unchanged; optional sixth argument specifies a nonzero input seed.
+The previous v1 source/binary and all tile candidates are unchanged.
+
+Binary SHA256:692c9e1d5b96f44b06643d648e217500cb17707d1387ce19e69410c67394a025
+Source SHA256:89c2ad10fb1b162caf18fa439aaa7af928af1bd2b06b33d1722a4c5d5c4f1331
+Build command: bash build.sh. Source include is the read-only frozen../../src.
+CPU build/link and invalid-argument guard pass. One compiler, CPUs6-8,quota2,
+6GiB memory limit, no swap, no network, no GPU. No active build containers.
+No model/service/routing changes or deployment. Real integration remains future
+work even if the isolated operator is faster.

@@ -1,0 +1,58 @@
+Sampled CPU-double attention reference: completed GPU receipts
+2026-11-12. Root ran both GPU invocations; this worker independently reviewed saved records and recomputed aggregate errors on CPU only.
+
+RESULT
+The candidate is closer to CPU double on these synthetic samples, especially the deep-context sample. This is numerical-accuracy evidence for these inputs, NOT model-quality equivalence or acceptance.
+
+Q=1023, K=98048, actual model scale=0.0625
+  Normal samples: 112 outputs, seven query/head selections x 16 dimensions.
+  Stock max absolute error: 9.2995789818806074e-08
+  V4 max absolute error:    1.6811433166353737e-08
+  Stock RMSE:              2.7742823920440080e-08
+  V4 RMSE:                 7.1581424713580716e-09
+  Candidate closer: 90/112; stock closer: 22/112. Stock/V4 RMSE ratio: 3.8757015569.
+  CPU-double elapsed: 327.352659 ms.
+  Whole ordinary-output comparison: 4186112 elements, maxabs 3.93018126488e-07, RMSE 2.74592173327e-08, differing bits 4164412.
+
+Q=65, K=4352, scale=0.0625
+  Normal samples: 112 outputs, seven query/head selections x 16 dimensions.
+  Stock max absolute error: 1.5716530328557798e-07
+  V4 max absolute error:    9.1530108923577880e-08
+  Stock RMSE:              3.5373774790487573e-08
+  V4 RMSE:                 2.9504056527409113e-08
+  Candidate closer: 57/112; stock closer: 55/112. Stock/V4 RMSE ratio: 1.1989461435.
+  CPU-double elapsed: 14.167955 ms.
+  Whole ordinary-output comparison: 262144 elements, maxabs 4.39584255219e-07, RMSE 3.68872024839e-08, differing bits 257267.
+
+SAFETY / INTERPRETATION
+Both runs report ordinary comparison nonfinite=0, candidate all_masked_nonzero=0 and output_guard_changed=0.
+An eighth selection is deliberately all-masked: all 16 candidate samples are finite zero, while the direct stock tile has 16 nonfinite samples. These stock values are explicitly flagged and excluded from normal error aggregates; zero-valued error placeholders are not zero-error claims.
+Independent CPU recalculation from all 112 per-sample error records reproduces each reported maxabs, RMSE and closer-count.
+Inputs are the same seeded synthetic FP32 Q / FP16 K,V, actual-scale additive-mask fixture used by both operators, including finite biases, holes, padded strides, query tails and key tails. They are not extracted model activations.
+The reference uses FP64 QK, softmax and PV on CPU, not GPU FP64. FP64 is a high-precision reference, not exact real arithmetic.
+Only sampled dimensions are compared to double. The full output is checked against stock separately. No timing claim follows from these zero-round diagnostic invocations.
+Closer synthetic arithmetic can still change quantized activations, MoE routing and recurrent/KV state, so it does not erase the observed real-model distribution drift.
+The initial container launch failed before CUDA with a read-only /w working-directory issue; root's -w /tmp retry completed. This was an environment launch failure, not a failed numerical or GPU run. HANDOFF.txt now uses /tmp.
+
+SHA256 PROVENANCE
+Probe source precision-attention-probe.cu:
+  2842fec21a0eb99dcd70130b7e944f4cf997cf4695f36123a40ec088b386cac0
+Probe executable precision-attention-probe:
+  affd8ebb73eb8084f72dee13919cfd2896cb9f496baeff3b923ebda0d829200f
+Frozen v4 libggml-cuda.so:
+  0c7ffbde334686f17f5ed6a1676c0cd966ec931eaa388900befb06af493330d5
+V4 fattn-maxwell-gemm.cuh:
+  7036c3c8f0a3ee2928323094a6b03748dfcd8ffd0de6e7eabb0304e489356c33
+V4 fattn.cu:
+  fae1a6c5f4a4f3667bd1d06e2a8767445e2e979a436cead57b9307e1d7b40598
+Stock fattn-tile.cuh, identical to original BUNDLE3:
+  1fe51794d418315fb02ccb2e99d110575cae7adc214fd1f5b4b59c789fda361c
+Stock fattn-common.cuh, identical to original BUNDLE3:
+  1133e27a530affa200423dbd148a70212bbde395591d6981eb7c0c59d9348a14
+Raw gpu-1023-98048.jsonl:
+  5a021459150229a1827d28bbc385c497c7df793eade170cc816aace60322e441
+Raw gpu-65-4352.jsonl:
+  80090e4d88178aae83c1d270d8b891a9ec5e09372c5f6b5db2e93719d57961f9
+
+Build provenance: build.sh, local/m6000-build-tools:20261013, nvcc 12.8.93, SM52, -O3 -use_fast_math device compilation; CPU double reference does not use device fast math.
+No frozen executable, library or candidate source changed during result review.

@@ -1,0 +1,78 @@
+INDEPENDENT SPECULATION RESULT AUDIT — 2026-11-12, 16:00 CET
+
+Scope: CPU-only reads of root's saved spec-off-a1, spec-on-b1 and spec4-on-b2
+receipts, exact response bytes, actual server logs, and BUNDLE3 source. No model,
+GPU, network or service execution by this worker. Root's original evidence is
+unchanged. An incidental original bytecode-cache write is disclosed separately
+in ORIGINAL-BYTECODE-INCIDENT.txt; no core/source patch was made here.
+
+Decision: reject unchanged ngram serving profile as a speed win. Stop further
+unchanged GPU tests. ng8 fails on the real profile; one ng4 request avoids its
+specific allocation cliff but produces no measured win even on favorable copy
+editing. New implementation work must change verification/memory economics,
+not merely increase ngram lookup acceptance.
+
+Matched root receipts (all actual content/reasoning hashes agree with receipts)
+                  OFF wall   ng4 wall  wall change  proposed/accepted  verify steps
+copy_edit          5.61544s   5.77289s    +2.804%       276 /239             69
+repetitive_client  8.11067s  11.61020s   +43.147%       384 /226             96
+low_reuse_control  9.99458s  11.76651s   +17.729%       216 / 98             54
+
+Slot/API draft counters exactly match per-request Prometheus counter deltas.
+Baseline draft deltas are all0. The ng4 receipts therefore show genuine drafting,
+not an initialization/no-match fallback. Copy acceptance86.594%, client58.854%,
+control45.370%. All three prompts are SHORT actual prefixes despite a configured
+2x98K context allocation; these results do not establish deep decode performance.
+
+copy_edit: output391tokens both arms. Content AND hidden-reasoning bytes are
+identical; expected-module AST passes both. Prediction rate86.415->83.449t/s
+(-3.432%). Prompt time1095.968->1092.334ms is similar. A single sample does not
+resolve a tiny stable2.8% regression statistically; it DOES fail to demonstrate
+a win despite high reuse. No further unchanged repeat is needed for this pilot.
+
+repetitive_client: output594->690tokens, both finish stop. Both raw content and
+reasoning diverge, so task wall increase includes changed answer length. Server
+rate86.363->66.601t/s (-22.882%). Both outputs violate no-fences instruction.
+Static AST passes required constructor/eight methods for both. Baseline factors
+requests into three private helpers; ng4 writes all request bodies explicitly.
+Manual review finds expected verbs/URLs/timeout/status/returns in both, but the
+isolated mock-session checks are prepared rather than falsely claimed executed.
+
+low_reuse_control: both consumed768tokens; baseline finishes stop, ng4 length.
+Candidate ends with an unfinished print(" and is syntax-invalid/incomplete,
+not merely missing a closing Markdown fence. Both include fences, and both
+purported unsorted-overlap examples are actually sorted. Baseline otherwise
+parses after fence removal. Both algorithms retain unmerged list-valued input
+pairs, rather than guaranteeing tuples in output; isolated test covers this.
+Server rate85.958->71.701t/s (-16.586%). The changed/truncated answer is not a
+matched numerical comparison and is not evidence of preserved task quality.
+
+Token identity limitation
+Neither arm retained sampled token IDs: OAI chat ignored return_tokens at top
+level. Exact bytes and equal counts do not prove equal token sequences. The
+reusable audit_results.py reports token_ids_equal=null, never true by inference.
+For a future changed implementation, request verbose=true and retain
+__verbose.tokens or use matched teacher-forced scoring from quality-guidance.txt.
+
+Important instrumentation blind spot
+The common_speculative cumulative log reports copy accepted251 versus slot/API239.
+After the client its cumulative total529 gives delta278 versus slot/API226;
+after control662 gives delta133 versus slot/API98. These discrepancies12/52/35
+match the source's extra replay-token adjustment: common_speculative_accept is
+called with accepted.size()-1, but server-context.cpp:4483 subtracts one more
+when spec_is_replay before accumulating slot n_draft_accepted. The library log
+therefore counts extra replay/anchor tokens as accepted proposals in this path.
+Its #mean acc len and per-position statistics inherit that inflation. Use the
+corrected slot/API counters and committed-output time, not library stats prose.
+
+Artifacts
+OOM-AND-ROLLBACK.txt: crash symbols, exact1940MiB Q4-head expansion, batch cliff,
+                    no supported ngram rollback CLI, VRAM/fusion correctness cost.
+validate_generated_static.py: bounded AST-only host checks; executed successfully
+                             against both baseline and ng4 responses.
+validate_generated_isolated.py: bounded behavioral tests, prepared for root only.
+VALIDATION.txt: exact networkless/read-only/unprivileged CPU-container command.
+audit_results.py: repeatable byte/hash/token-availability/metric-delta audit.
+
+No generated code was executed on the host. Container behavioral checks were
+not run by this worker. The ngram-core implementation was not changed.

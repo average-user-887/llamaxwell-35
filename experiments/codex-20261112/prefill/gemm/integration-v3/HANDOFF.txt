@@ -1,0 +1,44 @@
+Maxwell packed-GQA GEMM attention: isolated backend integration v3
+Frozen: 2026-11-12 15:01 UTC. Root owns GPU/model/service operations.
+
+DELTA FROM FROZEN V2
+Only the masked-softmax kernel changes to two-pass online max/sum, plus its first-use version label.
+The first pass computes each thread's stable running maximum and normalized sum; block reduction reconciles the thread maxima and sums.
+The second pass reads the same score plus actual additive mask and writes normalized probabilities.
+All-masked rows explicitly write zero when the reduced denominator is zero.
+Query padding guard, full key iteration, mask byte stride, PV key tail, FP32 GEMMs, and all support guards are unchanged.
+No synthetic end-causal position is assumed.
+Finite score values with finite or negative-infinity additive masks are supported. Positive-infinity/NaN masks are not newly qualified.
+
+ARTIFACTS
+./src/build/bin/libggml-cuda.so is the v3 candidate shared library.
+./integrated-attention-probe is byte-identical to the v2 probe and loads the candidate through LD_LIBRARY_PATH.
+./from-v2.patch is the small kernel/log delta; ./integration.patch is the complete patch from original BUNDLE3.
+./build.sh performs a CPU-only build with 2 jobs, CPUs6-8, 6GiB RAM/no swap/no network/no GPU.
+The fast CMake target skips dependency regeneration; the script touches fattn.cu so a changed new header is always rebuilt.
+
+ENABLE / ROLLBACK
+GGML_CUDA_FA_MAXWELL_GEMM=1; any other value leaves unchanged stock dispatch.
+First-use label: maxwell_gemm: version=3 softmax=online
+Restore the v2 library or unset the flag to reverse this experiment.
+All v2 source, binary, probe, and patch hashes remain unchanged.
+
+MEMORY
+Exactly the same fixed scratch slab as v2: 633341056 bytes (604.0010986328125 MiB).
+Same pre-existing backend cuBLAS workspace: 4194304 bytes.
+Uses the same context stream, handle, and pool; no added events, synchronization, allocator, or workspace.
+Softmax compiler resources remain 18 registers, 64 shared bytes, zero spills.
+
+ROOT-ONLY PROBES
+Use the frozen v2 root invocation, replacing integration with integration-v3 and container name with cxm6k-gemm-integration-v3.
+First boundary: integrated-attention-probe 64 4096 1
+Second realistic irregular shape: integrated-attention-probe 1023 98048 1
+The unchanged probe verifies arbitrary additive masks, padded row/head strides, masked holes/terminal keys, zero all-masked output, key/query tails, output canary, finiteness, and numerical error.
+Do not run concurrent GPU workloads; parent holds gpu-bench.lock.
+
+STATUS AT FREEZE
+CPU build passed and git diff --check passed. GPU validation pending root.
+The independently measured standalone online-softmax prototype reduced attention from about457ms to406ms; this does not qualify the actual-mask integration.
+V2 integrated irregular probe already passed at about474ms vs662ms stock, maxabs2.846e-6, RMS8.798e-8, no nonfinite/all-mask/canary failures.
+Real-model baseline/candidate comparison is owned by root and still in progress.
+No GPU/model/service operations, commits, or pushes by this worker.

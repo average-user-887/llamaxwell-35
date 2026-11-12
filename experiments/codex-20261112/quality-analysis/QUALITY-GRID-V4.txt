@@ -1,0 +1,88 @@
+V4 STRATIFIED QUALITY GRID - 2026-11-12
+
+IMPORTANT NEGATIVE EVIDENCE: NOT QUALITY-EQUIVALENT
+
+At position 65,536, normalized full-vocabulary API KL(off || on) is
+0.293615293 nats and total variation is 0.208523584: 20.85% probability mass
+moves, despite unchanged top1. Keep this finding prominent in publication.
+The candidate remains experimental; 64 / 64 top1 agreement and a slightly
+lower mean teacher NLL do NOT establish numerical or task-quality equivalence.
+This screen also does not by itself prove degraded task quality or causation.
+
+What moved at 65,536 (saved token strings, normalized API probabilities):
+  token 13016, " accuracy": 0.674864259 -> 0.804704704; remains raw top1.
+  token  4557, " loss":     0.240305999 -> 0.035389117; falls 20.4917 points.
+  token   220, " ":        0.070785197 -> 0.149388700; this is the teacher.
+The latter two alternatives swap rank. Teacher NLL improves from 2.648052692
+to 1.901160359, a change of -0.746892333 nats, but the teacher remains non-top1.
+These saved alternatives explain the metric contrast without guessing why
+the implementation changes this distribution.
+
+PAIRED RESULT
+
+64 fixed teacher labels: 16 each at 16,384 / 32,768 / 65,536 / 98,000.
+Raw top1 agrees between arms on 64 / 64. Teacher equals raw top1 on 59 / 64
+in both arms; agreement is not 64 / 64 teacher accuracy or task accuracy.
+Mean teacher NLL: OFF 0.2601810684, ON 0.2549830636.
+Mean signed ON-minus-OFF NLL: -0.0051980048.
+Mean absolute NLL change: 0.0290011369.
+Maximum absolute NLL change: 0.7468923330 at 65,536.
+
+Checkpoint    Mean signed NLL delta    Mean absolute delta    Max absolute delta
+16,384        +0.0223516496             0.0304085132           0.3098402023
+32,768        +0.0028894639             0.0317596656           0.2738466263
+65,536        -0.0482361916             0.0486801514           0.7468923330
+98,000        +0.0022030589             0.0051562176           0.0308741331
+
+Full-vocabulary distributions (all 248,320 IDs once at each checkpoint):
+Position      KL(off || on), nats      Total variation
+16,384        0.00737165529            0.05673073193
+32,768        0.00022257677            0.00083855554
+65,536        0.29361529283            0.20852358431
+98,000        0.00000576035            0.00002091865
+No zero-probability sentinels occur in these four paired vectors. Small
+float32 probability normalization errors are corrected before comparison.
+These are normalized API-distribution KL values, not original-logit KL.
+
+VALIDATED PROVENANCE AND PROFILE
+
+Both arms use v4 CUDA library SHA256:
+0c7ffbde334686f17f5ed6a1676c0cd966ec931eaa388900befb06af493330d5.
+GEMM 0 versus 1 is the intended treatment; other normalized serving argv
+and environment settings match. Full GPU offload is recorded. Candidate
+server.log line 347 confirms version 4, online softmax, one-head KV staging.
+Actual server logs confirm ubatch 1024 (line 168) and production checkpoint
+count 16 / minimum spacing 2048 (line 207) in both arms. Batch is 2048,
+total context 196608, slots 2. Cache RAM remains 0 for private isolation.
+This reproduces production checkpoint settings, NOT every production setting.
+
+Harness SHA256:
+093969d0bb44850b5134df28ca8f7efaad0ee9c33b48ffb2c6a08140cffe8829.
+Independently recomputed fixed-token SHA256:
+89bc5127c010d995496558695f313eca103c544c1ec7071beb25928d65028e77.
+Every position/label/prefix hash and cache boundary matches the fixed fixture.
+The initially erased trajectory is built entirely under each arm; no saved
+stock KV is restored. Scored blocks extend to 16,399 / 32,783 / 65,551 /
+98,015. Intervening stages are 49,167 from cache 32,783 and 81,935 from cache
+65,551, each adding exactly 16,384 tokens. The final 98K checkpoint appends
+16,065 tokens from 81,935. Generated continuations never replace teacher tokens.
+
+Raw reference and forced 64-token probability preflights are retained and
+independently recomputed. Label 1000 is outside reference top128; forced-label
+and top-probability differences are exactly zero in both arms. This validates
+extraction semantics, not GEMM quality at full context.
+
+LIMITS / NEXT DECISION
+
+One fixture, 64 labels and four full distributions remain a bounded screen.
+Its multiple checkpoint requests are not a single-request TTFT benchmark.
+The 98K hex/digit-heavy region is particularly low entropy; do not let its
+small KL obscure the 65K distribution movement. The separate deterministic
+controls establish that the earlier 16K difference is reproducible, not run
+noise or tested baseline 512-versus-1024 microbatch sensitivity. This grid
+uses a different checkpoint profile and trajectory from that control.
+Root's semantic retrieval receipts must be reported separately; passing
+retrievals do not erase this negative numerical evidence.
+
+Receipt: quality-grid-v4-analysis.json. Source receipts are model-runs/
+quality-grid-off-a1 and quality-grid-on-b1. CPU-only analyzer: analyze_grid.py.

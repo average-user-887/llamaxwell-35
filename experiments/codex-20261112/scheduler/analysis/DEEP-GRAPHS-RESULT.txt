@@ -1,0 +1,134 @@
+DEEP TWO-SLOT CUDA GRAPHS: CURRENT BUNDLE3 PATH FAILS CAPTURE
+2026-11-12. CPU-only source/evidence closeout; no fix, build or GPU launch.
+
+DECISION
+Do not enable GGML_CUDA_MAXWELL_GRAPHS for the current BUNDLE3 N2SPLIT
+serving combination. The paired ON run aborts during capture, not merely
+with a small timing regression. No graph-on throughput or quality result
+exists. Earlier E07 replay evidence does not qualify BUNDLE3 N2SPLIT.
+Leave the Maxwell graph override absent; setting it to "0" still enables
+the presence-based architecture override.
+
+MATCHED EXPERIMENT AND OBSERVATION
+Raw directories, relative to the investigation/evidence root:
+  model-runs/deep-graphs-off-v5-a1
+  model-runs/deep-graphs-on-v5-b1
+Both use the same frozen v4 CUDA library, GEMM=0, N2SPLIT=1, full GPU
+offload, two slots, batch 2048, ubatch 1024, cache RAM 0, verbosity 5 and
+production checkpoints 16 / minimum spacing 2048. Other environment
+entries match exactly. OFF omits GGML_CUDA_MAXWELL_GRAPHS; ON sets it to 1.
+Neither sets GGML_CUDA_DISABLE_GRAPHS or GGML_CUDA_GRAPH_OPT.
+
+Each pair restores two 90,000-token states, submits the same 90,001-token
+prompt concurrently, and requests 512 non-streamed generated tokens each.
+OFF repeat 0: pair wall 16.554469298 s, start skew 4.378333 ms.
+OFF repeat 1: pair wall 16.537300694 s, start skew 3.914363 ms.
+All four OFF requests return HTTP 200, cache_n=90000, prompt_n=1 and
+predicted_n=512; concurrent active slots are observed. Token IDs and content
+match between the two slots WITHIN each repeat. They DO NOT match between
+repeats, as retained in deep-graphs-repeat-comparison.json. The reason for
+that repeat difference is not established here; do not claim deterministic
+baseline output or use it as a graph-on quality comparison.
+
+ON repeat 0 fails both requests with HTTP 502 after the server aborts.
+Its pair wall and successful output/quality comparison are unavailable.
+server.log:5837-5841 records, in order:
+  CUDA Graph id 57 reused
+  ggml_backend_cuda_graph_compute: CUDA graph warmup complete
+  CUDA error: operation not permitted when stream is capturing
+  function ggml_cuda_occamy_gdn_split2, occamy-gdn.cu:1164
+  cudaStreamSynchronize(st)
+The pair-only log records the same failure immediately after its second
+warmup-complete message. The attempted capture is confirmed by the error;
+successful paired capture/replay is NOT confirmed. CUDA API trace/counts
+remain unavailable. Warmup or graph-UID reuse alone is not successful replay.
+
+SOURCE-GROUNDED CAUSE
+Source paths below are relative to prefill/gemm/integration-v4/src/.
+ggml/src/ggml-cuda/ggml-cuda.cu:2836-2866 checks MUL_MAT_ID synchronization
+compatibility but does not reject the N2SPLIT host readback path.
+Its line 3812 invokes ggml_cuda_occamy_gdn_split2 for a matched two-sequence
+window; lines 5275-5277 flush staged inputs and advance the GDN generation.
+Lines 5298-5300 mark capture ready, and line 5325 starts relaxed capture
+on the compute stream before evaluating the graph.
+
+ggml/src/ggml-cuda/occamy-gdn.cu:1151-1165 increments a per-compute generation
+and caches two s_copy values on the host once per generation/input pointer.
+The refresh performs device-to-host cudaMemcpyAsync followed by
+cudaStreamSynchronize on that same capturing stream. The observed failure
+is exactly this synchronization, not the new attention GEMM (disabled here).
+
+WHY "CACHE IT ONCE" OR "REMOVE THE SYNC" IS NOT A CORRECT FIX
+s_copy is mutable recurrent-state row-selection data, not constant model
+metadata. src/llama-graph.cpp:1208-1215 refreshes it from recurrent memory;
+can_reuse at 1230-1235 checks shape, head and zero-row metadata, not the
+contents of the row-selection array. src/llama-memory-recurrent.cpp:1368
+derives it from state cells and replay/checkpoint indexing.
+
+occamy-gdn.cu:1176 branches on the HOST values to omit or include a gather;
+1182-1183 hard-code source addresses using those values into CUDA memcpy
+nodes. A graph captured for [head, head+1] omits gather entirely. If later
+row selections change to a reorder, fork [r,r] or zeroed joiner, replaying
+that graph would still use the captured branch and addresses. This is a
+source-proven hazard of the proposed bypass, not an observed silent-error
+result from the aborted run.
+
+ggml-cuda.cu:2879-2883 treats matching graph UID as no property update;
+4980 skips host graph traversal on replay, and 5245 launches the stored
+graph. Advancing the host cache generation does not execute split2 again
+during replay. Moving the host read outside capture only at initial capture
+therefore does not solve dynamic row selection. Dropping synchronization
+also permits stale host values before an asynchronous copy completes.
+
+REAL FIX OPTIONS, NOT IMPLEMENTED OR VALIDATED
+1. Preferred replay-safe design: make the row selection device data. Capture
+   a GPU gather which reads current s_copy on every execution, gathers BOTH
+   conv/SSM source rows into temporary storage before either destination is
+   overwritten, then copies/uses the staged rows and launches paired GDN.
+   Preserve current zero-row-before-gather ordering and bounds/eligibility
+   semantics. Two-phase staging is essential for reorder and [r,r] aliasing;
+   an unsynchronized in-place gather is not equivalent. Ensure captured
+   temporary addresses and initialization remain valid across replay.
+2. Alternative: validate current host-side row selections before every
+   replay and include all capture-time branching/address data in the graph
+   key or executable update/invalidation contract. Input ordering and
+   graph lifetime must be explicit; any required readback/sync is outside
+   capture and its overhead must be included. This is not a cache-once fix.
+3. Conservative containment: reject graph capture for incompatible N2SPLIT
+   windows before BeginCapture and execute eagerly. The existing global
+   graph-off default already avoids this crash; a narrower compatibility
+   guard is a future code change, not applied here.
+
+Any real fix needs paired replay checks covering identity rows, swaps,
+copy/fork, joining/reset slots and checkpoint rollback, including recurrent
+state/output equality and scratch lifetime. Audit other lazy initialization
+on the captured path too. Historical single/shallow E07 qualification and
+successful single-sequence warmup cannot replace those tests. The previous
+prefill/GRAPH-HISTORY.txt was a provisional pre-run assessment; this current
+failed experiment supersedes its "no source blocker identified" statement.
+
+IDENTITY / ORIGINAL SHA256
+These are original local-file hashes. Public sanitization may change receipt
+bytes; consult the publication manifest for original-to-published hashes.
+CUDA library:
+  0c7ffbde334686f17f5ed6a1676c0cd966ec931eaa388900befb06af493330d5
+model_deep_graphs.py:
+  a6b70b6bf3dd2d2d72f38b9b83ca87d6120099ae75d32512bf54673ddaab8c3d
+ggml/src/ggml-cuda/occamy-gdn.cu:
+  48e0af262fc18966674a75371c200c693d56114af9cc8f1c755bb19b984c4a92
+ggml/src/ggml-cuda/ggml-cuda.cu:
+  0a743d6aefbb07e58a94fd853c76cb3560b509f48f1cdcfa18a66b2597519f4c
+src/llama-graph.cpp:
+  86da19a980374c050b40516d4cc6595e3f9c5ff3cfb7ec91291726c25e7b3938
+src/llama-memory-recurrent.cpp:
+  51172be188d0eece2267c9105dc5a8d2c3ef7ebd58e88a6f562ac6ee36326f98
+model-runs/deep-graphs-off-v5-a1/deep-graphs-0.json:
+  c6030f2233d21946a55161f1fcf05bebe9db1fc65d90ff785ea85ce4806016f8
+model-runs/deep-graphs-off-v5-a1/deep-graphs-1.json:
+  8e83838cd765c7b8620a2307082948a4d89588e4a2451e296f231f5036674df5
+model-runs/deep-graphs-off-v5-a1/deep-graphs-repeat-comparison.json:
+  db139474007fa8066bc3de04d4e30e1f484fd64ed740536a6525e5cc91c6abf0
+model-runs/deep-graphs-on-v5-b1/deep-graphs-0.json:
+  d8c9802b7c1534bcfd96f1d88d01794f889b2bc1b994cd855bc166c6b4432874
+model-runs/deep-graphs-on-v5-b1/server.log:
+  2a83f3dbbf062c401b6af60fce43359bc9f581a3c9196d250d9ee89d65ceb193

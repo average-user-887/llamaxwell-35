@@ -1,0 +1,62 @@
+Maxwell packed-GQA GEMM attention: isolated backend integration v2
+Frozen: 2026-11-12 14:56 UTC. GPU execution belongs to root only.
+
+DELIVERABLE
+Source copy: ./src, copied with timestamps from original BUNDLE3 2436f7554c0c8d70afc9acbcce85b2457193a516.
+Candidate CUDA library: ./src/build/bin/libggml-cuda.so
+Patch: ./integration.patch
+Operator probe: ./integrated-attention-probe
+Build: ./build.sh (CPU-only; 2 jobs, CPUs 6-8, 6 GiB RAM, no swap/network/GPU).
+The copied CMake cache requires /src and /b mappings; use ggml-cuda/fast to avoid unrelated legacy reconfiguration failures.
+
+ENABLE / ROLLBACK
+GGML_CUDA_FA_MAXWELL_GEMM=1 enables the candidate for supported operations.
+Unset it or set any other value to use unchanged baseline dispatch.
+All original Occamy decode modes remain below this new prefill-only dispatch.
+This is an experimental library, not production acceptance. Root must route model loads through existing approved machinery.
+
+NARROW SUPPORT
+SM52 only; Q/output FP32, K/V FP16; head dimension 256; 16 query heads / 2 KV heads.
+Single sequence, contiguous [D,H,Q,1] output; 64-1024 queries, 4096-98304 keys.
+Arbitrary query tails are zero-packed and excluded from output writes.
+Arbitrary key tails use a separate final PV GEMM; no padded or truncated KV reads.
+Q/K/V row and head strides are consumed directly; dim0 must be contiguous.
+Optional additive FP16 mask uses actual row stride, with ne0>=keys and ne1>=queries, ne2=ne3=1.
+No sinks, ALiBi/max_bias, softcap, or sparse n_kv_max. Unsupported cases fall back.
+All-mask-negative-infinity rows produce exact zero rather than NaN.
+Scale is read from the actual GGML operator; all GEMMs and reductions use FP32.
+Reduction order differs from baseline, so this is not bit-exact.
+
+ALGORITHM / MEMORY
+Converts FP16 KV to FP32 once per operation; packs 8 GQA heads into 512-column GEMMs.
+64-query tiles; QK SGEMM, full-context masked softmax, split-4096 PV batched SGEMM, final reduction.
+One fixed pool slab: 633341056 bytes (604.0010986328125 MiB), independent of actual supported Q/K.
+Breakdown: FP32 KV 384 MiB, packed Q 16 MiB, scores 192 MiB, PV partials 12 MiB, pointer tables 1152 bytes.
+Uses the backend's current CUDA stream, cuBLAS handle, and existing 4 MiB cuBLAS workspace.
+Does not create events or synchronize in the hot path; existing allocator/handle creation can perform their normal initialization.
+First use logs shape, mask stride, split tail, requested slab bytes, pool allocation bytes, and existing cuBLAS workspace bytes.
+The context's VMM pool may already have reusable capacity; real high-water VRAM requires root measurement.
+
+PROBE PURPOSE
+The probe invokes the actual integrated shared-library dispatcher, not a separate copy of the candidate.
+Defaults: Q=1023, K=98048, one ABBA timing round after correctness.
+Tests padded/noncontiguous Q/K/V rows and heads, mask row padding, finite additive mask bias, scattered masked holes, 128 terminal masked keys, arbitrary query tail, and 3840-key PV tail.
+Uses a non-default scale of 0.09375.
+The last query row is fully masked; it is independently required to produce all zero.
+The stock reference produces 0/0 on that row, so it is excluded from ordinary error statistics only.
+All other outputs must be finite; reports max absolute error, floored relative error, RMS, and bit differences.
+An output canary must stay unchanged. Safety thresholds maxabs<=1e-4 and RMS<=1e-5 are not model-quality acceptance.
+Requires --gpus explicit M6000 UUID and LD_LIBRARY_PATH pointing to candidate build/bin.
+
+ROOT-ONLY EXAMPLE
+work=<INVESTIGATION_ROOT>/prefill/gemm/integration
+timeout 90s docker run --rm --name cxm6k-gemm-integration --network none --gpus 'device=<GPU_UUID>' --cpuset-cpus 6-8 --cpus 2 --memory 3g --memory-swap 3g -e LD_LIBRARY_PATH=/b -v "$work:/w:ro" -v "$work/src/build/bin:/b:ro" -w /w --entrypoint /w/integrated-attention-probe local/m6000-build-tools:20261013 1023 98048 1
+Optional small boundary check: same command with 65 4352 1.
+
+VERIFICATION STATUS AT FREEZE
+CPU-only build succeeded. New kernels use 14-29 registers and no spills; mask softmax has 64 bytes shared memory.
+git diff --check passed. GPU numerical/model validation pending root.
+Prior standalone packed-GQA v2 evidence: 456.8-457.6 ms candidate vs 671.6-678.5 ms stock at Q1024/K98304; maxabs3.53e-7, RMS2.55e-8, no nonfinite values.
+That result uses synthetic contiguous causal masks; it does not validate this integration's general masks/strides/tails.
+No GPU/model/service operations were performed by this worker. No commit or push.
+Original BUNDLE3 source files untouched by this worker; other task activity regenerated tracked Python bytecode in the original tree, left untouched.

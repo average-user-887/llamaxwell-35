@@ -1,0 +1,36 @@
+Deep mixed: derived client-visible-only comparison
+
+Original strict receipts are unchanged. Cap1024 remains strict-failed; this
+derived view accepts only its client-observation metrics after all server,
+cache, completion, raw-SSE, and timestamp checks pass. Token identity and
+semantic quality equivalence remain unavailable, not true.
+
+Arm                  TTFT(s)     Max SSE gap(s)     Combined wall(s)
+Off/cap0             32.058909   15.777599          41.869754
+GEMM/cap0            23.659180   11.628429          33.432767
+GEMM/cap1024         23.762781    5.954646          33.619489
+
+Cap1024 vs GEMM-only: visible maximum stall -48.7923%, TTFT +0.4379%,
+combined wall +0.5585%. Versus off: stall -62.2589%, TTFT -25.8778%,
+wall -19.7046%. Single samples, not statistical estimates.
+
+The windows run from foreground request start to first foreground ID-bearing
+SSE event. Every background interval intersecting the window is included,
+even if it crosses a boundary. The JSON includes full interval durations,
+clipped overlap, window bounds, event indices and crossing flags. These are
+client arrival gaps, never internal GPU/token-completion timings.
+
+All arms preserve90000 cached tokens in both slots, generate512/32 tokens,
+report no truncation and complete normally. Cap1024 emits510 background IDs;
+all other streams emit their requested count. Its token_ids_complete=false,
+exact_token_identity=null. UTF-8 stream coalescing is source-grounded; missing
+IDs are not reconstructed. Its background text differs from off; no quality
+equivalence is claimed. GEMM dispatch q1022/k91136 is logged under cap1024.
+
+Same v4 library and scheduler runtime; checkpoint32/minstep8192, not production
+16/2048. Cap512 has no receipt in this comparison.
+
+Companion receipt: deep-mixed-client-visible-derived.json
+Optional runner flag: --client-visible-only
+Default remains strict. Opt-in status is accepted-client-visible-only, with
+completeness recorded per stream; any other validation failure remains fatal.

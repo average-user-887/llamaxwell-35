@@ -1,0 +1,45 @@
+model_spec.py opt-in route/token update, 2026-11-12 16:17 CET
+
+Modified file: ../model_spec.py
+SHA256: f170ebb74a2bd9a9cc343d151da4ac3d51e5ed0869c7a1664e015c24f8d58ab6
+
+--library PATH accepts a typed pathlib.Path, resolves it, and rejects a missing
+file before constructing BenchRoute. Default remains the approved BUNDLE3
+CUDA library. --head9 is a boolean flag, default false. The extra_env override
+is always explicitly GGML_CUDA_MAXWELL_HEAD9_MMVQ='0' or '1', preventing an
+inherited production environment value from accidentally enabling this path.
+--head9 does not prove that an arbitrary supplied library implements the flag;
+root must use and retain the known candidate library hash in route identity.
+
+OAI requests now set verbose=true as well as the existing return_tokens=true.
+BUNDLE3 server-schema.cpp:17/34 declares both booleans; server-task.cpp:445
+embeds the native result in __verbose; that result includes tokens at line339.
+server-context.cpp:1977 appends token IDs when return_tokens is set. Full raw
+responses remain saved, preserving __verbose.tokens when provided by runtime.
+Receipts add head9, returned_token_count and tokens_sha256. The token hash is
+SHA256 of the integer list serialized as compact JSON, without a trailing
+newline. Missing/malformed token data is null, not invented; an empty list is
+reported as count0 and the hash of []. Existing content/reasoning hashes,
+finish_reason, usage, timing, metric snapshots and semantic validation remain.
+
+CPU-only validation: eight mocked runner scenarios pass. No real route, GPU,
+service, model or network calls occur; BenchRoute is replaced in sys.modules.
+Temporary mock files stay within head9 and are removed after each case.
+1. Default original library and explicit head9 off.
+2. Candidate library, head9 on, native ng8 mode.
+3. Candidate library, head9 off, ng4, absent verbose/token data.
+4. Malformed token list maps to unknown.
+5. Empty token list remains empty rather than fabricated.
+6. Existing copy-edit semantic validation status is retained.
+7. Missing library fails before route creation.
+8. Raw --head9 yes is rejected; the option is a boolean, not shell/env text.
+--help runs successfully. No changes to BenchRoute, production configuration,
+original sources, frozen CUDA library/probe, or other agents' files.
+
+Root example, use a new unique tag:
+python3 -B model_spec.py --tag head9-ng8-a1 --mode ngram-simple --draft-count 8 \
+  --library head9/build/bin/libggml-cuda.so --head9 --prompts copy_edit
+
+For a same-library non-speculative control, use --mode none and omit --head9.
+The verbose response adds serialization/payload work compared with older saved
+arms; use the updated harness consistently for strict performance comparisons.

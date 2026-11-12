@@ -1,0 +1,53 @@
+Maxwell packed-GQA GEMM attention: isolated backend integration v4
+Frozen: 2026-11-12 15:07 UTC. Root owns every GPU/model/service operation.
+
+DELIVERABLE
+Candidate: ./src/build/bin/libggml-cuda.so
+Default-off flag remains GGML_CUDA_FA_MAXWELL_GEMM=1.
+Complete patch: ./integration.patch. Delta from frozen v3: ./from-v3.patch.
+Dump-capable operator probe: ./integrated-attention-probe, source alongside it.
+Build: ./build.sh, CPU-only, 2 jobs, CPUs6-8, 6GiB RAM/no swap/no network/no GPU.
+Build forces the existing fattn.cu object to refresh because the CMake fast target skips dependency regeneration.
+
+RESOURCE CHANGE
+Process one KV group completely before converting the next KV group into the same FP32 buffers.
+Requested fixed slab: 432013888 bytes = 412.00054931640625 MiB.
+VMM 128-byte-aligned allocation: 432013952 bytes.
+V3 requested slab: 633341056 bytes = 604.0010986328125 MiB.
+Requested saving: 201327168 bytes = 192 MiB + 576 bytes.
+Breakdown: FP32 one-head K/V192MiB, packed queries16MiB, scores192MiB, PV partials12MiB, pointer tables576B.
+Existing cuBLAS workspace remains4MiB; it is not part of the slab.
+The backend pool may already retain a larger high-water capacity; compare freshly started processes for actual VRAM savings.
+
+UNCHANGED PER-OUTPUT COMPUTATION
+Old global order: query tile outer, KV group inner. New global order: KV group outer, query tile inner.
+For every output (query,head,dimension), its KV group and packed-Q column are unchanged.
+FP16-to-FP32 conversion is exact and reads the same original row/head strides; each KV element is still converted once per operator call.
+QK SGEMM dimensions, leading dimensions, scalar scale, transposes, FP32 inputs, and beta0 are unchanged.
+Online actual-mask softmax kernel is byte-for-byte unchanged from v3.
+PV SGEMM shapes, split4096 boundaries, final key-tail SGEMM, leading dimensions, and scalars are unchanged.
+Partial reduction still sums splits in ascending order with the same kernel.
+Only physical scratch offsets, pointer tables, and scheduling order between independent head groups change.
+All work uses the same context stream, so the next group's conversion cannot overwrite scratch before previous group GEMMs/reductions finish.
+Bit-identical output is expected but must be demonstrated by the root's paired-library dump comparison; it is not claimed from source alone.
+
+PROBE / BYTE COMPARISON
+CLI: integrated-attention-probe [queries64..1024] [keys4096..98304,multiple256] [rounds0..3] [optional_output_f32_path]
+Rounds0 still performs baseline/candidate numerical, all-masked-row, and output-canary checks; it skips ABBA timing.
+Optional dump writes only actual candidate output elements, including the all-masked zero row, excluding the guard.
+The format is raw native FP32 ([query,head,dimension], little-endian on this x86 host).
+At1023queries the dump is16760832bytes.
+Use THIS SAME executable twice: first with frozen v3 build/bin mounted at /b, then with v4 build/bin mounted at /b; LD_LIBRARY_PATH=/b selects the library.
+Keep all other container/runtime arguments identical. Mount a writable output directory at /out.
+Example arguments: 1023 98048 0 /out/v3.f32, then 1023 98048 0 /out/v4.f32.
+Compare with cmp /path/to/output/v3.f32 /path/to/output/v4.f32 and save both hashes.
+Repeat the small boundary at64queries/4096keys if desired; 65/4352 also covers both tails at small size.
+All GPU launches must be serialized by root under gpu-bench.lock, with explicit M6000 UUID and cxm6k- container prefix.
+UUID: <GPU_UUID>.
+
+VALIDATION AT FREEZE
+CPU build and diff checks passed. CUDA conversion uses22registers without spills; unchanged softmax uses18registers/64Bshared/no spills.
+139264 CPU mapping checks over Q64/65/1023/1024 and K4096/4352/98048/98304 verified packed query indices, output mapping, key tails, and partial capacity.
+Actual GPU bit comparison, timing, and model-quality checks are pending root.
+Frozen v2 and v3 library hashes rechecked unchanged.
+No GPU/model/service operations, original-tree writes, Python execution, commits, or pushes by this worker. No active build container remains.

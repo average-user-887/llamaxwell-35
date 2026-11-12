@@ -1,0 +1,68 @@
+BOUNDED GENERATED-CODE CHECKS — 2026-11-12
+
+No generated code was executed on the host by this worker. The static checker
+uses ast.parse/literal_eval only, caps input bytes and AST node count, reports
+format violations separately, and NEVER labels method presence semantic PASS.
+
+Host-safe static checks:
+I=<INVESTIGATION_ROOT>
+python3 "$I/speculation/validate_generated_static.py" repetitive_client "$I/model-runs/spec-off-a1/repetitive_client-0-response.json"
+python3 "$I/speculation/validate_generated_static.py" low_reuse_control "$I/model-runs/spec-off-a1/low_reuse_control-0-response.json"
+
+Observed baseline: both violate the no-Markdown-fences instruction. Client has
+all nine required constructor/method definitions; functional behavior still
+needs testing. Merge has four assertions, but the overlap example is ALREADY
+sorted, so the explicitly requested unsorted-overlap example is missing.
+Source review also finds that list-valued input pairs remain list-valued in
+unmerged output, violating the output-tuples requirement for those inputs.
+Tuple-input happy paths look plausible; do not equate that with complete PASS.
+
+Root-only isolated behavior check, subsequently run by root:
+Choose fixture repetitive_client or low_reuse_control and matching response.
+This uses an already-local Python image, never GPU devices, network,
+host services, a Docker socket, writable host mounts, or model files.
+The script refuses execution without both its explicit marker and /.dockerenv.
+It executes the generated code ONLY INSIDE the disposable restricted container.
+
+FIXTURE=repetitive_client
+RESPONSE="$I/model-runs/spec-off-a1/$FIXTURE-0-response.json"
+timeout --signal=TERM --kill-after=3 15 docker run --rm --network none \
+  --read-only --cap-drop ALL --security-opt no-new-privileges \
+  --user 65534:65534 --cpuset-cpus 9 --cpus 1 --memory 128m --memory-swap 128m \
+  --pids-limit 32 --ulimit cpu=4:5 --ulimit nofile=64:64 \
+  --tmpfs /tmp:rw,noexec,nosuid,nodev,size=16m \
+  -e CODEX_ISOLATED_GENERATED_TEST=1 -e PYTHONDONTWRITEBYTECODE=1 \
+  -v "$I/speculation/validate_generated_isolated.py:/validator.py:ro" \
+  -v "$RESPONSE:/response.json:ro" \
+  --entrypoint python3 sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b \
+  /validator.py "$FIXTURE"
+
+Exit0 requires behavior and format; exit4 means completed checks with a failure.
+Other exits/timeouts mean unavailable/incomplete, NOT a semantic result. Run the
+static checker as well: the isolated checker tests function behavior, not whether
+the four embedded assertion examples cover every specifically requested category.
+
+Client tests: eight methods, all verbs/URLs, trailing-slash normalization,
+timeout10, json payload identity/value, payload preservation, status-before-JSON,
+return values, delete no-JSON, and propagation of failed status for every method.
+Merge tests: empty, unsorted overlap, touching, singleton, nested, negative,
+duplicates, generator, invalid interval, unchanged input, and list pairs to tuples.
+Successful fenced-code extraction for testing does NOT forgive format failure.
+
+CPU-only receipt/byte/counter audit, reusable for the next completed candidate:
+python3 "$I/speculation/audit_results.py" "$I/model-runs/spec-off-a1" "$I/model-runs/spec-on-b1"
+
+The saved baseline OAI responses contain no token-ID array. return_tokens=true
+does not expose it at OAI top level. Byte equality and token counts do NOT prove
+token-ID equality. For a FUTURE OAI request add verbose=true; inspected BUNDLE3
+server-task.cpp:443 adds __verbose with native tokens, and server-schema.cpp:17
+accepts the flag. Existing receipts cannot retroactively recover exact sampled
+IDs, especially hidden thinking/special-token boundaries, by retokenizing text.
+
+Root execution receipt at 16:04 CET: both baseline and ng4 client outputs pass
+all16 behavioral checks but fail the no-fences format requirement. Baseline
+merge passes9/10 behavior checks and fails list-pairs-to-tuples, plus formatting.
+Ng4 merge is truncated and not a complete fenced block, so execution is refused;
+it is not a semantic pass. Results live in each model-runs arm as
+*-isolated-validation-v2.json. Initial attempted build-image runs failed because
+that image has no Python interpreter; those failure logs are retained separately.

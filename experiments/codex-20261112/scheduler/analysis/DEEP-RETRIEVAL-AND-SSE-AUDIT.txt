@@ -1,0 +1,130 @@
+CPU-only independent audit, 2026-11-12, completed before 16:50 CET
+
+Scope: review root's retrieval harness and saved deep-mixed records. No GPU,
+model, service, production, or harness modifications. Source receipts remain
+unchanged, including the failed cap1024 status.
+
+Evidence root:
+<INVESTIGATION_ROOT>
+
+RETRIEVAL HARNESS
+Reviewed model_deep_retrieval.py; current SHA256
+1bca13b441968532c6418ff9a67d33a2d05418161c5c4c0853a1ce3c71bf3ef8
+No launch-blocking template/count/staging semantic defect found.
+
+Text-only equivalence is supported by local server source:
+head9/src/tools/server/server-context.cpp:5444 and:5590 share
+oaicompat_chat_params_parse for OAI chat and apply-template. At:4812 the
+completion route tokenizes with add_special=true/parse_special=true; :5626
+implements the explicit tokenizer, and:6170 uses the same flags for the
+independent input_tokens count. There are no multimodal inputs in this fixture.
+The request itself is reused for final chat, including enable_thinking=false.
+
+Each native stage sends the full true prefix, emits exactly the next known
+token through a large finite logit bias, and checks returned token identity.
+The final sampled token is not yet KV-evaluated, so the next expected cache_n
+is the previous prefix length, not prefix+1. Cache_n and prompt_n are checked
+at every stage and final chat. Initial slot erases plus first-stage cache_n0
+rule out accidental reuse from the short control. Slots are explicit.
+The94K..97K token bound plus512 generation stays below98304. Five16K stages
+leave a final tail; wall/TTFT fields correctly identify staged rather than
+single-request latency. Marker fractions are character offsets, not exact
+token-depth percentiles; fixture metadata correctly says character offsets.
+
+Nine CPU-only mock cases exercised the original reviewed logic: success,
+bad template count, failed short control, bad stage cache, wrong forced token,
+bad final cache, truncated final, wrong final answer, and missing verbose.
+Success used5 stages then13080 final tokens for a95000-token mock. Early
+count/short-control failures spend zero deep prefill. Original final-answer
+failure and missing verbose were identified to root before launch.
+Root's subsequently verified changes require a normal short-control stop,
+require final truncated is exactlyFalse, and explicitly classify final
+status passed/failed-task. Semantic failure is intentionally retained without
+stopping the paired arm; downstream acceptance must inspect status, not exit0.
+The current revision compiles. It has180-second request timeouts and global
+17:40 admission protection, not a hard15-minute pair wall deadline.
+
+DEEP-MIXED EVIDENCE
+Arms currently available: deep-mixed-off-a1, deep-mixed-on-b1,
+deep-mixed-on-cap1024-c1. No cap512 result is claimed; the pipeline halted.
+Same v4 library SHA0c7ffbde334686f17f5ed6a1676c0cd966ec931eaa388900befb06af493330d5
+and same scheduler/runtime. Both slots restore90000 tokens from the same
+saved snapshot, independently addressed as slots0 and1.
+
+                         off/cap0        GEMM/cap0       GEMM/cap1024
+client foreground TTFTs   32.058909       23.659180        23.762781
+client background max
+prefill-overlap gap ms  15777.599170    11628.428912      5954.646422
+foreground request s     33.074016       24.675139        24.790213
+combined wall s          41.869754       33.432767        33.619489
+
+GEMM/cap0 versus off: TTFT-26.2009%, visible max gap-26.2979%, wall-20.1506%.
+GEMM/cap1024 versus GEMM/cap0: TTFT+0.4379%, visible max gap-48.7923%,
+wall+0.5585%. Versus off: TTFT-25.8778%, visible max gap-62.2589%, wall-19.7046%.
+These are single samples, client-arrival measurements, and matched isolated
+checkpoint32/8192 profiles, not exact production16/2048 qualification.
+Actual logged v4 dispatch: cap0 q1024/k91136; cap1024 q1022/k91136.
+
+Every arm independently passes server-side count/cache/truncation checks:
+background prompt90001, new1, cache90000, generated512, final cache90512;
+foreground prompt94096, new4096, cache90000, generated32, final cache94127.
+HTTP200, completed nonalive threads, no stream errors, one raw final event,
+strictly increasing finite timestamps within request start/finish, raw SSE
+tokens/content equal captured tokens/content, event counts match parsed payloads.
+The cap1024 source has exactly one failure:510 received background IDs instead
+of512. Source receipt SHA256
+53340ed15401b3c236f001dfc130ff4c5511a158557ae42902ced9bddac7c320
+
+WHY510 IDS IS NOT EVIDENCE OF510 GENERATED TOKENS
+The raw SSE payloads themselves contain510 IDs; the capture parser did not
+drop two payload IDs. All final counters still report512 generated tokens.
+Local source head9/src/tools/server/server-context.cpp:1987 checks incomplete
+UTF-8; :1991..2019 withholds partial responses until text is complete. :2199
+then sends only the current token ID, not any earlier withheld IDs. :2241
+returns no complete ID list in streaming final responses.
+In the failing stream, event79 and81 each emit U+2581 with current ID223,
+consistent with withheld UTF-8 prefixes; event83 emits U+FF5C. The two U+2581
+events occur0.617s and0.672s after foreground completion. The largest observed
+prefill stall instead ends at background event13, before foreground first
+output, so the later UTF-8 coalescing does not erase that observed client stall.
+This supports a stream-observability failure, not context truncation or a
+failed model request. It does not reconstruct the two missing token IDs.
+
+CLIENT-VISIBLE GAPS ARE NOT TRUE ENGINE TOKEN GAPS
+All harness timestamps are client arrival times of nonfinal SSE messages
+containing IDs. Even a complete ID list does not timestamp internal GPU token
+completion separately from server scheduling/serialization/network buffering.
+When IDs are incomplete, one event can carry text spanning multiple generated
+tokens; event percentiles are not per-generated-token percentiles. Maximum
+client-visible stall remains meaningful for user experience. Label it as
+client/SSE-event gap, not measured internal per-token latency.
+
+Output comparisons:
+- Off and GEMM/cap0 background512 IDs/content match exactly.
+- Their foreground32-ID outputs differ first at zero-based index19.
+- Cap1024 foreground32 IDs/content match off exactly.
+- Cap1024 background content differs from off; full ID identity is unavailable
+  because the list is incomplete. Do not treat missing IDs as proof of equality
+  or attribute all content differences to SSE coalescing.
+The fixture is a continuation workload, not semantic task qualification.
+
+MINIMAL SAFE REPORTING PROPOSAL
+Prefer a separate read-only postprocessor; do not weaken existing strict status.
+Retain original status/errors and source SHA256. Require all exact server
+counts, restore destinations, cache values, no truncation, normal bounded limit
+completion, raw payload consistency, and finite ordered timestamps. Reject any
+error except the explicitly identified token-ID-count shortfall.
+Emit typed fields such as:
+  measurement_status: "client-visible-only"
+  original_probe_status: "failed"
+  server_completion_valid: true
+  background_token_ids_complete: false
+  background_server_generated_tokens:512
+  background_observed_token_ids:510
+  background_token_ids_equal: null
+  true_engine_token_gap_ms: null
+  client_sse_max_overlap_gap_ms:5954.646422
+  client_foreground_ttft_s:23.762781
+Do not set status=passed, manufacture missing IDs, silently compare shifted
+token positions, or call this token-equivalent quality acceptance. No rerun or
+harness relaxation is needed to report the already observed client stall.

@@ -1,0 +1,112 @@
+SPECULATIVE ng8 FAILURE AND BOUNDED FOLLOW-UP — 2026-11-12
+
+UPDATE16:00 CET: root completed the single-request ng4 follow-up without OOM;
+it was slower, and two tasks diverged, one truncating. See NG4-AUDIT-20261112.txt.
+Do not repeat the unchanged ng4 profile; the proposal below is historical.
+
+Actual run, not a performance win
+spec-off-a1 completed all three prompts. spec-on-b1 loaded with full offload and
+both /slots entries speculative=true. Its eight-token warmup generated ZERO
+draft tokens. The first real copy_edit request then crashed with CUDA OOM.
+There is no completed candidate output, committed-rate result or A/B token match.
+Speculation is NOT validated for the production 2x98K profile.
+
+Source root B=<LAB_STORAGE>/m6000-llama-cpp/occamy35-night-20261111/cand/BUNDLE3
+Crash log: ../model-runs/spec-on-b1/server.log, relative to investigation root.
+Library <LAB_STORAGE>/m6000-llama-cpp/prod-libs/libggml-cuda-bundle3-20261112.so
+ELF BuildID 0fba0ada11c0d824727d282da6b331f14f8cf5fc, not stripped.
+
+Exact symbol localization (addr2line -Cfipe against that library):
+  +0x32b733 ggml_cuda_mul_mat_cublas_impl<GGML_TYPE_F32>
+  +0x331f1f ggml_cuda_compute_forward
+  +0x33c807 ggml_cuda_graph_evaluate_and_capture
+  +0x33f9b2 ggml_backend_cuda_graph_compute
+Disassembly at0x32b6f8..0x32b733 calls ggml_nelements, multiplies by4, calls pool
+alloc, then checks source contiguous allocation before conversion. This matches
+src0_alloc.alloc(ggml_nelements(src0)) at ggml-cuda.cu:1630, not FA scratch.
+The failed allocator is cuMemCreate in ggml_cuda_pool_vmm::alloc.
+
+Strong source-backed cause: dense Q4 output-head dequantization cliff
+MMVQ_MAX_BATCH_SIZE is8 (mmvq.cuh:3); SM52's generic quantized selector permits
+up to8 columns (mmvq.cu:430). Eight drafted tokens plus the anchor require up
+to9 verification/logit columns, unlike normal one-token decode or last-token-
+only prompt output. Maxwell MMQ deliberately admits only n_experts>0
+(mmq.cu:413); the dense output projection therefore falls through to cuBLAS.
+SM52 selects F32 compute for quantized source (ggml-cuda.cu:1806).
+The existing512MiB chunked-conversion guard covers F16/BF16 only, not Q4_0
+(ggml-cuda.cu:1843), so Q4 source is converted whole.
+
+CPU-only GGUF metadata read confirmed output.weight is Q4_0(type2), dimensions
+[2048,248320], quantized bytes286064640. F32 expansion is exactly1940MiB.
+The final warmup repack message reported1417MiB free; this is not an exact
+allocation-time measurement, but the full head alone exceeds it by523MiB.
+The tensor name is not printed in the backtrace; head attribution remains a
+strong inference, not an instrumented allocation-name observation. The failed
+full-size F32 source conversion itself IS symbol/disassembly-confirmed.
+
+One justified profile-only follow-up, root may run through the private route
+Keep the same model/context and one active request. Change ONLY simple-size-m8
+to4, retaining simple-size-n4. This limits one sequence to5 verification columns,
+below the dense MMVQ cutoff; the default simple implementation will draft because
+size_m>=size_n. Start with the same copy_edit prompt and bounded output.
+Require actual draft counters, completed semantics and measured committed time.
+This does not prove paired safety: two ng4 requests can make10 output columns
+in one graph. For two simultaneous sequences, size_n3/size_m3 would bound total
+to8 if both are the only output-producing requests, but has different lookup/
+acceptance economics and is not a proposed sweep now. Lowering context merely
+provides room for the huge dequantization and does not repair its bandwidth cost.
+
+Potential root fix, NOT implemented: generalize the existing bounded row-chunk
+F32 conversion to the relevant contiguous quantized dense matrices, preserving
+quant block alignment and destination row strides. It removes this OOM cliff
+but not the recurring weight-dequantization cost. A better later performance
+path is narrow dense quantized matmul supporting temporal verification columns.
+Do not force FP16 compute as a workaround: it changes numerics and Maxwell has
+no native fast FP16 arithmetic. Do not simply raise MMVQ_MAX_BATCH_SIZE without
+adding/verifying the corresponding compiled kernel dispatch cases.
+
+Recurrent rollback: no supported CLI-only switch for ngram
+common/common.h:399 need_n_rs_seq() includes only MTP/Eagle3/DFlash/DSpark and
+returns draft.n_max for them; ngram modes return0. common/common.cpp:1712 copies
+that into target cparams. No standalone n_rs_seq CLI/environment field appears
+in common/arg.cpp or the captured actual production --help. Changing
+--spec-draft-n-max alone does not affect ngram. Mixing an unrelated draft type
+solely to activate snapshots is not a supported workaround; it can demand extra
+model/MTP tensors and change/fail initialization. The served file is trunk-only.
+
+A narrow explicit opt-in patch could set target n_rs_seq to the configured
+ngram proposal bound, bounded/validated before context creation. Do NOT change
+the default. For ng4, use4 snapshots, not5: the worst rejected suffix is4 after
+at least one sampled anchor token. Server checkpoint guards at3436/4440 already
+use bounded rollback when draft/rejected suffix length fits n_rs_seq.
+
+Persistent target RS VRAM estimate from observed baseline125.62MiB for2seqs:
+  snapshots0: total125.62MiB, extra0
+  snapshots2: total376.86MiB, extra251.24MiB
+  snapshots3: total502.48MiB, extra376.86MiB
+  snapshots4: total628.10MiB, extra502.48MiB
+  snapshots8: total1130.58MiB, extra1004.96MiB
+Formula is baseline*(1+n_rs_seq); recurrent.cpp:101 widens BOTH conv and SSM
+state planes. These are estimates using a rounded observed baseline; alignment,
+larger graph temporaries and changed kernels can add more. This allocation does
+not increase attention KV capacity. Current host checkpoint is62.813MiB per
+sequence per nonempty draft, with an additional host-to-GPU restore on rejection;
+the CUDA snapshots aim to avoid those PCIe transfers and accepted-prefix replay.
+
+Important cost beyond VRAM
+delta-net-base.cpp:479/502/564 generates K=n_rs_seq+1 snapshot handling. Even
+ordinary one-token steps use K>1 when rollback is enabled. The custom Occamy GDN
+window explicitly rejects K!=1 (occamy-gdn.cu:1016), so enabling snapshots can
+disable its fast path even when NO ngram proposal is found. Generic snapshot
+writes, graph memory and ordinary-decode slowdown must be measured; no claim
+that this is automatically faster than host checkpointing is defensible.
+
+Correctness burden before keeping that patch
+The generic implementation has single-use rollback indices, trailing K-token
+ubatch constraints and shared-cell restrictions. common_context_can_seq_rm
+returns RS immediately when n_rs_seq>0; it does not empirically test rollback.
+Validate zero/partial/full acceptance, repeated rejection/replay, both sequence
+IDs, prompt reuse/reset/cancellation, and matched teacher-forced positions after
+each rejection against no-spec. Verify ordinary decode remains numerically and
+semantically acceptable after the custom GDN path changes. Existing saved slots
+and source-level support are not proof. This worker made NO rollback/core patch.

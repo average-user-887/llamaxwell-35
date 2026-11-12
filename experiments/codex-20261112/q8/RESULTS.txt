@@ -1,0 +1,88 @@
+NATIVE Q8 KV ATTENTION SPEED PILOT - CLOSED 2026-11-12
+
+Outcome: this pilot does not establish a worthwhile speed gain. Do not integrate
+or deploy either loader on the basis of these results. The payload reduction is
+real; actual model quality, whole-serving performance and peak-memory savings
+were not measured.
+
+Root ran the GPU experiments. The worker prepared/compiled the artifacts and
+performed CPU-only validation and result analysis. Original BUNDLE3 source and
+production configuration were not changed by this worker.
+
+V1: SAME ALGORITHM, SIMPLE FUSED NATIVE Q8_0 LOADER
+
+Observed mean F16/Q8 timing ratios were 1.064 at4K, 1.045 at16K, 1.032 at64K,
+1.041 at98K single stream, and1.035 at98K two-stream/high-logit stress.
+These are not accepted speed improvements: Q8 timing changes systematically
+across blocks while F16 remains comparatively stable, and no clocks were sampled.
+Only five tiny initial warmups preceded CPU validation; validation left a GPU-idle
+gap immediately before measurements. Root had previously run the model, but
+that does not replace contemporaneous clock evidence for this kernel.
+
+V2: PACKED NATIVE LOADER, POST-VALIDATION WARMUP, TELEMETRY
+
+At least1,000ms of alternating GPU work follows CPU validation. ABBA and BAAB
+block order alternate. NVML is sampled before and after each timed arm; telemetry
+and CPU reference work are outside CUDA event timings.
+
+98,304 tokens, one stream, five blocks:
+  F16:0.746808755ms
+  Q8: 0.743940848ms
+  Ratio of means:1.003855021, approximately+0.39%, effectively flat.
+  Mean block ratio:1.003923505; block standard error:0.003774089.
+
+98,304 tokens, two streams, five blocks:
+  F16:1.464650452ms
+  Q8: 1.475019658ms
+  Ratio of means:0.992970124, approximately-0.70%, slightly slower.
+  Mean block ratio:0.992975807; block standard error:0.001063963.
+
+Observed SM clocks span1,063-1,151MHz across all v2 telemetry (single-stream),
+and1,063-1,139MHz (two-stream). Memory clock remains3,304MHz. Temperature is67-69C.
+Power observations span175.556-239.331W single-stream and227.241-242.282W two-stream.
+These samples do not isolate a causal power-throttling explanation; no throttle
+reason counter was recorded. They do show that clocks are dynamic rather than
+fixed. Five same-process blocks are not independent deployment trials.
+
+CORRECTNESS AND NUMERICS
+
+Both implementations match sampled CPU-double references computed from their
+own input representation. Maximum absolute errors are around1e-8 on ordinary
+inputs and below9e-7 for v1's concentrated-softmax stress. All outputs are finite.
+The sampled references cover32 output positions per stream for each format.
+V1 README's128-position wording is incorrect; emitted JSON counts are correct.
+
+Q8-versus-F16 relative output L2 error is around0.76-0.79% on ordinary synthetic
+inputs;1.59% on v1's query-scale4 stress. This is quantization error, not a claim
+that the model's generated answers or agent behavior are equivalent.
+
+The packed loader passes a CPU layout check over262,144 signed-code extracts,
+including alternate block alignments. Its maximum read ends at the272-byte row
+boundary. Q8 registers fall from128 to120 (F16:118); both versions have no spills
+and use33,664bytes shared memory. F16/Q8 use the same split counts and two resident
+blocks per SM. Compile resources and source hashes are retained beside each binary.
+
+MEMORY AND SERVING LIMITATIONS
+
+Native Q8_0 is34bytes/32values versus64bytes for F16:53.125% payload, a46.875%
+reduction. A3,840MiB F16 KV payload would become2,040MiB, saving1,800MiB.
+That is not the measured peak serving-memory reduction. Current source routes
+Q8 prefill with more than two query positions to the generic tile path and
+dequantizes K/V to F16 scratch:
+  BUNDLE3/ggml/src/ggml-cuda/fattn.cu:718-768
+  BUNDLE3/ggml/src/ggml-cuda/fattn-common.cuh:1071-1138
+
+This micro uses seeded Gaussian inputs, a single-query full-visible cache, two KV
+heads and16 query heads. Both98K working sets exceed L2, but same-data repetition
+still omits actual model weights, KV writes, quantization cost and scheduler work.
+It does not test prefill, long-context retrieval, tool use or task correctness.
+
+Artifacts:
+  gpu-*.jsonl                         root-owned v1 receipts
+  v2/gpu-98k-s1.jsonl                 root-owned final single-stream receipt
+  v2/gpu-98k-s2.jsonl                 root-owned final two-stream receipt
+  v2/cpu-load-check.jsonl             CPU packed-layout proof
+  SHA256SUMS and v2/SHA256SUMS         exact source/binary identities
+
+Next decision: retain compressed KV as a capacity idea, not an established speed
+breakthrough. No integrated Q8 patch is prepared in this investigation.

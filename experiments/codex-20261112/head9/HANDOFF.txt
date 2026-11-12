@@ -1,0 +1,96 @@
+HEAD9: bounded SM52 output-head MMVQ bypass
+Prepared 2026-11-12 16:09 CET; CPU-only worker. GPU results are pending root.
+
+Goal
+Remove the observed 1940 MiB full-head F32 dequantization allocation cliff for
+one native ng8 verification batch, so root can measure its actual economics.
+This is not a claimed speedup or a speculation-correctness fix.
+
+Provenance
+Source baseline: occamy35-night-20261111/cand/BUNDLE3
+Commit: 2436f7554c0c8d70afc9acbcce85b2457193a516
+Only backend changes: ggml/src/ggml-cuda/ggml-cuda.cu and maxwell-head9.cuh.
+No scheduler changes are included in this source copy or CUDA library.
+The reused scheduler CUDA objects came from E5; every source under E5/src/ggml
+matches this copy except ggml-cuda.cu and the new header. ggml-cuda.cu was rebuilt.
+Build image: local/m6000-build-tools:20261013, CUDA 12.8, gcc 14, SM52-real.
+Container: network none, CPUs 0-3, quota 2 CPUs, 6 GiB memory/swap limit, -j2.
+No GPU device passed to either build container. No original source edits,
+model/backend service calls, production configuration changes, commits or push.
+
+Enable / rollback
+GGML_CUDA_MAXWELL_HEAD9_MMVQ=1 is the only enabling value. Unset, 0, empty,
+and every other string leave the existing dispatch unchanged. The value is
+cached on first matrix dispatch; restart the process to change it.
+Mount build/bin/libggml-cuda.so in the same CUDA-library location as root's
+current isolated route. If using scheduler/runtime, overlay /candidate/
+libggml-cuda.so, since LD_LIBRARY_PATH=/candidate wins over /app.
+Rollback: remove the environment flag or restore the approved BUNDLE3 library.
+
+Exact scope
+SM52 only; contiguous Q4_0 weight [2048,248320,1,1]; F32 activation
+[2048,N,1,1] and F32 output [248320,N,1,1], where 9 <= N <= 16.
+Activation/output innermost strides must be sizeof(float); column strides
+must be whole-float multiples and at least the respective column lengths.
+Non-contiguous activation/output column padding is supported and preserved.
+Existing unsafe temporary-weight-padding/view rejection executes first.
+All other architectures, types, shapes, columns, and higher dimensions follow
+the old code. More than 16 columns is NOT fixed; two ng8 requests can need 18.
+
+Implementation / lifecycle review
+The operation makes two stack-local tensor copies and runs the existing MMVQ
+backend over 8+(N-8) columns. Only ne[1] and data pointers change. All nb[]
+values, buffers, and the original weight tensor remain intact. Higher-dimension
+strides are unused because all corresponding dimensions are 1.
+No tensor metadata or graph topology is mutated. CUDA launches copy arguments
+before stack-local views expire. Both calls use the same stream and existing
+MMVQ pool/Q8_1 activation quantization. Q8 reuse keys include the input pointer
+and sliced dimensions; each chunk therefore has a distinct valid cache key.
+Each graph evaluation already invalidates the Q8 cache. With reuse disabled,
+existing pool allocation/release and same-stream ordering are retained.
+Each temporary quantized activation block is 8*2048/32*36 = 18,432 bytes;
+Q8 reuse may reserve its existing 1 MiB cache. No head-sized F32 buffer is added.
+MMVQ_MAX_BATCH_SIZE and compiled kernels are unchanged; static_assert requires 8.
+
+CPU checks completed
+cpu-guards.cpp includes the actual guard header. 57 assertions passed:
+all column counts 1..17, flag disabled, several other compute capabilities,
+wrong types, dimensions, element strides, undersized/fractional column strides,
+and valid padded layouts. probe-build.log contains the PASS record.
+Backend library and full-head probe compiled successfully without GPU access.
+Existing unrelated source cast-qual warnings remain in the CUDA build log.
+
+Root GPU probe
+Mount this directory at /w read-only in the compatible CUDA runtime, expose
+only the owned M6000, set LD_LIBRARY_PATH=/w/build/bin and
+GGML_CUDA_MAXWELL_HEAD9_MMVQ=1, then execute /w/head9-probe with no arguments.
+Suggested production-relevant environment for this run:
+GGML_CUDA_Q8_REUSE=1, GGML_CUDA_HEAD_ROWPACK_SM52=1, GGML_CUDA_MMVQ_SM52=1.
+The program refuses a missing flag or non-SM52 device. It uploads the complete
+286,064,640-byte synthetic Q4_0 head, then compares the real modified CUDA
+library dispatch against independent existing MMVQ graph nodes of at most
+8 columns. Cases: N=9 and16, contiguous and padded input/output, four distinct
+activation inputs per case. Repeats permit normal CUDA graph warmup/replay.
+Every one of 248320 output rows is compared. Pass requires bitwise equality,
+all finite values, and unchanged output-column padding sentinels.
+No CPU inference/fallback is implemented; graph_compute targets CUDA directly
+for this synthetic numerical test only. Root owns any actual model route.
+
+Limits
+This comparison proves only equivalence to existing chunked MMVQ arithmetic.
+It does not compare against the old full-F32 cuBLAS path, whose activation
+arithmetic differs from Q8_1 MMVQ, or prove end-to-end model output equality.
+Probe timing is synchronized graph wall time with warmup, not a fair throughput
+benchmark; it should not be promoted as a speed claim. Cache/graph replay and
+stride cases are bounded samples, not universal qualification.
+The original recurrent speculative rollback/checkpoint problem remains
+untouched. Root must evaluate accepted tokens, rejection/replay correctness,
+semantic completion, full-offload memory headroom, and committed-token time.
+
+Artifacts
+head9.patch: minimal backend patch against BUNDLE3.
+build/bin/libggml-cuda.so: candidate CUDA library.
+head9-probe: real-library full-output numerical comparator.
+cpu-guards: CPU-only eligibility checks.
+build.sh / build-probe.sh: bounded reproducible builds using existing cache.
+SHA256SUMS: frozen source, binary, and build-script hashes.

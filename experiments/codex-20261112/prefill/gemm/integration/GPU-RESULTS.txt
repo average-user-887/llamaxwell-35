@@ -1,0 +1,7 @@
+Root GPU validation received 2026-11-12 14:58 UTC.
+Raw: gpu-irregular-1023-98048.jsonl
+Actual integrated shared-library dispatcher: 1023 queries, 98048 keys, padded Q/K/V strides, actual additive-mask holes/bias/padding, tail PV split, query tail, all-masked final row, output canary.
+Nonfinite values: 0. All-masked nonzero outputs: 0. Output guard changes: 0.
+Maximum absolute error: 2.846e-6. RMS: 8.798e-8.
+Candidate approximately 474 ms versus reference approximately 662 ms (about 28% less GPU time).
+This is synthetic operator evidence, not model-quality qualification. Root started a real-model baseline/candidate comparison afterward.

@@ -1,0 +1,58 @@
+Prefill GEMM numerical/semantic audit, 2026-11-12 15:26 UTC
+Scope: read-only audit of frozen v3/v4 and actual quality16 logs; separate diagnostic probe only.
+
+CONCLUSION
+No unsupported dispatch, head/query transpose, causal-mask shortcut, scale omission, or output-indexing error was identified.
+This is NOT model-quality clearance. The observed KL/TV drift is real in the reported distributions and needs a fresh OFF/OFF reproducibility control plus broader quality evidence.
+The new operator preserves FP32 accumulation, but differs from stock in more than a single summation order: softmax exponent scaling, probability normalization placement, and PV partitioning also differ.
+
+ACTUAL RUN EVIDENCE
+quality16-off-a1 and quality16-on-b1 both load frozen v3 SHA256 a5dbc3682541ecb4ec5035273a624cd4c6295fdf0aadb856c98e849fcd32a6ed.
+Their identity files differ only in the GEMM flag and process/route/timing metadata. Full GPU offload and speculation=none match.
+Model log: Qwen35MoE derivative,40layers,16Qheads/2KVheads,D256,10full-attention KV layers,F16KV,30recurrent layers implied by architecture, no SWA.
+Actual batch2048/ubatch1024,2slots of98304,KV non-unified. First candidate call: Q1024,K4096,mask byte stride8192.
+Source model kq_scale is1/sqrt(D) when f_attention_scale=0; the actual log reports the default, so scale=0.0625.
+Source llama-graph.cpp explicitly requests GGML_PREC_F32 for the FlashAttention result.
+Evidence: model-runs/quality16-on-b1/server.log:84,164,180,346; src/src/models/qwen35moe.cpp:340; src/src/llama-graph.cpp:2843.
+
+DISPATCH / DATAFLOW CHECKS
+The gate is default off and requires SM520,FP32 Q/output,FP16 K/V,D256,16/2heads,single sequence,Q64..1024,K4096..98304.
+It rejects sinks, max_bias/ALiBi, softcap, sparse n_kv_max, incompatible mask head/sequence dimensions, non-contiguous output, and unsupported element strides.
+Q/K/V row and head byte strides are consumed directly. The output mapping is [query,head,dimension], matching GGML's [D,H,Q,1] result constructor.
+The actual FP16 additive mask is read at query*mask_row_stride+key in both softmax passes. No synthetic causal position is used.
+Unused query-tile columns are zero-packed and excluded from output writes. Tail keys are handled by a bounded tail SGEMM, not truncated.
+The new pool/handle/stream is not substituted: it reuses the backend's current stream, cuBLAS handle, and pool.
+Both implementations are FP32 on this SM52 build; FAST_FP16_AVAILABLE requires a different architecture in common.cuh:267.
+Source pointers: frozen v4 fattn-maxwell-gemm.cuh:77,129,149,165,179,186,242; ggml.c:5507.
+
+PRECISE FLOATING-POINT DIFFERENCES
+1. Stock multiplies Q elements by scale before QK; SGEMM applies alpha after its dot accumulation. For actual scale0.0625 this is a power-of-two placement change and should commute for normal, non-overflowing FP32 values; dot accumulation order still differs.
+2. Stock uses FATTN_KQ_MAX_OFFSET=3*0.6931, approximately ln8, in the running softmax maximum. The candidate uses the unshifted maximum. Exact-real probabilities are identical, but FP32 exponent scaling and underflow behavior are not.
+3. Stock repeatedly rescales the unnormalized PV accumulator as its running maximum changes, then normalizes at output. Candidate computes normalized probabilities first, then multiplies V by those FP32 probabilities.
+4. Candidate PV uses4096-key GEMM partials, followed by ascending partial reduction. Stock accumulates through its own tile/lane order across the KV sequence.
+5. Stock mask scan can skip fully masked trailing256-key blocks. Candidate evaluates the full declared K extent and applies the mask. These are equivalent for finite Q/K/V and finite/-inf masks. Startup KV storage is explicitly zero-cleared in llama-kv-cache.cpp:293; nonfinite data remain unqualified.
+6. Intentional edge difference: a completely masked real query row returns zero in the candidate; the direct stock tile returns0/0. Normal causal model rows have at least one visible key. Padded candidate query rows are never written.
+Source pointers: fattn-tile.cuh:656,689,696,711,935,997,1108; fattn-common.cuh:21,711,1157.
+
+WHY THE QUALITY DIFFERENCE IS STATE DRIFT, NOT A NEW DECODE PATH
+Both quality16 runs split the last prompt at15356,16380,16384 tokens, leaving a4-token final tail.
+That final tail is below the candidate's64-query guard, so row0's final attention operation uses stock dispatch on state previously produced by candidate prefills.
+Rows1..15 each process a single new teacher token; they also cannot enter the GEMM path.
+The observed differences therefore propagate through stored KV/recurrent state and subsequent model operations. Quantized activations and MoE expert selection can amplify small perturbations; that is a hypothesis, not a measured attribution.
+Evidence: quality16-on-b1/server.log:359,362,363,366,385 and quality-row timing receipts.
+
+MEASURED EVIDENCE AND LIMITS
+The reported row0 normalized API-probability KL is0.0073716553 and TV0.0567307319; the normalization corrections are only~1e-4, so these metrics cannot be dismissed as the normalization correction itself.
+Raw top1 agrees16/16; mean teacher NLL increases0.02235165nats. Sixteen adjacent positions on one fixture do not establish broad quality equivalence or broad regression.
+V3/v4 irregular operator dumps were independently rehashed and cmp-checked byte-identical: de7ec70bfe75dd89bc2faa6303fcf0ff1165c78301d7e00ed37eca784c3d3886.
+That validates the one-KV-group resource change for that input; it does not make either path bit-identical to stock.
+No actual model Q/K/V tensors or per-layer attention outputs were captured in this audit. Therefore a distribution-specific operator defect is not conclusively excluded by synthetic probes.
+
+SMALLEST NEXT CONTROLS
+1. Fresh OFF/OFF row0 repeat with identical route/batch/checkpoint schedule and full probabilities. If not reproducible, quantify that floor before assigning KL to GEMM.
+2. If OFF is stable, one fresh ON/ON repeat distinguishes deterministic numerical drift from a new nondeterminism/race.
+3. Run the supplied double-reference probe. It compares BOTH stock and candidate outputs to the same FP64 QK/softmax/PV calculation on sampled columns; this distinguishes arithmetic accuracy on those inputs only.
+4. If real-state drift still needs localization, capture one actual early attention tensor pair and compare stock/candidate against FP64 samples before changing the algorithm again.
+Optional precision diagnostic, not implemented: retain unnormalized exp weights through PV and normalize only after reduction, optionally matching the stock ln8 offset. This isolates normalization placement but cannot reproduce stock's full accumulation order.
+
+No frozen library/source/binary was changed. No GPU/model/service operations, commits, or pushes by this worker.

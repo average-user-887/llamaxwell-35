@@ -1,0 +1,367 @@
+{
+  "status": "paired-repeat-client-visible-analysis",
+  "workload": "Two restored 90K slots; background 512, foreground append 4096 and generate 32; checkpoint32/8192, cacheRAM0",
+  "arms": {
+    "off_cap0": {
+      "tag": "deep-mixed-off-cap0-a2",
+      "identity_sha256": "3ff9351f10c016f6cf037aa5a72b74f696da8e9ddd1c8bb023f86791ffc43187",
+      "samples": [
+        {
+          "receipt": "model-runs/deep-mixed-off-cap0-a2/deep-mixed-0.json",
+          "receipt_sha256": "9d8c21ae555ccf3d083df1ec93a3915812971a838243a2d24f6bbe3096d8e0cb",
+          "repetition": 0,
+          "foreground_ttft_s": 32.186367413029075,
+          "total_wall_s": 42.061930361029226,
+          "maximum_visible_gap_s": 15.839560083986726,
+          "actual_first_dispatch_log": null,
+          "quality_equivalence": null,
+          "background": {
+            "http_status": 200,
+            "content_sha256": "6a179b8e030b4b3273fa90e27bdf6062b2f05f7eb81e0c473b2f61e0c6b36c6c",
+            "observed_tokens_sha256": "fd2eb32213139d948fb71e46bd383a4e8c50e30c4f595d82c1ba92254edb8e65",
+            "observation": {
+              "server_generated_tokens": 512,
+              "observed_token_ids": 512,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          },
+          "foreground": {
+            "http_status": 200,
+            "content_sha256": "7dc15b0acc49aaa044f484af1b6ab662592c274890c20e6628374d4ddd71a55b",
+            "observed_tokens_sha256": "4667df68916f515cff37514bf17fa7eb9ade30844a0af04acfc4a43dc3b0ab9a",
+            "observation": {
+              "server_generated_tokens": 32,
+              "observed_token_ids": 32,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          }
+        },
+        {
+          "receipt": "model-runs/deep-mixed-off-cap0-a2/deep-mixed-1.json",
+          "receipt_sha256": "c44bd94ea11167e34fc0da9bd1188f4e9ed21d6a4933cfbc64e231c4d707611f",
+          "repetition": 1,
+          "foreground_ttft_s": 32.213827145984396,
+          "total_wall_s": 42.1100269780145,
+          "maximum_visible_gap_s": 15.856640824000351,
+          "actual_first_dispatch_log": null,
+          "quality_equivalence": null,
+          "background": {
+            "http_status": 200,
+            "content_sha256": "6a179b8e030b4b3273fa90e27bdf6062b2f05f7eb81e0c473b2f61e0c6b36c6c",
+            "observed_tokens_sha256": "fd2eb32213139d948fb71e46bd383a4e8c50e30c4f595d82c1ba92254edb8e65",
+            "observation": {
+              "server_generated_tokens": 512,
+              "observed_token_ids": 512,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          },
+          "foreground": {
+            "http_status": 200,
+            "content_sha256": "7dc15b0acc49aaa044f484af1b6ab662592c274890c20e6628374d4ddd71a55b",
+            "observed_tokens_sha256": "4667df68916f515cff37514bf17fa7eb9ade30844a0af04acfc4a43dc3b0ab9a",
+            "observation": {
+              "server_generated_tokens": 32,
+              "observed_token_ids": 32,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          }
+        }
+      ],
+      "mean": {
+        "foreground_ttft_s": 32.200097279506736,
+        "total_wall_s": 42.085978669521865,
+        "maximum_visible_gap_s": 15.848100453993538
+      }
+    },
+    "on_cap0": {
+      "tag": "deep-mixed-on-cap0-b2",
+      "identity_sha256": "dc4fdf3ffe1c13b0d46eb71bd14bdfb343ffe69302c9abc253b7e64479094bee",
+      "samples": [
+        {
+          "receipt": "model-runs/deep-mixed-on-cap0-b2/deep-mixed-0.json",
+          "receipt_sha256": "ba916b2ca64b9e644b3f868ccd7db2f481ae7d120388892bf736bd3112e679d3",
+          "repetition": 0,
+          "foreground_ttft_s": 23.51722191501176,
+          "total_wall_s": 33.26004896196537,
+          "maximum_visible_gap_s": 11.536660387995653,
+          "actual_first_dispatch_log": "0.15.136.601 I maxwell_gemm: version=4 softmax=online kv_staging_heads=1 call=1 q=1024 k=91136 q_heads=16 kv_heads=2 d=256 mask_stride=182272 key_capacity=98304 splits=23 tail=1024 scratch_bytes=432013888 pool_bytes=432013952 cublas_workspace_bytes=4194304",
+          "quality_equivalence": null,
+          "background": {
+            "http_status": 200,
+            "content_sha256": "6a179b8e030b4b3273fa90e27bdf6062b2f05f7eb81e0c473b2f61e0c6b36c6c",
+            "observed_tokens_sha256": "fd2eb32213139d948fb71e46bd383a4e8c50e30c4f595d82c1ba92254edb8e65",
+            "observation": {
+              "server_generated_tokens": 512,
+              "observed_token_ids": 512,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          },
+          "foreground": {
+            "http_status": 200,
+            "content_sha256": "ab634949c6c52fe6ce1dd175f8c192435c7d2bc1c1b428ccb83612e54a3b5af6",
+            "observed_tokens_sha256": "4f65ceef111fc95f8278d8881d115b0e59e14c30c67907938dfb4ad2b2321f5c",
+            "observation": {
+              "server_generated_tokens": 32,
+              "observed_token_ids": 32,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          }
+        },
+        {
+          "receipt": "model-runs/deep-mixed-on-cap0-b2/deep-mixed-1.json",
+          "receipt_sha256": "cc3d54899f30bd6237f6f7465380781c310caa9e19a4ea003cc6a94a4848bcf2",
+          "repetition": 1,
+          "foreground_ttft_s": 23.65466765797464,
+          "total_wall_s": 33.53370917699067,
+          "maximum_visible_gap_s": 11.618787735002115,
+          "actual_first_dispatch_log": "0.15.136.601 I maxwell_gemm: version=4 softmax=online kv_staging_heads=1 call=1 q=1024 k=91136 q_heads=16 kv_heads=2 d=256 mask_stride=182272 key_capacity=98304 splits=23 tail=1024 scratch_bytes=432013888 pool_bytes=432013952 cublas_workspace_bytes=4194304",
+          "quality_equivalence": null,
+          "background": {
+            "http_status": 200,
+            "content_sha256": "6a179b8e030b4b3273fa90e27bdf6062b2f05f7eb81e0c473b2f61e0c6b36c6c",
+            "observed_tokens_sha256": "fd2eb32213139d948fb71e46bd383a4e8c50e30c4f595d82c1ba92254edb8e65",
+            "observation": {
+              "server_generated_tokens": 512,
+              "observed_token_ids": 512,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          },
+          "foreground": {
+            "http_status": 200,
+            "content_sha256": "ab634949c6c52fe6ce1dd175f8c192435c7d2bc1c1b428ccb83612e54a3b5af6",
+            "observed_tokens_sha256": "4f65ceef111fc95f8278d8881d115b0e59e14c30c67907938dfb4ad2b2321f5c",
+            "observation": {
+              "server_generated_tokens": 32,
+              "observed_token_ids": 32,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          }
+        }
+      ],
+      "mean": {
+        "foreground_ttft_s": 23.5859447864932,
+        "total_wall_s": 33.39687906947802,
+        "maximum_visible_gap_s": 11.577724061498884
+      }
+    },
+    "on_cap1024": {
+      "tag": "deep-mixed-on-cap1024-c2",
+      "identity_sha256": "57aac3957a9a295eff99134e4e120d1108ffe1792daf3f5c05c081408182a735",
+      "samples": [
+        {
+          "receipt": "model-runs/deep-mixed-on-cap1024-c2/deep-mixed-0.json",
+          "receipt_sha256": "8020eb33d3d43d84c536277ea9c6e392b18ec77b65f3d9a971af9eafb533e09a",
+          "repetition": 0,
+          "foreground_ttft_s": 23.760604446055368,
+          "total_wall_s": 33.62104585202178,
+          "maximum_visible_gap_s": 5.949933780007996,
+          "actual_first_dispatch_log": "0.23.636.834 I maxwell_gemm: version=4 softmax=online kv_staging_heads=1 call=1 q=1022 k=91136 q_heads=16 kv_heads=2 d=256 mask_stride=182272 key_capacity=98304 splits=23 tail=1024 scratch_bytes=432013888 pool_bytes=432013952 cublas_workspace_bytes=4194304",
+          "quality_equivalence": null,
+          "background": {
+            "http_status": 200,
+            "content_sha256": "df3f464197944d36ea433c219eb7cbe81f95276566ea9113699bc5dd4cea0ec1",
+            "observed_tokens_sha256": "08ae8bbee249846807fe0f30f818ebc0c937b126ba05f02de60e6f5d94318910",
+            "observation": {
+              "server_generated_tokens": 512,
+              "observed_token_ids": 510,
+              "token_ids_complete": false,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          },
+          "foreground": {
+            "http_status": 200,
+            "content_sha256": "7dc15b0acc49aaa044f484af1b6ab662592c274890c20e6628374d4ddd71a55b",
+            "observed_tokens_sha256": "4667df68916f515cff37514bf17fa7eb9ade30844a0af04acfc4a43dc3b0ab9a",
+            "observation": {
+              "server_generated_tokens": 32,
+              "observed_token_ids": 32,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          }
+        },
+        {
+          "receipt": "model-runs/deep-mixed-on-cap1024-c2/deep-mixed-1.json",
+          "receipt_sha256": "2cc4db947c9beb5f74596fb9cc4b9dcabffe4989a6466a8cdaf1b0244e3c15df",
+          "repetition": 1,
+          "foreground_ttft_s": 23.822481726005208,
+          "total_wall_s": 33.70787320099771,
+          "maximum_visible_gap_s": 5.951442578982096,
+          "actual_first_dispatch_log": "0.23.636.834 I maxwell_gemm: version=4 softmax=online kv_staging_heads=1 call=1 q=1022 k=91136 q_heads=16 kv_heads=2 d=256 mask_stride=182272 key_capacity=98304 splits=23 tail=1024 scratch_bytes=432013888 pool_bytes=432013952 cublas_workspace_bytes=4194304",
+          "quality_equivalence": null,
+          "background": {
+            "http_status": 200,
+            "content_sha256": "df3f464197944d36ea433c219eb7cbe81f95276566ea9113699bc5dd4cea0ec1",
+            "observed_tokens_sha256": "08ae8bbee249846807fe0f30f818ebc0c937b126ba05f02de60e6f5d94318910",
+            "observation": {
+              "server_generated_tokens": 512,
+              "observed_token_ids": 510,
+              "token_ids_complete": false,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          },
+          "foreground": {
+            "http_status": 200,
+            "content_sha256": "7dc15b0acc49aaa044f484af1b6ab662592c274890c20e6628374d4ddd71a55b",
+            "observed_tokens_sha256": "4667df68916f515cff37514bf17fa7eb9ade30844a0af04acfc4a43dc3b0ab9a",
+            "observation": {
+              "server_generated_tokens": 32,
+              "observed_token_ids": 32,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          }
+        }
+      ],
+      "mean": {
+        "foreground_ttft_s": 23.791543086030288,
+        "total_wall_s": 33.664459526509745,
+        "maximum_visible_gap_s": 5.950688179495046
+      }
+    },
+    "on_cap512": {
+      "tag": "deep-mixed-on-cap512-d1",
+      "identity_sha256": "b4b7d645ac8129210ec4845883563f3e4aa4d503137bab36517bca712bd63cef",
+      "samples": [
+        {
+          "receipt": "model-runs/deep-mixed-on-cap512-d1/deep-mixed-0.json",
+          "receipt_sha256": "accb26d005c1f4451ca8c4fc447a328e10dd3bde9a94f0aa930ee32dcc0425b4",
+          "repetition": 0,
+          "foreground_ttft_s": 25.564099956012797,
+          "total_wall_s": 35.351296111999545,
+          "maximum_visible_gap_s": 3.228486810985487,
+          "actual_first_dispatch_log": "0.16.908.430 I maxwell_gemm: version=4 softmax=online kv_staging_heads=1 call=1 q=510 k=90624 q_heads=16 kv_heads=2 d=256 mask_stride=181248 key_capacity=98304 splits=23 tail=512 scratch_bytes=432013888 pool_bytes=432013952 cublas_workspace_bytes=4194304",
+          "quality_equivalence": null,
+          "background": {
+            "http_status": 200,
+            "content_sha256": "6a179b8e030b4b3273fa90e27bdf6062b2f05f7eb81e0c473b2f61e0c6b36c6c",
+            "observed_tokens_sha256": "fd2eb32213139d948fb71e46bd383a4e8c50e30c4f595d82c1ba92254edb8e65",
+            "observation": {
+              "server_generated_tokens": 512,
+              "observed_token_ids": 512,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          },
+          "foreground": {
+            "http_status": 200,
+            "content_sha256": "7dc15b0acc49aaa044f484af1b6ab662592c274890c20e6628374d4ddd71a55b",
+            "observed_tokens_sha256": "4667df68916f515cff37514bf17fa7eb9ade30844a0af04acfc4a43dc3b0ab9a",
+            "observation": {
+              "server_generated_tokens": 32,
+              "observed_token_ids": 32,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          }
+        },
+        {
+          "receipt": "model-runs/deep-mixed-on-cap512-d1/deep-mixed-1.json",
+          "receipt_sha256": "b5a94b1fa8fed142bf2ec7e580324fbc43a81dd793063000f54858381c632bfe",
+          "repetition": 1,
+          "foreground_ttft_s": 25.760902745008934,
+          "total_wall_s": 35.56225717498455,
+          "maximum_visible_gap_s": 3.2437313919654116,
+          "actual_first_dispatch_log": "0.16.908.430 I maxwell_gemm: version=4 softmax=online kv_staging_heads=1 call=1 q=510 k=90624 q_heads=16 kv_heads=2 d=256 mask_stride=181248 key_capacity=98304 splits=23 tail=512 scratch_bytes=432013888 pool_bytes=432013952 cublas_workspace_bytes=4194304",
+          "quality_equivalence": null,
+          "background": {
+            "http_status": 200,
+            "content_sha256": "6a179b8e030b4b3273fa90e27bdf6062b2f05f7eb81e0c473b2f61e0c6b36c6c",
+            "observed_tokens_sha256": "fd2eb32213139d948fb71e46bd383a4e8c50e30c4f595d82c1ba92254edb8e65",
+            "observation": {
+              "server_generated_tokens": 512,
+              "observed_token_ids": 512,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          },
+          "foreground": {
+            "http_status": 200,
+            "content_sha256": "7dc15b0acc49aaa044f484af1b6ab662592c274890c20e6628374d4ddd71a55b",
+            "observed_tokens_sha256": "4667df68916f515cff37514bf17fa7eb9ade30844a0af04acfc4a43dc3b0ab9a",
+            "observation": {
+              "server_generated_tokens": 32,
+              "observed_token_ids": 32,
+              "token_ids_complete": true,
+              "exact_token_identity": null,
+              "true_engine_token_gap_ms": null,
+              "measurement_kind": "client-visible-sse-events"
+            }
+          }
+        }
+      ],
+      "mean": {
+        "foreground_ttft_s": 25.662501350510865,
+        "total_wall_s": 35.45677664349205,
+        "maximum_visible_gap_s": 3.2361091014754493
+      }
+    }
+  },
+  "comparisons": {
+    "on_cap0_versus_off_cap0": {
+      "foreground_ttft_s_change_percent": -26.75194555544366,
+      "total_wall_s_change_percent": -20.64606758529862,
+      "maximum_visible_gap_s_change_percent": -26.945667115698836
+    },
+    "on_cap1024_versus_on_cap0": {
+      "foreground_ttft_s_change_percent": 0.8716983839240688,
+      "total_wall_s_change_percent": 0.8012139591698331,
+      "maximum_visible_gap_s_change_percent": -48.60226286370265
+    },
+    "on_cap512_versus_on_cap0": {
+      "foreground_ttft_s_change_percent": 8.804211927125483,
+      "total_wall_s_change_percent": 6.167934344190273,
+      "maximum_visible_gap_s_change_percent": -72.0488320132196
+    },
+    "on_cap1024_versus_off_cap0": {
+      "foreground_ttft_s_change_percent": -26.11344344859463,
+      "total_wall_s_change_percent": -20.010272801641836,
+      "maximum_visible_gap_s_change_percent": -62.45172601745126
+    }
+  },
+  "limitations": [
+    "Two repeats per arm, not a confidence interval or a broad service-level guarantee.",
+    "SSE UTF-8 withholding can omit token IDs; client-visible gaps are not exact engine token intervals.",
+    "Token identity and general quality equivalence are not established across arms.",
+    "Repeated requests share a process; restoration and warmup are excluded from pair wall times.",
+    "Earlier strict failure is retained separately and is not reclassified as a pass."
+  ]
+}

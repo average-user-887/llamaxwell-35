@@ -1,0 +1,75 @@
+Deep two-slot CUDA-graphs probe: root-only, CPU-tested, not GPU-launched
+2026-11-12
+
+Harness:
+<INVESTIGATION_ROOT>/model_deep_graphs.py
+
+Root invocation, choose fresh tags and identical prediction count/verbosity:
+python3 -B model_deep_graphs.py --tag <fresh-off-tag> --graphs 0 --n-predict 256 --verbosity 5
+python3 -B model_deep_graphs.py --tag <fresh-on-tag> --graphs 1 --n-predict 256 --verbosity 5
+512 is the only alternative prediction length. Two repeats per arm are fixed.
+No invocation above was performed by this worker.
+
+Isolated profile:
+- Same frozen v4 library SHA256
+  0c7ffbde334686f17f5ed6a1676c0cd966ec931eaa388900befb06af493330d5.
+- Explicit GEMM=0; baseline omits MAXWELL_GRAPHS entirely, candidate sets1.
+  Inherited baseline MAXWELL_GRAPHS, even0, is rejected. DISABLE_GRAPHS and
+  GRAPH_OPT must be absent in both arms. All identity checks happen before
+  the harness's warmup, inside the BenchRoute cleanup context.
+- Production checkpoints16/minstep2048; cacheRAM0; speculationnone.
+- Both slots independently restore s1_90k_off200000.bin to destination0/1;
+  n_restored must equal90000. Both native prompts are the same immutable
+  fixture slice[200000:290000]+[198], length90001.
+- Two non-stream requests share a three-party start barrier, temperature0,
+  ignore_eos=true, return_tokens=true, explicit slot IDs.
+- Every response requires cache_n90000/new prompt1, exact output count,
+  final cache90000+n_predict, stop=limit, no truncation, full integer ID list,
+  finite server/client times, HTTP200 and completed workers.
+- Client request overlap and two simultaneously active server slots are
+  independently required; actual per-kernel batching is not assumed.
+- Full response, raw tokens/content, hashes, timing and backend log receipts
+  are saved. Within-arm slot/repeat equality is reported, not presumed.
+  Root still needs exact cross-arm ID/content comparison and speed analysis.
+
+Bounds and cleanup:
+Control/restore requests30s, completion sockets90s, pair joins110s, shared
+barrier10s; deadline admission leaves30s beyond each request timeout. Bounded
+daemon workers cannot hold the parent open indefinitely. All real operations
+use the existing isolated route and BenchRoute context-manager cleanup;
+the CPU test exercises cleanup on a pair failure. BenchRoute owns its existing
+launch/unload/container cleanup behavior. Source production configuration is
+not changed. No CPU inference path is added.
+
+CUDA evidence, not fake counters:
+Frozen Release library independently contains warmup/reuse debug strings and
+cudaStreamBeginCapture/cudaGraphLaunch imports. Current build enables graphs.
+Pair-only logs exclude prior warmup and restores. At verbosity5, a backend
+"CUDA graph warmup complete" plus valid completed requests supports capture
+and launch by source control flow: ggml-cuda.cu5298 ->5325 BeginCapture ->5224
+EndCapture ->5239 Instantiate ->5245 Launch, with fatal CUDA_CHECK failures.
+It is explicitly marked source-supported evidence, not an API trace.
+CUDA capture/replay counts remain null. "CUDA Graph id ... reused" is only
+properties reuse; server "graphs reused" is never counted as CUDA proof.
+No compiled debug strings, suppressed verbosity4, missing pair evidence, log
+prefix loss or failed outputs means capture evidence remains unavailable.
+
+BenchRoute received only the authorized typed verbosity parameter:
+default4 preserved; accepted integers4/5 only; actual argv records -lv value.
+Harness defaults5 for backend evidence and also allows4. Match both arms;
+diagnostic logging can perturb timings. If a meaningful effect appears,
+repeat both arms at4 and retain the5-level evidence separately.
+
+Prior evidence, independently coordinated with prefill worker:
+<INVESTIGATION_ROOT>/prefill/GRAPH-HISTORY.txt
+Earlier GR1 used E07, not current B3/v4; one shallow cycle found effectively
+no gain, with bit-identical logits/state. Deep two-slot serving was untested.
+No speed expectation or production qualification is inferred from that record.
+
+CPU verification:
+Seven unittest methods pass, including38 bad-response mutations across
+256/512, presence-sensitive environment cases, real shared-barrier mock
+threads, mocked timeout receipt retention, source-evidence guards, typed
+route verbosity, and main-context cleanup on failure.
+Test command: python3 -B scheduler/analysis/test_deep_graphs.py -v
+All model/service/GPU operations are mocked in those tests.

@@ -1,0 +1,36 @@
+Bounded sampled CPU-double attention diagnostic
+Frozen executable: precision-attention-probe
+SHA256: affd8ebb73eb8084f72dee13919cfd2896cb9f496baeff3b923ebda0d829200f
+Source SHA256: 2842fec21a0eb99dcd70130b7e944f4cf997cf4695f36123a40ec088b386cac0
+CPU-only build script: build.sh. It reads frozen v4 source/build read-only and writes only this directory.
+
+WHAT IT DOES
+Uses the same seeded Q/K/V, padded row/head strides, finite additive mask bias, masked holes, masked terminal keys, query/key tails, and output canary as the integrated probe.
+The scale is the actual model's0.0625 for BOTH GPU operators and the CPU reference.
+Launches stock tile and actual candidate shared-library dispatcher once, then copies both outputs to CPU.
+CPU reference computes FP64 dot products, max-shifted exp/sum, and V-weighted sums from the exact same FP32 Q and FP16 K/V/mask values.
+Seven normal query/head selections plus one all-masked selection;16 output dimensions each. No GPU FP64 is used.
+Per-sample and per-selection JSON, plus one double_summary record report error versus FP64 for BOTH paths.
+The all-masked row's stock nonfinite values are flagged, not used in normal aggregate statistics; candidate must be zero.
+The standard whole-operator finite/error/canary safety checks still run before this diagnostic.
+CLI unchanged: Q K timing_rounds optional_output_dump_path. Use0 timing rounds for minimum GPU time.
+
+ROOT-ONLY RUN
+work=<INVESTIGATION_ROOT>/prefill/precision-audit
+library=<INVESTIGATION_ROOT>/prefill/gemm/integration-v4/src/build/bin
+timeout 90s docker run --rm --name cxm6k-precision-audit --network none --gpus 'device=<GPU_UUID>' --cpuset-cpus 6-8 --cpus 2 --memory 3g --memory-swap 3g -e LD_LIBRARY_PATH=/b -v "$work:/w:ro" -v "$library:/b:ro" -w /tmp --entrypoint /w/precision-attention-probe local/m6000-build-tools:20261013 1023 98048 0
+Use /tmp as the container working directory: root's initial read-only /w launch failed before CUDA initialization; the /tmp retry succeeded.
+Serialize all GPU launches under the parent's gpu-bench.lock; this worker has not run the GPU probe.
+Extract double_summary for a compact accepted-result packet. Raw per-dimension records should remain saved.
+
+RUNTIME / RESOURCES
+172562176 normal QK terms in the CPU cost proxy, plus7*16 full-context PV sums, ran in316.111ms in a CPU-only container limited to1CPU,1GiB,CPUs6-8.
+The actual probe adds FP16 conversion and detailed reporting; allow a few seconds, not minutes. Proxy is a cost estimate, not the numerical validation.
+CPU reference adds about192MiB key-conversion scratch plus less than1MiB FP64 score storage; existing probe host arrays and GPU slab remain bounded.
+GPU candidate v4 uses the frozen412MiB slab; the diagnostic does not change the library or introduce GPU FP64 work.
+
+LIMITS
+These are synthetic operator inputs, not extracted real-model tensors.
+FP64 is a high-precision numerical reference, not exact arithmetic.
+A candidate closer to FP64 here does not prove model-quality equivalence, and a larger error does not alone locate the16K model drift.
+The raw model-quality audit and smallest controls are recorded in AUDIT.txt.

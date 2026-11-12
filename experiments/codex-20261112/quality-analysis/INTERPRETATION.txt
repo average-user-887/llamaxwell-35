@@ -1,0 +1,80 @@
+Quality screen: GEMM v3 versus same-library flag-off baseline, 2026-11-12.
+
+The 16 adjacent, fixed teacher-forced positions 16384..16399 all keep the
+same raw top-1 token, but the numerical distributions are NOT equivalent.
+Mean teacher NLL changes 0.5535019055 -> 0.5758535550 (+0.0223516496 nats).
+Mean absolute NLL difference is 0.0304085132; maximum is 0.3098402023 at
+position 16390, label 1148. Full-vocabulary normalized API KL(off||on) is
+0.0073716553 at position 16384 and 0.0000541315 at position 16385. Their
+total variation is 0.0567307319 and 0.0007020261, respectively.
+
+These are API float32-softmax distributions, not original-logit KL.
+Each full row contains every one of 248320 token IDs once. None has a
+zero-probability sentinel. Raw probability sums differ slightly from one
+(first row 1.0001160788 vs 1.0001017137); the analyzer renormalizes before
+KL. It explicitly distinguishes unavailable underflow tails in future
+receipts rather than silently imputing missing probabilities.
+
+This screen detects a real numerical difference, not demonstrated task
+quality loss, and not 16K quality equivalence. It covers only one fixture,
+16 adjacent labels and two full distributions. A later fresh98K v4 screen
+is now documented in QUALITY98-V4.txt; it too is a bounded, low-entropy
+screen, not broad qualification or evidence that16K is equivalent.
+
+Harness checks: both arms use the same v3 library, same model/full-GPU
+arguments and private route, differing only GEMM enablement. Candidate
+server log confirms actual version=3 kernel execution. Slice SHA256 is
+8ef15856bab92aa9809fa5f9a83fd0ae94aa3b0d32ab4b9c11e51e483c44ebb4.
+The analyzer independently hashes fixture tokens and joins source offset,
+position and label. Cache/prompt boundaries match exactly: first request
+is cache0 + prompt16384, later requests append one fixed teacher token.
+Generated continuations never feed the next quality query.
+
+Important profile limit: these are matched isolated routes, NOT an exact
+production profile. Root's live audit found production explicitly uses
+--ctx-checkpoints16 and --checkpoint-min-step2048, whereas the original
+BenchRoute omits both and the server logs confirm defaults32/8192. Cache
+RAM is therefore not the only production-profile difference. Current
+paired results remain internally matched, but do not establish production
+parity. A checkpoint/batching-profile change may itself change numerical
+probabilities and requires a new matched baseline/candidate comparison.
+
+Both 64-token bias preflights selected label1000 outside top128 and report
+exactly unchanged raw label/top probabilities after forced selection.
+This validates the probability extraction path, not GEMM numerical
+quality (the special prefill kernel is not exercised at 64 tokens).
+Raw preflight responses were not retained, so the saved summary cannot
+be independently reconstructed after the fact. Source inspection agrees
+that forced sampling is separate from the requested raw-probability path.
+
+Fresh64K/98K harness cases rebuild every prefix under their own tested
+arm using 16K checkpoints; these are fresh-state quality screens, not
+single-request timing tests. The deep-append performance case instead
+restores stock 90K KV then appends 4096 tokens, and must not be described
+as a fresh full-context prefill or full-context quality validation.
+
+Performance repeats (all five profiles, two repeats each) have identical
+32 output token IDs, content bytes and every retained probability entry
+within each profile. The v2-library and v3-library flag-off profiles also
+match exactly, giving no observed baseline probability drift here.
+V2 and v3 candidates keep the same 32-token output, but are not probability
+equivalent: across 304 shared top10 entries, mean absolute logprob change
+is 0.1657548747 nats and maximum 1.1579160690; top10 sets also change.
+In absolute probability units the shared-top10 mean change is0.00449393,
+maximum0.08605010 (output index4/token8482:0.60712080 ->0.52107071).
+Thus unchanged generated text does not imply only tiny distribution drift;
+the logprob metric alone would overemphasize low-probability alternatives.
+V3 and v4 candidates match all 32 tokens and every retained probability
+entry exactly. Baseline versus v3 first diverges at output index22; only
+the first23 matched-history decisions are compared as distributions.
+No full-vocabulary KL can be inferred from these top10 performance rows.
+
+Later control runs reproduce the 16K GEMM difference exactly, while OFF
+repeat, ON repeat and baseline microbatch 1024-versus-512 all match every
+retained probability entry exactly. See QUALITY16-CONTROLS.txt. The drift
+is not explained by run noise or this tested baseline microbatch change;
+that finding is not an arbitrary quality-equivalence or rejection threshold.
+
+Files were moved from literal investigation/C/quality-analysis to the
+canonical investigation/quality-analysis directory at 16:18 CET. Only
+this worker's own two files moved; the empty C directory was removed.

@@ -1,0 +1,74 @@
+Native Q8_0 KV + packed-GQA GEMM: source-only forward look
+2026-11-12; no new build, GPU run, model launch, or frozen-artifact change.
+
+BOTTOM LINE
+This is a plausible capacity-and-prefill combination, not an established speed or quality result.
+The existing non-contiguous Q8_0-to-F32 converter can populate v4's one-head scratch directly. A new dequantization framework is unnecessary.
+The important memory trap is separate allocation accounting: skipping F16 conversion at execution time does not remove F16 storage already reserved by the graph allocator.
+Changing only cache flags would currently disable both the GEMM candidate and Occamy's fast F16 decode. The near-neutral native-Q8 decoder is a standalone microprototype, not an integrated model path.
+
+SOURCE / ELIGIBILITY
+Source root: <INVESTIGATION_ROOT>/prefill/gemm/integration-v4/src
+block_q8_0 is exactly 34 bytes: one FP16 scale plus 32 signed int8 codes (ggml/src/ggml-common.h:251).
+At D=256 there are 8 blocks / 272 bytes per head row. Two KV heads occupy 544 bytes per token, for each of K and V.
+The normal FA cache view after graph permutation is [D, K, Hkv, S], with Q8 byte strides nb0=34, nb1=544, nb2=272, nb3=544*capacity for this model.
+Evidence: src/llama-kv-cache.cpp:1296,1320; src/llama-graph.cpp:2813. Head rows are interleaved by token, not contiguous full-context head arrays.
+For each KV head, use input=data+head*nb2 and ggml_get_to_fp32_nc_cuda(Q8_0), shape [256,key_count,1,1], source strides nb1/34, nb2/34, nb3/34. The output is contiguous [D,K], exactly the SGEMM input layout already used by v4.
+The converter already exists in ggml/src/ggml-cuda/convert.cu:720; its generic block traversal is at line 9, and float dequantization is dequantize.cuh:110.
+At 128K, avoiding a materialized F16 bridge removes 256 MiB of temporary K/V storage and 512 MiB of write-plus-reread traffic per single-stream attention invocation. Direct conversion still reads 136 MiB of Q8 K/V and writes 512 MiB of FP32 staging across both head groups. This does not remove the SGEMM/softmax work and is primarily a capacity/cleanup opportunity, not evidence of another large speed multiplier.
+Keep the narrow SM52, D256, 16/2 heads, finite scale, no sinks/ALiBi/softcap/sparse index, actual additive-mask, query-tail and key-tail guards. Require nb0==34 and higher byte strides divisible by 34 for quantized inputs; do not retain the F16 nb0==2 check.
+Do not assume 4-byte alignment of every Q8 block: successive 34-byte blocks alternate alignment. Existing conversion avoids the packed-load alignment trap.
+Frozen v4 currently rejects Q8 at fattn-maxwell-gemm.cuh:160 and caps keys at 98304 at line 167. Its direct FP32 scratch capacity and split arrays would need a deliberate 131072-capacity version.
+
+ALLOCATION TRAP / PAIRED STREAMS
+fattn.cu:732 selects the stock kernel for allocation sizing. For Q8 prefill (>2 query positions), the generic tile path requests F16 K and V.
+fattn-common.cuh:93 appends these arrays to the attention output allocation, and ggml-cuda.cu:1084 exposes that expanded size to the graph allocator.
+Therefore a runtime early return alone saves conversion work but leaves this graph memory reserved. A shared, pure eligibility predicate must govern BOTH allocation sizing and execution before removing the extra arrays.
+Unsupported shapes must still receive stock-sized buffers. Never remove F16 allocation globally merely because the environment flag is set.
+At 131072 keys, F16 fallback arrays total 256 MiB for one stream and 512 MiB for two streams; at 98304 they total 192 / 384 MiB respectively.
+The existing narrow candidate supports only ne3==1. Two-stream prompt graphs therefore remain fallback, even if each stream has 512 queries.
+src/llama-context.cpp:638,684 reserves a full-cache graph with n_seq_max streams. With two non-unified slots, the two-stream reserve is real, not just a hypothetical concurrent request.
+To remove the paired reserve too, a future implementation must explicitly process streams sequentially while honoring their Q/K/V/mask/output offsets, or provide another qualified no-F16 paired path. The same one-head slab can in principle be reused sequentially; this is not implemented or tested.
+
+EXACT PAYLOAD / SLAB ARITHMETIC (MiB = 1048576 bytes)
+                                            2 x 98304      2 x 131072
+F16 KV payload, 10 full-attention layers       3840           5120
+Q8_0 KV payload, same layers/heads            2040           2720
+One-head FP32 K+V staging                      192            256
+Packed Q scratch, maximum 1024 queries          16             16
+Score scratch, 512 packed columns              192            256
+PV partials, 4096-key splits                    12             16
+Pointer arrays, bytes                         576            768
+Total fixed GEMM slab, bytes             432013888      570426112
+Total fixed GEMM slab, MiB              412.000549     544.000732
+F16 attention mask, total 1024 query rows       192            256
+
+Payload formula: capacity * 2 slots * 10 layers * 2(K,V) * 2 heads * (256/32) * 34 bytes.
+Thus Q8 at 2x128K saves 1120 MiB against today's F16 at 2x96K, not 1800 MiB. The larger fixed GEMM slab consumes another 132 MiB, and mask growth requires another 64 MiB of tensor storage.
+The fixed slab must remain constant for a process/profile, not accumulate successive capacity slabs. The actual runtime uses a VMM pool with 128-byte request alignment and retained physical high-water storage, not the legacy 5-percent cache policy (ggml-cuda.cu:532,565,670).
+
+SERVING BUDGET: ESTIMATE, NOT ADMISSION PROOF
+Observed gemm4-on-d1 server log: CUDA model 18393.41 MiB, F16 KV 3840.00, recurrent state 125.62, CUDA compute 408.04, GEMM slab 412.000549, existing cuBLAS workspace 4 MiB.
+The recurrent allocation remains 125.62 MiB when only context capacity changes: two recurrent cells, not one state per cached token (server.log:183). Do not multiply it by 128K.
+Root telemetry at 16:29 CET records 23458 MiB used / 1006 MiB free; usable total 24464 MiB. That interval is quality98-on-b1, whose identity confirms frozen v4 and whose server log confirms version=4. Named allocations above sum to 23183.07 MiB, leaving about 274.93 MiB unattributed runtime/pool/driver overhead. Preserve that residual rather than claiming it is free.
+First-order projection from that measured v4 footprint, same batch/ubatch/output counts and no speculative draft:
+  Complete no-F16 single/pair path: 23458 -1120 +132 +64 = 22534 MiB used, about 1930 MiB free.
+  Narrow single-stream path retaining paired F16 reserve: add a 512 MiB allowance -> 23046 MiB used, about 1418 MiB free.
+The 512 MiB figure is the paired operator's extra arrays, not a measured increase of the entire packed graph allocation. Graph lifetimes, allocator placement and pool high-water can change the final number; these are planning scenarios, not guaranteed peaks or upper bounds.
+For comparison, F16 2x128K plus larger slab/mask projects 24934 MiB, exceeding the observed usable total by about 470 MiB before any additional reserve. Q8 is material to this capacity idea.
+No native-Q8 real-model load, paired 128K request, peak memory, or quality run exists in this investigation. q8/v2 receipts are synthetic only.
+
+OUTPUT / LOGIT / HOST RESERVES
+Current serving profile has n_outputs_max=2 and one output per sequence. Two FP32 vocabulary rows (248320 tokens) are 1.894531 MiB; final output storage is CUDA_Host, not device VRAM (llama-context.cpp:2132,2210; gemm4-on-d1/server.log:175,178).
+Device output-head/logit intermediates still consume compute/pool memory and are not eliminated by that host placement. Keep the observed compute allowance and overhead; do not subtract 1.89 MiB as newly free device memory.
+Raising output rows changes the budget: 18 raw FP32 logit rows are 17.050781 MiB; 1024 rows are 970 MiB, before associated sampling/workspace/intermediate storage. The 2x128K projection does not cover logits-all, speculative verification or a separate draft model.
+Current CUDA_Host compute reserve is 224.05 MiB. Larger masks also affect host staging; this is additional RAM pressure, not device capacity.
+The 62.813 MiB context checkpoints seen in logs store recurrent state in host vectors (common/common.h:1271; server-context.cpp:2571; llama-memory-hybrid.cpp:190). They are not another 62.813 MiB of permanent GPU state per checkpoint, but host checkpoint/prompt-cache budgets still apply.
+
+NUMERICAL / PERFORMANCE LIMITS
+Direct Q8-to-F32 preserves the quantized value scale*code without the generic prefill path's intermediate F16 rounding. It is NOT bit-identical to Q8->F16->F32, and neither equals the original F16 KV values.
+This matches the standalone native-Q8 decoder's arithmetic representation more naturally, but real quality remains unmeasured. Current F16 GEMM already has measurable model-distribution drift despite small operator errors; adding quantization needs its own controlled evidence.
+The packed Q8 decoder's measured micro timing is effectively flat, not a speed gain. It also omits real KV writes/quantization, model weights and routing.
+Minimum next evidence: quantized padded-stride operator probe against CPU double; real native-Q8 decode path proof; one routed paired long-context run with both slots actually filled, peak memory and quality compared at equal context. Configuration of two 128K slots alone is not capacity acceptance.
+
+No production configuration or original source was changed. This note proposes a future isolated branch of the experiment, not deployment.

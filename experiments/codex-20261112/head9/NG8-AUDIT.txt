@@ -1,0 +1,99 @@
+Independent CPU-only audit, 2026-11-12, completed before 16:45 CET
+
+Decision: REJECT ng8 as a speed optimization for the measured copy-edit task.
+Keep the default-off head9 allocation-cliff fix as an experimental enabler, not a speed win.
+No GPU/model/service actions or harness changes were made for this audit.
+
+Evidence root:
+<INVESTIGATION_ROOT>
+Candidate: model-runs/spec8-head9-on-c1
+Control: model-runs/spec-head9-off-a2
+Both use head9/build/bin/libggml-cuda.so, SHA256
+90d6040f0540bcf71b2e4278d3fb3ddca18839551fbb8c4ceb58efccae987485
+Both use the same production server image, full GPU offload 41/41, batch2048,
+ubatch1024, two configured slots, context196608, and the same model and sampler.
+Recorded environment differs only in GGML_CUDA_MAXWELL_HEAD9_MMVQ=1 versus0.
+Server arguments otherwise differ only in container identity and speculation
+(ngram-simple n4/m8 versus none). All generation settings match except
+speculative.types. These arms match each other, not exact production:
+checkpoint max32/minspacing8192 and cacheRAM0; production checkpoint16/2048.
+
+Results, two fresh-cache repetitions each:
+                       candidate0    candidate1      control0      control1
+wall seconds            11.194956     11.167209      5.680256      5.664686
+prompt milliseconds      1094.608      1091.999      1103.828      1089.945
+generation milliseconds 10093.493     10068.602      4570.760      4567.365
+Mean wall: 11.181082 versus5.672471 seconds; 1.971113x, +97.1113% elapsed.
+Mean generation: 10.081048 versus4.569063 seconds; 2.206371x, +120.6371%.
+Mean prompt: 1.093304 versus1.096887 seconds; -0.3267%.
+Each request evaluates347 prompt tokens, generates391 tokens, cache_n0,
+finishes at EOS, reports no truncation, and runs in slot0 without concurrency.
+Candidate each commits267 of340 draft tokens (78.5294%),43 verification steps.
+The n_decode_total metric delta is127 versus393, but its HELP explicitly
+excludes speculative/multimodal decoding: do not equate it to total GPU calls.
+
+Exact-output audit:
+All four full __verbose.tokens lists are identical, length391. All four
+content strings, reasoning strings, and native prompts are identical.
+Recomputed content/reasoning/token hashes agree with every saved receipt.
+Token list SHA256: 8bce0bfab8573e1f54c175281079214dc8028d44c84e016bc851c8c3b33f9a26
+Content SHA256: 8dfb452c19b19658dffaabf97d2787921613e7915063c73f16b7b949570671eb
+Reasoning SHA256: 4519708508d0564cfb4e13647b13bf625b9e1fde70b180bf9931cbaf8455f735
+Independent AST parsing/comparison matches copy_edit_expected.py in all four.
+Generated code was not executed. Exact bytes differ from the expected fixture,
+but that difference is shared by both arms and the ASTs match.
+Native tokens_cached differs738 versus737 despite identical returned tokens;
+this describes final cache state, not prefix cache reuse (timings cache_n0).
+Do not conflate common_speculative proposer statistics (279 accepted at the
+first cumulative print) with committed timings/metrics (267 accepted).
+
+What logs establish:
+Both record n_rs_seq=0, GDN repack/n2gdn variant initialization, and30 repacked
+ssm_out weights. The candidate records n_outputs_max_per_seq9, n_outputs_max18,
+ngram-simple initialization and267/340 acceptance per request. The control
+explicitly records no speculative implementations. Its generic message that
+speculation will use checkpoints is capability discovery, not enabled drafts.
+Both record ordinary prompt checkpoints of62.813MiB. There is no logged
+head9 dispatch counter or per-verification checkpoint/GDN timing. Repacked
+weights prove preparation, not which fusion handled every verification batch.
+The correct claim is recorded head9 enablement plus successful ng8 execution;
+actual call count and component timing were not instrumented.
+
+Likely structural problem, grounded in source, not measured attribution:
+Paths below are relative to head9/src (same source used for candidate library).
+- common/common.h:399 need_n_rs_seq omits ngram; both live logs confirm0.
+- tools/server/server-context.cpp:3436 saves a target checkpoint for each
+  nonempty draft when FULL/RS rollback cannot cover its length.
+- common/common.cpp:2381 copies target state into a host vector; :2417 loads it.
+- tools/server/server-context.cpp:4436 tests rejection depth; :4450 sets replay,
+  restores the checkpoint and sampler, and later re-evaluates accepted tokens.
+- ggml/src/ggml-cuda/occamy-gdn.cu:837 accepts only1 activation row or a narrow
+  two-row decode case; nine-row verification cannot use the whole-layer decode
+  fusion. :1018 additionally requires snapshot countK=1 (not token count).
+- ggml/src/ggml-cuda/gated_delta_net.cu:296 chooses the prefill setting for
+  n_tokens>1, so recorded GDN_COLS=2,4 selects4; :115 loops recurrent tokens.
+- ggml/src/ggml-cuda/ggml-cuda.cu:2107 has the head9 default-off guard and splits
+  supported output-head columns into existing MMVQ blocks of at most8.
+Head9 removes the large dequantization allocation; it does not solve recurrent
+checkpoint/replay, multi-token GDN fusion, or output-head computation economics.
+These are plausible remaining costs, not a measured breakdown of the slowdown.
+If revisited, measure checkpoint save/restore/replay and verification shapes
+before investing in a rollback-aware multi-token GDN design. Simply increasing
+rollback snapshots also costs VRAM and violates the current fusion'sK=1 guard.
+
+Additional precision result independently parsed:
+head9/gpu-head9-prodflags.jsonl SHA256
+42c1bcef892834c2f865b2895ae9e24257c5ab9579646077249079b8e7b90ed3
+16 cases,49,664,000 floats,9/16 columns,contiguous/padded,4 input repetitions:
+all finite, bit-identical, padding unchanged, maximum absolute error/RMSE0.
+The file records Q8_REUSE=1, but not all launch flags; production-flag identity
+comes from root's launch evidence, not this JSONL header alone. The unchanged
+probe SHA is19b5abde72fff00faeba8d2504ba149bb5751459764e6128f42aceac8079e09c.
+CUDA graphs are disabled by the architecture in this probe; no graph-replay
+coverage or standalone head9 speed claim follows from its fixed-order timing.
+
+Limits: one short copy-edit prompt, two sequential repeats, fixed arm order,
+no randomized thermal control, no long-context/mixed-load specimen here.
+This is a clean representative rejection, not universal speculation failure
+or deployment qualification. Paired ng8 can request18 output columns, beyond
+the deliberately narrow9..16 guard, and remains outside this fix's coverage.

@@ -1,0 +1,40 @@
+Independent audit of root's head9 GPU result, 2026-11-12 16:17 CET
+
+Input: gpu-head9.jsonl
+SHA256: 554bbd83ff3f1dae3ec4fc8f98be9d5d247bc67935062091094792e2a76f51be
+Library and probe hashes remain the frozen values in SHA256SUMS.
+
+PASS: 16 expected cases, covering 9/16 columns, contiguous/padded activation
+and output strides, four changing-input repetitions each, full 248320 rows.
+49,664,000 float comparisons. Nonfinite=0, bit differences=0, modified output
+padding=0, maximum absolute error=0, RMSE=0 in every case.
+
+Actual setup reports M6000 24GB / SM52 and Q8_REUSE=1. It does NOT report
+GGML_CUDA_MMVQ_SM52 or GGML_CUDA_HEAD_ROWPACK_SM52; their values are unknown
+from this saved receipt, not assumed enabled or disabled.
+
+Effect if MMVQ_SM52 was absent:
+The optimized XMAD branch is compiled for Q4_0 column counts <=4
+(mmvq.cu:1304). Eight-column blocks do not select it, so both blocks of the
+16-column case are unaffected by this flag. The 9-column case has a one-column
+tail. With HEAD_ROWPACK enabled and contiguous output, that tail selects the
+existing rowpack path earlier. A padded-output tail cannot use rowpack and
+MMVQ_SM52 would choose XMAD rather than generic MMVQ. Thus the current receipt
+does not independently qualify every production flag combination or the
+untested 10..15-column intermediate shapes. The bypass still uses the existing
+dispatcher, not a newly introduced arithmetic kernel.
+
+Important correction to planned coverage: the log explicitly says CUDA graphs
+were disabled due to GPU architecture. These repetitions exercise changing
+inputs and Q8 cache lifecycle, NOT CUDA graph capture/replay. Source permits
+Maxwell graph opt-in via GGML_CUDA_MAXWELL_GRAPHS; this receipt does not test it.
+
+No speed claim. The first reference call includes warmup (~27 ms), while the
+candidate follows it warm. Other calls also use fixed order and host wall
+timing. This is a numerical/safety probe, not a performance A/B. It compares
+against separately dispatched existing MMVQ blocks, not full-F32 cuBLAS or
+end-to-end model generation. The next acceptance evidence is a root-owned
+model experiment retaining real draft/accept counters, token IDs, semantic
+completion and committed-token time. More than 16 columns remains unchanged.
+
+No GPU, model or service action was performed by this auditing worker.

@@ -1,0 +1,150 @@
+NO-EXTRA-MODEL SPECULATIVE SERVING PILOT
+Prepared 2026-11-12, CPU/source inspection only. Root owns GPU/service actions.
+
+POST-PILOT WARNING: actual root run spec-on-b1 with size-m8 OOMed at its first
+real copy_edit request after a no-draft warmup. It is NOT a working production
+profile. See OOM-AND-ROLLBACK.txt for the symbol-confirmed dense-F32 conversion
+failure, inferred1940MiB output-head allocation, and one-request ng4 follow-up.
+The initial profile below is retained as historical experiment provenance.
+
+DECISION AND EXACT FLAGS
+
+Use the existing isolated routing-stack profile and keep all target-model,
+offload, context, batch, cache, sampling and performance options identical.
+No new model, draft weights, downloads, CPU inference or GPU ownership changes.
+
+Arm A:
+  --spec-type none
+
+Arm B:
+  --spec-type ngram-simple --spec-ngram-simple-size-n 4 --spec-ngram-simple-size-m 8
+
+This uses exact token-history matching and proposes at most eight tokens from
+the same request's history. CPU token lookup is not CPU model inference.
+Do not add draft-model/HuggingFace flags. Do not set synthetic-acceptance flags
+or LLAMA_ARG_SPEC_SYNTH_LEN / LLAMA_ARG_SPEC_SYNTH_RATES environment variables.
+Those synthetic options replace target verification and cannot establish quality.
+
+The actual production-app CLI supports these flags; see production-cli-help.txt.
+The old --draft/--draft-max options are explicitly removed in this binary.
+--spec-draft-n-max does NOT bound ngram-simple: use its own size-m option.
+Do not set size-m below size-n: the simple implementation then returns no draft
+because copy_max < n_draft_min. The simple mode ignores its exposed min-hits
+setting; its actual config contains only n-gram and m-gram lengths.
+
+A small optional second step, only if B has substantial acceptance, is size-m=4
+versus8 to measure verification/checkpoint economics. This is not a mandatory
+full sweep. Avoid48-token default drafts during the first bounded experiment.
+
+REAL REQUEST PROFILE
+
+Start with one active slot, no concurrent human request, temperature0, fixed seed,
+the route's existing chat template/thinking configuration, and bounded output.
+Use the prepared prompts.json request templates after filling the root-owned
+isolated route alias. They target /v1/chat/completions; keep the current approved
+routing URL, not a direct model backend. No request has been sent by this worker.
+
+Prompts:
+1. copy_edit: one Unicode-normalization change in a complete supplied Python
+   module. This is the positive representative copy-heavy edit. Expected AST is
+   available in copy_edit_expected.py; complete output must retain every other
+   statement. This is not a loop of forced repeated nonsense.
+2. repetitive_client: eight explicit API-client methods with real HTTP behavior,
+   shared patterns, no entire-file answer in the prompt. This tests generation
+   history reuse instead of only source copying.
+3. low_reuse_control: merge_intervals implementation. This reveals overhead when
+   exact n-gram matches/acceptance are scarce.
+
+Keep cache_prompt=false for the initial whole-request comparison, or restore an
+identical saved prompt for both arms and explicitly report the cached window.
+Do not mix cache treatments. Respect EOS and complete the task rather than forcing
+ignore_eos or judging a truncated fixed-length code fragment as correct.
+
+Collect a first A/B representative result, then only repeat ABBA if the outcome
+would change the decision. Hold server launch count, request count and order in
+the retained receipt. Use unique files so no earlier A/B result is overwritten.
+
+ACCEPTANCE AND METRICS
+
+Require live /slots or equivalent configuration evidence that B has speculation
+enabled and A does not. A valid response alone is insufficient: initialization
+can catch a speculative exception and continue with spec=nullptr; no-match mode
+can also produce ordinary decoding with zero drafted tokens.
+
+Retain complete response text/token counts, client monotonic wall time, prompt
+time, prediction time, draft_n and draft_n_accepted when present, and startup/
+request logs. Server metrics expose spec_decode_num_draft_tokens_total,
+spec_decode_num_accepted_tokens_total and spec_decode_num_drafts_total. The log
+prints draft acceptance and mean accepted length when actual drafts exist.
+Use metric deltas for the isolated run, not cumulative totals from unrelated work.
+
+Compare committed output tokens per elapsed second, completion wall time and
+task correctness. Acceptance alone is not a win; it can hide expensive verification
+or replay. Compare exact greedy A/B token/output sequences and independently check
+semantics. Batch-shape numerical differences mean sample-and-match does not prove
+bit-identical output versus one-token decoding in this custom stack.
+
+Leave trace logging off during scored timing. If diagnostics are required, a
+single separate LLAMA_TRACE=1 run exposes accepted counts/checkpoint restore lines;
+do not compare that instrumented request directly against uninstrumented A.
+
+ROLLBACK, MEMORY AND KERNEL CAVEATS
+
+The configured ngram modes do not request recurrent rollback slots:
+common/common.h:399-405 need_n_rs_seq() returns draft.n_max only for MTP/Eagle3/
+DFlash/DSpark, otherwise0; common/common.cpp:1712 uses that result.
+
+The server probes the target context's sequence-removal ability. Without bounded
+rollback, the hybrid recurrent model normally uses checkpoint-based rollback.
+For every nonempty draft it saves target partial state; on a rejected suffix it
+restores that checkpoint, restores the sampler, and replays the accepted prefix.
+These costs are part of the real experiment and must not be subtracted away.
+
+Partial state here is NOT the full long-context attention KV cache:
+src/llama-memory-hybrid.cpp:190-205 skips attention serialization when
+LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY is set, but saves/restores recurrent state.
+common/common.cpp:2381-2430 stores it in a host vector via the state API.
+No extra model weights are needed. There is still host checkpoint storage,
+GPU/host state transfer, more simultaneous logits and target verification scratch.
+The current pilot has not measured these byte counts or transfer costs.
+
+The fast custom Occamy attention applicability guard requires Q->ne[1]==1
+(ggml/src/ggml-cuda/fattn-occamy.cu:621). An8-token proposal verifies up to9 query
+positions, so it does not use that single-query kernel. This pilot therefore tests
+the actual existing generic verification path, not a future tiny-batch kernel.
+
+QUALITY SEMANTICS
+
+For ngram-simple the drafter emits no probability distribution. Target verification
+falls back to common_sampler_sample_and_accept_n(): sample the target at each
+position, accept only matching proposals, stop at the first mismatch, and append
+one extra target token if all proposals match. This is not unchecked acceptance.
+Temperature0 makes the intended check greedy; runtime numerical/kernel behavior
+and recurrent replay still need the actual output comparison described above.
+
+Avoid ngram-mod as the first test: its defaults are48-64 proposal tokens and its
+source explicitly warns about lookup lengths below16. ngram-cache uses a fixed
+eight-token proposal limit plus optional cache-file state. ngram-map-k/map-k4v
+add per-sequence lookup tables and more lifecycle state. These may be useful later,
+but ngram-simple has the smallest state surface for this first real sample.
+
+SOURCE RECEIPTS (relative to BUNDLE3)
+
+common/arg.cpp:4282-4360                actual supported mode flags
+common/ngram-map.cpp:49-118            exact history search, proposal-length edge
+common/speculative.cpp:1835-1878       stateless simple-mode wrapper
+common/speculative.cpp:2400-2428       each mode's actual configured maximum
+common/speculative.cpp:2704-2708       explicit ngram modes, no draft model needed
+common/speculative.cpp:2744-2755       simple config discards min-hits
+common/sampling.cpp:689-720            target sample-and-match verification
+common/common.cpp:1566-1610            rollback-capability probe
+tools/server/server-context.cpp:1391   speculative-init failure can fall back
+tools/server/server-context.cpp:3413   checkpoint before nonempty proposals
+tools/server/server-context.cpp:4400   verification and checkpoint replay
+tools/server/server-common.cpp:99      response draft counters
+tools/server/server-task.cpp:1555      metrics acceptance counters
+
+Source root:
+<LAB_STORAGE>/m6000-llama-cpp/occamy35-night-20261111/cand/BUNDLE3
+Actual inspected app-library hashes: production-artifact-sha256.txt.
+No GPU execution, model loading or service writes were performed by this worker.

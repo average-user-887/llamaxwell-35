@@ -1,0 +1,61 @@
+FRESH98K V4 PAIRED QUALITY SCREEN - 2026-11-12
+
+Decision: no large numerical disturbance observed in this narrow window;
+NOT proof of general model quality, production equivalence or bitwise
+equivalence. The scored fixture region is hex/digit-heavy and low entropy.
+Only32 adjacent teacher labels and two full distributions are measured.
+
+Both arms use identical v4 library SHA256
+0c7ffbde334686f17f5ed6a1676c0cd966ec931eaa388900befb06af493330d5,
+full41/41 GPU offload, same isolated route arguments, GEMM0 versus1.
+Token slice SHA256 independently verified:
+1966209ec68b4875dd766580dba1f50b13ce164fad66351135eaef5f73db3564.
+Positions98000..98031 and labels match exactly; no saved stock KV restore.
+
+Raw top1 agreement between arms:32/32. Both select the teacher as raw top1
+on31/32 positions, so32/32 agreement must not be called32/32 task accuracy.
+Teacher mean NLL baseline0.09825879652, candidate0.09481999685 nats.
+Mean candidate-minus-baseline NLL:-0.00343879967.
+Mean absolute NLL difference:0.01050708041.
+Maximum absolute NLL difference:0.06628260016 at position98030.
+The small mean NLL improvement is not evidence of improved general quality.
+
+Full-vocabulary normalized API-distribution KL(off||on):
+  position98000, label15:3.0333111844e-6 nats; TV7.6049041794e-6.
+  position98001, label15:7.2188000744e-5 nats; TV0.0003214681087.
+Every row contains all248320 IDs once, without zero-probability sentinels.
+Float32 probability sums are slightly nonunit and explicitly renormalized.
+This is KL of API float32 probabilities, not inaccessible original logits.
+
+Exact cache trajectory verified independently for both arms:
+  cache0 +16384 ->16384
+  cache16384 +16384 ->32768
+  cache32768 +16384 ->49152
+  cache49152 +16384 ->65536
+  cache65536 +16384 ->81920
+  cache81920 +16080 ->98000
+Then31 requests each append exactly one fixed teacher token. Cache and
+prompt counts match between arms, and every scored tokens_cached equals
+its requested prefix length. Generated continuation never feeds a query.
+Both saved64-token forced-label preflights pass exactly; raw preflight
+responses were not retained by this older harness.
+
+STAGED TIMING ONLY, NOT SINGLE-REQUEST TTFT:
+Sum of six server prompt times through98000 tokens:
+  baseline481.332268s; candidate375.744221s.
+  Ratio1.281010435, or21.9366% less staged prompt time.
+Sum of those six request wall times:
+  baseline482.6904874s; candidate376.9693163s.
+These sums exclude load, warmup, bias preflight and the later31 scoring
+queries. HTTP staging and full-probability serialization make them unlike
+a single contiguous fresh-prefill/TTFT measurement. This is one pair, not
+an independent repeated performance campaign.
+
+PROFILE LIMIT: private route defaults32/8192 for checkpoint count/minstep;
+production explicitly uses16/2048. Cache RAM is not the only difference.
+The pair is internally matched but must not be described production-exact.
+A new production-checkpoint profile needs its own baseline/candidate pair.
+
+Receipts: quality98-v4-analysis.json and quality98-v4-cache-timing.json.
+Next evidence: root's representative long-context semantic task and the
+optional64-label/four-checkpoint grid; those are still bounded screens.

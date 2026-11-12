@@ -1,0 +1,113 @@
+{
+  "utc": "2026-11-12T16:31:59.805069+00:00",
+  "own_containers_before_cleanup": [],
+  "owned_copies_removed": [
+    {
+      "name": "codex-20261112-s0.bin",
+      "bytes": 2471307220,
+      "absent_after": true
+    },
+    {
+      "name": "codex-20261112-s1.bin",
+      "bytes": 2043313664,
+      "absent_after": true
+    }
+  ],
+  "user_slot_metadata": [
+    {
+      "name": "slot0.bin",
+      "size": 133144248,
+      "mtime_ns": 1794465919798834396,
+      "matches_recorded_start_metadata": true
+    },
+    {
+      "name": "slot1.bin",
+      "size": 65885224,
+      "mtime_ns": 1794346104115710059,
+      "matches_recorded_start_metadata": true
+    }
+  ],
+  "own_telemetry_stop_requested": true,
+  "guard_cleanup_requested": true,
+  "verified_utc": "2026-11-12T16:32:32.499095+00:00",
+  "slotkeeper": {
+    "returncode": 0,
+    "stdout": "active",
+    "stderr": ""
+  },
+  "production_container": {
+    "returncode": 0,
+    "stdout": "sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d 2026-11-12T13:14:47.464616639Z exited",
+    "stderr": ""
+  },
+  "own_containers": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "original_source_git_status": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "production_library_sha256": "94c777dc55489fba4cab5b68c6b54cf8a45810b0a1011589260e5bd23cd05486",
+  "candidate_library_sha256": "0c7ffbde334686f17f5ed6a1676c0cd966ec931eaa388900befb06af493330d5",
+  "public_route_config_final_sha256": "227742c74c97809015f207000c9d834b050c127f8dd19e89ce1305100c4f449f",
+  "public_route_config_mtime_ns": 1794229810504352714,
+  "public_running_http_status": 200,
+  "public_running": {
+    "running": []
+  },
+  "gpu_snapshot": {
+    "returncode": 0,
+    "stdout": "16 MiB, 24449 MiB, 0 %, 250.00 W, 45",
+    "stderr": ""
+  },
+  "gpu_processes": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "ownership_events": [
+    {
+      "time": "2026-11-12T14:09:35.106684+00:00",
+      "event": "acquired",
+      "keeper_paused": true,
+      "deadline": 1794502200.0
+    },
+    {
+      "time": "2026-11-12T16:32:02.536713+00:00",
+      "event": "cleanup_started"
+    },
+    {
+      "time": "2026-11-12T16:32:02.715351+00:00",
+      "event": "route_unload",
+      "status": 200,
+      "body": "OK"
+    },
+    {
+      "time": "2026-11-12T16:32:02.732167+00:00",
+      "event": "keeper_restored",
+      "returncode": 0
+    },
+    {
+      "time": "2026-11-12T16:32:02.732249+00:00",
+      "event": "lock_released"
+    }
+  ],
+  "gpu_lock_available": true,
+  "remaining_private_routers": [],
+  "production_not_deployed": true,
+  "checks": {
+    "keeper_restored": true,
+    "own_containers_removed": true,
+    "own_routers_closed": true,
+    "original_source_clean": true,
+    "production_library_unchanged": true,
+    "candidate_library_unchanged": true,
+    "lock_released": true,
+    "gpu_no_compute_processes": true,
+    "guard_completed": true
+  },
+  "status": "passed"
+}

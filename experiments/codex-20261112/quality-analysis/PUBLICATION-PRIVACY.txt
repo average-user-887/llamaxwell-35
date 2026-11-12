@@ -1,0 +1,74 @@
+Publication privacy and source provenance preflight — 2026-11-12
+
+Conclusion
+No new private-data ancestry leak was identified in the five BUNDLE3-only
+commits relative to the locally available public reference 5e2bc37. This is
+bounded evidence, not a declaration that the entire repository or investigation
+is secret-free. Publish only the explicit, redacted artifact allowlist.
+
+Corpus provenance
+D0 deep_text.txt is a concatenation of public llama.cpp/ggml C++ source, not
+user conversations and not naturally generated synthetic prose. All 2,400,000
+bytes reconstruct exactly as 43 whole tracked source files followed by the
+first 25,878 bytes of ggml/src/ggml-cann/aclnn_ops.cpp. Every contributing source
+blob is byte-identical to the corresponding pre-existing public 5e2bc37 blob.
+No unmatched bytes remain. Corpus SHA256:
+7881b8bc5c046bcf06dfb50fb79a7702bf1d70ac2d738ec625d3ef59df17eea9
+
+deep-corpus-manifest.json records ordered relative paths, offsets, lengths,
+whole/partial status, source hashes, public reference and LICENSE hash. The
+public repository LICENSE states MIT License, Copyright (c) 2023-2026 The ggml
+authors. Preserve its notice and any source-specific notices with any bundled
+substantial source corpus. Retrieval records and task instructions were later
+constructed as benchmark fixtures; describe these as public source-code
+workloads with synthetic task/record insertions.
+
+Newly reachable source history
+Public reference: 5e2bc37710264dd7fc20241e862ad4963df79009
+BUNDLE3 reference: 2436f7554c0c8d70afc9acbcce85b2457193a516
+85dbeed is an ancestor of the public reference. The difference contains five
+commits, including two merges, and eight new blobs across six CUDA source
+paths: fattn-occamy.cu, ggml-cuda.cu, occamy-fused.cu/.cuh, occamy-gdn.cu/.cuh.
+The audit included intermediate and merge-result blobs, not just final files.
+No new log, chat, slot, weight, bytecode or configuration blob is reachable in
+this range. All author/committer tuples were already present in the last 200
+public commits. No high-specificity credential-pattern hit was found in these
+new commit or blob objects. publication-history-objects.json is the receipt;
+publication-preflight.json records the independent commit-set comparison.
+Existing public history was not exhaustively audited, nor are future root
+integration commits covered by this ancestry result.
+
+Saved benchmark data reviewed
+The inspected generators draw from the proven public corpus, fixed teacher
+tokens, constructed copy-edit/client/control prompts, and constructed retrieval
+records. Twelve representative fixture/response/server-log artifacts are
+enumerated and hashed in publication-preflight.json. None showed a credential
+pattern hit. This does not clear every raw receipt. Identity and server logs
+still need schema allowlisting and removal of local paths, IPs, GPU UUIDs,
+container/PID/route identities and unrelated environment values.
+
+Strict publication boundaries
+Exclude route.yaml/router.log, credentials, .env files, private keys, model
+weights, saved slots, raw source/build trees, ownership snapshots, user rollout
+excerpts, all bytecode-incident/backup files and speculation/quality-guidance.txt.
+Do not publish arbitrary files merely because a text scanner finds no secret.
+Use exact allowed GGML environment keys and validated boolean/numeric values,
+not an unrestricted GGML-prefix rule. Preserve probability vectors and
+measurement numbers; retain a redaction manifest and post-redaction hashes.
+
+Recommended supplemental scan rules
+Scan PEM private-key headers, GitHub tokens, sk- provider keys, AWS access IDs,
+Google API keys, Slack tokens, JWT-shaped values, credentialed URLs,
+Authorization Bearer/Basic values, quoted password/API/access/refresh/client
+secret assignments, hf_ tokens and credential-bearing URL query values.
+For JSON, scan both raw bytes and decoded string values. Report only rule,
+path and count/offset/hash, never matched credential values. Word "token", model
+token IDs and probability distributions are not intrinsically credentials.
+Generic assignment/query rules need human review; scanner absence is not proof.
+
+Limits and evidence preservation
+This was CPU-only, local-object and saved-artifact inspection: no network,
+git mutation, service, model or GPU action. The public candidate must remain
+experimental: retain QUALITY-GRID-V4.txt's 65K normalized API-distribution
+KL 0.293615 / TV 20.8524% prominently despite 64/64 top-1 agreement. Do not
+rewrite the quality conclusion as numerical or task-quality equivalence.

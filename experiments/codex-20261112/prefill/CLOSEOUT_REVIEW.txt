@@ -1,0 +1,63 @@
+V4 independent closeout review, 2026-11-12
+Scope: saved real-task receipts, source/allocator/stream integrity and remaining bottlenecks. CPU-only; no new source patch, build or GPU run.
+Investigation root: <INVESTIGATION_ROOT>
+Source shorthand below: prefill/gemm/integration-v4/src
+
+COPY-EDIT TASK: VERIFIED EXACT A/B COMPLETION IDENTITY
+Runs: model-runs/long-task-off-a1 and long-task-on-b1.
+OFF response ID: chatcmpl-j9Skw3snlWH5T0Zd8FTeKtkU6cD3pI7T
+ON response ID:  chatcmpl-jyy8rBxPQE8N3FcKA5s2ZYFBQar8B4eU
+These are distinct response objects/IDs and timestamps from separate routed processes, not the same raw response copied twice.
+Both use frozen v4 library 0c7ffbde334686f17f5ed6a1676c0cd966ec931eaa388900befb06af493330d5, identical serving settings except GEMM flag and run metadata, full GPU offload and speculation=none.
+Both requests contain 17881 prompt tokens, cache_n=0, finish_reason=stop and 397 completion tokens. The saved rendered prompts and generation settings are identical.
+The complete message objects, including reasoning_content and final code, are equal. All 397 returned token IDs are identical, not just the rendered final code.
+Token-array SHA256 (compact JSON): f3cdb09de588997087c671e771637f54617465b1421d90226044c790f64b56c1
+Full verbose completion content SHA256: 2de01c64f00bd8f9c9d27c1562a6b21abaa5673e358de9eabdddf0d448cb8958
+Final code SHA256: 8dfb452c19b19658dffaabf97d2787921613e7915063c73f16b7b949570671eb
+Final code is 1116 bytes. The 1117-byte expected file differs only by a final newline; this explains exact_bytes_equal=false, not a code-edit error.
+Independent ast.parse/ast.dump comparison confirms expected_ast_equal=true; expected itself equals input with exactly the single .lower() -> .casefold() replacement. No generated code was executed.
+The current fixture and 60000-character reference reconstruct the recorded request SHA256 exactly: e797084150fa46b87a3a406da710acaa3fcc4cf09d928f15cddd0acc1d55bc2e.
+Validator SHA256: eea7c932243e85272166a07c8fb571684a12af2719e2d8d4e895a6cdee26508c
+Input SHA256: cf4a9bbfcc1daa301b683765a93b23f329584d218e75817cc8820d5ba2fd7d3e
+Expected SHA256: 2877dc50e5660bb0194414580f9c9aebe8ea8077c993241d97bf32384f61f579
+OFF raw response SHA256: 84b1824c051934222450718dd64715908ceba25ed321adc903919b0192ec2b87
+ON raw response SHA256:  6b1ccacd1475c42baf2fd6056c9a72b5161e933795c8e1d691b6740c07188f6b
+Observed prompt time OFF 40886.904 ms / ON 38451.933 ms; decode 5219.765 / 5227.713 ms. One short-context task pair is not a general speed benchmark or broad quality qualification.
+
+RETRIEVAL TASK: TRUNCATION IS A CONFOUNDER
+OFF response ID: chatcmpl-HR2V97Iu4ml9d8Qw9aX80LKIZKTxvxhs
+ON response ID:  chatcmpl-WV4hGs3631r1T7YuDV1AEhqGTRHirx0Y
+Same saved request SHA256 d6cb77fde6f1c17dc1523eb25fe1dcaa04ca164e760223bc7ac86d48ad338963; both prompt_n=17650 and cache_n=0.
+OFF exhausts max_tokens=512, finish_reason=length, and stops inside a JSON string. Its saved reasoning already names all four correct records, but its final answer is incomplete and strict JSON validation fails.
+ON finishes at 237 completion tokens with stop and the exact four-record JSON object. Independent json.loads/equality reproduces the recorded pass.
+This is one completed candidate answer versus a baseline response-budget failure, not evidence that candidate retrieval quality is superior. Extra output budget or controlled no-thinking repetition is needed for an informative comparison.
+The two request completions contain different reasoning lengths, so wall-time differences here also include different decoding work.
+
+V4 SOURCE / GUARD INTEGRITY
+Compared with BUNDLE3, fattn.cu adds only the new header include and a default-off early dispatch call. The original tile/common headers hash-identically; all failed candidate guards continue to the existing Occamy/stock dispatcher.
+Guard requires SM520, F32 Q/output, F16 K/V, D256, 16 Q / 2 KV heads, all sequence dimensions one, Q64..1024, K4096..98304, compatible actual mask/strides, contiguous output, no sinks/ALiBi/softcap/sparse mode and finite scale.
+Both-decode multi-sequence attention falls back twice over: Q is below 64 and ne3>1. A single-sequence decode also falls back. Genuine two-stream prefill falls back by ne3.
+Mixed scheduling can expose a single-sequence prefill of Q1022 or Q1023; both satisfy the guard. Packing rounds to 1024, fills unused columns with zero, softmax zeroes those columns, and reduction suppresses writes outside actual Q. Slot numbers are not used as tensor indices; actual view base pointers/strides select the right slot.
+The source does not truncate context: K above 98304 falls back, and supported K tails use a separate tail SGEMM. The same actual additive mask is applied in both softmax passes.
+All-masked query output zero is an intentional edge behavior differing from the direct stock tile's 0/0. Nonfinite source tensors or NaN/+inf masks are not qualified by the synthetic or real tests.
+
+ALLOCATOR / STREAM LIFETIME
+The slab is a local ggml_cuda_pool_alloc<char>, not a shared global buffer. Context pools, cuBLAS handles and cuBLAS workspaces are indexed by device AND curr_stream_no (common.cuh:1451,1548,1570).
+Conversion, Q packing, pointer setup, QK, softmax, PV and output reduction all enqueue on ctx.stream(); the handle is permanently bound to that same stream when created. There is no separately launched default-stream kernel in the candidate.
+The device pointer table is initialized before use; its values point into the same slab and do not change between KV groups. Group 1 overwrites K/V only after every group-0 query tile has enqueued its PV/reduction in the same stream.
+RAII destruction returns the allocation to the VMM stack after enqueue, but does not unmap the physical storage. Later reuse on that pool's same stream is ordered after earlier consumers. This matches existing backend temporary-allocation practice (common.cuh:1219; ggml-cuda.cu:565,670).
+The server's single start_loop invokes update_slots once per iteration for all slots (server-queue.cpp:278,310). Two concurrent HTTP requests do not independently execute two host graph traversals on the same context.
+No shared-slab race was identified under this serving model. This is source reasoning, not a race-detector result, and does not make concurrent external host calls into one backend context thread-safe.
+Separate backend contexts or optimized graph streams would get separate pools and may each retain a slab; 412 MiB is per used context/stream, not a process-global maximum. Current saved routes omit both GGML_CUDA_MAXWELL_GRAPHS and GGML_CUDA_GRAPH_OPT, so that untested concurrency regime is not activated.
+CUDA graphs are disabled below Volta unless GGML_CUDA_MAXWELL_GRAPHS is present (ggml-cuda.cu:5258). Server 'graphs reused' counters alone do not demonstrate CUDA graph replay.
+The current v4 slab requests 432013888 bytes, pool-aligned to 432013952, plus the backend's existing 4 MiB cuBLAS workspace. The observed v4 2-slot profile, not multiplication by two HTTP requests, is the memory evidence. Capacity estimates remain workload- and output-count-specific.
+
+REMAINING BOTTLENECKS / NEXT DECISIONS
+The standalone online-softmax receipt around 98K attributes approximately 161 ms to QK, 150 ms to PV, 91 ms to softmax, 2.4 ms to conversion and 1.5 ms to reduction, of about 406 ms total. This stage profile uses synthetic causal data, not a measured breakdown of the integrated real-mask operator.
+Consequently another conversion-only change cannot plausibly remove a large fraction of current operator time. Q8 direct conversion remains principally a capacity idea; see Q8_FORWARD_LOOK.txt.
+The materialized score matrix is written by QK, scanned twice by softmax, then consumed by PV. Shared memory and SM52 register limits defeated the earlier naive tile/config sweeps; redoing occupancy-only sweeps is not supported by evidence.
+Possible next algorithm work: retain packed GQA reuse while reducing score traffic, improve PV split/shape efficiency, or consume masks without redundant work. These require new measurements and precision checks, not a promised multiplicative speedup.
+Allocator guards and two-stream fallback prevent current GEMM from covering every serving phase. That coverage limit should be reported, not averaged away.
+Neither closer CPU-double samples nor one byte-identical real copy-edit proves general model-quality equivalence. The real distribution drift, OFF/OFF reproducibility controls and deeper task evidence remain separate acceptance questions.
+
+Review created no GPU work, modified no frozen source/library/binary, and executed no generated model code. Python inspection used -B and standard-library parsing only.

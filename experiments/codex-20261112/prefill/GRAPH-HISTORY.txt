@@ -1,0 +1,49 @@
+Maxwell CUDA graphs: bounded source/history review, 2026-11-12
+
+CONCLUSION
+This is an existing functional opt-in path, not hardware-inapplicable. The examined rejection was for no measured shallow speed gain, not an identified correctness failure. A fresh isolated deep two-slot comparison is justified; it is not already a proven speed improvement or cleared for production.
+No GPU work or build was performed for this review. Root owns any next comparison.
+
+CURRENT SOURCE GUARDS
+Source root: <INVESTIGATION_ROOT>/prefill/gemm/integration-v4/src
+ggml/src/ggml-cuda/ggml-cuda.cu:5258 disables graphs for cc<Volta unless GGML_CUDA_MAXWELL_GRAPHS is PRESENT. Setting it to 0 still enables this override; baseline must omit it.
+ggml/src/ggml-cuda/common.cuh:1290 separately disables all graphs when GGML_CUDA_DISABLE_GRAPHS is present, even if its value is 0. Leave it absent for the candidate.
+ggml-cuda.cu:5482 graph-stream optimization is a different GGML_CUDA_GRAPH_OPT==1 feature. Leave it absent; the graph opt-in alone does not request concurrent graph streams.
+ggml-cuda.cu:2836 rejects graphs when a MUL_MAT_ID path requires synchronization. Its helper at line 2143 permits small quantized MMVQ; Q4_0 supports up to six rows on Pascal/older (mmvq.cu:153), so two-row decode is not inherently excluded by that condition.
+Compilation includes graphs (build/CMakeCache.txt GGML_CUDA_GRAPHS=ON). Frozen v4 contains the actual cudaGraphLaunch and cudaStreamBeginCapture imports and warmup/reuse log strings.
+
+EXACT PRIOR EXPERIMENT
+Receipt directory: <LAB_STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GR1
+cfg-gr1san.json:37,44 uses the same E07 libggml-cuda.so for both arms; B alone adds GGML_CUDA_MAXWELL_GRAPHS=1 at line 46. Library SHA256 f638b70ec2e8f7def5a36bb77ecd4cbc87cbfc0030051fe6dc5b57d2b2a541b3. This predates current BUNDLE3/v4.
+cfg-gr1san.json:131 requests one cycle. g4-gr1san-warm_decode.analysis.json:19 gives OFF 85.0162725 / ON 84.8851835 tok/s, delta -0.1541928341%; g4-gr1san-d4096.analysis.json:19 gives 82.2431740 / 82.3804735, delta +0.1669433381%.
+Both analysis files at line 43 explicitly say INSUFFICIENT_CYCLES; confidence intervals and standard deviations are null. The ledger's REJECT means the kill-screen found no worthwhile gain, not a statistically established universal regression.
+g1-B1.cmp.txt:1 and g1-B2.cmp.txt:1 each compare 15892480 logits over 64 steps: zero bit/tolerance mismatches, zero NaN/Inf. Lines 2-3 also report byte-identical state at steps 64 and 2112. The A repeat matches too.
+g1-B1.txt:2698 logs CUDA graph warmup completion. Both B1 and B2 contain 9 warmup-complete, 8 warmup-reset and 2102 CUDA Graph id reuse lines across the 2112-step run. This supports amortized recapture, not recapture every token.
+pg.txt:1-4 reports a 25-token d0 nvprof sample: period median 11.970 -> 11.986 ms; trimmed means 12.0393 -> 12.0068 ms. Signs differ by statistic and the sample is shallow.
+Decision: <LAB_STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/LEDGER.md:12 records no gain/reject; NIGHT.md:38 agrees.
+Later self-audit: <LAB_STORAGE>/m6000-llama-cpp/occamy35-day-20261112/research/DATA_DIG.md:87 explicitly calls the rejection shallow and states deep, two-slot and server graph comparisons were not performed.
+
+ADDITIONAL FUNCTIONAL EVIDENCE, NOT CURRENT PERFORMANCE
+<LAB_STORAGE>/m6000-llama-cpp/occamy35-day-20261112/evidence/E5/src/data/downx-20261110/extra/README.md:16 reports device-versus-host dispatch counters with opt-in graphs: harness dev 2560 / host 120 and bench dev 5160 / host 280. Its replay logits match the eager fixture. This is evidence that actual SM52 CUDA replay works, not that current B3 deep serving is faster.
+<LAB_STORAGE>/m6000-llama-cpp/occamy35-day-20261112/evidence/E5/src/audit/RUN-RECEIPT.md:8 separately records device readback proving the norm-Q8 pair producer and cache-hit marker execute during replay. That was a debug micrograph, not current full-model qualification.
+
+RELIABLE REPLAY SIGNAL WITHOUT A NEW BUILD
+Server 'graphs reused' alone is insufficient: it also counts reusable GGML graphs while CUDA graphs remain disabled.
+Existing -lv 5 exposes CUDA backend debug logging; -lv 4 suppresses it (common/log.h:24 and common/log.cpp:532). LLAMA_ARG_LOG_VERBOSITY is an alternative only if not overridden by explicit CLI -lv.
+In ggml-cuda.cu:5298, 'CUDA graph warmup complete' occurs after compatibility plus stable node properties, sets use_cuda_graph/update=true, and follows the BeginCapture -> EndCapture -> Instantiate -> cudaGraphLaunch path. Later matching UID reuse with no warmup reset and successful output supports replay by source control flow. UID-reused lines alone only establish property reuse.
+Stronger direct proof is an existing nvprof CUDA API trace/summary showing cudaStreamBeginCapture/EndCapture and repeated cudaGraphLaunch. GR1/prof.sh already invokes /usr/local/cuda/bin/nvprof in nvidia/cuda:12.8.1-devel-ubuntu24.04 successfully on this GPU. Keep a short profiled routed evidence run separate from unprofiled timing; no new source or instrumentation library is required.
+Do not enable debug logging or profiling only on timed ON. Either equal logging on both timed arms or separate short evidence collection avoids that confound.
+
+NEXT COMPARISON LIMITS
+Use the same immutable v4 library with GEMM=0 in both arms, graph env omitted versus =1, same production checkpoint16/min-step2048 settings, restored deep slot states and actual paired requests. This isolates graphs from the new attention algorithm.
+Current B3 N2SPLIT/N2GDN/HOSTGAP changes postdate GR1. Their combination with replay needs fresh output/state equality, safe cleanup and memory evidence even though no source blocker was identified.
+Keep timing work long enough to amortize graph warmup and record any pad-boundary recaptures. Matched request tokens do not automatically imply identical single/pair microbatch scheduling; inspect actual slots/batch behavior before attributing a rare token difference to graphs.
+The old shallow null result should temper expectations. Graphs can reduce launch overhead, not the bandwidth-bound attention arithmetic or all server-side scheduling gaps. No numerical speed prediction is warranted from this review.
+
+RAW RECEIPT SHA256
+cfg-gr1san.json: 66eb6fe19bf52719541264c3ce11d223ef8d52abf6f29ea426c219c48b32b76d
+g1-B1.cmp.txt: 3fb9fcf7ccafac78357f2d0278a7e01ea6e0e8a98ecb355533753161b6682c02
+g1-B2.cmp.txt: dce96745d23e2614ada05553dc184f06dbe6788d657d3d0423da175471229ca2
+g4-gr1san-warm_decode.analysis.json: a7d260408b70bcad9453aa1cdb59c087ec173bf13021aa515942b3cfbd7c69de
+g4-gr1san-d4096.analysis.json: 0514b8c9b26f7e663973a705738e837ee7ad6843e4a60bf5600e2368b8d498ed
+pg.txt: ad62ee53e95c1ff480c82f6e760861421edbe3059e60bb9b34be1a21b88f7017

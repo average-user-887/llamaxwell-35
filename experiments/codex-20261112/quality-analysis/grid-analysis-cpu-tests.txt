@@ -1,0 +1,11 @@
+test_changed_raw_forced_probability (__main__.AnalyzerTests.test_changed_raw_forced_probability) ... ok
+test_hidden_cache_skip (__main__.AnalyzerTests.test_hidden_cache_skip) ... ok
+test_identical_stratified_pair (__main__.AnalyzerTests.test_identical_stratified_pair) ... ok
+test_mismatched_teacher_label (__main__.AnalyzerTests.test_mismatched_teacher_label) ... ok
+test_missing_scored_row (__main__.AnalyzerTests.test_missing_scored_row) ... ok
+test_unmatched_checkpoint_profile (__main__.AnalyzerTests.test_unmatched_checkpoint_profile) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 3.390s
+
+OK

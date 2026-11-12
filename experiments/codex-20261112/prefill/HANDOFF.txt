@@ -1,0 +1,91 @@
+PREFILL ATTENTION PILOT - 2026-11-12
+
+Scope
+CPU-only preparation. No GPU was used, no model was loaded, no services or
+Claude source trees were modified, and no commits or branches were created.
+All files are under codex-investigation-20261112/prefill.
+
+Source baseline
+Copied with timestamps from occamy35-night-20261111/cand/BUNDLE3,
+commit 2436f7554c0c8d70afc9acbcce85b2457193a516.
+Only ggml/src/ggml-cuda/fattn-tile.cuh is modified in the source checkout.
+
+Hypothesis
+Deep prefill currently uses 4 query positions x 8 GQA heads per block.
+Its FP32 Q staging, accumulators, and intermediate lifetimes restrict occupancy.
+Reducing the query tile to 2 positions while retaining 8-head KV reuse and
+using a 64-column KV staging tile may improve latency hiding enough to outweigh
+the reduced inter-query reuse. This is a bounded configuration/work-partition
+pilot, not the proposed full kernel redesign.
+
+Runtime selector
+GGML_CUDA_FA_MAXWELL_PREFILL is read once per process.
+0 or unset: original BUNDLE3 path.
+1: stock two-query x eight-head tile, isolation control.
+2: two-query x eight-head tile, 256 threads, requested occupancy 3,
+   nbatch_fa=32, nbatch_K=64.
+Only SM52, D_K=D_V=256, GQA grouping of 8, and query_count>2 are affected.
+Decode and two-query verification remain unchanged. Default is unchanged.
+
+Compiler resources, non-softcap target
+Baseline 4x8: 128 registers/thread, 45,312 shared bytes/block,
+              12 spill-store bytes, 24 spill-load bytes.
+Stock 2x8:    124 registers/thread, 35,072 shared bytes/block, no spills.
+Tuned 2x8:     80 registers/thread, 26,880 shared bytes/block,
+               4 spill-store bytes, 8 spill-load bytes.
+The tuned configuration should permit 3 resident CTAs/SM rather than 2;
+the GPU probe reports actual occupancy from CUDA's occupancy API.
+
+Precision and limits
+All paths keep FP32 arithmetic and F16 K/V storage. No cache compression,
+context truncation, approximate attention, or changed softmax formula.
+Numerical bit equality is not claimed until the probe runs; compiler scheduling
+and changed block grouping can affect floating-point rounding.
+The probe compares against the current generic tile, not an independent FP64
+reference, and synthetic operator equivalence does not establish model quality.
+No measured speed gain or end-to-end qualification is claimed here.
+
+Standalone probe
+prefill-kernel-probe.cu and prefill-kernel-probe are frozen with the actual
+model shape: 16 query heads, 2 KV heads, head dimension 256, GQA ratio 8.
+Inputs are deterministic synthetic F32 Q and F16 K/V with a causal F16 mask.
+Arguments: query_count key_count rounds candidate_mode.
+Defaults: 1024 98304 3 2. Device allocation is about 416 MiB for this shape.
+Only SM52 is accepted. Query count is capped at 1024, history at 131072,
+and rounds at 8. The kernel uses KV split=1, matching large-prefill geometry.
+The first untimed A/B launches compare every output element. Exit 4 stops before
+timing if nonfinite values occur, max absolute error exceeds 1e-4, or RMSE
+exceeds 1e-5. Those are probe safety thresholds, not acceptance criteria.
+Then each round performs A/B/B/A. CUDA event timings and resource/correctness
+records are emitted as JSONL. Timing covers the attention kernel only.
+
+Bounded GPU command for the root after acquiring gpu-bench.lock and checking
+ownership/admission (not run by this worker):
+
+timeout 180 env CUDA_VISIBLE_DEVICES=<GPU_UUID> \
+  LD_LIBRARY_PATH=<INVESTIGATION_ROOT>/prefill/src/build/bin \
+  <INVESTIGATION_ROOT>/prefill/prefill-kernel-probe 1024 98304 3 2
+
+Repeat with final argument 1 to isolate stock query tiling; optionally use
+key_count 16384 to detect a short-context regression. Do not infer full-serving
+speedup from kernel timings. Use the existing route for any real-model test.
+
+Build and rollback
+Run bash build.sh from this directory to rebuild sequentially with the existing
+copied CMake cache. The build image is local/m6000-build-tools:20261013,
+sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed.
+CUDA 12.8.93, g++14, SM52-only, CPU set 6-8, CPU quota 2, memory limit 6 GiB,
+network disabled, and no GPU device exposure. The main library uses -j2;
+the standalone probe is compiled afterward with one compiler invocation.
+The image requires a writable /w/tmp-combo, provided by this directory.
+The inherited CMake cache fails reconfiguration with a missing CUDA_CCVER;
+ggml-cuda/fast uses its existing generated makefiles and rebuilds header
+dependencies without reconfiguration. No unrelated CMake fix was applied.
+Library: src/build/bin/libggml-cuda.so.
+Rollback: unset GGML_CUDA_FA_MAXWELL_PREFILL or restore the original BUNDLE3
+library. No production deployment was performed by this worker.
+
+Checks completed without GPU
+Source diff whitespace check; CPU build/link of library and probe;
+invalid argument rejection before CUDA initialization; compiler resource review.
+Artifacts remain experimental until root-run numerical and timing evidence.

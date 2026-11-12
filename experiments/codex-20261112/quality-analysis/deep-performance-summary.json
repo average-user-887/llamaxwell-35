@@ -1,0 +1,77 @@
+{
+  "gemm-off-a1": {
+    "replicates_in_same_process": 2,
+    "prompt_seconds": [
+      31.977667,
+      31.9958
+    ],
+    "mean_prompt_seconds": 31.9867335,
+    "wall_seconds": [
+      32.628816094016656,
+      32.641115575970616
+    ],
+    "mean_wall_seconds": 32.634965834993636,
+    "prompt_time_reduction_percent_vs_gemm3_off": -0.0021853287252460163,
+    "prompt_rate_increase_percent_vs_gemm3_off": -0.002185280969679848
+  },
+  "gemm-on-b1": {
+    "replicates_in_same_process": 2,
+    "prompt_seconds": [
+      25.097009,
+      25.3221
+    ],
+    "mean_prompt_seconds": 25.2095545,
+    "wall_seconds": [
+      25.75467822299106,
+      25.98160066199489
+    ],
+    "mean_wall_seconds": 25.868139442492975,
+    "prompt_time_reduction_percent_vs_gemm3_off": 21.185745922958976,
+    "prompt_rate_increase_percent_vs_gemm3_off": 26.88060195589732
+  },
+  "gemm3-off-a2": {
+    "replicates_in_same_process": 2,
+    "prompt_seconds": [
+      31.965700000000002,
+      32.006369
+    ],
+    "mean_prompt_seconds": 31.986034500000002,
+    "wall_seconds": [
+      32.61226187297143,
+      32.65756764699472
+    ],
+    "mean_wall_seconds": 32.634914759983076,
+    "prompt_time_reduction_percent_vs_gemm3_off": 0.0,
+    "prompt_rate_increase_percent_vs_gemm3_off": 0.0
+  },
+  "gemm3-on-c1": {
+    "replicates_in_same_process": 2,
+    "prompt_seconds": [
+      23.179878000000002,
+      23.443247
+    ],
+    "mean_prompt_seconds": 23.3115625,
+    "wall_seconds": [
+      23.82890766300261,
+      24.080341327004135
+    ],
+    "mean_wall_seconds": 23.954624495003372,
+    "prompt_time_reduction_percent_vs_gemm3_off": 27.11956056947291,
+    "prompt_rate_increase_percent_vs_gemm3_off": 37.211027789321285
+  },
+  "gemm4-on-d1": {
+    "replicates_in_same_process": 2,
+    "prompt_seconds": [
+      23.186559000000003,
+      23.357139
+    ],
+    "mean_prompt_seconds": 23.271849000000003,
+    "wall_seconds": [
+      23.835341320023872,
+      24.007767384988256
+    ],
+    "mean_wall_seconds": 23.921554352506064,
+    "prompt_time_reduction_percent_vs_gemm3_off": 27.243719442621117,
+    "prompt_rate_increase_percent_vs_gemm3_off": 37.44517893700667
+  }
+}

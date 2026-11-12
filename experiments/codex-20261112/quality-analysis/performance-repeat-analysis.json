@@ -1,0 +1,190 @@
+{
+  "prompt_sha256": "c2be0bb07d8a8078e5c1397c3d86b898ad9dc8bea3df943082bb1a9ed50304d8",
+  "input_receipts": [
+    {
+      "name": "gemm-off-a1",
+      "repeat": 0,
+      "path": "<INVESTIGATION_ROOT>/model-runs/gemm-off-a1/repeat-0.json",
+      "file_sha256": "be5cbe5fbe3e462c37e5fa6d323adf4d7c20049759dbd56d08d163e94896c18d"
+    },
+    {
+      "name": "gemm-off-a1",
+      "repeat": 1,
+      "path": "<INVESTIGATION_ROOT>/model-runs/gemm-off-a1/repeat-1.json",
+      "file_sha256": "d9fd1dae439ebbfb6e25e877024165cf2a8fe26d287e52dd4a732f10b1164d3a"
+    },
+    {
+      "name": "gemm-on-b1",
+      "repeat": 0,
+      "path": "<INVESTIGATION_ROOT>/model-runs/gemm-on-b1/repeat-0.json",
+      "file_sha256": "5ee72c21921c849637ee549ccfd060f9f36d78e04d87f0ab99479215d66ffd62"
+    },
+    {
+      "name": "gemm-on-b1",
+      "repeat": 1,
+      "path": "<INVESTIGATION_ROOT>/model-runs/gemm-on-b1/repeat-1.json",
+      "file_sha256": "bcad55045a28b090e23cf2aa9aeeec6e7c5c57b76da79638a0940f91d79cc7ca"
+    },
+    {
+      "name": "gemm3-off-a2",
+      "repeat": 0,
+      "path": "<INVESTIGATION_ROOT>/model-runs/gemm3-off-a2/repeat-0.json",
+      "file_sha256": "fab2195ee084ba0b332eab1bc3b327de88768942d9b893ed087fdaff60096170"
+    },
+    {
+      "name": "gemm3-off-a2",
+      "repeat": 1,
+      "path": "<INVESTIGATION_ROOT>/model-runs/gemm3-off-a2/repeat-1.json",
+      "file_sha256": "7a3612bb616cf094e7443875cf91f45949e53ed053703bc6abdbd7c85686854d"
+    },
+    {
+      "name": "gemm3-on-c1",
+      "repeat": 0,
+      "path": "<INVESTIGATION_ROOT>/model-runs/gemm3-on-c1/repeat-0.json",
+      "file_sha256": "ec77052f79fb57d3c5d254339a470e539ad7ac5ca43a1cfdb8b03cd461160530"
+    },
+    {
+      "name": "gemm3-on-c1",
+      "repeat": 1,
+      "path": "<INVESTIGATION_ROOT>/model-runs/gemm3-on-c1/repeat-1.json",
+      "file_sha256": "ad161bd7de259d800e15aaf494fd7b340067d5f34fce85cb130fe4e0925d40b3"
+    },
+    {
+      "name": "gemm4-on-d1",
+      "repeat": 0,
+      "path": "<INVESTIGATION_ROOT>/model-runs/gemm4-on-d1/repeat-0.json",
+      "file_sha256": "f61520a4876f685da10117f18170d36453d7c69d13ac6280a406361ec52a6740"
+    },
+    {
+      "name": "gemm4-on-d1",
+      "repeat": 1,
+      "path": "<INVESTIGATION_ROOT>/model-runs/gemm4-on-d1/repeat-1.json",
+      "file_sha256": "67130c60a58b4b3d2813e42b1882015428d146eedfc8dec763a1def10ab687e0"
+    }
+  ],
+  "comparisons": [
+    {
+      "baseline": "<INVESTIGATION_ROOT>/model-runs/gemm-off-a1/repeat-0.json",
+      "candidate": "<INVESTIGATION_ROOT>/model-runs/gemm-off-a1/repeat-1.json",
+      "same_content_bytes": true,
+      "same_all_32_token_ids": true,
+      "first_divergence_zero_based": null,
+      "matched_history_probability_rows": 32,
+      "all_probability_rows_exact": true,
+      "shared_top10_logprob_comparisons_at_matched_histories": 320,
+      "mean_absolute_shared_top10_logprob_difference": 0.0,
+      "max_absolute_shared_top10_logprob_difference": 0.0,
+      "top10_symmetric_difference_id_count_at_matched_histories": 0
+    },
+    {
+      "baseline": "<INVESTIGATION_ROOT>/model-runs/gemm-on-b1/repeat-0.json",
+      "candidate": "<INVESTIGATION_ROOT>/model-runs/gemm-on-b1/repeat-1.json",
+      "same_content_bytes": true,
+      "same_all_32_token_ids": true,
+      "first_divergence_zero_based": null,
+      "matched_history_probability_rows": 32,
+      "all_probability_rows_exact": true,
+      "shared_top10_logprob_comparisons_at_matched_histories": 320,
+      "mean_absolute_shared_top10_logprob_difference": 0.0,
+      "max_absolute_shared_top10_logprob_difference": 0.0,
+      "top10_symmetric_difference_id_count_at_matched_histories": 0
+    },
+    {
+      "baseline": "<INVESTIGATION_ROOT>/model-runs/gemm3-off-a2/repeat-0.json",
+      "candidate": "<INVESTIGATION_ROOT>/model-runs/gemm3-off-a2/repeat-1.json",
+      "same_content_bytes": true,
+      "same_all_32_token_ids": true,
+      "first_divergence_zero_based": null,
+      "matched_history_probability_rows": 32,
+      "all_probability_rows_exact": true,
+      "shared_top10_logprob_comparisons_at_matched_histories": 320,
+      "mean_absolute_shared_top10_logprob_difference": 0.0,
+      "max_absolute_shared_top10_logprob_difference": 0.0,
+      "top10_symmetric_difference_id_count_at_matched_histories": 0
+    },
+    {
+      "baseline": "<INVESTIGATION_ROOT>/model-runs/gemm3-on-c1/repeat-0.json",
+      "candidate": "<INVESTIGATION_ROOT>/model-runs/gemm3-on-c1/repeat-1.json",
+      "same_content_bytes": true,
+      "same_all_32_token_ids": true,
+      "first_divergence_zero_based": null,
+      "matched_history_probability_rows": 32,
+      "all_probability_rows_exact": true,
+      "shared_top10_logprob_comparisons_at_matched_histories": 320,
+      "mean_absolute_shared_top10_logprob_difference": 0.0,
+      "max_absolute_shared_top10_logprob_difference": 0.0,
+      "top10_symmetric_difference_id_count_at_matched_histories": 0
+    },
+    {
+      "baseline": "<INVESTIGATION_ROOT>/model-runs/gemm4-on-d1/repeat-0.json",
+      "candidate": "<INVESTIGATION_ROOT>/model-runs/gemm4-on-d1/repeat-1.json",
+      "same_content_bytes": true,
+      "same_all_32_token_ids": true,
+      "first_divergence_zero_based": null,
+      "matched_history_probability_rows": 32,
+      "all_probability_rows_exact": true,
+      "shared_top10_logprob_comparisons_at_matched_histories": 320,
+      "mean_absolute_shared_top10_logprob_difference": 0.0,
+      "max_absolute_shared_top10_logprob_difference": 0.0,
+      "top10_symmetric_difference_id_count_at_matched_histories": 0
+    },
+    {
+      "baseline": "<INVESTIGATION_ROOT>/model-runs/gemm-off-a1/repeat-0.json",
+      "candidate": "<INVESTIGATION_ROOT>/model-runs/gemm3-off-a2/repeat-0.json",
+      "same_content_bytes": true,
+      "same_all_32_token_ids": true,
+      "first_divergence_zero_based": null,
+      "matched_history_probability_rows": 32,
+      "all_probability_rows_exact": true,
+      "shared_top10_logprob_comparisons_at_matched_histories": 320,
+      "mean_absolute_shared_top10_logprob_difference": 0.0,
+      "max_absolute_shared_top10_logprob_difference": 0.0,
+      "top10_symmetric_difference_id_count_at_matched_histories": 0
+    },
+    {
+      "baseline": "<INVESTIGATION_ROOT>/model-runs/gemm-on-b1/repeat-0.json",
+      "candidate": "<INVESTIGATION_ROOT>/model-runs/gemm3-on-c1/repeat-0.json",
+      "same_content_bytes": true,
+      "same_all_32_token_ids": true,
+      "first_divergence_zero_based": null,
+      "matched_history_probability_rows": 32,
+      "all_probability_rows_exact": false,
+      "shared_top10_logprob_comparisons_at_matched_histories": 304,
+      "mean_absolute_shared_top10_logprob_difference": 0.16575487469909653,
+      "max_absolute_shared_top10_logprob_difference": 1.1579160690307617,
+      "top10_symmetric_difference_id_count_at_matched_histories": 32
+    },
+    {
+      "baseline": "<INVESTIGATION_ROOT>/model-runs/gemm3-on-c1/repeat-0.json",
+      "candidate": "<INVESTIGATION_ROOT>/model-runs/gemm4-on-d1/repeat-0.json",
+      "same_content_bytes": true,
+      "same_all_32_token_ids": true,
+      "first_divergence_zero_based": null,
+      "matched_history_probability_rows": 32,
+      "all_probability_rows_exact": true,
+      "shared_top10_logprob_comparisons_at_matched_histories": 320,
+      "mean_absolute_shared_top10_logprob_difference": 0.0,
+      "max_absolute_shared_top10_logprob_difference": 0.0,
+      "top10_symmetric_difference_id_count_at_matched_histories": 0
+    },
+    {
+      "baseline": "<INVESTIGATION_ROOT>/model-runs/gemm3-off-a2/repeat-0.json",
+      "candidate": "<INVESTIGATION_ROOT>/model-runs/gemm3-on-c1/repeat-0.json",
+      "same_content_bytes": false,
+      "same_all_32_token_ids": false,
+      "first_divergence_zero_based": 22,
+      "matched_history_probability_rows": 23,
+      "all_probability_rows_exact": false,
+      "shared_top10_logprob_comparisons_at_matched_histories": 214,
+      "mean_absolute_shared_top10_logprob_difference": 0.17753194998808328,
+      "max_absolute_shared_top10_logprob_difference": 0.8119897842407227,
+      "top10_symmetric_difference_id_count_at_matched_histories": 32
+    }
+  ],
+  "limitations": [
+    "All repeats restore stock 90000-token KV; only the 4096-token append uses the tested kernel.",
+    "Top10 probabilities cannot establish full-vocabulary KL or aggregate tail differences.",
+    "Cross-arm distribution comparison stops after the first generated token divergence, inclusive of that matched-history decision.",
+    "Repeat determinism in this fixture is not evidence of general model quality."
+  ]
+}

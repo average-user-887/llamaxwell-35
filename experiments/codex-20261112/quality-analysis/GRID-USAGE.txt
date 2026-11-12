@@ -1,0 +1,51 @@
+Prepared only; this worker has not launched any model, service or GPU work.
+
+New harness:
+<INVESTIGATION_ROOT>/model_quality_grid.py
+
+Root-only representative commands, after root's normal resource admission:
+PYTHONDONTWRITEBYTECODE=1 python3 -B <harness> --tag quality-grid-off-a1 --library <v4-library> --gemm 0 --production-checkpoints
+PYTHONDONTWRITEBYTECODE=1 python3 -B <harness> --tag quality-grid-on-b1 --library <same-v4-library> --gemm 1 --production-checkpoints
+
+CPU-only validation:
+PYTHONDONTWRITEBYTECODE=1 python3 -B <harness> --self-test
+Six mock tests pass; exact transcript is grid-cpu-tests.txt. Self-test does
+not import BenchRoute or access a model/service/network. Mock tests verify
+all requested teacher labels, exact prefix continuity, bounded append size,
+four full-vector positions, label mismatch failure, cache-skip failure,
+cached-prefix-length failure, truncation failure and retained preflight.
+
+Actual profile: 64 fixed teacher labels, 16 at each of positions 16384,
+32768, 65536 and 98000; full vocabulary on the first row of each block.
+Every request uses the same fixture's token prefix, n_predict1 and raw
+pre-sampling probabilities. The selected teacher label is forced solely
+to obtain its raw log probability. No generated continuation is fed back.
+One initially erased prefix trajectory is extended under each arm; this
+does not load stock KV. Intervening NEW evaluation is at most16384 tokens
+(the full request prefix array grows to98015 tokens). All cache_n,
+prompt_n and tokens_cached boundaries are validated exactly, not loosely.
+Full reference and forced raw responses from the64-token bias preflight
+are retained, plus per-stage cache receipts and64 scored row files.
+
+Bounded execution: normal private BenchRoute, speculationnone, ubatch1024
+(optional512), same original model; no public configuration edit. HTTP
+requests retain BenchRoute's180-second timeout. Before every call, the
+new wrapper requires180 seconds remaining inside the earlier of a20-minute
+run budget and BenchRoute's existing deadline. Existing route cleanup is
+retained. Each tag must be new; artifact files refuse overwrite.
+
+Profile choice: --production-checkpoints explicitly passes the production
+checkpoint arguments and records the launched profile from identity.json.
+Omitting the flag preserves the original defaults. Root found production
+uses --ctx-checkpoints16 --checkpoint-min-step2048, while the original
+private profile defaults to32/8192. The grid is paired isolated evidence,
+not production-exact. Do not compare different checkpoint/batch profiles
+as if only the GEMM flag changed. Cache RAM remains0 for isolation, and no
+claim is made that every other production setting is reproduced. Eight
+CPU mock tests now pass; see grid-cpu-tests-prod-profile.txt. Original six-
+test transcript is preserved as an earlier receipt.
+
+Limits: stratification improves the single98K-window screen but this is
+still one fixture,64 positions and four full distributions. It is not a
+broad quality qualification. Its multiple HTTP checkpoints and scored
+teacher queries are not a single fresh-prefill latency benchmark.
