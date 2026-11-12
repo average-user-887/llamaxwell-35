@@ -4771,6 +4771,167 @@ static int ggml_cuda_try_fuse(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph 
     return 0;
 }
 
+// GGML_CUDA_OCCAMY_SMALLFUSE: bitmask of decode-time launch merges (bit 1: Q/K norm+rope+set_rows).
+static int ggml_cuda_occamy_smallfuse() {
+    static const int v = [] { const char * e = getenv("GGML_CUDA_OCCAMY_SMALLFUSE"); return e ? atoi(e) : 0; }();
+    return v;
+}
+
+static bool occamy_sf_overlap(const ggml_tensor * a, const ggml_tensor * b) {
+    if (a == nullptr || b == nullptr || a->data == nullptr || b->data == nullptr) {
+        return false;
+    }
+    const char * alo = (const char *) a->data;
+    const char * blo = (const char *) b->data;
+    return alo < blo + ggml_nbytes(b) && blo < alo + ggml_nbytes(a);
+}
+
+// Plan the bit-2 group at the gate CONT node i: CONT(view) -> UNARY sigmoid -> MUL. The fused launch happens at the
+// MUL position; the CONT and SIGMOID results are never materialised. Returns the MUL position or -1.
+static int occamy_sf2_plan(const ggml_cgraph * g, const int i, ggml_tensor ** grp) {
+    ggml_tensor * cont = g->nodes[i];
+    ggml_tensor * sig  = nullptr;
+    ggml_tensor * mul  = nullptr;
+    int ps = -1, pm = -1;
+    int uses_cont = 0, uses_sig = 0;
+    for (int j = i + 1; j < g->n_nodes; ++j) {
+        ggml_tensor * n = g->nodes[j];
+        for (int s = 0; s < GGML_MAX_SRC; ++s) {
+            if (n->src[s] == nullptr) { continue; }
+            uses_cont += n->src[s] == cont || n->src[s]->view_src == cont;
+            uses_sig  += sig != nullptr && (n->src[s] == sig || n->src[s]->view_src == sig);
+        }
+        if (sig == nullptr && n->op == GGML_OP_UNARY && n->src[0] == cont) { sig = n; ps = j; }
+        else if (sig != nullptr && mul == nullptr && n->op == GGML_OP_MUL && (n->src[0] == sig || n->src[1] == sig)) { mul = n; pm = j; }
+    }
+    if (sig == nullptr || mul == nullptr || uses_cont != 1 || uses_sig != 1 || pm - i > 256) {
+        return -1;
+    }
+    if ((cont->flags & sig->flags & mul->flags & GGML_TENSOR_FLAG_COMPUTE) == 0 ||
+        (cont->flags | sig->flags) & GGML_TENSOR_FLAG_OUTPUT || cont->view_src != nullptr || sig->view_src != nullptr) {
+        return -1;
+    }
+    if (!ggml_cuda_occamy_gate_sig_mul_ok(cont, sig, mul)) {
+        return -1;
+    }
+    const ggml_tensor * gv    = cont->src[0];
+    const ggml_tensor * other = mul->src[0] == sig ? mul->src[1] : mul->src[0];
+    if (occamy_sf_overlap(mul, gv) || occamy_sf_overlap(mul, other)) {
+        return -1;
+    }
+    // the gate source must stay intact until the MUL position
+    for (int j = i + 1; j < pm; ++j) {
+        const ggml_tensor * n = g->nodes[j];
+        if (n != sig && !ggml_cuda_is_view_or_noop(n) && occamy_sf_overlap(n, gv)) {
+            return -1;
+        }
+    }
+    (void) ps;
+    grp[0] = cont; grp[1] = sig; grp[2] = mul;
+    return pm;
+}
+
+// Plan the bit-1 group starting at the Q RMS_NORM at node i. On success fills grp (q_norm, q_mul, q_rope, k_norm,
+// k_mul, k_rope, set_rows K, set_rows V) and pos, and returns the position at which the whole group is computed
+// (its last node); the other group nodes are skipped. Returns -1 if the pattern or the safety checks fail.
+static int occamy_sf1_plan(const ggml_cgraph * g, const int i, ggml_tensor ** grp, int * pos) {
+    const int jmax = std::min(g->n_nodes, i + 64);
+    auto find = [&](int from, auto pred) -> int {
+        for (int j = from; j < jmax; ++j) {
+            if (pred(g->nodes[j])) {
+                return j;
+            }
+        }
+        return -1;
+    };
+    auto uses = [&](const ggml_tensor * t, ggml_op op) {
+        return [=](const ggml_tensor * n) { return n->op == op && (n->src[0] == t || n->src[1] == t); };
+    };
+    pos[0] = i;
+    pos[1] = find(i + 1, uses(g->nodes[i], GGML_OP_MUL));                        if (pos[1] < 0) { return -1; }
+    pos[2] = find(pos[1] + 1, [&](const ggml_tensor * n) { return n->op == GGML_OP_ROPE && n->src[0] == g->nodes[pos[1]]; });
+    if (pos[2] < 0) { return -1; }
+    pos[3] = find(pos[2] + 1, [](const ggml_tensor * n) { return n->op == GGML_OP_RMS_NORM; });   if (pos[3] < 0) { return -1; }
+    pos[4] = find(pos[3] + 1, uses(g->nodes[pos[3]], GGML_OP_MUL));                if (pos[4] < 0) { return -1; }
+    pos[5] = find(pos[4] + 1, [&](const ggml_tensor * n) { return n->op == GGML_OP_ROPE && n->src[0] == g->nodes[pos[4]]; });
+    if (pos[5] < 0) { return -1; }
+    const ggml_tensor * kr = g->nodes[pos[5]];
+    pos[6] = find(pos[5] + 1, [&](const ggml_tensor * n) { return n->op == GGML_OP_SET_ROWS && n->src[0]->data == kr->data; });
+    if (pos[6] < 0) { return -1; }
+    pos[7] = find(i + 1, [&](const ggml_tensor * n) { return n->op == GGML_OP_SET_ROWS && n->src[0]->data != kr->data; });
+    if (pos[7] < 0) { return -1; }
+    int last = 0;
+    for (int k = 0; k < 8; ++k) {
+        grp[k] = g->nodes[pos[k]];
+        if ((grp[k]->flags & GGML_TENSOR_FLAG_COMPUTE) == 0) {
+            return -1;
+        }
+        last = std::max(last, pos[k]);
+    }
+    // norm and mul results stay inside the kernel
+    for (int k : {0, 1, 3, 4}) {
+        if (ggml_node_get_use_count(g, pos[k]) != 1) {
+            return -1;
+        }
+    }
+    auto in_grp = [&](const ggml_tensor * t) {
+        for (int k = 0; k < 8; ++k) {
+            if (t == grp[k] || (t != nullptr && t->view_src == grp[k])) {
+                return true;
+            }
+        }
+        return false;
+    };
+    static const int ext[4] = {2, 5, 6, 7};
+    // external outputs must not alias any external group input (blocks run concurrently)
+    for (int k = 0; k < 8; ++k) {
+        for (int s = 0; s < GGML_MAX_SRC; ++s) {
+            const ggml_tensor * src = grp[k]->src[s];
+            if (src == nullptr || in_grp(src)) {
+                continue;
+            }
+            for (int e : ext) {
+                if (occamy_sf_overlap(src, grp[e])) {
+                    return -1;
+                }
+            }
+        }
+    }
+    for (int j = i + 1; j < last; ++j) {
+        const ggml_tensor * m = g->nodes[j];
+        if (in_grp(m) && !ggml_cuda_is_view_or_noop(m)) {
+            continue;
+        }
+        if (ggml_cuda_is_view_or_noop(m) || (m->flags & GGML_TENSOR_FLAG_COMPUTE) == 0) {
+            continue;
+        }
+        for (int k = 0; k < 8; ++k) {
+            if (pos[k] >= j) {
+                continue;
+            }
+            // m runs before the deferred group node k: it must not overwrite k's inputs ...
+            for (int s = 0; s < GGML_MAX_SRC; ++s) {
+                const ggml_tensor * src = grp[k]->src[s];
+                if (src != nullptr && !in_grp(src) && occamy_sf_overlap(m, src)) {
+                    return -1;
+                }
+            }
+            // ... nor touch k's output if that output is used outside the group
+            if (k == 2 || k == 5 || k == 6 || k == 7) {
+                if (occamy_sf_overlap(m, grp[k])) {
+                    return -1;
+                }
+                for (int s = 0; s < GGML_MAX_SRC; ++s) {
+                    if (occamy_sf_overlap(m->src[s], grp[k])) {
+                        return -1;
+                    }
+                }
+            }
+        }
+    }
+    return last;
+}
+
 static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph * cgraph, const bool use_cuda_graph, const bool cuda_graph_update_required, const void * graph_key) {
     bool graph_evaluated_or_captured = false;
 
@@ -4870,6 +5031,13 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
             }
 
             cuda_ctx->q8r_valid = false; // q8_1 reuse never spans graph evaluations
+            const bool sf1_on = (ggml_cuda_occamy_smallfuse() & 1) && stream_ctx.concurrent_events.empty();
+            ggml_tensor * sf1_grp[8];
+            int           sf1_pos[8];
+            int           sf1_last = -1;
+            const bool sf2_on = (ggml_cuda_occamy_smallfuse() & 2) && stream_ctx.concurrent_events.empty();
+            ggml_tensor * sf2_grp[3] = {nullptr, nullptr, nullptr};
+            int           sf2_last = -1;
             for (int i = 0; i < cgraph->n_nodes; i++) {
                 ggml_tensor * node = cgraph->nodes[i];
                 if (is_concurrent_event_active) {
@@ -4910,6 +5078,78 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
 
                 if ((node->flags & GGML_TENSOR_FLAG_COMPUTE) == 0) {
                     continue;
+                }
+
+                if (sf1_on) {
+                    if (sf1_last >= 0) {
+                        GGML_ASSERT(i <= sf1_last && "occamy smallfuse: group end was skipped");
+                        if (i == sf1_last) {
+                            const bool sf_ok = ggml_cuda_occamy_qk_rope_set(*cuda_ctx, sf1_grp);
+                            GGML_ASSERT(sf_ok);
+                            for (int k = 0; k < 8; ++k) {
+                                cuda_ctx->q8r_invalidate_if_overlaps(sf1_grp[k]);
+                            }
+                            sf1_last = -1;
+                            continue;
+                        }
+                        bool member = false;
+                        for (int k = 0; k < 8; ++k) {
+                            member = member || sf1_grp[k] == node;
+                        }
+                        if (member) {
+                            cuda_ctx->q8r_invalidate_if_overlaps(node);
+                            continue;
+                        }
+                    } else if (node->op == GGML_OP_RMS_NORM && !is_concurrent_event_active && cuda_ctx->curr_stream_no == 0 &&
+                               node->src[0]->ne[0] == 256 && node->src[0]->ne[2] == 1) {
+                        const int last = occamy_sf1_plan(cgraph, i, sf1_grp, sf1_pos);
+                        if (last > i && ggml_cuda_occamy_qk_rope_set_ok(sf1_grp)) {
+                            sf1_last = last;
+                            static const bool sf_dbg = getenv("GGML_CUDA_OCCAMY_DEBUG") != nullptr;
+                            if (sf_dbg) {
+                                fprintf(stderr, "occamy-sf1: i=%d last=%d", i, last);
+                                for (int k = 0; k < 8; ++k) { fprintf(stderr, " %s@%d", sf1_grp[k]->name, sf1_pos[k]); }
+                                fprintf(stderr, "\n");
+                            }
+                            cuda_ctx->q8r_invalidate_if_overlaps(node);
+                            continue;
+                        }
+                    }
+                }
+
+                if (sf2_on) {
+                    if (sf2_last >= 0) {
+                        GGML_ASSERT(i <= sf2_last && "occamy smallfuse: gate group end was skipped");
+                        if (i == sf2_last) {
+                            void * q8 = cuda_ctx->curr_stream_no == 0 && cuda_ctx->q8r_buf != nullptr &&
+                                        cuda_ctx->q8r_cap >= (size_t) ggml_nelements(node)/QK8_1*sizeof(block_q8_1) ? cuda_ctx->q8r_buf : nullptr;
+                            ggml_cuda_occamy_gate_sig_mul(*cuda_ctx, sf2_grp[0], node, q8);
+                            cuda_ctx->q8r_invalidate_if_overlaps(node);
+                            if (q8 != nullptr) {
+                                // same key as the MMVQ q8_1 reuse path for a single contiguous row
+                                const int64_t key[8] = {(int64_t) (uintptr_t) node->data, ggml_nelements(node), 1, 1, 1, 0, 0, 0};
+                                memcpy(cuda_ctx->q8r_key, key, sizeof(key));
+                                cuda_ctx->q8r_lo    = (const char *) node->data;
+                                cuda_ctx->q8r_hi    = cuda_ctx->q8r_lo + ggml_nbytes(node);
+                                cuda_ctx->q8r_valid = true;
+                            }
+                            sf2_last = -1;
+                            continue;
+                        }
+                        if (node == sf2_grp[1]) {
+                            continue; // not written: nothing to invalidate
+                        }
+                    } else if (node->op == GGML_OP_CONT && !is_concurrent_event_active && cuda_ctx->curr_stream_no == 0) {
+                        const int last = occamy_sf2_plan(cgraph, i, sf2_grp);
+                        if (last > i) {
+                            sf2_last = last;
+                            static const bool sf_dbg2 = getenv("GGML_CUDA_OCCAMY_DEBUG") != nullptr;
+                            if (sf_dbg2) {
+                                fprintf(stderr, "occamy-sf2: i=%d last=%d %s %s %s\n", i, last, sf2_grp[0]->name, sf2_grp[1]->name, sf2_grp[2]->name);
+                            }
+                            continue; // not written: nothing to invalidate
+                        }
+                    }
                 }
 
                 cuda_ctx->q8r_invalidate_if_overlaps(node);
