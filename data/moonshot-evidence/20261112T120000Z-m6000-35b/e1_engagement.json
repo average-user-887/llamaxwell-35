@@ -1,0 +1,338 @@
+[
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "2_n1_shallow",
+  "kernel_class": "moe_v2",
+  "count": "2440",
+  "per_step": "40.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "2_n1_shallow",
+  "kernel_class": "gdn_fused(n1)",
+  "count": "1830",
+  "per_step": "30.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "2_n1_shallow",
+  "kernel_class": "gdn_fused2",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "2_n1_shallow",
+  "kernel_class": "fa_ar(FA_ADDR)",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "2_n1_shallow",
+  "kernel_class": "fa_hs",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "2_n1_shallow",
+  "kernel_class": "fa_base",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "2_n1_shallow",
+  "kernel_class": "fa_combine",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "2_n1_shallow",
+  "kernel_class": "n2gather_copy",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "3_n2_shallow",
+  "kernel_class": "moe_v2",
+  "count": "4880",
+  "per_step": "80.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "3_n2_shallow",
+  "kernel_class": "gdn_fused(n1)",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "3_n2_shallow",
+  "kernel_class": "gdn_fused2",
+  "count": "1830",
+  "per_step": "30.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "3_n2_shallow",
+  "kernel_class": "fa_ar(FA_ADDR)",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "3_n2_shallow",
+  "kernel_class": "fa_hs",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "3_n2_shallow",
+  "kernel_class": "fa_base",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "3_n2_shallow",
+  "kernel_class": "fa_combine",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "3_n2_shallow",
+  "kernel_class": "n2gather_copy",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "4_n2_deep",
+  "kernel_class": "moe_v2",
+  "count": "4880",
+  "per_step": "80.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "4_n2_deep",
+  "kernel_class": "gdn_fused(n1)",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "4_n2_deep",
+  "kernel_class": "gdn_fused2",
+  "count": "1830",
+  "per_step": "30.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "4_n2_deep",
+  "kernel_class": "fa_ar(FA_ADDR)",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "4_n2_deep",
+  "kernel_class": "fa_hs",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "4_n2_deep",
+  "kernel_class": "fa_base",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "4_n2_deep",
+  "kernel_class": "fa_combine",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T131846Z-B",
+  "phase": "4_n2_deep",
+  "kernel_class": "n2gather_copy",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "2_n1_shallow",
+  "kernel_class": "moe_v2",
+  "count": "2440",
+  "per_step": "40.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "2_n1_shallow",
+  "kernel_class": "gdn_fused(n1)",
+  "count": "1830",
+  "per_step": "30.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "2_n1_shallow",
+  "kernel_class": "gdn_fused2",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "2_n1_shallow",
+  "kernel_class": "fa_ar(FA_ADDR)",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "2_n1_shallow",
+  "kernel_class": "fa_hs",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "2_n1_shallow",
+  "kernel_class": "fa_base",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "2_n1_shallow",
+  "kernel_class": "fa_combine",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "2_n1_shallow",
+  "kernel_class": "n2gather_copy",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "3_n2_shallow",
+  "kernel_class": "moe_v2",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "3_n2_shallow",
+  "kernel_class": "gdn_fused(n1)",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "3_n2_shallow",
+  "kernel_class": "gdn_fused2",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "3_n2_shallow",
+  "kernel_class": "fa_ar(FA_ADDR)",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "3_n2_shallow",
+  "kernel_class": "fa_hs",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "3_n2_shallow",
+  "kernel_class": "fa_base",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "3_n2_shallow",
+  "kernel_class": "fa_combine",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "3_n2_shallow",
+  "kernel_class": "n2gather_copy",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "4_n2_deep",
+  "kernel_class": "moe_v2",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "4_n2_deep",
+  "kernel_class": "gdn_fused(n1)",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "4_n2_deep",
+  "kernel_class": "gdn_fused2",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "4_n2_deep",
+  "kernel_class": "fa_ar(FA_ADDR)",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "4_n2_deep",
+  "kernel_class": "fa_hs",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "4_n2_deep",
+  "kernel_class": "fa_base",
+  "count": "0",
+  "per_step": "0.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "4_n2_deep",
+  "kernel_class": "fa_combine",
+  "count": "610",
+  "per_step": "10.0"
+ },
+ {
+  "trace_id": "20261112T132117Z-A",
+  "phase": "4_n2_deep",
+  "kernel_class": "n2gather_copy",
+  "count": "610",
+  "per_step": "10.0"
+ }
+]

@@ -1,0 +1,137 @@
+{
+ "arm": "A",
+ "lib": "<LAB>/prod-libs/libggml-cuda-gdn4-20261112.so",
+ "launcher": "<LAB>/run-35b-gdn4-20261112.sh",
+ "env": [
+  "GGML_CUDA_MOE_DOWNX=1",
+  "GGML_CUDA_MOE_DOWNH=2",
+  "GGML_CUDA_OCCAMY_GDN_QKREUSE=1",
+  "GGML_CUDA_OCCAMY_GDN_PCSHARE=1",
+  "GGML_CUDA_MMVQ_SM52=1",
+  "GGML_CUDA_RMS_WARP=0",
+  "GGML_CUDA_HEAD_ROWPACK_SM52=1",
+  "GGML_CUDA_MMQ_COMPACT_SM52=1",
+  "GGML_CUDA_Q8_REUSE=1",
+  "GGML_CUDA_NORM_Q8=1",
+  "GGML_CUDA_CONCAT_T=1",
+  "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT=1",
+  "GGML_CUDA_GATE_COPY=1",
+  "GGML_CUDA_OCCAMY_GDN=1",
+  "GGML_CUDA_MMQ_XMAD_SM52=1",
+  "GGML_CUDA_GDN_COLS=2,4",
+  "GGML_CUDA_OCCAMY_FA=1",
+  "GGML_CUDA_OCCAMY_FUSED=1",
+  "GGML_CUDA_OCCAMY_FA_PIPE=3",
+  "GGML_CUDA_MOE_LOP3=1",
+  "GGML_CUDA_MOE_TAILBAL=1",
+  "GGML_CUDA_OCCAMY_GDN_PREF=1",
+  "GGML_CUDA_OCCAMY_HOSTGAP=1",
+  "GGML_CUDA_OCCAMY_SMALLFUSE=2",
+  "GGML_CUDA_MMQ_TAIL_SM52=1",
+  "GGML_CUDA_OCCAMY_GDN_REPACK=1"
+ ],
+ "build_up_running_at_start": true,
+ "build_up": "build-up Up 7 minutes",
+ "loadavg": "7.96 5.54 3.38 8/2766 2609667",
+ "phases": {
+  "plain": {
+   "1_prefill4k": {
+    "prompt_n": 4096,
+    "prompt_ms": 7497.043,
+    "predicted_n": 1,
+    "predicted_ms": 0.001,
+    "predicted_per_second": 0.0,
+    "wall_s": 7.50128436088562
+   },
+   "2_n1_shallow": {
+    "prompt_n": 20,
+    "prompt_ms": 268.45,
+    "predicted_n": 64,
+    "predicted_ms": 788.566,
+    "predicted_per_second": 79.89185432798268
+   },
+   "3_n2_shallow": {
+    "s0": {
+     "prompt_n": 20,
+     "prompt_ms": 490.129,
+     "predicted_n": 64,
+     "predicted_ms": 1394.358,
+     "predicted_per_second": 45.18208379770475
+    },
+    "s1": {
+     "prompt_n": 20,
+     "prompt_ms": 484.768,
+     "predicted_n": 64,
+     "predicted_ms": 1391.923,
+     "predicted_per_second": 45.26112435817211
+    }
+   },
+   "4_n2_deep": {
+    "s1": {
+     "prompt_n": 1,
+     "prompt_ms": 117.33,
+     "predicted_n": 64,
+     "predicted_ms": 2356.512,
+     "predicted_per_second": 26.734427832321668
+    },
+    "s0": {
+     "prompt_n": 1,
+     "prompt_ms": 192.669,
+     "predicted_n": 64,
+     "predicted_ms": 2352.8,
+     "predicted_per_second": 26.776606596395784
+    }
+   }
+  },
+  "prof": {
+   "1_prefill4k": {
+    "prompt_n": 4096,
+    "prompt_ms": 7607.792,
+    "predicted_n": 1,
+    "predicted_ms": 0.001,
+    "predicted_per_second": 0.0,
+    "wall_s": 7.612962007522583
+   },
+   "2_n1_shallow": {
+    "prompt_n": 20,
+    "prompt_ms": 265.681,
+    "predicted_n": 64,
+    "predicted_ms": 778.178,
+    "predicted_per_second": 80.9583411507393
+   },
+   "3_n2_shallow": {
+    "s0": {
+     "prompt_n": 20,
+     "prompt_ms": 493.485,
+     "predicted_n": 64,
+     "predicted_ms": 1458.135,
+     "predicted_per_second": 43.20587599913588
+    },
+    "s1": {
+     "prompt_n": 20,
+     "prompt_ms": 489.548,
+     "predicted_n": 64,
+     "predicted_ms": 1456.24,
+     "predicted_per_second": 43.262099653903206
+    }
+   },
+   "4_n2_deep": {
+    "s0": {
+     "prompt_n": 1,
+     "prompt_ms": 184.365,
+     "predicted_n": 64,
+     "predicted_ms": 2478.829,
+     "predicted_per_second": 25.415226302419406
+    },
+    "s1": {
+     "prompt_n": 1,
+     "prompt_ms": 113.091,
+     "predicted_n": 64,
+     "predicted_ms": 2488.938,
+     "predicted_per_second": 25.312000539989345
+    }
+   }
+  }
+ },
+ "build_up_running_at_end": true
+}

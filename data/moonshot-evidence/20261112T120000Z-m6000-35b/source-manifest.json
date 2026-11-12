@@ -1,0 +1,260 @@
+{
+ "schema_version": "m6000-evidence-v1",
+ "session_id": "20261112T120000Z-m6000-35b",
+ "files": {
+  "README.md": {
+   "origin": "harness_or_derived"
+  },
+  "requests.jsonl": {
+   "origin": "new_measurement"
+  },
+  "quality.json": {
+   "origin": "harness_or_derived"
+  },
+  "phases.csv": {
+   "origin": "harness_or_derived"
+  },
+  "kernels.csv": {
+   "origin": "harness_or_derived"
+  },
+  "runs.jsonl": {
+   "origin": "new_measurement"
+  },
+  "manifest.json": {
+   "origin": "harness_or_derived"
+  },
+  "summary.json": {
+   "origin": "harness_or_derived"
+  },
+  "e1_engagement.json": {
+   "origin": "harness_or_derived"
+  },
+  "PUBLICATION_REVIEW.md": {
+   "origin": "harness_or_derived"
+  },
+  "memory.json": {
+   "origin": "harness_or_derived"
+  },
+  "build/upstream-b12318-build.sh": {
+   "origin": "harness_or_derived"
+  },
+  "raw/sessions.jsonl": {
+   "origin": "new_measurement"
+  },
+  "raw/E4/e4_analyze.py": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/SUMMARY.md": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/go.sh": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/e4_run.py": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T131846Z-B/record.json": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T131846Z-B/prof/timings.json": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T131846Z-B/prof/cmd.txt": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T131846Z-B/analysis/phase_4_n2_deep_kernels.csv": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T131846Z-B/analysis/phase_2_n1_shallow_kernels.csv": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T131846Z-B/analysis/phase_1_prefill4k_kernels.csv": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T131846Z-B/analysis/e1_engagement.csv": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T131846Z-B/analysis/summary.csv": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T131846Z-B/analysis/phase_3_n2_shallow_kernels.csv": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T131846Z-B/plain/timings.json": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T131846Z-B/plain/cmd.txt": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T132117Z-A/record.json": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T132117Z-A/prof/timings.json": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T132117Z-A/prof/cmd.txt": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T132117Z-A/analysis/phase_4_n2_deep_kernels.csv": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T132117Z-A/analysis/phase_2_n1_shallow_kernels.csv": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T132117Z-A/analysis/phase_1_prefill4k_kernels.csv": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T132117Z-A/analysis/e1_engagement.csv": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T132117Z-A/analysis/summary.csv": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T132117Z-A/analysis/phase_3_n2_shallow_kernels.csv": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T132117Z-A/plain/timings.json": {
+   "origin": "harness_or_derived"
+  },
+  "raw/E4/20261112T132117Z-A/plain/cmd.txt": {
+   "origin": "harness_or_derived"
+  },
+  "raw/Q8/Q8_CAPACITY_SIZING.md": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "raw/S1/S1_GEMM_NUMERICS.md": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "raw/C/C2_top1_failures.csv": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "raw/C/C1.csv": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "raw/C/C2_agg.json": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "raw/C/C1.md": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "raw/C/C2.csv": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "raw/C/C3.json": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "raw/C/C_SUMMARY.md": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "raw/C/C2.md": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "raw/C/C3.md": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "raw/C/C4.md": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "raw/C/c1_estimators.json": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "fixtures/fixtures_manifest.json": {
+   "origin": "harness_or_derived"
+  },
+  "harness/evlib.py": {
+   "origin": "harness_or_derived"
+  },
+  "harness/c2_kld_dumps.py": {
+   "origin": "harness_or_derived"
+  },
+  "harness/analyze_e3.py": {
+   "origin": "harness_or_derived"
+  },
+  "harness/c1_block_estimator.py": {
+   "origin": "harness_or_derived"
+  },
+  "harness/e3.py": {
+   "origin": "harness_or_derived"
+  },
+  "harness/build_text.py": {
+   "origin": "harness_or_derived"
+  },
+  "harness/metrics.py": {
+   "origin": "harness_or_derived"
+  },
+  "E5/RUN_E8.md": {
+   "origin": "harness_or_derived"
+  },
+  "E5/analyze.py": {
+   "origin": "harness_or_derived"
+  },
+  "E5/classify_nvprof.py": {
+   "origin": "harness_or_derived"
+  },
+  "E5/RUN.md": {
+   "origin": "harness_or_derived"
+  },
+  "historical/DAY.md": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "historical/day-20261112/provenance/RESOURCES.md": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "historical/day-20261112/provenance/ENV.md": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "historical/day-20261112/provenance/env.json": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "historical/day-20261112/provenance/resources.csv": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "historical/day-20261112/ledger/rounds.csv": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "historical/day-20261112/ledger/LEDGER.md": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "historical/day-20261112/ledger/telemetry_index.csv": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "historical/day-20261112/ledger/rounds.json": {
+   "origin": "historical_or_reanalyzed"
+  },
+  "historical/day-20261112/ledger/telemetry_arm_summary.csv": {
+   "origin": "historical_or_reanalyzed"
+  }
+ },
+ "omitted_large_or_binary": [
+  {
+   "what": "E4 nvprof prof.csv arm B (trace 20261112T131846Z-B)",
+   "bytes": 18073370,
+   "sha256": "c1155de91dfc0973de3aadd554f164acdaf9d35cbbfde5a5e4e0b0c3d9ae8a1c",
+   "reason": "omitted >2 MB"
+  },
+  {
+   "what": "E4 nvprof prof.csv arm A (trace 20261112T132117Z-A)",
+   "bytes": 70762768,
+   "sha256": "019e13bcf02ad41ece83dd4d359ce16cc3a0d9473897353cde9400f898fe11b4",
+   "reason": "omitted >2 MB"
+  },
+  {
+   "what": "fixtures/text and fixtures/tokens (7.2 MB / 5.0 MB)",
+   "reason": "omitted >2 MB; sha256 of each in fixtures/fixtures_manifest.json"
+  },
+  {
+   "what": "E5 build.log",
+   "bytes": 3683336,
+   "sha256": "473884e54ebc798d5eff37bd40dcb5ae7ec1f376832f8dfc605d5ceba88d9192",
+   "reason": "omitted >2 MB"
+  },
+  {
+   "what": "E5 build tree",
+   "reason": "binary/large"
+  },
+  {
+   "what": "slot dumps, logits dumps, model, libs",
+   "reason": "binary, withheld; lib sha256 in manifest.json"
+  }
+ ]
+}

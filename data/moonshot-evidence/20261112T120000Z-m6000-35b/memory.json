@@ -1,0 +1,54 @@
+{
+ "schema_version": "m6000-evidence-v1",
+ "evidence_origin": "reanalyzed_historical (C1 reconciliation of day sampled logs)",
+ "units": "MiB",
+ "device_total_cuda_MiB": 24463,
+ "nvidia_smi_nominal_MiB": 24576,
+ "nvidia_smi_reserved_MiB": 113,
+ "total_note": "CUDA-usable total 24,463 MiB (ggml 'Total VRAM'); old hard-coded margins used 24,576",
+ "configs": {
+  "BUNDLE3_server_two_slot": {
+   "sampled_device_peak_MiB": 23108,
+   "margin_MiB": 1355,
+   "old_margin_MiB": 1468,
+   "method": "max of nvidia-smi memory.used samples at 0.5 s (smoke_vram.csv)",
+   "workload": "-np 2 -c 196608 F16 KV, smoke"
+  },
+  "GDN4_server_smoke": {
+   "sampled_device_peak_MiB": 23046,
+   "margin_MiB": 1417,
+   "method": "nvidia-smi 0.5 s samples",
+   "margin_note": "derived = 24463 - 23046"
+  },
+  "stock_deep_2slot_D0": {
+   "sampled_device_peak_MiB": 23143,
+   "margin_MiB": 1320,
+   "old_margin_MiB": 1433,
+   "method": "vram_deep.csv, 0.5 s samples"
+  },
+  "dxt_tool_D1B_D1BF": {
+   "sampled_device_peak_MiB": 23820,
+   "margin_MiB": 643,
+   "old_margin_MiB": 756,
+   "method": "tool process, not server"
+  }
+ },
+ "allocation_categories_BUNDLE3_2x96K_MiB": {
+  "kv_cache_f16": 3840,
+  "recurrent_state": 125.62,
+  "compute_buffer": 408,
+  "model_and_other": null,
+  "model_and_other_reason": "not separately itemised in preserved logs; remainder of sampled peak"
+ },
+ "allocator_high_water_MiB": null,
+ "allocator_high_water_reason": "not measured; only nvidia-smi sampled peaks exist (open item from C_SUMMARY)",
+ "host_memory": null,
+ "host_memory_reason": "not collected in this package",
+ "coverage_gaps": [
+  "allocator high-water not instrumented",
+  "sampling at 0.5 s may miss short spikes",
+  "2x128K F16 KV measured: NOT_RUN (paper sizing in raw/Q8/Q8_CAPACITY_SIZING.md: ~+1.7 GB needed vs 1.36 GB margin)"
+ ],
+ "stability_result": null,
+ "stability_reason": "no long soak run in this package"
+}

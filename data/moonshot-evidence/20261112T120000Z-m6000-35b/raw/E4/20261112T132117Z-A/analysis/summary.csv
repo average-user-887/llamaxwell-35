@@ -1,0 +1,5 @@
+phase,steps,period_ms_nvprof,busy_ms,gap_ms,gap_pct,server_ms_per_tok_plain,server_ms_per_tok_nvprof,nvprof_overhead_pct,top3_kernels
+1_prefill4k,1,7577.695,7458.828,118.867,1.6,1.8303,1.8574,1.48,"sgemm_128x128x8_NT_vec(2092282us/step) | mul_mat_q<ggml_type=2, int=64, bool=0, g(1818836us/step) | mul_mat_q<ggml_type=2, int=16, bool=0, g(681111us/step)"
+2_n1_shallow,61,12.24,10.993,1.247,10.2,13.4225,13.284,-1.03,"occamy::moe_v2<int=0, int=61>(4603us/step) | occamy_gdn::gdn_fused<int=0, int=1, int=(3606us/step) | head_rowpack_sm52(1193us/step)"
+3_n2_shallow,61,23.042,19.511,3.531,15.3,21.7678,22.7686,4.6,"mul_mat_vec_q<ggml_type=2, int=2, bool=0(5633us/step) | mul_mat_vec_q_moe<ggml_type=2, int=2, bo(5431us/step) | mul_mat_vec_q<ggml_type=2, int=1, bool=0(1451us/step)"
+4_n2_deep,61,39.37,34.049,5.321,13.5,36.7915,38.8107,5.49,"ofa_decode_hs_kernel<bool=0>(14686us/step) | mul_mat_vec_q<ggml_type=2, int=2, bool=0(5661us/step) | mul_mat_vec_q_moe<ggml_type=2, int=2, bo(5459us/step)"

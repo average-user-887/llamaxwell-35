@@ -1,0 +1,86 @@
+{
+ "arm_vs_stockpair0|all5cases": {
+  "rows": 336,
+  "meanKL": 0.002754632151040333,
+  "same_top1": 0.9880952380952381,
+  "bitexact_rows": 8,
+  "maxKL": 0.24874822144182648
+ },
+ "arm_vs_stockpair0|short_<=6K": {
+  "rows": 272,
+  "meanKL": 0.001995436676010595,
+  "same_top1": 0.9889705882352942,
+  "bitexact_rows": 8,
+  "maxKL": 0.24874822144182648
+ },
+ "arm_vs_stockpair0|deep_98K+90K": {
+  "rows": 64,
+  "meanKL": 0.005981212919916719,
+  "same_top1": 0.984375,
+  "bitexact_rows": 0,
+  "maxKL": 0.1126017908461406
+ },
+ "stockpair0_vs_solo|all5cases": {
+  "rows": 336,
+  "meanKL": 0.0030572851371800276,
+  "same_top1": 0.9880952380952381,
+  "bitexact_rows": 8,
+  "maxKL": 0.35035640035821114
+ },
+ "stockpair0_vs_solo|short_<=6K": {
+  "rows": 272,
+  "meanKL": 0.002585796103206416,
+  "same_top1": 0.9926470588235294,
+  "bitexact_rows": 8,
+  "maxKL": 0.35035640035821114
+ },
+ "stockpair0_vs_solo|deep_98K+90K": {
+  "rows": 64,
+  "meanKL": 0.005061113531567874,
+  "same_top1": 0.96875,
+  "bitexact_rows": 0,
+  "maxKL": 0.10092066656174081
+ },
+ "arm_vs_solo|all5cases": {
+  "rows": 336,
+  "meanKL": 0.0008921585998644925,
+  "same_top1": 0.9880952380952381,
+  "bitexact_rows": 8,
+  "maxKL": 0.029646396395975484
+ },
+ "arm_vs_solo|short_<=6K": {
+  "rows": 272,
+  "meanKL": 0.0006373724662195437,
+  "same_top1": 0.9889705882352942,
+  "bitexact_rows": 8,
+  "maxKL": 0.029646396395975484
+ },
+ "arm_vs_solo|deep_98K+90K": {
+  "rows": 64,
+  "meanKL": 0.001974999667855524,
+  "same_top1": 0.984375,
+  "bitexact_rows": 0,
+  "maxKL": 0.026140301097880368
+ },
+ "n2split_only_vs_solo|all5cases": {
+  "rows": 336,
+  "meanKL": 0.0008921585998644925,
+  "same_top1": 0.9880952380952381,
+  "bitexact_rows": 8,
+  "maxKL": 0.029646396395975484
+ },
+ "n2split_only_vs_solo|short_<=6K": {
+  "rows": 272,
+  "meanKL": 0.0006373724662195437,
+  "same_top1": 0.9889705882352942,
+  "bitexact_rows": 8,
+  "maxKL": 0.029646396395975484
+ },
+ "n2split_only_vs_solo|deep_98K+90K": {
+  "rows": 64,
+  "meanKL": 0.001974999667855524,
+  "same_top1": 0.984375,
+  "bitexact_rows": 0,
+  "maxKL": 0.026140301097880368
+ }
+}

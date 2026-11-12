@@ -1,0 +1,27 @@
+kernel,calls_total,total_ms,avg_us,launches_per_step,us_per_step,pct_busy
+ofa_decode_hs_kernel<bool=0>,610,895.822,1468.56,10.0,14685.6,43.13
+"mul_mat_vec_q<ggml_type=2, int=2, bool=0, bool=0, bool=0, bool=0, bool=1>",17141,345.338,20.15,281.0,5661.3,16.63
+"mul_mat_vec_q_moe<ggml_type=2, int=2, bool=0, bool=1>",7320,332.994,45.49,120.0,5458.9,16.03
+"mul_mat_vec_q<ggml_type=2, int=1, bool=0, bool=0, bool=0, bool=0, bool=1>",1830,88.396,48.3,30.0,1449.1,4.26
+"gated_delta_net_direct<int=128, bool=0, bool=0, int=2>",1830,65.857,35.99,30.0,1079.6,3.17
+"mul_mat_vec_f<float, float, int=2, int=256, bool=0, bool=0>",4880,51.681,10.59,80.0,847.2,2.49
+quantize_q8_1,12200,33.383,2.74,200.0,547.3,1.61
+rms_norm_mul_q8_1_pair<int=1024>,4941,28.996,5.87,81.0,475.3,1.4
+"topk_moe_cuda<int=256, bool=0>",2440,28.189,11.55,40.0,462.1,1.36
+cpy_scalar<__operator_&__,1830,20.037,10.95,30.0,328.5,0.96
+_Z11k_bin_bcastIXadL_ZN42_INTERNAL_dee15d3c_11_binbcast_cu_6840010b6op_addEffEEfffJPKfEEvPKT0_PKT1_PT2_jjj5uin,4270,19.538,4.58,70.0,320.3,0.94
+unary_gated_op_kernel<__operator_&__,7320,18.941,2.59,120.0,310.5,0.91
+"concat_cont<unsigned int, int=0>",1830,17.94,9.8,30.0,294.1,0.86
+_Z11k_bin_bcastIXadL_ZN42_INTERNAL_dee15d3c_11_binbcast_cu_6840010b6op_mulEffEEfffJPKfEEvPKT0_PKT1_PT2_jjj5uin,4270,17.532,4.11,70.0,287.4,0.84
+"rms_norm_f32<int=256, bool=1, bool=0, bool=0>",3050,17.196,5.64,50.0,281.9,0.83
+"k_get_rows_float<float, float>",1952,17.183,8.8,32.0,281.7,0.83
+moe_weighted_reduction_f32,2440,15.005,6.15,40.0,246.0,0.72
+"rms_norm_f32<int=256, bool=0, bool=0, bool=1>",3660,13.655,3.73,60.0,223.9,0.66
+unary_op_kernel<__operator_&__,6100,11.479,1.88,100.0,188.2,0.55
+_Z11k_bin_bcastIXadL_ZN42_INTERNAL_dee15d3c_11_binbcast_cu_6840010b6op_addEffEEfffJPKfS2_EEvPKT0_PKT1_PT2_jjj5,2440,11.461,4.7,40.0,187.9,0.55
+"ssm_conv_f32<bool=1, unsigned long=128, unsigned long=4>",1830,8.803,4.81,30.0,144.3,0.42
+ofa_combine_kernel,610,4.522,7.41,10.0,74.1,0.22
+"rope_multi<bool=1, bool=0, float>",1220,4.493,3.68,20.0,73.7,0.22
+"k_set_rows<float, long, __half>",1220,4.29,3.52,20.0,70.3,0.21
+ggml_cuda_hg_gather,61,2.716,44.52,1.0,44.5,0.13
+gate_copy_sm52,610,1.536,2.52,10.0,25.2,0.07

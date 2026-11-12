@@ -1,0 +1,150 @@
+{
+ "schema_version": "m6000-evidence-v1",
+ "session_id": "20261112T120000Z-m6000-35b",
+ "items": {
+  "E1": {
+   "status": "DONE",
+   "label": "measured",
+   "detail": "Engagement of N2SPLIT, FA_ADDR, N2GDN in BUNDLE3 confirmed by kernel names per decode step (e1_engagement.json). n2gather_copy 10 + gdn_fused2 30 per step in N2 phases; ofa_decode_hs_ar 10; gdn_fused n1 = 0.",
+   "caveat": "Arm A classifier also counts n2gather_copy 10/step in N2 phases; name-match check pending."
+  },
+  "E4": {
+   "status": "DONE",
+   "label": "measured",
+   "detail": "Single nvprof+plain run per arm; ms/token plain A vs B: prefill4K 1.830 vs 1.836 (+0.3%), N1 shallow 13.42 vs 12.99 (-3.2%), N2 shallow 21.77 vs 18.62 (-14.5%), N2 deep 36.79 vs 33.38 (-9.3%). Indicative only, not ABBA.",
+   "artifacts": [
+    "phases.csv",
+    "kernels.csv",
+    "e1_engagement.json"
+   ]
+  },
+  "E3": {
+   "status": "PARTIAL",
+   "label": "measured",
+   "arm_A": "partial runs recorded",
+   "arm_B": "NOT_RUN",
+   "detail": "Dropped: Codex covered mixed serving. runs.jsonl/requests.jsonl hold arm-A partial data only (evidence_origin new_measurement). No A-vs-B comparison is claimed.",
+   "artifacts": [
+    "runs.jsonl",
+    "requests.jsonl"
+   ]
+  },
+  "E10": {
+   "status": "NOT_RUN",
+   "reason": "speed lane falsified by Codex; quality screen deferred"
+  },
+  "E8": {
+   "status": "CLOSED",
+   "reason": "Codex speculation result",
+   "note": "E5/RUN_E8.md describes the unrun k=1,2,3 nvprof plan; superseded"
+  },
+  "C1": {
+   "status": "DONE",
+   "label": "derived",
+   "detail": "15 claims reconciled to raw logs; see raw/C/C1.md. BUNDLE3 -8.98% reproduces but is ONE ABBA block (8 reps/arm): PROVISIONAL. Throughput 54.30->59.67 t/s is sum of per-slot rates; common-window 54.15->59.07 (+9.07%). N2SPLIT -4.52% [-5.55,-3.49]; N2GDN -3.33% [-3.43,-3.24] on top of N2SPLIT. VRAM margins 1,355/1,320/643 MiB (total 24,463).",
+   "not_run": [
+    "allocator-peak VRAM",
+    "E2 >=5 ABBA blocks"
+   ]
+  },
+  "C2": {
+   "status": "DONE",
+   "label": "measured",
+   "detail": "N2SPLIT pair vs stock pair KL .00275 (stock vs solo .00306); vs solo .00089; top-1 98.81%; deep rows 98.44%.",
+   "not_run": [
+    "Full BUNDLE3 vs GDN4 2-slot logits (needs GPU; command in raw/C/C2.md)"
+   ]
+  },
+  "C3": {
+   "status": "DONE",
+   "label": "measured",
+   "detail": "Build provenance: BUNDLE3 = 2436f75, clean tree, lib 94c777dc, sm_52 only, model sha, env chain."
+  },
+  "C4": {
+   "status": "DONE",
+   "label": "measured",
+   "detail": "Tool-level lifecycle cases e1/ea/eb/ec/ef/ed/ks pass N2GDN-vs-N2SPLIT bit-equal; server smoke a-e sanity only.",
+   "not_run": [
+    "N1-N2-N1",
+    "slot swap",
+    "server cancel/restore equality vs GDN4",
+    "mid-draft checkpoint"
+   ]
+  },
+  "G1_GEMM_qualification": {
+   "status": "PENDING",
+   "note": "to be filled in by a later commit",
+   "reason": "later commit"
+  },
+  "E9": {
+   "status": "PENDING",
+   "note": "to be filled in by a later commit",
+   "reason": "later commit"
+  },
+  "E5": {
+   "status": "PENDING",
+   "note": "to be filled in by a later commit",
+   "reason": "later commit"
+  },
+  "E7": {
+   "status": "PENDING",
+   "note": "to be filled in by a later commit",
+   "reason": "later commit"
+  },
+  "E2": {
+   "status": "PENDING",
+   "note": "to be filled in by a later commit",
+   "reason": "needs >=5 ABBA blocks on GPU"
+  },
+  "E6": {
+   "status": "PENDING",
+   "note": "to be filled in by a later commit",
+   "reason": "later commit"
+  }
+ },
+ "comparisons": {
+  "BUNDLE3_vs_GDN4_deep_2slot_ABBA": {
+   "metric": "period change = pB/pA-1 (negative = faster); throughput gain = pA/pB-1; block = one ABBA cycle using all runs",
+   "value_pct": -8.98,
+   "ci_pm": 1.21,
+   "blocks": 1,
+   "reps_per_arm": 8,
+   "estimator": "mean of per-rep period ratio, t-CI over blocks",
+   "validity": "PROVISIONAL (one block, CI not estimable across blocks; the +-1.21 is within-block)",
+   "label": "measured",
+   "conclusion": "PROVISIONAL until E2"
+  },
+  "N2SPLIT_vs_stock": {
+   "value_pct": -4.52,
+   "ci95": [
+    -5.55,
+    -3.49
+   ],
+   "blocks": 3,
+   "label": "measured"
+  },
+  "N2GDN_on_N2SPLIT": {
+   "value_pct": -3.33,
+   "ci95": [
+    -3.43,
+    -3.24
+   ],
+   "blocks": 3,
+   "label": "measured"
+  },
+  "E4_ms_per_tok": {
+   "values": "see items.E4",
+   "label": "measured",
+   "validity": "single run per arm, indicative"
+  }
+ },
+ "hypotheses": [
+  "No 96K profile of BUNDLE3 graph existed before E4 (now partly covered by E4 phase 4).",
+  "2x128K does not fit at F16 KV (needs ~+1.7 GB vs 1.36 GB margin)  [modeled, Q8_CAPACITY_SIZING.md]",
+  "Deep two-slot ABBA resolves only ~1% at 3 cycles (step sd 0.34-0.43 ms on 36.2)  [derived]"
+ ],
+ "known_discrepancies": [
+  "Three 2-slot stock baselines (37.22 nvprof server, 36.29 B3 server, 35.56 tool) are not interchangeable.",
+  "Several per-run files were overwritten by filename reuse; see raw/C/C1.md."
+ ]
+}

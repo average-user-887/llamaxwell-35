@@ -1,0 +1,15 @@
+kernel,calls_total,total_ms,avg_us,launches_per_step,us_per_step,pct_busy
+"occamy::moe_v2<int=0, int=61>",2440,280.784,115.08,40.0,4603.0,41.87
+"occamy_gdn::gdn_fused<int=0, int=1, int=1, int=0, int=1>",1830,219.985,120.21,30.0,3606.3,32.81
+head_rowpack_sm52,61,72.755,1192.71,1.0,1192.7,10.85
+"mul_mat_vec_q<ggml_type=2, int=1, bool=0, bool=0, bool=0, bool=0, bool=1>",2440,53.766,22.04,40.0,881.4,8.02
+ofa_decode_hs_kernel<bool=0>,610,14.612,23.95,10.0,239.5,2.18
+"rms_norm_f32<int=256, bool=1, bool=0, bool=0>",1220,5.996,4.91,20.0,98.3,0.89
+rms_norm_mul_q8_1_row<int=1024>,671,4.544,6.77,11.0,74.5,0.68
+"rope_multi<bool=1, bool=0, float>",1220,4.485,3.68,20.0,73.5,0.67
+"k_set_rows<float, long, __half>",1220,4.221,3.46,20.0,69.2,0.63
+ofa_combine_kernel,610,3.577,5.86,10.0,58.6,0.53
+_Z11k_bin_bcastIXadL_ZN42_INTERNAL_dee15d3c_11_binbcast_cu_6840010b6op_addEffEEfffJPKfEEvPKT0_PKT1_PT2_jjj5uin,610,2.847,4.67,10.0,46.7,0.42
+occamy_gate_sig_mul_q8,610,1.898,3.11,10.0,31.1,0.28
+"k_get_rows_float<float, float>",122,0.59,4.83,2.0,9.7,0.09
+ggml_cuda_hg_gather,61,0.502,8.24,1.0,8.2,0.07

@@ -1,0 +1,27 @@
+kernel,calls_total,total_ms,avg_us,launches_per_step,us_per_step,pct_busy
+"mul_mat_vec_q<ggml_type=2, int=2, bool=0, bool=0, bool=0, bool=0, bool=1>",17141,343.585,20.04,281.0,5632.5,28.87
+"mul_mat_vec_q_moe<ggml_type=2, int=2, bool=0, bool=1>",7320,331.266,45.25,120.0,5430.6,27.83
+"mul_mat_vec_q<ggml_type=2, int=1, bool=0, bool=0, bool=0, bool=0, bool=1>",1830,88.506,48.36,30.0,1450.9,7.44
+"gated_delta_net_direct<int=128, bool=0, bool=0, int=2>",1830,65.86,35.99,30.0,1079.7,5.53
+"mul_mat_vec_f<float, float, int=2, int=256, bool=0, bool=0>",4880,51.703,10.59,80.0,847.6,4.34
+quantize_q8_1,12200,33.427,2.74,200.0,548.0,2.81
+rms_norm_mul_q8_1_pair<int=1024>,4941,29.084,5.89,81.0,476.8,2.44
+"topk_moe_cuda<int=256, bool=0>",2440,28.248,11.58,40.0,463.1,2.37
+cpy_scalar<__operator_&__,1830,20.089,10.98,30.0,329.3,1.69
+_Z11k_bin_bcastIXadL_ZN42_INTERNAL_dee15d3c_11_binbcast_cu_6840010b6op_addEffEEfffJPKfEEvPKT0_PKT1_PT2_jjj5uin,4270,19.567,4.58,70.0,320.8,1.64
+unary_gated_op_kernel<__operator_&__,7320,18.937,2.59,120.0,310.4,1.59
+"concat_cont<unsigned int, int=0>",1830,17.992,9.83,30.0,295.0,1.51
+_Z11k_bin_bcastIXadL_ZN42_INTERNAL_dee15d3c_11_binbcast_cu_6840010b6op_mulEffEEfffJPKfEEvPKT0_PKT1_PT2_jjj5uin,4270,17.571,4.12,70.0,288.1,1.48
+"k_get_rows_float<float, float>",1952,17.227,8.83,32.0,282.4,1.45
+"rms_norm_f32<int=256, bool=1, bool=0, bool=0>",3050,17.204,5.64,50.0,282.0,1.45
+ofa_decode_hs_kernel<bool=0>,610,15.372,25.2,10.0,252.0,1.29
+moe_weighted_reduction_f32,2440,14.994,6.15,40.0,245.8,1.26
+"rms_norm_f32<int=256, bool=0, bool=0, bool=1>",3660,13.671,3.74,60.0,224.1,1.15
+unary_op_kernel<__operator_&__,6100,11.512,1.89,100.0,188.7,0.97
+_Z11k_bin_bcastIXadL_ZN42_INTERNAL_dee15d3c_11_binbcast_cu_6840010b6op_addEffEEfffJPKfS2_EEvPKT0_PKT1_PT2_jjj5,2440,11.466,4.7,40.0,188.0,0.96
+"ssm_conv_f32<bool=1, unsigned long=128, unsigned long=4>",1830,8.815,4.82,30.0,144.5,0.74
+"rope_multi<bool=1, bool=0, float>",1220,4.5,3.69,20.0,73.8,0.38
+"k_set_rows<float, long, __half>",1220,4.288,3.51,20.0,70.3,0.36
+ofa_combine_kernel,610,3.335,5.47,10.0,54.7,0.28
+gate_copy_sm52,610,1.365,2.24,10.0,22.4,0.11
+ggml_cuda_hg_gather,61,0.61,10.0,1.0,10.0,0.05

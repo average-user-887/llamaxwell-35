@@ -1,0 +1,14 @@
+# C summary (CPU only; files in evidence/C/; <LAB>=<LAB>)
+- C1 (C1.md, C1.csv, c1_estimators.json): 15 claims reconciled to raw logs. DAY.md correction line appended.
+  - N2SPLIT -4.52% [-5.55,-3.49] = all-run block mean (speed.log -4.54% = last-only); 35.56->33.94 ms, +4.74% t/s; 3 blocks.
+  - N2GDN -3.3% is on top of N2SPLIT: all-run -3.33% [-3.43,-3.24]; published CI was last-only.
+  - B3 -8.98% reproduces (36.29->33.03 /64, 36.86->33.55 /63) but is ONE ABBA block, 8 reps/arm: PROVISIONAL until E2. 54.30->59.67 = sum of per-slot rates; common-window 54.15->59.07 (+9.07%); "2-token step" = 2x per-slot.
+  - Ledger-vs-json "15-30% gap" = units (delta_pct vs absolute t/s); all numbers reproduce.
+  - VRAM total is 24,463 MiB usable, not 24,576: margins 1,355 / 1,320 / 643 (were 1,468 / 1,433 / 756). 2x128K at F16 KV does not fit (~+1.7 GB vs 1.36).
+  - NIGHT d0 4.77/32.6% -> raw 4.617/33.5%; DAY ofa 15.0 -> 14.689; GR1 INCONCLUSIVE; unified-KV cross-slot scan CLOSED; B3 warm +0.053% INSUFFICIENT_CYCLES.
+  - Three 2-slot "stock" baselines (37.22 nvprof server, 36.29 B3 server, 35.56 tool) are not interchangeable.
+  - Overwritten per-run files listed in C1.md (D1B/D1BF sp_* dirs, D1BF g0/g1/ks logits, D1ATT json); survivors not relabelled.
+- C2 (C2.md): N2SPLIT-pair vs stock pair KL .00275 (same size as stock vs solo .00306); vs solo .00089; top-1 98.81%; deep rows 98.44%. Full BUNDLE3 vs GDN4 2-slot logits NOT_RUN; GPU command in C2.md.
+- C3 (C3.md, C3.json): BUNDLE3 = 2436f75, clean tree, lib 94c777dc, sm_52 only, model sha, env chain, public f410f99 (pushed ~14:20, recorded, no rewrite).
+- C4 (C4.md): tool-level lifecycle cases e1/ea/eb/ec/ef/ed/ks pass N2GDN-vs-N2SPLIT bit-equal; server smoke a-e sanity only. NOT_RUN: N1-N2-N1, slot swap, server cancel/restore equality vs GDN4, mid-draft checkpoint.
+- Open: E2 >=5 blocks; allocator-peak VRAM; BUNDLE3 2-slot logits vs GDN4 on GPU.

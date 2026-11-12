@@ -1,0 +1,46 @@
+kernel,calls_total,total_ms,avg_us,launches_per_window,us_per_window,pct_busy
+sgemm_128x128x8_NT_vec,596,2092.282,3510.54,596.0,2092281.8,28.05
+"mul_mat_q<ggml_type=2, int=64, bool=0, ggml_prec=30, bool=1, bool=1>",468,1818.836,3886.4,468.0,1818836.3,24.39
+"mul_mat_q<ggml_type=2, int=16, bool=0, ggml_prec=30, bool=1, bool=1>",468,681.111,1455.37,468.0,681111.3,9.13
+"mul_mat_q<ggml_type=2, int=32, bool=0, ggml_prec=30, bool=1, bool=1>",468,660.756,1411.87,468.0,660755.7,8.86
+"flash_attn_tile<int=256, int=256, int=4, int=8, bool=0, int=0>",50,623.423,12468.45,50.0,623422.7,8.36
+"gated_delta_net_cuda<int=128, bool=0, bool=0, int=4>",150,428.929,2859.53,150.0,428928.9,5.75
+dequantize_block_q4_0<float>,1228,291.641,237.49,1228.0,291641.4,3.91
+maxwell_sgemm_128x64_tn,392,171.087,436.45,392.0,171086.6,2.29
+"rms_norm_f32<int=256, bool=1, bool=0, bool=0>",250,90.761,363.05,250.0,90761.3,1.22
+"rms_norm_f32<int=256, bool=0, bool=0, bool=1>",300,74.736,249.12,300.0,74736.5,1.0
+unary_gated_op_kernel<__operator_&__,590,62.111,105.27,590.0,62110.8,0.83
+"rms_norm_f32<int=1024, bool=1, bool=0, bool=0>",395,58.865,149.03,395.0,58865.3,0.79
+sgemm_32x32x32_NT_vec,396,58.265,147.13,396.0,58265.1,0.78
+"ssm_conv_long_token_f32<bool=1, unsigned long=128, unsigned long=4, long=32>",120,49.242,410.35,120.0,49242.1,0.66
+moe_weighted_reduction_f32,195,43.302,222.06,195.0,43302.3,0.58
+"quantize_mmq_q8_1<mmq_q8_1_ds_layout=1, bool=1>",312,35.229,112.91,312.0,35228.6,0.47
+concat_dim0_transposed<unsigned int>,120,34.822,290.18,120.0,34821.9,0.47
+cpy_scalar<__operator_&__,200,30.39,151.95,200.0,30389.8,0.41
+mm_ids_helper<int=8>,468,23.246,49.67,468.0,23246.2,0.31
+_Z11k_bin_bcastIXadL_ZN42_INTERNAL_dee15d3c_11_binbcast_cu_6840010b6op_addEffEEfffJPKfS2_EEvPKT0_PKT1_PT2_jjj5,195,19.809,101.59,195.0,19809.3,0.27
+_Z11k_bin_bcastIXadL_ZN42_INTERNAL_dee15d3c_11_binbcast_cu_6840010b6op_addEffEEfffJPKfEEvPKT0_PKT1_PT2_jjj5uin,346,15.823,45.73,346.0,15822.6,0.21
+flash_attn_combine_results<int=256>,50,14.987,299.74,50.0,14987.2,0.2
+_Z11k_bin_bcastIXadL_ZN42_INTERNAL_dee15d3c_11_binbcast_cu_6840010b6op_mulEffEEfffJPKfEEvPKT0_PKT1_PT2_jjj5uin,345,14.599,42.32,345.0,14599.5,0.2
+"quantize_mmq_q8_1<mmq_q8_1_ds_layout=1, bool=0>",156,13.884,89.0,156.0,13884.2,0.19
+"mul_mat_vec_q_moe<ggml_type=2, int=2, bool=0, bool=1>",117,9.262,79.16,117.0,9262.3,0.12
+"mul_mat_vec_q<ggml_type=2, int=4, bool=0, bool=0, bool=0, bool=0, bool=1>",307,7.446,24.26,307.0,7446.3,0.1
+"rope_multi<bool=1, bool=0, float>",100,6.339,63.39,100.0,6339.1,0.08
+"mul_mat_vec_f<float, float, int=1, int=256, bool=0, bool=0>",156,5.612,35.97,156.0,5611.9,0.08
+"topk_moe_cuda<int=256, bool=0>",195,4.658,23.89,195.0,4658.0,0.06
+"k_set_rows<float, long, __half>",100,3.077,30.77,100.0,3076.9,0.04
+mmq_make_tail_tiles,468,2.984,6.38,468.0,2983.6,0.04
+k_get_rows_float_vec<float>,150,2.747,18.31,150.0,2746.6,0.04
+"concat_non_cont<unsigned int, int=0>",30,1.35,45.02,30.0,1350.5,0.02
+head_rowpack_sm52,1,1.192,1191.92,1.0,1191.9,0.02
+unary_op_kernel<__operator_&__,495,1.153,2.33,495.0,1152.6,0.02
+"k_get_rows_float<float, float>",152,0.99,6.51,152.0,989.9,0.01
+"gemmSN_TN_kernel<float, int=128, int=16, int=2, int=4, int=4, int=4, bool=1, cublasGemvTensorStridedBatched<fl",39,0.984,25.24,39.0,984.2,0.01
+scale_f32<float>,60,0.856,14.26,60.0,855.6,0.01
+quantize_q8_1,236,0.686,2.91,236.0,686.0,0.01
+"gemv2T_kernel_val<int, int, float, float, float, float, int=128, int=16, int=2, int=2, bool=0, bool=0, cublasG",39,0.674,17.27,39.0,673.6,0.01
+flash_attn_mask_to_KV_max<int=4>,30,0.297,9.9,30.0,297.0,0.0
+"ssm_conv_f32<bool=1, unsigned long=128, unsigned long=4>",30,0.183,6.1,30.0,182.9,0.0
+"occamy::moe_v2<int=0, int=61>",1,0.114,114.27,1.0,114.3,0.0
+ggml_cuda_hg_gather,9,0.081,8.99,9.0,80.9,0.0
+rms_norm_mul_q8_1_row<int=1024>,1,0.007,7.04,1.0,7.0,0.0

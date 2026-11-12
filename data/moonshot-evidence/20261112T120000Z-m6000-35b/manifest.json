@@ -1,0 +1,68 @@
+{
+ "schema_version": "m6000-evidence-v1",
+ "session_id": "20261112T120000Z-m6000-35b",
+ "created_for": "M6000 35B moonshot evidence day 2026-11-12",
+ "hardware": {
+  "gpu": "Quadro M6000 24GB (sm_52)",
+  "driver": "580.178.04",
+  "cuda_runtime_host": "13.0",
+  "device_id": "<gpu>",
+  "host": "<host>"
+ },
+ "toolchain": {
+  "arch": "52-real (sm_52, 147 cubins, 0 PTX in bundle3 and gdn4)",
+  "cuda": "12.8.1 (nvcc 12.8.93)",
+  "gcc": "14.2.0",
+  "cmake": "3.28.3",
+  "flags": "-DGGML_BACKEND_DL=ON -DGGML_NATIVE=OFF",
+  "build_image": "local/m6000-build-tools:20261013"
+ },
+ "source": {
+  "bundle3_sha": "2436f7554c0c8d70afc9acbcce85b2457193a516",
+  "n2gdn_007999b": "007999bfa6d0e37223872e16319349d4e60d0fb1",
+  "n2split_9312e7e": "9312e7ed249ef530d7f25efd43527a9b71aeefc7",
+  "fa_addr_4e726d4": "4e726d440900592604e47761f426dbc576e30041",
+  "public_main": "f410f991bff88c2abdc7040ba0b01efed06764f1",
+  "upstream_base": "ggml-org/llama.cpp b11552 (23b0202a189c44a54625aadcb37a946dd1d6278d)"
+ },
+ "binaries_sha256": {
+  "bundle3 (=B3/libggml-cuda.b3.so, 38046656 B)": "94c777dc55489fba4cab5b68c6b54cf8a45810b0a1011589260e5bd23cd05486",
+  "gdn4": "31181041f325390adff5314df3fb08f537179e2065cfca543a7bb7187577146d",
+  "n2gdn": "07d3deea4dfc97df0536298360500fd2f3b703de24da3a2ec515b26ac2605a71",
+  "n2split": "7251e011d0212a2889bdacece238b15d7dc8ebd64446436024613963071dd516",
+  "bundle2 (night35)": "c7d0455e50a6342187e0699ebd08d98930f6e4f44070da8a9e7edeca9bb2c600",
+  "baseline call35": "c3d0ecd041193e2c4399eb11a4a37df76ba9c9ebfe437872c5663ada2bcadd6f",
+  "stock image libggml-cuda.so (overridden)": "413adbea46e85222f2c4d8a803a563e6fec2a5e1958bc74a931d3a85412ad51e"
+ },
+ "upstream_b12318_build": {
+  "script": "build/upstream-b12318-build.sh",
+  "libggml-cuda.so_sha256": "7b3ff766ee3437b5be59e5112c7f6e6b1b7e465231796f364fe407d87c499e55",
+  "llama-server_sha256": "188964d4ed3a863b758c038827f38a7746fa14cbe9795609f648fe3c8575162f",
+  "note": "recomputed from files at session build time; binaries not published"
+ },
+ "model": {
+  "file": "<MODELS>/occamy-1.0-Q4_0-headq40b.gguf",
+  "bytes": 19583940352,
+  "sha256": "2b5d7a2ca6813e9cdd25fe9142e35bd732583679c52ee7888f9455df218d9cc0"
+ },
+ "tokenizer": {
+  "override": "tokenizer.ggml.pre=str:qwen35",
+  "fixtures": "fixtures/fixtures_manifest.json (sha256 of prompt tokens and text)"
+ },
+ "runtime_image": "local/llama.cpp:server-cuda-b11552-sm52-normq8 sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d; prod lib bind-mounted read-only over libggml-cuda.so",
+ "server_args": "-m <model> --override-kv tokenizer.ggml.pre=str:qwen35 -ngl 999 -np 2 -c 196608 -b 2048 -ub 1024 --cache-ram 12288 --ctx-checkpoints 16 --checkpoint-min-step 2048 -fa on --jinja --metrics -lv 4 (B3 bench: --cache-ram 0)",
+ "env_chain": {
+  "a_baseline": "c9825b1 call35",
+  "b_BUNDLE2": "2ca7934 (+FA_PIPE=3 MOE_LOP3 MOE_TAILBAL GDN_PREF HOSTGAP SMALLFUSE=2)",
+  "c_GDN4": "85dbeed (+GDN_REPACK=1)",
+  "d_BUNDLE3": "2436f75 (+N2SPLIT=1 FA_ADDR=1 N2GDN=1)"
+ },
+ "configurations": {
+  "A": "GDN4 prod (lib 31181041...)",
+  "B": "BUNDLE3 = GDN4 + GGML_CUDA_OCCAMY_N2SPLIT=1 + FA_ADDR=1 + GGML_CUDA_OCCAMY_N2GDN=1 (lib 94c777dc...)",
+  "config-A-ub1024": "E3 arm A server, -ub 1024"
+ },
+ "publication_scope": "text only: JSON/JSONL/CSV/MD/py/sh; no binaries, slot dumps, logits dumps, prof.csv, token arrays; files >2 MB replaced by sha256 pointer; paths/IPs/GPU id/hostnames redacted (see PUBLICATION_REVIEW.md)",
+ "time_units": "ns for *_ns fields, ms for *_ms, MiB for memory",
+ "withheld_pointers": []
+}

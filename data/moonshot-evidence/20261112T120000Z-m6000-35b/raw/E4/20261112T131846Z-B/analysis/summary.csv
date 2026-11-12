@@ -1,0 +1,5 @@
+phase,steps,period_ms_nvprof,busy_ms,gap_ms,gap_pct,server_ms_per_tok_plain,server_ms_per_tok_nvprof,nvprof_overhead_pct,top3_kernels
+1_prefill4k,1,7564.755,7450.649,114.106,1.5,1.8357,1.8526,0.92,"sgemm_128x128x8_NT_vec(2086451us/step) | mul_mat_q<ggml_type=2, int=64, bool=0, g(1820065us/step) | mul_mat_q<ggml_type=2, int=16, bool=0, g(681844us/step)"
+2_n1_shallow,61,12.045,10.976,1.069,8.9,12.9894,12.735,-1.96,"occamy::moe_v2<int=0, int=61>(4611us/step) | occamy_gdn::gdn_fused<int=0, int=1, int=(3606us/step) | head_rowpack_sm52(1195us/step)"
+3_n2_shallow,61,19.164,17.405,1.758,9.2,18.6201,18.9098,1.56,"occamy::moe_v2<int=0, int=61>(8573us/step) | occamy_gdn::gdn_fused2(5850us/step) | mul_mat_vec_q<ggml_type=2, int=2, bool=0(2216us/step)"
+4_n2_deep,61,33.858,31.514,2.344,6.9,33.376,33.3536,-0.07,"ofa_decode_hs_ar_kernel(14244us/step) | occamy::moe_v2<int=0, int=61>(8573us/step) | occamy_gdn::gdn_fused2(5850us/step)"

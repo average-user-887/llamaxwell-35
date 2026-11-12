@@ -1,0 +1,109 @@
+{
+ "schema_version": "m6000-evidence-v1",
+ "evidence_origin": "reanalyzed_historical",
+ "oracle": "solo (single-slot n=1) logits, dx2seq tool, D1B dumps",
+ "candidate": "N2SPLIT pair1 (graph-level proxy; NOT full BUNDLE3)",
+ "reference_pair": "stock pair0 (2-slot, no treatments)",
+ "pairing": "paired by case (e1,ea,eb,ec,ed) and token position; ef excluded (no stock pair0), 336 common rows",
+ "counts": {
+  "common_rows": 336,
+  "missing": "ef case rows (no stock pair0)",
+  "failed": 0,
+  "top1_mismatches": 12
+ },
+ "thresholds": {
+  "kld_dmean_one_sided": "<= +0.0010",
+  "same_top1": ">= -0.3 pt",
+  "applies_to": "Q8 KV / candidate quality gate; not evaluated here for BUNDLE3"
+ },
+ "results": {
+  "arm_vs_stockpair0|all5cases": {
+   "rows": 336,
+   "meanKL": 0.002754632151040333,
+   "same_top1": 0.9880952380952381,
+   "bitexact_rows": 8,
+   "maxKL": 0.24874822144182648
+  },
+  "arm_vs_stockpair0|short_<=6K": {
+   "rows": 272,
+   "meanKL": 0.001995436676010595,
+   "same_top1": 0.9889705882352942,
+   "bitexact_rows": 8,
+   "maxKL": 0.24874822144182648
+  },
+  "arm_vs_stockpair0|deep_98K+90K": {
+   "rows": 64,
+   "meanKL": 0.005981212919916719,
+   "same_top1": 0.984375,
+   "bitexact_rows": 0,
+   "maxKL": 0.1126017908461406
+  },
+  "stockpair0_vs_solo|all5cases": {
+   "rows": 336,
+   "meanKL": 0.0030572851371800276,
+   "same_top1": 0.9880952380952381,
+   "bitexact_rows": 8,
+   "maxKL": 0.35035640035821114
+  },
+  "stockpair0_vs_solo|short_<=6K": {
+   "rows": 272,
+   "meanKL": 0.002585796103206416,
+   "same_top1": 0.9926470588235294,
+   "bitexact_rows": 8,
+   "maxKL": 0.35035640035821114
+  },
+  "stockpair0_vs_solo|deep_98K+90K": {
+   "rows": 64,
+   "meanKL": 0.005061113531567874,
+   "same_top1": 0.96875,
+   "bitexact_rows": 0,
+   "maxKL": 0.10092066656174081
+  },
+  "arm_vs_solo|all5cases": {
+   "rows": 336,
+   "meanKL": 0.0008921585998644925,
+   "same_top1": 0.9880952380952381,
+   "bitexact_rows": 8,
+   "maxKL": 0.029646396395975484
+  },
+  "arm_vs_solo|short_<=6K": {
+   "rows": 272,
+   "meanKL": 0.0006373724662195437,
+   "same_top1": 0.9889705882352942,
+   "bitexact_rows": 8,
+   "maxKL": 0.029646396395975484
+  },
+  "arm_vs_solo|deep_98K+90K": {
+   "rows": 64,
+   "meanKL": 0.001974999667855524,
+   "same_top1": 0.984375,
+   "bitexact_rows": 0,
+   "maxKL": 0.026140301097880368
+  },
+  "n2split_only_vs_solo|all5cases": {
+   "rows": 336,
+   "meanKL": 0.0008921585998644925,
+   "same_top1": 0.9880952380952381,
+   "bitexact_rows": 8,
+   "maxKL": 0.029646396395975484
+  },
+  "n2split_only_vs_solo|short_<=6K": {
+   "rows": 272,
+   "meanKL": 0.0006373724662195437,
+   "same_top1": 0.9889705882352942,
+   "bitexact_rows": 8,
+   "maxKL": 0.029646396395975484
+  },
+  "n2split_only_vs_solo|deep_98K+90K": {
+   "rows": 64,
+   "meanKL": 0.001974999667855524,
+   "same_top1": 0.984375,
+   "bitexact_rows": 0,
+   "maxKL": 0.026140301097880368
+  }
+ },
+ "not_run": [
+  "Full BUNDLE3 (lib 94c777dc) vs GDN4 2-slot logits: no raw logits exist; GPU command in raw/C/C2.md",
+  "single-slot G1: 64/64 BITEQUAL, max_abs 0, 15,892,480 values (text log, from C2.md)"
+ ]
+}

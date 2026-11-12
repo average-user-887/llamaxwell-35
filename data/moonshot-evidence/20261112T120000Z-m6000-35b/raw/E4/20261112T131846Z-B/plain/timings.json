@@ -1,0 +1,49 @@
+{
+ "1_prefill4k": {
+  "prompt_n": 4096,
+  "prompt_ms": 7518.927,
+  "predicted_n": 1,
+  "predicted_ms": 0.001,
+  "predicted_per_second": 0.0,
+  "wall_s": 7.524343013763428
+ },
+ "2_n1_shallow": {
+  "prompt_n": 20,
+  "prompt_ms": 259.789,
+  "predicted_n": 64,
+  "predicted_ms": 757.723,
+  "predicted_per_second": 83.14384016322589
+ },
+ "3_n2_shallow": {
+  "s0": {
+   "prompt_n": 20,
+   "prompt_ms": 481.226,
+   "predicted_n": 64,
+   "predicted_ms": 1192.625,
+   "predicted_per_second": 52.82465150403522
+  },
+  "s1": {
+   "prompt_n": 20,
+   "prompt_ms": 474.049,
+   "predicted_n": 64,
+   "predicted_ms": 1190.746,
+   "predicted_per_second": 52.90800892885636
+  }
+ },
+ "4_n2_deep": {
+  "s0": {
+   "prompt_n": 1,
+   "prompt_ms": 170.912,
+   "predicted_n": 64,
+   "predicted_ms": 2134.324,
+   "predicted_per_second": 29.517542791066397
+  },
+  "s1": {
+   "prompt_n": 1,
+   "prompt_ms": 104.958,
+   "predicted_n": 64,
+   "predicted_ms": 2137.809,
+   "predicted_per_second": 29.46942406922227
+  }
+ }
+}
