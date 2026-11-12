@@ -537,7 +537,8 @@ bool ggml_cuda_occamy_moe_match_window(ggml_backend_cuda_context & ctx, const gg
     const ggml_tensor * norm = cgraph->nodes[i];
     if (norm->op != GGML_OP_RMS_NORM) { return false; }
     const ggml_tensor * h = norm->src[0];
-    if (h->type != GGML_TYPE_F32 || h->ne[0] != H || ggml_nrows(h) != 1 || !ggml_is_contiguous(h)) { return false; }
+    const int64_t nt = ggml_nrows(h);
+    if (h->type != GGML_TYPE_F32 || h->ne[0] != H || !(nt == 1 || (nt == 2 && ggml_cuda_occamy_n2split())) || !ggml_is_contiguous(h)) { return false; }
 
     // window end: first ADD after i that takes h directly (the FFN residual add)
     int end = -1;
@@ -565,8 +566,8 @@ bool ggml_cuda_occamy_moe_match_window(ggml_backend_cuda_context & ctx, const gg
         const ggml_tensor * t = cgraph->nodes[i + j];
         if (t->flags & GGML_TENSOR_FLAG_OUTPUT) { reject("window node flagged as output"); return false; }
         if (t->ne[2] != 1 && t->op != GGML_OP_VIEW && t->op != GGML_OP_RESHAPE && t->op != GGML_OP_PERMUTE) {
-            // mul_mat_id outputs are [n, 8, 1]; anything with a token dim > 1 fails here
-            if (t->ne[2] != 1) { reject("n_tokens != 1"); return false; }
+            // mul_mat_id outputs are [n, 8, nt]; any other token dim fails here
+            if (t->ne[2] != nt || t->ne[3] != 1) { reject("n_tokens != 1"); return false; }
         }
         switch (t->op) {
             case GGML_OP_RMS_NORM: c_norm++; break;
@@ -635,8 +636,8 @@ bool ggml_cuda_occamy_moe_match_window(ggml_backend_cuda_context & ctx, const gg
             }
             if (t->src[0]->op == GGML_OP_MUL_MAT_ID) { glu_r = t; } else if (t->src[0]->op == GGML_OP_MUL_MAT) { glu_s = t; }
         } else if (t->op == GGML_OP_MUL_MAT_ID) {
-            if (t->src[2] == nullptr || t->src[2]->type != GGML_TYPE_I32 || t->src[2]->ne[0] != TOPK || t->src[2]->ne[1] != 1) {
-                reject("mul_mat_id ids not [8,1]"); return false;
+            if (t->src[2] == nullptr || t->src[2]->type != GGML_TYPE_I32 || t->src[2]->ne[0] != TOPK || t->src[2]->ne[1] != nt) {
+                reject("mul_mat_id ids not [8,nt]"); return false;
             }
             if (is_q4_mat(t->src[0], FF, H, NE)) { down_id = t; }
             else if (!(is_q4_mat(t->src[0], H, FF, NE) && strip_views(t->src[1]) == xn)) { reject("unexpected mul_mat_id"); return false; }
@@ -663,9 +664,9 @@ bool ggml_cuda_occamy_moe_match_window(ggml_backend_cuda_context & ctx, const gg
     float eps = 0.f;
     memcpy(&eps, norm->op_params, sizeof(float));
     ggml_tensor * out = cgraph->nodes[end];
-    if (out->type != GGML_TYPE_F32 || out->ne[0] != H || ggml_nrows(out) != 1 || !ggml_is_contiguous(out)) { reject("output shape"); return false; }
+    if (out->type != GGML_TYPE_F32 || out->ne[0] != H || ggml_nrows(out) != nt || !ggml_is_contiguous(out)) { reject("output shape"); return false; }
 
-    m.n_nodes = n; m.h = h; m.eps = eps; m.out = out;
+    m.n_nodes = n; m.h = h; m.eps = eps; m.out = out; m.nt = (int) nt;
     m.gate_inp = router->src[0]; m.gate_inp_sh = shgate->src[0];
     m.gate_exps = g_r->src[0]; m.up_exps = u_r->src[0]; m.down_exps = down_id->src[0];
     m.gate_sh = g_s->src[0]; m.up_sh = u_s->src[0]; m.down_sh = sh_down->src[0];
@@ -681,7 +682,9 @@ bool ggml_cuda_occamy_moe_match_window(ggml_backend_cuda_context & ctx, const gg
     return true;
 }
 
-void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_moe_match & m, float * out_override) {
+bool ggml_cuda_occamy_n2split() { static const bool on = env_flag("GGML_CUDA_OCCAMY_N2SPLIT"); return on; }
+
+void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_moe_match & m, float * out_override, int row) {
     static const bool three = env_flag("GGML_CUDA_OCCAMY_3L");
     DevState & d = dev_state(ctx.device);
     Params P;
@@ -693,9 +696,9 @@ void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cud
     P.L.gate_sh     = (const uint8_t *) m.gate_sh->data;
     P.L.up_sh       = (const uint8_t *) m.up_sh->data;
     P.L.down_sh     = (const uint8_t *) m.down_sh->data;
-    P.h    = (const float *) m.h->data;
+    P.h    = (const float *) m.h->data + (size_t) row * H;
     P.norm = (const float *) m.norm_w->data;
-    P.out  = out_override ? out_override : (float *) m.out->data;
+    P.out  = (out_override ? out_override : (float *) m.out->data) + (size_t) row * H;
     P.s    = d.scratch;
     P.eps  = m.eps;
     cudaStream_t st = ctx.stream();

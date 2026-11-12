@@ -35,3 +35,9 @@ bool ggml_cuda_occamy_gdn_enabled();
 int  ggml_cuda_occamy_gdn_check_budget();   // remaining CHECK windows (decrements)
 bool ggml_cuda_occamy_gdn_match_window(ggml_backend_cuda_context & ctx, const ggml_cgraph * cgraph, int i, ggml_cuda_occamy_gdn_match & m);
 void ggml_cuda_occamy_gdn_launch(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m, float * out_override);
+// D1b (GGML_CUDA_OCCAMY_N2SPLIT=1): two-sequence window as two n=1 fused launches after a general host-decided state gather.
+// Returns false (caller keeps the STATE_DIRECT path) when the layout is not covered.
+// D1BF (GGML_CUDA_OCCAMY_N2GDN=1, needs N2SPLIT=1 and the REPACK path): the two n=1 launches become one gdn_fused2 launch
+// (weights read once, per-sequence arithmetic unchanged); falls back to two launches when its occupancy grid is too small.
+bool ggml_cuda_occamy_gdn_split2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m);
+void ggml_cuda_occamy_gdn_graph_begin();

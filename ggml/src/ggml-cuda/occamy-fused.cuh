@@ -15,9 +15,11 @@ struct ggml_cuda_occamy_moe_match {
     const ggml_tensor * gate_exps = nullptr, * up_exps = nullptr, * down_exps = nullptr;
     const ggml_tensor * gate_sh = nullptr, * up_sh = nullptr, * down_sh = nullptr;
     ggml_tensor * out = nullptr;
+    int nt = 1;                      // D1b: tokens in the window (2 only with GGML_CUDA_OCCAMY_N2SPLIT=1; launched once per row)
 };
 
 bool ggml_cuda_occamy_enabled();
 int  ggml_cuda_occamy_check_budget();   // remaining CHECK windows (decrements)
 bool ggml_cuda_occamy_moe_match_window(ggml_backend_cuda_context & ctx, const ggml_cgraph * cgraph, int i, ggml_cuda_occamy_moe_match & m);
-void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_moe_match & m, float * out_override);
+void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_moe_match & m, float * out_override, int row = 0);
+bool ggml_cuda_occamy_n2split();   // D1b: GGML_CUDA_OCCAMY_N2SPLIT=1 (default off) splits two-token MoE/GDN windows into per-row fused launches
