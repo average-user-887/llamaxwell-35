@@ -1683,6 +1683,17 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
         }
     ).set_env("LLAMA_ARG_UBATCH"));
     add_opt(common_arg(
+        {"--mixed-batch-size"}, "N",
+        "maximum total batch size when adding splittable text prompts to generation (default: 0, disabled); "
+        "limited to the logical and physical batch sizes; pure prefill is unchanged",
+        [](common_params & params, int value) {
+            if (value < 0) {
+                throw std::invalid_argument("--mixed-batch-size must be non-negative");
+            }
+            params.n_batch_mixed = value;
+        }
+    ).set_env("LLAMA_ARG_MIXED_BATCH_SIZE").set_examples({LLAMA_EXAMPLE_SERVER}));
+    add_opt(common_arg(
         {"--keep"}, "N",
         string_format("number of tokens to keep from the initial prompt (default: %d, -1 = all)", params.n_keep),
         [](common_params & params, int value) {

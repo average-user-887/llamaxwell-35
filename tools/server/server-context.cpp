@@ -3466,6 +3466,7 @@ private:
         // process in chunks of params.n_batch
         int32_t n_batch  = llama_n_batch(ctx_tgt);
         int32_t n_ubatch = llama_n_ubatch(ctx_tgt);
+        const int32_t n_generation = batch.size();
 
         auto & alora_scale       = batch.alora_scale;
         auto & alora_disabled_id = batch.alora_disabled_id;
@@ -3497,6 +3498,14 @@ private:
                 // this slot still has a prompt to be processed
                 if (slot.state == SLOT_STATE_PROCESSING_PROMPT || slot.state == SLOT_STATE_STARTED) {
                     const auto & input_tokens = slot.task->tokens;
+                    int32_t n_batch_prompt = n_batch;
+                    if (params_base.n_batch_mixed > 0 && n_generation > 0 && slot.can_split() &&
+                        slot.task->type == SERVER_TASK_TYPE_COMPLETION && !input_tokens.has_mtmd) {
+                        n_batch_prompt = std::min({n_batch, n_ubatch, params_base.n_batch_mixed});
+                        if (batch.size() >= n_batch_prompt) {
+                            return;
+                        }
+                    }
 
                     // used to determine the number of tokens added to the batch for the current slot
                     const auto n_tokens_prev = batch.size();
@@ -3940,7 +3949,7 @@ private:
                     const int32_t n_decision_first = slot.task->type == SERVER_TASK_TYPE_DECISION ? slot.task->decision.pos_first() : -1;
 
                     // add prompt tokens for processing in the current batch
-                    while (slot.prompt.n_tokens() < slot.task->n_tokens() && batch.size() < n_batch) {
+                    while (slot.prompt.n_tokens() < slot.task->n_tokens() && batch.size() < n_batch_prompt) {
                         // get next token to process
                         llama_token cur_tok = input_tokens[slot.prompt.n_tokens()];
                         if (cur_tok == LLAMA_TOKEN_NULL) {

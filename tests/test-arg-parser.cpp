@@ -172,6 +172,21 @@ static void test(void) {
 
     std::vector<std::string> argv;
 
+    {
+        common_params mixed_params;
+        assert(mixed_params.n_batch_mixed == 0);
+        argv = {"binary_name", "--mixed-batch-size", "1024"};
+        assert(true == common_params_parse(argv.size(), list_str_to_char(argv).data(), mixed_params, LLAMA_EXAMPLE_SERVER));
+        assert(mixed_params.n_batch_mixed == 1024);
+        argv = {"binary_name", "--mixed-batch-size", "0"};
+        assert(true == common_params_parse(argv.size(), list_str_to_char(argv).data(), mixed_params, LLAMA_EXAMPLE_SERVER));
+        assert(mixed_params.n_batch_mixed == 0);
+        argv = {"binary_name", "--mixed-batch-size", "-1"};
+        assert(false == common_params_parse(argv.size(), list_str_to_char(argv).data(), mixed_params, LLAMA_EXAMPLE_SERVER));
+        argv = {"binary_name", "--mixed-batch-size", "invalid"};
+        assert(false == common_params_parse(argv.size(), list_str_to_char(argv).data(), mixed_params, LLAMA_EXAMPLE_SERVER));
+    }
+
     printf("test-arg-parser: test invalid usage\n\n");
 
     // missing value
