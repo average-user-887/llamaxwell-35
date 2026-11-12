@@ -132,7 +132,15 @@ constexpr int SMEM2_FLOATS = SMEM_FLOATS + NW * STW;
 // head's NCG items builds that head's 128 xs values and 4 sums (same expressions/order as phase C) into Scratch xg/sg.
 // The existing phase-B->C grid barrier (or the kernel boundary in 3-launch mode) orders them before phase C, which then
 // only copies xg/sg into smem. No new grid barrier, no new launch.
-template <int PHASE, int RQK = 0, int PCS = 0>
+// PF (GDN1, opt-in GGML_CUDA_OCCAMY_GDN_PREF=1, fused single launch only): load-issue hoisting, no arithmetic change.
+//   A: each warp's first K=2048 row is requested at kernel entry, before the rmsnorm prologue (weights are read-only).
+//   A->B: the block's first phase-B state tile (2 float4/thread) and each warp's first ssm_out row (5 uint4) are
+//         requested before grid barrier 1 (state is not written in phase A; ssm_out weights are read-only).
+//   B: the next item's state tile is requested right after the current item's delta-rule loop (tiles are disjoint, so
+//      the S_in/S_out alias of the in-place row is safe). After the first item the first ssm_out row is staged into the
+//      warp's (phase-B-idle) stg buffer and the second row requested, so phase C starts with two rows in flight/staged.
+//   Every dot product, reduction and store is the same expression in the same order -> bit-identical results.
+template <int PHASE, int RQK = 0, int PCS = 0, int PF = 0>
 __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
     extern __shared__ float smem[];
     __shared__ float qn[SD], kn[SD], vv[CGC], red[NW], fac[NVH];
@@ -147,9 +155,16 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
     const int row = __ldg(P.s_copy);
     const float * conv_in = P.conv_base + (size_t)row * P.conv_stride;
     const float * S_in    = P.ssm_base  + (size_t)row * P.ssm_stride;
+    constexpr bool PFX = PF && PHASE == 0;
+    uint4 cpf[5];                 // PF: ssm_out row prefetch (first row before barrier 1, second after the first B item)
+    float4 stn[2];                // PF: next phase-B state tile
+    bool staged = false;          // PF: first ssm_out row is in stg, cpf holds the second
 
     if (PHASE == 0 || PHASE == 1) {
         // ---- phase A: xn = rmsnorm(h)*w (per block), then all K=2048 GEMV rows ----
+        uint4 c0, c1, c2;
+        int t = gw;
+        if (PFX && t < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, t); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
         float ss = 0.f;
         for (int i = threadIdx.x; i < H; i += NT) { float v = P.h[i]; xs[(i >> 6) * CH + (i & 63)] = v; ss += v * v; }
         ss = warp_sum(ss);
@@ -163,9 +178,7 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
         __syncthreads();
         block_sums(xs, sums, H);
         const float * xc = xs + lane * CH; const float2 sx = sums[lane];
-        uint4 c0, c1, c2;
-        int t = gw;
-        if (t < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, t); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
+        if (!PFX && t < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, t); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
         for (; t < NROWS_A; t += W) {
             stg4[lane] = c0; stg4[lane + 32] = c1; if (lane < 8) stg4[lane + 64] = c2;
             __syncwarp();
@@ -174,6 +187,21 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
             float a = warp_sum(dot2w(stg + lane * 9, xc, sx));
             if (lane == 0) { float * dst = t < NQKV ? &s->qkv[t] : t < NQKV + DI ? &s->z[t - NQKV] : &s->ab[t - NQKV - DI]; *dst = a; }
             __syncwarp();
+        }
+    }
+    if (PFX) {
+        // first ssm_out row of this warp and the first phase-B state tile of this block, before barrier 1
+        if (gw < H) { const uint4 * p = (const uint4 *)(L.out + (size_t)gw * ROW_O);
+#pragma unroll
+            for (int i = 0; i < 4; ++i) cpf[i] = __ldg(p + lane + 32 * i);
+            if (lane < 16) cpf[4] = __ldg(p + lane + 128); }
+        const int it0 = RQK ? (int)(((long long)blockIdx.x * (NVH * NCG)) / gridDim.x) : (int)blockIdx.x;
+        const int it1 = RQK ? (int)(((long long)(blockIdx.x + 1) * (NVH * NCG)) / gridDim.x) : NVH * NCG;
+        if (it0 < it1) {
+            const int hv = RQK ? it0 / (2 * NCG) + NKH * ((it0 / NCG) & 1) : it0 / NCG;
+            const int col0 = (it0 % NCG) * CGC + warp * 2;
+            const float4 * si = (const float4 *)(S_in + ((size_t)hv * SD + col0) * SD) + lane;
+            stn[0] = si[0]; stn[1] = si[SD / 4];
         }
     }
     if (PHASE == 0) grid_barrier(s);
@@ -231,7 +259,8 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
             const int col0 = cg * CGC + warp * 2;
             const float4 * si = (const float4 *)(S_in + ((size_t)hv * SD + col0) * SD) + lane;
             float4 * so = (float4 *)(P.S_out + ((size_t)hv * SD + col0) * SD) + lane;
-            float4 st[2] = { si[0], si[SD / 4] };
+            float4 st[2];
+            if (PFX) { st[0] = stn[0]; st[1] = stn[1]; } else { st[0] = si[0]; st[1] = si[SD / 4]; }
             float ssq = 0.f;
 #pragma unroll
             for (int j = 0; j < 2; ++j) {
@@ -245,11 +274,42 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
                 if (lane == 0) s->attn[hv * SD + col0 + j] = att;
                 ssq += att * att;
             }
+            if (PFX && it + it_st < it_hi) {   // next item's (disjoint) state tile
+                const int itn = it + it_st;
+                const int hvn = RQK ? itn / (2 * NCG) + NKH * ((itn / NCG) & 1) : itn / NCG;
+                const int coln = (itn % NCG) * CGC + warp * 2;
+                const float4 * sin_ = (const float4 *)(S_in + ((size_t)hvn * SD + coln) * SD) + lane;
+                stn[0] = sin_[0]; stn[1] = sin_[SD / 4];
+            }
             __syncthreads();   // everyone done with red/qn/kn/vv
             if (lane == 0) red[warp] = ssq;
             __syncthreads();
             if (threadIdx.x == 0) { float t = 0.f; for (int i = 0; i < NW; ++i) t += red[i]; s->ssq[hv * NCG + cg] = t; if (PCS) hc[hv]++; }
             __syncthreads();
+            if (PFX && !staged) {   // stage the first ssm_out row (stg is idle in phase B), request the second
+                staged = true;
+                if (gw < H) {
+#pragma unroll
+                    for (int i = 0; i < 4; ++i) stg4[lane + 32 * i] = cpf[i];
+                    if (lane < 16) stg4[lane + 128] = cpf[4];
+                    const int rn = gw + W;
+                    if (rn < H) { const uint4 * p = (const uint4 *)(L.out + (size_t)rn * ROW_O);
+#pragma unroll
+                        for (int i = 0; i < 4; ++i) cpf[i] = __ldg(p + lane + 32 * i);
+                        if (lane < 16) cpf[4] = __ldg(p + lane + 128); }
+                }
+            }
+        }
+        if (PFX && !staged && gw < H) {   // block without phase-B items
+            staged = true;
+#pragma unroll
+            for (int i = 0; i < 4; ++i) stg4[lane + 32 * i] = cpf[i];
+            if (lane < 16) stg4[lane + 128] = cpf[4];
+            const int rn = gw + W;
+            if (rn < H) { const uint4 * p = (const uint4 *)(L.out + (size_t)rn * ROW_O);
+#pragma unroll
+                for (int i = 0; i < 4; ++i) cpf[i] = __ldg(p + lane + 32 * i);
+                if (lane < 16) cpf[4] = __ldg(p + lane + 128); }
         }
         if (PCS) {
             // publish: every attn/ssq writer (lane 0 of each warp, incl. thread 0) fences once, then one add per touched head
@@ -307,11 +367,15 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
         }
         uint4 c[5];
         int r = gw;
-        if (r < H) { const uint4 * p = (const uint4 *)(L.out + (size_t)r * ROW_O);
+        if (PFX) {
+#pragma unroll
+            for (int i = 0; i < 5; ++i) c[i] = cpf[i];   // row gw is staged in stg, c = row gw + W (if any)
+        } else if (r < H) { const uint4 * p = (const uint4 *)(L.out + (size_t)r * ROW_O);
 #pragma unroll
             for (int i = 0; i < 4; ++i) c[i] = __ldg(p + lane + 32 * i);
             if (lane < 16) c[4] = __ldg(p + lane + 128); }
         for (; r < H; r += W) {
+            if (!(PFX && r == gw)) {
 #pragma unroll
             for (int i = 0; i < 4; ++i) stg4[lane + 32 * i] = c[i];
             if (lane < 16) stg4[lane + 128] = c[4];
@@ -321,6 +385,7 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
 #pragma unroll
                 for (int i = 0; i < 4; ++i) c[i] = __ldg(p + lane + 32 * i);
                 if (lane < 16) c[4] = __ldg(p + lane + 128); }
+            }
             float acc = dot2w(stg + lane * 9, xs + lane * CH, sums[lane]) + dot2w(stg + (lane + 32) * 9, xs + (lane + 32) * CH, sums[lane + 32]);
             acc = warp_sum(acc);
             if (lane == 0) P.out[r] = P.h[r] + acc;
@@ -343,6 +408,9 @@ static bool env_flag(const char * name) {
 static bool g_debug = env_flag("GGML_CUDA_OCCAMY_DEBUG");
 static bool qk_reuse() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_QKREUSE"); return on; }   // C10, default OFF
 static bool pc_share() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_PCSHARE"); return on; }   // C11, default OFF
+// GDN1, default OFF; engaged only with QKREUSE=1 PCSHARE=1 and the fused single launch (not GDN_3L)
+static bool pref() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_PREF") && qk_reuse() && pc_share() && !env_flag("GGML_CUDA_OCCAMY_GDN_3L"); return on; }
+static long g_launch_pf = 0;    // GDN1 dispatch counter
 static long g_launch_rqk = 0;   // C10 dispatch counter (launches of the reuse variant)
 static long g_launch_pcs = 0;   // C11 dispatch counter (launches of the shared phase-C variant)
 static long g_engaged = 0, g_rejected_gdn = 0;   // windows fused / GDN-layer windows rejected (DEBUG counter)
@@ -369,6 +437,11 @@ static DevState & dev_state(int device) {
             int per_sm_rp = 0;
             CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_rp, gdn_fused<0, 1, 1>, NT, SMEM2_FLOATS * sizeof(float)));
             per_sm = std::min(per_sm, per_sm_rp);
+            if (pref()) {
+                int per_sm_pf = 0;
+                CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_pf, gdn_fused<0, 1, 1, 1>, NT, SMEM2_FLOATS * sizeof(float)));
+                per_sm = std::min(per_sm, per_sm_pf);
+            }
         } else if (rqk) {
             int per_sm_r = 0;
             CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_r, gdn_fused<0, 1, 0>, NT, SMEM2_FLOATS * sizeof(float)));
@@ -381,8 +454,8 @@ static DevState & dev_state(int device) {
         const int nsm = ggml_cuda_info().devices[device].nsm;
         d.grid = std::max(1, per_sm) * nsm;   // all blocks co-resident -> grid barrier is safe
         if (g_debug) {
-            fprintf(stderr, "occamy-gdn: device %d: %d SMs x %d blocks/SM -> grid %d, smem %zu B, qk_reuse %d, pc_share %d\n",
-                    device, nsm, per_sm, d.grid, SMEM2_FLOATS * sizeof(float), (int) rqk, (int) pcs);
+            fprintf(stderr, "occamy-gdn: device %d: %d SMs x %d blocks/SM -> grid %d, smem %zu B, qk_reuse %d, pc_share %d, pref %d\n",
+                    device, nsm, per_sm, d.grid, SMEM2_FLOATS * sizeof(float), (int) rqk, (int) pcs, (int) pref());
         }
         if (per_sm < 1) { d.grid = -1; }
     }
@@ -715,7 +788,12 @@ void ggml_cuda_occamy_gdn_launch(ggml_backend_cuda_context & ctx, const ggml_cud
             gdn_fused<3, 0, 0><<<d.grid, NT, smem, st>>>(P);
         }
     } else {
-        if (rqk && pcs) {
+        if (rqk && pcs && pref()) {
+            gdn_fused<0, 1, 1, 1><<<d.grid, NT, smem, st>>>(P);
+            if (g_debug && (++g_launch_pf == 1 || g_launch_pf % 3000 == 0)) {
+                fprintf(stderr, "occamy-gdn: pref launches %ld\n", g_launch_pf);
+            }
+        } else if (rqk && pcs) {
             gdn_fused<0, 1, 1><<<d.grid, NT, smem, st>>>(P);
         } else if (rqk) {
             gdn_fused<0, 1, 0><<<d.grid, NT, smem, st>>>(P);
