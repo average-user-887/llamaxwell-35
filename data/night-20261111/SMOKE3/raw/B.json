@@ -1,0 +1,76 @@
+{
+ "a": {
+  "a1": {
+   "text": "\n\n<think>\nHere's a thinking process:\n\n1.  **Analyze User Input:**\n   - **Input Text:** A long list of seemingly unrelated sentences with various numbers (movement 887, hall 574, form 190, sheet 645, 311 sheep, pump 552, 406 containers, etc.).\n   - **Question:** \"Write a short summary of the above, listing three notable numbers.\"\n   - **Task:** Summarize the text briefly and pick three notable numbers from it.\n\n2.  **Identify Key Themes/Patterns in the Text:**\n   - The text is a collection of repetitive, structured sentences describing various activities:\n     - Orchestras rehearsing movements in halls until an oboe tuned.\n     - Clerks filing forms in triplicate and stamping each copy.\n     - Cartographers revising sheets after a river changed course",
+   "t": {
+    "prompt_n": 1724,
+    "prompt_tps": 241.69,
+    "predicted_n": 200,
+    "decode_tps": 46.26
+   },
+   "stop": "limit"
+  },
+  "a2": {
+   "text": "\n\n<think>\nHere's a thinking process:\n\n1.  **Analyze User Input:**\n   - **Input Text:** A long list of seemingly unrelated sentences. Each sentence follows a pattern: [Role/Entity] [Number] [Action/Event] [Number/Detail]. Examples: \"Engineer 249 reported that pump 25 lost pressure after the third inspection.\", \"Clerk 458 filed form 189 in triplicate and stamped each copy.\", \"In the valley, farmer 758 counted 668 sheep before the storm reached the ridge.\", etc.\n   - **Question:** \"Write a short summary of the above, listing three notable numbers.\"\n   - **Task:** Summarize the text briefly and pick out three notable numbers from it.\n\n2.  **Identify Key Characteristics of the Text:**\n   - It's a collection of discrete, formulaic statements.\n   - Each statement",
+   "t": {
+    "prompt_n": 2089,
+    "prompt_tps": 292.8,
+    "predicted_n": 200,
+    "decode_tps": 46.27
+   },
+   "stop": "limit"
+  }
+ },
+ "b": {
+  "text": "\n\n<think>\nHere's a thinking process:\n\n1.  **Analyze User Input:**\n   - **Input Text:** A long list of seemingly random, structured sentences. Each sentence follows a pattern like \"[Role] [Number] [action] [Object] [Number] [details]\". Examples: \"Clerk 172 filed form 648 in triplicate and stamped each copy.\", \"Cartographer 931 revised sheet 541 after the river changed its course.\", \"A courier carried parcel 491 through checkpoint 668 without further delay.\", etc.\n   - **Question:** \"Write a short summary of the above, listing three notable numbers.\"\n   - **Task:** Summarize the text briefly and extract/list three notable numbers from it.\n\n2.  **Identify Key Characteristics of the Text:**\n   - It's a collection of procedural/operational log entries.\n   - Roles:",
+  "t": {
+   "prompt_n": 18246,
+   "prompt_tps": 445.52,
+   "predicted_n": 200,
+   "decode_tps": 76.36
+  },
+  "stop": "limit"
+ },
+ "c1": {
+  "text": "\n\n<think>\nHere's a thinking process:\n\n1.  **Analyze User Input:**\n   - **Input Text:** A long list of seemingly unrelated sentences describing various activities (orchestra rehearsals, clerks filing forms, cartographers revising sheets, farmers counting sheep, engineers reporting pump pressure, harbor authority recording vessel arrivals, students solving exercises, couriers carrying parcels, stations logging temperature drifts, archive documents referencing ledgers).\n   - **Question:** \"Write a short summary of the above, listing three notable numbers.\"\n   - **Task:** Summarize the text briefly and extract/list three notable numbers from it.\n\n2.  **Identify Key Characteristics of the Text:**\n   - It's a collection of repetitive, structured sentences with random numbers assigned to various entities (movements, halls, forms, sheets, farmers, sheep, pumps, vessels, containers, students, exercises, parcels, checkpoints, stations, temperature drifts, documents, ledgers",
+  "t": {
+   "prompt_n": 1724,
+   "prompt_tps": 548.0,
+   "predicted_n": 200,
+   "decode_tps": 84.67
+  }
+ },
+ "c2": {
+  "c2b": {
+   "text": "\n\n<think>\nHere's a thinking process:\n\n1.  **Analyze User Input:**\n   - **Input Text:** A long list of seemingly unrelated sentences. Each sentence follows a pattern: [Role/Entity] [Number] [Action/Event] [Number/Detail].\n   - **Question:** \"Write a short summary of the above, listing three notable numbers.\"\n   - **Task:** Summarize the text briefly and highlight three notable numbers from it.\n\n2.  **Identify Key Characteristics of the Input:**\n   - The text is a collection of repetitive, structured statements.\n   - Each statement involves an entity (Engineer, Clerk, Farmer, Station, Harbor authority, Courier, Student, Cartographer, Archive, Orchestra) with an ID number, performing an action with another number.\n   - Examples: \"Engineer 249 reported that pump 25 lost pressure...\", \"Clerk 458 filed form",
+   "t": {
+    "prompt_n": 2089,
+    "prompt_tps": 315.36,
+    "predicted_n": 200,
+    "decode_tps": 46.69
+   }
+  },
+  "c2a": {
+   "text": "\n\n<think>\nHere's a thinking process:\n\n1.  **Analyze User Input:**\n   - **Input Text:** A long list of seemingly unrelated sentences with various numbers (movement 887, hall 574, form 190, sheet 645, 311 sheep, pump 552, 406 containers, movement 670, hall 757, form 162, form 852, sheet 61, 901 containers, document 615, ledger 31, movement 335, hall 452, form 201, sheet 656, parcel 512, checkpoint 5, 671 sheep, parcel 417, checkpoint 565, 261 sheep, 785 sheep, 111 sheep, 396,",
+   "t": {
+    "prompt_n": 1724,
+    "prompt_tps": 216.37,
+    "predicted_n": 200,
+    "decode_tps": 46.69
+   }
+  }
+ },
+ "c_aborted_after": [
+  20,
+  40
+ ],
+ "d": {
+  "text": "\n\n<think>\nHere's a thinking process:\n\n1.  **Analyze User Input:**\n   - The input is a paragraph containing many seemingly unrelated sentences with various numbers.\n   - The question asks for a \"short summary of the above, listing three notable numbers.\"\n   - I need to extract a short summary and pick three notable numbers from the text.\n\n2.  **Identify Key Elements in the Text:**\n   The text is a collection of disjointed statements, each containing numbers. Examples:\n   - farmer 320 counted 446 sheep\n   - document 806, ledger 457\n   - parcel 263, checkpoint 883\n   - Cartographer 98, sheet 763\n   - movement 189, hall 480\n   - Cartographer 132, sheet 940\n   - farmer 732 counted 373 sheep\n   - Engineer 418, pump 746\n   - movement 655, hall 518\n   - vessel 542, 115 containers\n   - Student 139, exercise 380\n   - vessel 902, 10 containers\n   - document 714, ledger 480\n   - Clerk 211, form 6",
+  "t": {
+   "prompt_n": 376,
+   "prompt_tps": 434.49,
+   "predicted_n": 300,
+   "decode_tps": 86.0
+  }
+ }
+}
