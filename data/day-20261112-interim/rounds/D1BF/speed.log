@@ -1,0 +1,22 @@
+lock 13:13:09
+OK
+sp_two_c1_A: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2077860704 decodes=104 STATE seq=1 bytes=1913357112 decodes=104 DONE pair_steps=96 pair_ms_mean=34.004 one_steps=0 one_ms_mean=0.000 rc=0 
+sp_two_c1_B: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2077860704 decodes=104 STATE seq=1 bytes=1913357112 decodes=104 DONE pair_steps=96 pair_ms_mean=32.744 one_steps=0 one_ms_mean=0.000 rc=0 
+sp_two_c1_B: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2077860704 decodes=104 STATE seq=1 bytes=1913357112 decodes=104 DONE pair_steps=96 pair_ms_mean=32.945 one_steps=0 one_ms_mean=0.000 rc=0 
+sp_two_c1_A: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2077860704 decodes=104 STATE seq=1 bytes=1913357112 decodes=104 DONE pair_steps=96 pair_ms_mean=33.967 one_steps=0 one_ms_mean=0.000 rc=0 
+sp_two_c2_A: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2077860704 decodes=104 STATE seq=1 bytes=1913357112 decodes=104 DONE pair_steps=96 pair_ms_mean=33.979 one_steps=0 one_ms_mean=0.000 rc=0 
+sp_two_c2_B: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2077860704 decodes=104 STATE seq=1 bytes=1913357112 decodes=104 DONE pair_steps=96 pair_ms_mean=32.855 one_steps=0 one_ms_mean=0.000 rc=0 
+sp_two_c2_B: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2077860704 decodes=104 STATE seq=1 bytes=1913357112 decodes=104 DONE pair_steps=96 pair_ms_mean=32.655 one_steps=0 one_ms_mean=0.000 rc=0 
+sp_two_c2_A: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2077860704 decodes=104 STATE seq=1 bytes=1913357112 decodes=104 DONE pair_steps=96 pair_ms_mean=33.806 one_steps=0 one_ms_mean=0.000 rc=0 
+sp_two_c3_A: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2077860704 decodes=104 STATE seq=1 bytes=1913357112 decodes=104 DONE pair_steps=96 pair_ms_mean=34.007 one_steps=0 one_ms_mean=0.000 rc=0 
+sp_two_c3_B: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2077860704 decodes=104 STATE seq=1 bytes=1913357112 decodes=104 DONE pair_steps=96 pair_ms_mean=32.913 one_steps=0 one_ms_mean=0.000 rc=0 
+sp_two_c3_B: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2077860704 decodes=104 STATE seq=1 bytes=1913357112 decodes=104 DONE pair_steps=96 pair_ms_mean=32.822 one_steps=0 one_ms_mean=0.000 rc=0 
+sp_two_c3_A: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2077860704 decodes=104 STATE seq=1 bytes=1913357112 decodes=104 DONE pair_steps=96 pair_ms_mean=33.965 one_steps=0 one_ms_mean=0.000 rc=0 
+== two (pair_ms_mean, ms/step, lower better)
+ cycle1 A=33.967 B=32.945 d=-3.01%
+ cycle2 A=33.806 B=32.655 d=-3.40%
+ cycle3 A=33.965 B=32.822 d=-3.37%
+ mean d=-3.26% 95%CI [-3.80,-2.72] (t, n=3 cycles)
+peak VRAM per run A [23820, 23820, 23820, 23820, 23820, 23820] B [23820, 23820, 23820, 23820, 23820, 23820]
+peak VRAM MiB 23820 margin 756 max W 234.34
+done 13:25:26

@@ -1,0 +1,108 @@
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.8.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+WARNING: The NVIDIA Driver was not detected.  GPU functionality will not be available.
+   Use the NVIDIA Container Toolkit to start this container with GPU support; see
+   https://docs.nvidia.com/datacenter/cloud-native/ .
+
+Cuda compilation tools, release 12.8, V12.8.93
+Build cuda_12.8.r12.8/compiler.35583870_0
+gcc-14 (Ubuntu 14.2.0-4ubuntu2~24.04.1) 14.2.0
+cmake version 3.28.3
+[  5%] Built target ggml-base
+[  5%] Building CUDA object ggml/src/ggml-cuda/CMakeFiles/ggml-cuda.dir/occamy-gdn.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+ptxas info    : 26792 bytes gmem, 88 bytes cmem[4]
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi2ELi0ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi2ELi0ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 1120 bytes smem, 496 bytes cmem[0]
+ptxas info    : Compile time = 9.274 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi2ELi0ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi2ELi0ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0]
+ptxas info    : Compile time = 10.161 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi3ELi0ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi3ELi0ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 128 bytes smem, 496 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 18.044 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi2ELi1ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi2ELi1ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 1120 bytes smem, 496 bytes cmem[0]
+ptxas info    : Compile time = 13.973 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi3ELi0ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi3ELi0ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 496 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 15.142 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi2ELi1ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi2ELi1ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0]
+ptxas info    : Compile time = 15.159 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi1ELi0ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi1ELi0ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 48 registers, used 1 barriers, 32 bytes smem, 496 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 12.222 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi1EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi1EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 62 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 53.258 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi0ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi0ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 42.694 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi1ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 1248 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 51.658 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi1ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi1ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 80 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 57.952 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 51.444 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi0ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi0ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 1248 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 43.327 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn7rp_packEPKjPj' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn7rp_packEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 6 registers, used 0 barriers, 336 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 1.197 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn10gdn_fused2ENS_7Params2E' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn10gdn_fused2ENS_7Params2E
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 80 registers, used 1 barriers, 1392 bytes smem, 672 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 114.354 ms
+/src/ggml/src/ggml-cuda/occamy-gdn.cu:1181: warning: ignoring '#pragma unroll ' [-Wunknown-pragmas]
+ 1181 |         for (int k = 0; k < 2; ++k) {
+[  5%] Linking CUDA shared module ../../../bin/libggml-cuda.so
+[100%] Built target ggml-cuda
+-rwxr-xr-x 1 ubuntu ubuntu 38042312 Nov 12 09:45 /b/bin/libggml-cuda.so
+07d3deea4dfc97df0536298360500fd2f3b703de24da3a2ec515b26ac2605a71  /b/bin/libggml-cuda.so

@@ -1,0 +1,36 @@
+waiting for D0 priority window until 11:30
+Terminated
+lock 09:10:09
+running before: {"running":[]}
+OK
+apps 0 16 MiB, 16.37 W
+deep rc=1
+    p=[statistics.mean([x['s0']['predicted_ms']/x['s0']['predicted_n'],x['s1']['predicted_ms']/x['s1']['predicted_n']]) for x in v]
+                        ~^^^^^^
+KeyError: 's0'
+G1 A DONE steps=64 values=15892480 nan=0 inf=0 ggml_cuda: occamy FA pipe mode 3 (blocks/SM 2, flag-off 2) rc=0 STATE step=2112 bytes=109169140 file=/o/g1-A.step2112.state STATE step=64 bytes=67176948 file=/o/g1-A.step64.state 
+G1 B DONE steps=64 values=15892480 nan=0 inf=0 ggml_cuda: occamy FA addr mode 1 (blocks/SM 2) ggml_cuda: occamy FA pipe mode 3 (blocks/SM 2, flag-off 2) rc=0 STATE step=2112 bytes=109169140 file=/o/g1-B.step2112.state STATE step=64 bytes=67176948 file=/o/g1-B.step64.state 
+g1-B.bin steps=64 compared=15892480 nan=0/0 inf=0/0 bit_mismatch=0 tol_mismatch=0 bitequal_units=64/64 max_abs=0 verdict=BITEQUAL
+state .step64.state: A=652476ce477f B=652476ce477f diffbytes=0
+state .step2112.state: A=5be5fc2d816d B=5be5fc2d816d diffbytes=0
+G1-PASS 226s
+DEEP A rc=3 
+DEEP B rc=3 
+Traceback (most recent call last):
+  File "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/tests/compare_report.py", line 68, in <module>
+    main()
+  File "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/tests/compare_report.py", line 61, in main
+    reps = [compare(a.files[0], f, a.nv, "logits", "step", a.atol, a.rtol) for f in a.files[1:]]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/tests/compare_report.py", line 25, in compare
+    r = load(ref_p, unit); a = load(arm_p, unit)
+        ^^^^^^^^^^^^^^^^^
+  File "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/tests/compare_report.py", line 20, in load
+    a = np.fromfile(p, dtype=np.uint32)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/dumps/gd-A.bin'
+sha256sum: /media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/dumps/gd-A.state: No such file or directory
+sha256sum: /media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/dumps/gd-B.state: No such file or directory
+cmp: /media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/D1ATT/dumps/gd-A.state: No such file or directory
+state .state: A= B= diffbytes=0
+DEEP-MISMATCH-STOP

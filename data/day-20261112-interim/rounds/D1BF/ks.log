@@ -1,0 +1,21 @@
+wait lock 10:46:25
+lock 10:49:20
+OK
+ks_dbg1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128196856 decodes=40 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=40 pair_ms_mean=40.640 rc=0 
+occamy-fused: MOE_TAILBAL launches 1
+occamy-fused: DOWNH=2 launches 1
+occamy-fused: MOE_TAILBAL launches 2
+occamy-fused: DOWNH=2 launches 2
+occamy-fused: MOE_TAILBAL launches 4
+occamy-fused: DOWNH=2 launches 4
+occamy-gdn: n2gdn variant 3 blocks/SM -> grid 72 (smem 27392 B dyn)
+occamy-gdn: n2gdn launches 1
+occamy-fused: MOE_TAILBAL launches 8
+occamy-fused: DOWNH=2 launches 8
+ks_p0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128196856 decodes=40 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=40 pair_ms_mean=40.194 rc=0 
+ks_p1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128196856 decodes=40 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=40 pair_ms_mean=39.083 rc=0 
+  logits rows=40 bitequal=True maxabs=0.000e+00 top1_same=1.000
+  seq0 state: BITEQUAL 128196856
+  logits rows=40 bitequal=True maxabs=0.000e+00 top1_same=1.000
+  seq1 state: BITEQUAL 128196856
+done 10:50:15

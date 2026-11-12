@@ -1,0 +1,35 @@
+lock 09:34:10
+e1v_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128196856 decodes=40 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=40 pair_ms_mean=39.604 rc=0 
+eav_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128032824 decodes=32 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=32 pair_ms_mean=44.732 rc=0 
+ecv_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=107364792 decodes=36 STATE seq=1 bytes=189626840 decodes=36 DONE pair_steps=36 pair_ms_mean=64.902 rc=0 
+edv_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128032824 decodes=32 STATE seq=1 bytes=1911880824 decodes=32 DONE pair_steps=32 pair_ms_mean=32.699 rc=0 
+e1v_pair0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128196856 decodes=40 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=40 pair_ms_mean=41.387 rc=0 
+eav_pair0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128032824 decodes=32 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=32 pair_ms_mean=46.722 rc=0 
+ecv_pair0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=107364792 decodes=36 STATE seq=1 bytes=189626840 decodes=36 DONE pair_steps=36 pair_ms_mean=66.923 rc=0 
+edv_pair0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128032824 decodes=32 STATE seq=1 bytes=1911880824 decodes=32 DONE pair_steps=32 pair_ms_mean=34.494 rc=0 
+e1_pair0b: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128196856 decodes=40 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=40 pair_ms_mean=41.476 rc=0 
+ea_pair0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128032824 decodes=32 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=32 pair_ms_mean=46.640 rc=0 
+ec_pair0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=107364792 decodes=36 STATE seq=1 bytes=189626840 decodes=36 DONE pair_steps=36 pair_ms_mean=66.819 rc=0 
+e1_pair1~e1v_pair1 s1: logits BITEQ state BITEQ
+ea_pair1~eav_pair1 s1: logits BITEQ state BITEQ
+ec_pair1~ecv_pair1 s1: logits BITEQ state BITEQ
+e1_pair0~e1v_pair0 s1: logits BITEQ state BITEQ
+ea_pair0~eav_pair0 s1: logits BITEQ state BITEQ
+ec_pair0~ecv_pair0 s1: logits BITEQ state BITEQ
+e1_pair0~e1_pair0b s0: logits BITEQ state BITEQ | run-to-run determinism
+== ea_pair0 vs ea_solo
+  logits rows=32 bitequal=False maxabs=4.256e+00 top1_same=1.000
+  seq0 state: DIFF 128032824
+  logits rows=40 bitequal=False maxabs=6.346e+00 top1_same=1.000
+  seq1 state: DIFF 128196856
+== ec_pair0 vs ec_solo
+  logits rows=36 bitequal=False maxabs=3.230e+00 top1_same=1.000
+  seq0 state: DIFF 107364792
+  logits rows=36 bitequal=False maxabs=3.616e+00 top1_same=0.944
+  seq1 state: DIFF 189626840
+== edv: seq1 (restored 90k) vs ed_pair (seq0 = 98k restore) per arm
+  logits rows=32 bitequal=False maxabs=5.549e+00 top1_same=1.000
+  seq1 state: DIFF 1911880824
+  logits rows=32 bitequal=False maxabs=4.059e+00 top1_same=1.000
+  seq1 state: DIFF 1911880824
+done 09:38:35

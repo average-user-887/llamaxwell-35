@@ -1,0 +1,40 @@
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 24463 MiB):
+  Device 0: Quadro M6000 24GB, compute capability 5.2, VMM: yes, VRAM: 24463 MiB
+load_backend: loaded CUDA backend from /app/libggml-cuda.so
+load_backend: loaded CPU backend from /app/libggml-cpu-haswell.so
+occamy-gdn: repack variant 3 blocks/SM -> grid 72 (smem 27392 B dyn)
+occamy-gdn: repacked ssm_out blk.0.ssm_out.weight (1/1073741824) 4718592 B, VRAM free 5374 -> 5370 MiB0
+occamy-gdn: repacked ssm_out blk.1.ssm_out.weight (2/1073741824) 4718592 B, VRAM free 5370 -> 5365 MiB0
+occamy-gdn: repacked ssm_out blk.2.ssm_out.weight (3/1073741824) 4718592 B, VRAM free 5365 -> 5361 MiB0
+ggml_cuda: occamy FA decode kernel mode 1
+ggml_cuda: occamy FA pipe mode 3 (blocks/SM 2, flag-off 2)
+occamy-gdn: repacked ssm_out blk.4.ssm_out.weight (4/1073741824) 4718592 B, VRAM free 5352 -> 5348 MiB0
+occamy-gdn: repacked ssm_out blk.5.ssm_out.weight (5/1073741824) 4718592 B, VRAM free 5348 -> 5343 MiB0
+occamy-gdn: repacked ssm_out blk.6.ssm_out.weight (6/1073741824) 4718592 B, VRAM free 5343 -> 5339 MiB0
+occamy-gdn: repacked ssm_out blk.8.ssm_out.weight (7/1073741824) 4718592 B, VRAM free 5339 -> 5334 MiB0
+occamy-gdn: repacked ssm_out blk.9.ssm_out.weight (8/1073741824) 4718592 B, VRAM free 5334 -> 5330 MiB0
+occamy-gdn: repacked ssm_out blk.10.ssm_out.weight (9/1073741824) 4718592 B, VRAM free 5330 -> 5325 MiB0
+occamy-gdn: repacked ssm_out blk.12.ssm_out.weight (10/1073741824) 4718592 B, VRAM free 5325 -> 5321 MiB0
+occamy-gdn: repacked ssm_out blk.13.ssm_out.weight (11/1073741824) 4718592 B, VRAM free 5321 -> 5316 MiB0
+occamy-gdn: repacked ssm_out blk.14.ssm_out.weight (12/1073741824) 4718592 B, VRAM free 5316 -> 5312 MiB0
+occamy-gdn: repacked ssm_out blk.16.ssm_out.weight (13/1073741824) 4718592 B, VRAM free 5312 -> 5307 MiB0
+occamy-gdn: repacked ssm_out blk.17.ssm_out.weight (14/1073741824) 4718592 B, VRAM free 5307 -> 5303 MiB0
+occamy-gdn: repacked ssm_out blk.18.ssm_out.weight (15/1073741824) 4718592 B, VRAM free 5303 -> 5298 MiB0
+occamy-gdn: repacked ssm_out blk.20.ssm_out.weight (16/1073741824) 4718592 B, VRAM free 5298 -> 5294 MiB0
+occamy-gdn: repacked ssm_out blk.21.ssm_out.weight (17/1073741824) 4718592 B, VRAM free 5294 -> 5289 MiB0
+occamy-gdn: repacked ssm_out blk.22.ssm_out.weight (18/1073741824) 4718592 B, VRAM free 5289 -> 5285 MiB0
+occamy-gdn: repacked ssm_out blk.24.ssm_out.weight (19/1073741824) 4718592 B, VRAM free 5285 -> 5280 MiB0
+occamy-gdn: repacked ssm_out blk.25.ssm_out.weight (20/1073741824) 4718592 B, VRAM free 5280 -> 5276 MiB0
+occamy-gdn: repacked ssm_out blk.26.ssm_out.weight (21/1073741824) 4718592 B, VRAM free 5276 -> 5271 MiB0
+occamy-gdn: repacked ssm_out blk.28.ssm_out.weight (22/1073741824) 4718592 B, VRAM free 5271 -> 5267 MiB0
+occamy-gdn: repacked ssm_out blk.29.ssm_out.weight (23/1073741824) 4718592 B, VRAM free 5267 -> 5262 MiB0
+occamy-gdn: repacked ssm_out blk.30.ssm_out.weight (24/1073741824) 4718592 B, VRAM free 5262 -> 5258 MiB0
+occamy-gdn: repacked ssm_out blk.32.ssm_out.weight (25/1073741824) 4718592 B, VRAM free 5258 -> 5253 MiB0
+occamy-gdn: repacked ssm_out blk.33.ssm_out.weight (26/1073741824) 4718592 B, VRAM free 5253 -> 5249 MiB0
+occamy-gdn: repacked ssm_out blk.34.ssm_out.weight (27/1073741824) 4718592 B, VRAM free 5249 -> 5244 MiB0
+occamy-gdn: repacked ssm_out blk.36.ssm_out.weight (28/1073741824) 4718592 B, VRAM free 5244 -> 5240 MiB0
+occamy-gdn: repacked ssm_out blk.37.ssm_out.weight (29/1073741824) 4718592 B, VRAM free 5240 -> 5235 MiB0
+occamy-gdn: repacked ssm_out blk.38.ssm_out.weight (30/1073741824) 4718592 B, VRAM free 5235 -> 5231 MiB0
+build_commit,build_number,cpu_info,gpu_info,backends,model_filename,model_type,model_size,model_n_params,n_batch,n_ubatch,n_threads,cpu_mask,cpu_strict,poll,type_k,type_v,n_gpu_layers,n_cpu_moe,split_mode,main_gpu,no_kv_offload,flash_attn,devices,tensor_split,tensor_buft_overrides,load_mode,lazy_mode,embeddings,no_op_offload,no_host,repack,fit_target,fit_min_ctx,n_prompt,n_gen,n_depth,test_time,avg_ns,stddev_ns,avg_ts,stddev_ts
+"unknown","0","AMD Ryzen 5 5600X 6-Core Processor","Quadro M6000 24GB","CUDA","/models/occamy-1.0-Q4_0-headq40b.gguf","qwen35moe 35B.A3B Q4_0","19572951552","34660610688","2048","512","6","0x0","0","50","f16","f16","999","0","layer","0","0","1","auto","0.00","none","auto","auto","0","0","0","1","0","0","0","512","0","2026-11-12T09:36:42Z","5817806834","9265179","88.005850","0.139905"
+ggml_cuda_hostgap: deferred=25610 flushes=2561

@@ -1,0 +1,11 @@
+lock 09:38:59
+edw_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2076466432 decodes=32 STATE seq=1 bytes=1911880824 decodes=32 DONE pair_steps=32 pair_ms_mean=34.375 rc=0 
+ebv_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=752 decodes=16 STATE seq=1 bytes=128032824 decodes=32 DONE pair_steps=16 pair_ms_mean=70.207 rc=0 
+edw_pair0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2076466432 decodes=32 STATE seq=1 bytes=1911880824 decodes=32 DONE pair_steps=32 pair_ms_mean=36.076 rc=0 
+ebv_pair0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=752 decodes=16 STATE seq=1 bytes=128032824 decodes=32 DONE pair_steps=16 pair_ms_mean=72.085 rc=0 
+eb_pair0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=752 decodes=16 STATE seq=1 bytes=128032824 decodes=32 DONE pair_steps=16 pair_ms_mean=71.406 rc=0 
+ed_pair1~edw_pair1 s1: logits DIFF maxabs 5.49 state DIFF
+eb_pair1~ebv_pair1 s1: logits BITEQ state BITEQ
+ed_pair0~edw_pair0 s1: logits DIFF maxabs 5.01 state DIFF
+eb_pair0~ebv_pair0 s1: logits BITEQ state BITEQ
+done 09:57:22

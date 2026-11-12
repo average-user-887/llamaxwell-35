@@ -1,0 +1,182 @@
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.8.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+WARNING: The NVIDIA Driver was not detected.  GPU functionality will not be available.
+   Use the NVIDIA Container Toolkit to start this container with GPU support; see
+   https://docs.nvidia.com/datacenter/cloud-native/ .
+
+Cuda compilation tools, release 12.8, V12.8.93
+Build cuda_12.8.r12.8/compiler.35583870_0
+gcc-14 (Ubuntu 14.2.0-4ubuntu2~24.04.1) 14.2.0
+cmake version 3.28.3
+CMAKE_BUILD_TYPE=Release
+-- llama.cpp version: 0.6.0-dev
+-- Warning: ccache not found - consider installing it for faster compilation or disable this warning with GGML_CCACHE=OFF
+-- CMAKE_SYSTEM_PROCESSOR: x86_64
+-- GGML_SYSTEM_ARCH: x86
+-- Including CPU backend
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-x64:  
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-sse42: -msse4.2 GGML_SSE42
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-sandybridge: -msse4.2;-mavx GGML_SSE42;GGML_AVX
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-ivybridge: -msse4.2;-mf16c;-mavx GGML_SSE42;GGML_F16C;GGML_AVX
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-piledriver: -msse4.2;-mf16c;-mfma;-mavx GGML_SSE42;GGML_F16C;GGML_FMA;GGML_AVX
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-haswell: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2 GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-skylakex: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-cannonlake: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw;-mavx512vbmi GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512;GGML_AVX512_VBMI
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-cascadelake: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw;-mavx512vnni GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512;GGML_AVX512_VNNI
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-icelake: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw;-mavx512vbmi;-mavx512vnni GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512;GGML_AVX512_VBMI;GGML_AVX512_VNNI
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-cooperlake: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw;-mavx512vnni;-mavx512bf16 GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512;GGML_AVX512_VNNI;GGML_AVX512_BF16
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-zen4: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw;-mavx512vbmi;-mavx512vnni;-mavx512bf16 GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512;GGML_AVX512_VBMI;GGML_AVX512_VNNI;GGML_AVX512_BF16
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-alderlake: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavxvnni GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX_VNNI
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu-sapphirerapids: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw;-mavx512vbmi;-mavx512vnni;-mavx512bf16;-mamx-tile;-mamx-int8 GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512;GGML_AVX512_VBMI;GGML_AVX512_VNNI;GGML_AVX512_BF16;GGML_AMX_TILE;GGML_AMX_INT8
+-- CUDA Toolkit found
+-- Using CMAKE_CUDA_ARCHITECTURES=52-real CMAKE_CUDA_ARCHITECTURES_NATIVE=No CUDA devices found.-real
+-- FlashAttention K-V type combinations: f16-f16;q4_0-q4_0;q8_0-q8_0;bf16-bf16
+-- CUDA host compiler is GNU 14.2.0
+-- Including CUDA backend
+-- ggml version: 0.26.0
+-- ggml commit:  2436f75
+-- OpenSSL found: 3.0.13
+-- Generating embedded license file for target: llama-app
+-- Configuring done (0.3s)
+-- Generating done (0.4s)
+-- Build files have been written to: /b
+[  0%] Building C object ggml/src/CMakeFiles/ggml-base.dir/ggml.c.o
+[  0%] Linking CXX shared library ../../bin/libggml-base.so
+[  5%] Built target ggml-base
+[  5%] Building CUDA object ggml/src/ggml-cuda/CMakeFiles/ggml-cuda.dir/occamy-gdn.cu.o
+[  5%] Building CUDA object ggml/src/ggml-cuda/CMakeFiles/ggml-cuda.dir/ggml-cuda.cu.o
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+/src/ggml/src/ggml-cuda/ggml-cuda.cu(4807): warning #550-D: variable "ps" was set but never used
+      int ps = -1, pm = -1;
+          ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+ptxas info    : 26792 bytes gmem, 88 bytes cmem[4]
+ptxas info    : Compiling entry function '_Z22k_compute_batched_ptrsPKvS0_PcPS0_PPvlllmmmmmmll' for 'sm_52'
+ptxas info    : Function properties for _Z22k_compute_batched_ptrsPKvS0_PcPS0_PPvlllmmmmmmll
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 26 registers, used 0 barriers, 448 bytes cmem[0]
+ptxas info    : Compile time = 39.784 ms
+ptxas info    : Compiling entry function '_Z19ggml_cuda_hg_gather19ggml_cuda_hg_params' for 'sm_52'
+ptxas info    : Function properties for _Z19ggml_cuda_hg_gather19ggml_cuda_hg_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 15 registers, used 0 barriers, 840 bytes cmem[0]
+ptxas info    : Compile time = 2.229 ms
+/src/ggml/src/ggml-cuda/ggml-cuda.cu: In function 'int ggml_cuda_try_fuse(ggml_backend_cuda_context*, ggml_cgraph*, int)':
+/src/ggml/src/ggml-cuda/ggml-cuda.cu:3890:34: warning: cast from type 'const float*' to type 'void*' casts away qualifiers [-Wcast-qual]
+ 3890 |                 CUDA_CHECK(cudaMemcpyAsync((void *) conv_src, snap_c.data(), NC * sizeof(float), cudaMemcpyHostToDevice, st));
+      |                                  ^~~~~~~~~~~~~~~~
+/src/ggml/src/ggml-cuda/ggml-cuda.cu:3891:34: warning: cast from type 'const float*' to type 'void*' casts away qualifiers [-Wcast-qual]
+ 3891 |                 CUDA_CHECK(cudaMemcpyAsync((void *) ssm_src,  snap_s.data(), NS * sizeof(float), cudaMemcpyHostToDevice, st));
+      |                                  ^~~~~~~~~~~~~~~
+ptxas info    : 26792 bytes gmem, 88 bytes cmem[4]
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi2ELi0ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi2ELi0ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 1120 bytes smem, 496 bytes cmem[0]
+ptxas info    : Compile time = 9.168 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi2ELi0ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi2ELi0ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0]
+ptxas info    : Compile time = 10.020 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi3ELi0ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi3ELi0ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 128 bytes smem, 496 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 17.454 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi2ELi1ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi2ELi1ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 1120 bytes smem, 496 bytes cmem[0]
+ptxas info    : Compile time = 13.570 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi3ELi0ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi3ELi0ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 496 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 15.438 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi2ELi1ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi2ELi1ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0]
+ptxas info    : Compile time = 15.110 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi1ELi0ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi1ELi0ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 48 registers, used 1 barriers, 32 bytes smem, 496 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 12.185 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi1EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi1EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 62 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 51.164 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi0ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi0ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 43.239 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi1ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 1248 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 51.405 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi1ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi1ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 80 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 55.902 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 50.612 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi0ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi0ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 1248 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 41.743 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn7rp_packEPKjPj' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn7rp_packEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 6 registers, used 0 barriers, 336 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 1.154 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn10gdn_fused2ENS_7Params2E' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn10gdn_fused2ENS_7Params2E
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 80 registers, used 1 barriers, 1392 bytes smem, 672 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 112.735 ms
+/src/ggml/src/ggml-cuda/occamy-gdn.cu:1181: warning: ignoring '#pragma unroll ' [-Wunknown-pragmas]
+ 1181 |         for (int k = 0; k < 2; ++k) {
+[  5%] Linking CUDA shared module ../../../bin/libggml-cuda.so
+[100%] Built target ggml-cuda
+-rwxr-xr-x 1 ubuntu ubuntu 38046656 Nov 12 12:26 /b/bin/libggml-cuda.so
+94c777dc55489fba4cab5b68c6b54cf8a45810b0a1011589260e5bd23cd05486  /b/bin/libggml-cuda.so

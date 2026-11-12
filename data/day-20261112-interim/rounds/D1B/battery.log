@@ -1,0 +1,57 @@
+lock 09:27:25
+OK
+e1_solo: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128196856 decodes=40 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=0 pair_ms_mean=0.000 rc=0 
+e1_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128196856 decodes=40 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=40 pair_ms_mean=39.523 rc=0 
+e1_pair0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128196856 decodes=40 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=40 pair_ms_mean=41.368 rc=0 
+ea_solo: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128032824 decodes=32 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=0 pair_ms_mean=0.000 rc=0 
+ea_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=128032824 decodes=32 STATE seq=1 bytes=128196856 decodes=40 DONE pair_steps=32 pair_ms_mean=44.892 rc=0 
+eb_solo: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=752 decodes=16 STATE seq=1 bytes=128032824 decodes=32 DONE pair_steps=0 pair_ms_mean=0.000 rc=0 
+eb_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=752 decodes=16 STATE seq=1 bytes=128032824 decodes=32 DONE pair_steps=16 pair_ms_mean=69.852 rc=0 
+ec_solo: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=107364792 decodes=36 STATE seq=1 bytes=189626840 decodes=36 DONE pair_steps=0 pair_ms_mean=0.000 rc=0 
+ec_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=107364792 decodes=36 STATE seq=1 bytes=189626840 decodes=36 DONE pair_steps=36 pair_ms_mean=65.164 rc=0 
+ef_solo: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=127786776 decodes=20 STATE seq=1 bytes=127786776 decodes=16 DONE pair_steps=0 pair_ms_mean=0.000 rc=0 
+ef_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=127786776 decodes=20 STATE seq=1 bytes=127786776 decodes=16 DONE pair_steps=16 pair_ms_mean=20.128 rc=0 
+ed_solo: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2076384416 decodes=32 STATE seq=1 bytes=1911880824 decodes=32 DONE pair_steps=0 pair_ms_mean=0.000 rc=0 
+ed_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2076384416 decodes=32 STATE seq=1 bytes=1911880824 decodes=32 DONE pair_steps=32 pair_ms_mean=37.149 rc=0 
+ed_pair0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2076384416 decodes=32 STATE seq=1 bytes=1911880824 decodes=32 DONE pair_steps=32 pair_ms_mean=37.848 rc=0 
+== e1_pair1 vs e1_solo
+  logits rows=40 bitequal=False maxabs=4.115e+00 top1_same=1.000
+  seq0 state: DIFF 128196856
+  logits rows=40 bitequal=False maxabs=3.444e+00 top1_same=1.000
+  seq1 state: DIFF 128196856
+== e1_pair0 vs e1_solo
+  logits rows=40 bitequal=False maxabs=4.256e+00 top1_same=1.000
+  seq0 state: DIFF 128196856
+  logits rows=40 bitequal=False maxabs=4.746e+00 top1_same=1.000
+  seq1 state: DIFF 128196856
+== ea_pair1 vs ea_solo
+  logits rows=32 bitequal=False maxabs=4.115e+00 top1_same=1.000
+  seq0 state: DIFF 128032824
+  logits rows=40 bitequal=False maxabs=6.147e+00 top1_same=1.000
+  seq1 state: DIFF 128196856
+== eb_pair1 vs eb_solo
+  logits rows=16 bitequal=False maxabs=4.115e+00 top1_same=1.000
+  seq0 state: BITEQUAL 752
+  logits rows=32 bitequal=False maxabs=6.933e+00 top1_same=1.000
+  seq1 state: DIFF 128032824
+== ec_pair1 vs ec_solo
+  logits rows=36 bitequal=False maxabs=3.100e+00 top1_same=0.972
+  seq0 state: DIFF 107364792
+  logits rows=36 bitequal=False maxabs=3.326e+00 top1_same=0.944
+  seq1 state: DIFF 189626840
+== ef_pair1 vs ef_solo
+  logits rows=20 bitequal=False maxabs=3.226e+00 top1_same=1.000
+  seq0 state: DIFF 127786776
+  logits rows=16 bitequal=False maxabs=3.226e+00 top1_same=1.000
+  seq1 state: DIFF 127786776
+== ed_pair1 vs ed_solo
+  logits rows=32 bitequal=False maxabs=2.094e+00 top1_same=0.969
+  seq0 state: DIFF 2076384416
+  logits rows=32 bitequal=False maxabs=4.271e+00 top1_same=1.000
+  seq1 state: DIFF 1911880824
+== ed_pair0 vs ed_solo
+  logits rows=32 bitequal=False maxabs=2.651e+00 top1_same=0.938
+  seq0 state: DIFF 2076384416
+  logits rows=32 bitequal=False maxabs=3.389e+00 top1_same=1.000
+  seq1 state: DIFF 1911880824
+done 09:33:17

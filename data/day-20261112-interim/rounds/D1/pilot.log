@@ -1,0 +1,45 @@
+lock 13:12:04
+Thu Nov 12 01:12:04 PM CET 2026
+{"running":[]}
+
+memory.used [MiB], power.limit [W], clocks.current.sm [MHz], temperature.gpu
+16 MiB, 250.00 W, 324 MHz, 50
+pid, used_gpu_memory [MiB]
+base1 rc=0
+occamy-gdn: repack variant 3 blocks/SM -> grid 72 (smem 27392 B dyn)
+| qwen35moe 35B.A3B Q4_0         |  18.23 GiB |    34.66 B | CUDA       | 999 |    4096 |     4096 |   1 |            tg32 |         85.30 ± 0.00 |
+a72 rc=0
+occamy-gdn: repack variant 3 blocks/SM -> grid 72 (smem 27392 B dyn)
+occamy-gdn: arepack variant 56 regs, 1392 B static smem, 4 blocks/SM -> grid 72 (smem 18176 B dyn)
+occamy-gdn: arepacked ssm_in blk.0.attn_qkv.weight (1/1) 14229504 B, VRAM free 5835 -> 5822 MiB, words checked 3557376, mismatches 0
+occamy-gdn: arepack launches 1
+| qwen35moe 35B.A3B Q4_0         |  18.23 GiB |    34.66 B | CUDA       | 999 |    4096 |     4096 |   1 |            tg32 |         85.54 ± 0.00 |
+a96 rc=0
+occamy-gdn: repack variant 3 blocks/SM -> grid 72 (smem 27392 B dyn)
+occamy-gdn: arepack variant 56 regs, 1392 B static smem, 4 blocks/SM -> grid 96 (smem 18176 B dyn)
+occamy-gdn: arepacked ssm_in blk.0.attn_qkv.weight (1/1) 14229504 B, VRAM free 5835 -> 5822 MiB, words checked 3557376, mismatches 0
+occamy-gdn: arepack launches 1
+| qwen35moe 35B.A3B Q4_0         |  18.23 GiB |    34.66 B | CUDA       | 999 |    4096 |     4096 |   1 |            tg32 |         85.74 ± 0.00 |
+base2 rc=0
+occamy-gdn: repack variant 3 blocks/SM -> grid 72 (smem 27392 B dyn)
+| qwen35moe 35B.A3B Q4_0         |  18.23 GiB |    34.66 B | CUDA       | 999 |    4096 |     4096 |   1 |            tg32 |         85.10 ± 0.00 |
+a72b rc=0
+occamy-gdn: repack variant 3 blocks/SM -> grid 72 (smem 27392 B dyn)
+occamy-gdn: arepack variant 56 regs, 1392 B static smem, 4 blocks/SM -> grid 72 (smem 18176 B dyn)
+occamy-gdn: arepacked ssm_in blk.0.attn_qkv.weight (1/1) 14229504 B, VRAM free 5835 -> 5822 MiB, words checked 3557376, mismatches 0
+occamy-gdn: arepack launches 1
+| qwen35moe 35B.A3B Q4_0         |  18.23 GiB |    34.66 B | CUDA       | 999 |    4096 |     4096 |   1 |            tg32 |         85.39 ± 0.00 |
+a96b rc=0
+occamy-gdn: repack variant 3 blocks/SM -> grid 72 (smem 27392 B dyn)
+occamy-gdn: arepack variant 56 regs, 1392 B static smem, 4 blocks/SM -> grid 96 (smem 18176 B dyn)
+occamy-gdn: arepacked ssm_in blk.0.attn_qkv.weight (1/1) 14229504 B, VRAM free 5835 -> 5822 MiB, words checked 3557376, mismatches 0
+occamy-gdn: arepack launches 1
+| qwen35moe 35B.A3B Q4_0         |  18.23 GiB |    34.66 B | CUDA       | 999 |    4096 |     4096 |   1 |            tg32 |         85.80 ± 0.00 |
+Xid before 0 after 0
+a72b.csv tokens 31 L0 us median 156.71 mean 148.24 p25 120.77 | gdn sum/tok median 3674.1 | rest29 median 3519.2 | period ms median 11.7050 mean 11.7067 | {'occamy_gdn::gdn_fused<int=0, int=1, int=1, int=0, int=2> grid=72'}
+a72.csv tokens 31 L0 us median 120.23 mean 145.92 p25 119.20 | gdn sum/tok median 3622.8 | rest29 median 3503.2 | period ms median 11.6940 mean 11.6855 | {'occamy_gdn::gdn_fused<int=0, int=1, int=1, int=0, int=2> grid=72'}
+a96b.csv tokens 31 L0 us median 123.62 mean 144.73 p25 121.67 | gdn sum/tok median 3635.1 | rest29 median 3509.9 | period ms median 11.6440 mean 11.6491 | {'occamy_gdn::gdn_fused<int=0, int=1, int=1, int=0, int=2> grid=96'}
+a96.csv tokens 31 L0 us median 123.68 mean 145.67 p25 121.60 | gdn sum/tok median 3634.9 | rest29 median 3513.3 | period ms median 11.6640 mean 11.6586 | {'occamy_gdn::gdn_fused<int=0, int=1, int=1, int=0, int=2> grid=96'}
+base1.csv tokens 31 L0 us median 197.22 mean 164.51 p25 123.23 | gdn sum/tok median 3739.2 | rest29 median 3546.7 | period ms median 11.7490 mean 11.7175 | {'occamy_gdn::gdn_fused<int=0, int=1, int=1, int=0, int=1> grid=72'}
+base2.csv tokens 31 L0 us median 175.43 mean 162.43 p25 123.04 | gdn sum/tok median 3744.7 | rest29 median 3559.4 | period ms median 11.7570 mean 11.7446 | {'occamy_gdn::gdn_fused<int=0, int=1, int=1, int=0, int=1> grid=72'}
+Thu Nov 12 01:13:09 PM CET 2026

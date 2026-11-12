@@ -1,0 +1,6 @@
+lock 10:25:41
+edx_pair1: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2076384416 decodes=32 STATE seq=1 bytes=1911880824 decodes=32 DONE pair_steps=32 pair_ms_mean=37.936 rc=0 
+edx_pair0: defaults n_ctx=512 n_batch=2048 n_ubatch=512 n_seq_max=1 kv_unified=0 STATE seq=0 bytes=2076384416 decodes=32 STATE seq=1 bytes=1911880824 decodes=32 DONE pair_steps=32 pair_ms_mean=38.195 rc=0 
+ed_pair1~edx_pair1 s1: logits BITEQ state BITEQ
+ed_pair0~edx_pair0 s1: logits BITEQ state BITEQ
+done 10:27:01

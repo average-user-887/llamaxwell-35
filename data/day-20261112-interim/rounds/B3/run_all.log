@@ -1,0 +1,48 @@
+lock 13:28:31
+OK
+apps 0 16 MiB
+G1 A DONE steps=64 values=15892480 nan=0 inf=0 ggml_cuda: occamy FA pipe mode 3 (blocks/SM 2, flag-off 2) rc=0 STATE step=2112 bytes=109169140 file=/o/g1-A.step2112.state STATE step=64 bytes=67176948 file=/o/g1-A.step64.state 
+G1 B DONE steps=64 values=15892480 nan=0 inf=0 ggml_cuda: occamy FA addr mode 1 (blocks/SM 2) ggml_cuda: occamy FA pipe mode 3 (blocks/SM 2, flag-off 2) rc=0 STATE step=2112 bytes=109169140 file=/o/g1-B.step2112.state STATE step=64 bytes=67176948 file=/o/g1-B.step64.state 
+g1-B.bin steps=64 compared=15892480 nan=0/0 inf=0/0 bit_mismatch=0 tol_mismatch=0 bitequal_units=64/64 max_abs=0 verdict=BITEQUAL
+state .step64.state: A=652476ce477f B=652476ce477f diffbytes=0
+state .step2112.state: A=5be5fc2d816d B=5be5fc2d816d diffbytes=0
+G1-PASS 75s 13:29:46
+deep rc=0 13:33:02
+{"wall": 2.574740171432495, "s1": {"prompt_n": 1, "prompt_ms": 67.942, "predicted_n": 64, "predicted_ms": 2433.458, "predicted_per_second": 25.889084586625284}, "s0": {"prompt_n": 5, "prompt_ms": 211.014, "predicted_n": 64, "predicted_ms": 2263.94, "predicted_per_second": 27.827592604044277}, "arm": "A", "pos": 3, "rep": 2, "warm": false}
+{"wall": 2.581160545349121, "s1": {"prompt_n": 1, "prompt_ms": 70.97, "predicted_n": 64, "predicted_ms": 2438.418, "predicted_per_second": 25.836423451598534}, "s0": {"prompt_n": 5, "prompt_ms": 215.914, "predicted_n": 64, "predicted_ms": 2264.872, "predicted_per_second": 27.816141486141383}, "arm": "A", "pos": 3, "rep": 3, "warm": false}
+{"wall": 2.5711140632629395, "s0": {"prompt_n": 5, "prompt_ms": 240.464, "predicted_n": 64, "predicted_ms": 2297.735, "predicted_per_second": 27.418305418161797}, "s1": {"prompt_n": 1, "prompt_ms": 137.509, "predicted_n": 64, "predicted_ms": 2299.591, "predicted_per_second": 27.39617610261999}, "arm": "A", "pos": 3, "rep": 4, "warm": false}
+A s0 n 8 ms/tok mean 35.612 sd 0.235 t/s 27.643
+A s1 n 8 ms/tok mean 36.965 sd 1.091 t/s 26.653
+A per-slot period ms 36.289 -> 2-token step ms 72.577 agg t/s 54.30
+B s0 n 8 ms/tok mean 32.173 sd 0.195 t/s 30.597
+B s1 n 8 ms/tok mean 33.887 sd 0.927 t/s 29.071
+B per-slot period ms 33.030 -> 2-token step ms 66.060 agg t/s 59.67
+DELTA s0 ms/tok B vs A -9.66% +-0.64 (95% z-CI)
+DELTA s1 ms/tok B vs A -8.33% +-2.87 (95% z-CI)
+DELTA period B vs A -8.98% +-1.21
+deep1 rc=0 13:34:18
+{"wall": 1.4030561447143555, "s0": {"prompt_n": 5, "prompt_ms": 158.037, "predicted_n": 64, "predicted_ms": 1216.106, "predicted_per_second": 51.80469465655132}, "arm": "A", "pos": 3, "rep": 3, "warm": false}
+{"wall": 1.4023118019104004, "s0": {"prompt_n": 5, "prompt_ms": 157.96, "predicted_n": 64, "predicted_ms": 1215.173, "predicted_per_second": 51.84446988206617}, "arm": "A", "pos": 3, "rep": 4, "warm": false}
+A s0 n 8 ms/tok mean 18.989 sd 0.012 t/s 51.839
+A per-slot period ms 18.989 -> 2-token step ms 37.978 agg t/s 51.84
+B s0 n 8 ms/tok mean 18.799 sd 0.024 t/s 52.362
+B per-slot period ms 18.799 -> 2-token step ms 37.599 agg t/s 52.36
+DELTA s0 ms/tok B vs A -1.00% +-0.10 (95% z-CI)
+DELTA period B vs A -1.00% +-0.10
+smoke B rc=0 13:35:35
+ntoks 788960
+a PASS [(200, 29.39, '                    || t.first == "<|end_of_text|>" // grani'), (200, 30.26, '</think>\n\n```\n#include "llama-impl.h"\n#include "llama-model.')]
+b PASS [(200, 1, 3.27, '                    || t.first == "<|end_of_text|>" // grani'), (200, 16384, 58.95, '1, 2, 2, 3, 4 };\n\n    uint8_t  first = (uint8_t) *src;\n    u')]
+c PASS [200, 8, 200, '                string> & tokens) {\n            for (const a']
+d PASS [200, "Here's a thinking process:\n\n1.  **Analyze User Input:**\n   - **Task:** Name thre"]
+e PASS [200, 6, 200, '                    || t.first == "<|end_of_text|>" // grani']
+smoke A rc=0 13:36:17
+ntoks 788960
+a PASS [(200, 26.63, '                    || t.first == "<|end_of_text|>" // grani'), (200, 27.57, "</think>\n\nThis is the **GGML** (Gehring's Generic Model Libr")]
+run rc=0
+finished b3 warm_decode
+1 88.199 88.108 -0.104
+2 88.041 88.058 0.019
+3 88.123 88.337 0.243
+{'schema_version': 'c02.1', 'mode': 'warm_decode', 'arms': ['A', 'B'], 'min_cycles': 5, 'n_trials_total': 14, 'n_valid': 14, 'n_invalid': 0, 'n_warmup': 2, 'excluded_cycles': [], 'delta': {'n': 3, 'mean': 0.04677350000000047, 'median': 0.017058999999989055, 'stdev': 0.1550777558283314, 'ci95': [-0.3384920940653018, 0.4320390940653027], 'ci95_halfwidth': 0.38526559406530225}, 'delta_pct': {'n': 3, 'mean': 0.053113428951071885, 'median': 0.019376105750756878, 'stdev': 0.17593739282625406, 'ci95': [-0.3839745583199169, 0.4902014162220607], 'ci95_halfwidth': 0.4370879872709888}, 'min_detectable_delta_95': 0.38526559406530225, 'verdict': 'INSUFFICIENT_CYCLES', 'identity_invalid_trials': [], 'invalid_trials': [], 'all_trials': [{'trial_id': 'b3-warm_decode-c00-p0-A-d84d2b50', 'mode': 'warm_decode', 'cycle': 0, 'position': 0, 'arm': 'A', 'warmup': True, 'rc': 0, 'value': 88.288604, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c00-p0-A-d84d2b50.log'}, {'trial_id': 'b3-warm_decode-c00-p1-B-7446c8ec', 'mode': 'warm_decode', 'cycle': 0, 'position': 1, 'arm': 'B', 'warmup': True, 'rc': 0, 'value': 88.358049, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c00-p1-B-7446c8ec.log'}, {'trial_id': 'b3-warm_decode-c01-p0-A-2a650804', 'mode': 'warm_decode', 'cycle': 1, 'position': 0, 'arm': 'A', 'warmup': False, 'rc': 0, 'value': 88.324914, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c01-p0-A-2a650804.log'}, {'trial_id': 'b3-warm_decode-c01-p1-B-b52a3cf2', 'mode': 'warm_decode', 'cycle': 1, 'position': 1, 'arm': 'B', 'warmup': False, 'rc': 0, 'value': 88.102046, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c01-p1-B-b52a3cf2.log'}, {'trial_id': 'b3-warm_decode-c01-p2-B-7417ae4c', 'mode': 'warm_decode', 'cycle': 1, 'position': 2, 'arm': 'B', 'warmup': False, 'rc': 0, 'value': 88.113684, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c01-p2-B-7417ae4c.log'}, {'trial_id': 'b3-warm_decode-c01-p3-A-d90d41bb', 'mode': 'warm_decode', 'cycle': 1, 'position': 3, 'arm': 'A', 'warmup': False, 'rc': 0, 'value': 88.07341, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c01-p3-A-d90d41bb.log'}, {'trial_id': 'b3-warm_decode-c02-p0-A-857cbeb7', 'mode': 'warm_decode', 'cycle': 2, 'position': 0, 'arm': 'A', 'warmup': False, 'rc': 0, 'value': 88.017246, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c02-p0-A-857cbeb7.log'}, {'trial_id': 'b3-warm_decode-c02-p1-B-06285cd9', 'mode': 'warm_decode', 'cycle': 2, 'position': 1, 'arm': 'B', 'warmup': False, 'rc': 0, 'value': 88.099066, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c02-p1-B-06285cd9.log'}, {'trial_id': 'b3-warm_decode-c02-p2-B-4176214b', 'mode': 'warm_decode', 'cycle': 2, 'position': 2, 'arm': 'B', 'warmup': False, 'rc': 0, 'value': 88.017906, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c02-p2-B-4176214b.log'}, {'trial_id': 'b3-warm_decode-c02-p3-A-8b2a2a2c', 'mode': 'warm_decode', 'cycle': 2, 'position': 3, 'arm': 'A', 'warmup': False, 'rc': 0, 'value': 88.065608, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c02-p3-A-8b2a2a2c.log'}, {'trial_id': 'b3-warm_decode-c03-p0-A-7eed8497', 'mode': 'warm_decode', 'cycle': 3, 'position': 0, 'arm': 'A', 'warmup': False, 'rc': 0, 'value': 88.024976, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c03-p0-A-7eed8497.log'}, {'trial_id': 'b3-warm_decode-c03-p1-B-8687af3b', 'mode': 'warm_decode', 'cycle': 3, 'position': 1, 'arm': 'B', 'warmup': False, 'rc': 0, 'value': 88.376259, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c03-p1-B-8687af3b.log'}, {'trial_id': 'b3-warm_decode-c03-p2-B-fbaa9b4b', 'mode': 'warm_decode', 'cycle': 3, 'position': 2, 'arm': 'B', 'warmup': False, 'rc': 0, 'value': 88.298613, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c03-p2-B-fbaa9b4b.log'}, {'trial_id': 'b3-warm_decode-c03-p3-A-eab0dcd0', 'mode': 'warm_decode', 'cycle': 3, 'position': 3, 'arm': 'A', 'warmup': False, 'rc': 0, 'value': 88.220779, 'status': 'VALID', 'log_path': '/media/avg-usr/Storage/m6000-llama-cpp/occamy35-day-20261112/rounds/B3/g4-b3/b3-warm_decode-c03-p3-A-eab0dcd0.log'}]}
+ALL DONE 13:44:28 957s
