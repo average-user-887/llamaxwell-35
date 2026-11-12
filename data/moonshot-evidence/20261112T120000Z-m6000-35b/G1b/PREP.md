@@ -1,0 +1,11 @@
+# G1b PREP (CPU only, no GPU used)
+- Ancestry: 4041db9 is on Codex branch (publication-repo), NOT directly on 2436f75: b890d79 (CUDA packed-GQA prototype) sits between. 4041db9 itself is server-only (+37/-1: common/arg.cpp, common.h, tests/test-arg-parser.cpp, tools/server/server-context.cpp).
+- Cap patch: `--mixed-batch-size N` (default 0 = off); caps prompt tokens added to batches that already hold generation tokens. No CUDA/numerics change; only batch composition.
+- Clean cherry-pick onto 2436f75 -> 57076feb7eb3 in G/src (own clone; gh-pub untouched). diff vs 2436f75 = those 4 files.
+- Build: container build-g1b (removed, rc=0), sm_52, same flags as E5. test-arg-parser: all OK; --help shows flag. Hashes: G/SHA256SUMS (llama-server 83c511d9..., 32 files).
+- libggml-cuda.so from build (6d291452...) is NOT byte-identical to prod BUNDLE3 (94c777dc...); launcher overlays the prod lib on /candidate, so only llama-server/libllama* are new.
+- 510/512: server withholds text of tokens ending mid-UTF-8 (server-context.cpp ~1983, send block skipped); bytes merge into the next event but only that token's ID is emitted (~2199); final stream chunk has tokens=[] (~2240). Matches events 79/81 (3-byte chars) in cap1024 logs; content-dependent, cap doesn't touch process_token. Stop-string holdback loses no IDs.
+- Receipt: authoritative count = final tokens_predicted/predicted_n; streamed IDs are a lower bound, gap must be <= non-ASCII events; identity by content sha + stream:false exact-ID pass per arm.
+- Files: launch-arm.sh (arm container g1b-*, prod args, cache-ram 0, GGML env checks), g1b_run.py (driver, own code), run-g1b.sh (flock, unload POST, compute-apps check, telemetry, cleanup), RUN.md (spec). g1b_run.py/run-g1b.sh only compile-checked, never run: use --smoke first.
+- Schedule: ABBA,BAAB,ABBA,BAAB,ABBA, 20 units, ~13 server launches, workloads a (Codex 90K restore + 4096 append) and b (e3 deep + 16K). Est ~70 GPU minutes.
+- Risks: greedy text varies between repeats; baseline gap differs from Codex GEMM-on numbers (G1b has no GEMM); driver untested; build libggml-cuda differs from prod (overlaid).

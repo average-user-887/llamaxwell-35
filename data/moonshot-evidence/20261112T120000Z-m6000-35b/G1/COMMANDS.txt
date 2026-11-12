@@ -1,0 +1,1 @@
+run_all.sh (env G1_GPU, G1_UNLOAD_URL=<lab-endpoint>) under flock on gpu-bench.lock; arms C,A,B,Ap,A2,B2 via g1_harness.py; analysis: python3 -I g1_analyze.py <OUT>. rc per step in steps.log.
