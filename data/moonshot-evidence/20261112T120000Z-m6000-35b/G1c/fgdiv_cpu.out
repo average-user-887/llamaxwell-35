@@ -1,0 +1,29 @@
+group,n,distinct_streams,len
+('a', False, 'A') 10 1 [32]
+('a', False, 'B') 10 1 [32]
+('a', True, 'A') 1 1 [32]
+('a', True, 'B') 1 1 [32]
+('b', False, 'A') 10 8 [32]
+('b', False, 'B') 10 8 [32]
+('b', True, 'A') 1 1 [32]
+('b', True, 'B') 1 1 [32]
+
+within-arm repeat first-divergence (same workload; for kind b the u-segment differs per unit so only kind a / identity are comparable)
+('a', False, 'A') [None, None, None, None, None, None, None, None, None]
+('a', False, 'B') [None, None, None, None, None, None, None, None, None]
+('a', True, 'A') []
+('a', True, 'B') []
+('b', True, 'A') []
+('b', True, 'B') []
+
+cap0 vs cap1024 first divergent fg token index
+a timed distinct first-div over all A x B pairs: [None]
+a identity distinct first-div over all A x B pairs: [26]
+b timed matched-by-segment {}
+b identity distinct first-div over all A x B pairs: [0]
+
+workload a: identity pass (stream:false, arrival fixed 4 s) vs timed pass (arrival after 8 bg tokens), same arm
+arm A identity-vs-timed first-div None
+arm B identity-vs-timed first-div 26
+
+NOTE workload b: u-segment = (cycle*4+pos)%16 and arms never share a segment in ABBA/BAAB order (A:0,3,5,6,8,11,13,14 B:1,2,4,7,9,10,12,15), so cap0-vs-cap1024 greedy divergence for b is NOT measured (prompts differ). Within-arm repeats of a segment (cycle 4 == cycle 0) are identical.
