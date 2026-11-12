@@ -15,9 +15,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <map>
 #include <mutex>
 #include <set>
 #include <string>
+#include <vector>
 
 namespace occamy_gdn {
 
@@ -85,8 +87,8 @@ __device__ __forceinline__ float nib(unsigned v, int k) {
     return __int_as_float(__byte_perm(v, 0x3F000000u, 0x7044u | (k << 8)));
 }
 // dot of 2 consecutive Q4_0 blocks staged as 9 smem words (lane stride 9) with a 64-float smem chunk and its block sums
-__device__ __forceinline__ float dot2w(const unsigned * w, const float * xc, float2 sx) {
-    unsigned w0 = w[0], w1 = w[1], w2 = w[2], w3 = w[3], w4 = w[4], w5 = w[5], w6 = w[6], w7 = w[7], w8 = w[8];
+__device__ __forceinline__ float dot2v(unsigned w0, unsigned w1, unsigned w2, unsigned w3, unsigned w4, unsigned w5, unsigned w6,
+                                       unsigned w7, unsigned w8, const float * xc, float2 sx) {
     float d0 = __half2float(__ushort_as_half((unsigned short)(w0 & 0xFFFF)));
     float d1 = __half2float(__ushort_as_half((unsigned short)(w4 >> 16)));
     unsigned q0[4] = { __byte_perm(w0, w1, 0x5432), __byte_perm(w1, w2, 0x5432), __byte_perm(w2, w3, 0x5432), __byte_perm(w3, w4, 0x5432) };
@@ -105,6 +107,23 @@ __device__ __forceinline__ float dot2w(const unsigned * w, const float * xc, flo
     }
     return d0 * (128.f * a0 - 136.f * sx.x) + d1 * (128.f * a1 - 136.f * sx.y);
 }
+__device__ __forceinline__ float dot2w(const unsigned * w, const float * xc, float2 sx) {
+    return dot2v(w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], xc, sx);
+}
+// GDN3 card B (REPACK): ssm_out row packed as a lossless 32-bit word permutation (576 words/row, same bytes).
+// Lane l needs words 9l..9l+8 (chunk l) and 288+9l..+8 (chunk l+32) = local word j (0..17).
+// Packed word q: q < 512 -> [g = q/128][lane][j%4] with j = 4g + q%4; q >= 512 -> [lane][2] with j = 16 + q%2.
+__host__ __device__ __forceinline__ int rp_src(int q) {
+    int lane, j;
+    if (q < 512) { lane = (q & 127) >> 2; j = (q >> 7) * 4 + (q & 3); } else { lane = (q - 512) >> 1; j = 16 + (q & 1); }
+    return j < 9 ? lane * 9 + j : 288 + lane * 9 + (j - 9);
+}
+__device__ __forceinline__ void ldrp(const uint8_t * base, int r, int lane, unsigned (&w)[18]) {
+    const uint4 * p = (const uint4 *)(base + (size_t)r * (DI / 32 * QB));
+#pragma unroll
+    for (int g = 0; g < 4; ++g) { const uint4 v = __ldg(p + 32 * g + lane); w[4 * g] = v.x; w[4 * g + 1] = v.y; w[4 * g + 2] = v.z; w[4 * g + 3] = v.w; }
+    const uint2 t = __ldg((const uint2 *)(p + 128) + lane); w[16] = t.x; w[17] = t.y;
+}
 __device__ __forceinline__ const uint8_t * rowA(const Layer & L, int t) {
     return t < NQKV ? L.qkv + (size_t)t * ROW_H : t < NQKV + DI ? L.gate + (size_t)(t - NQKV) * ROW_H
          : t < NQKV + DI + NVH ? L.alpha + (size_t)(t - NQKV - DI) * ROW_H : L.beta + (size_t)(t - NQKV - DI - NVH) * ROW_H;
@@ -121,6 +140,8 @@ __device__ __forceinline__ void block_sums(const float * xs, float2 * sums, int 
 constexpr int SMEM_FLOATS = DI / 64 * CH + DI / 32 + 64;
 constexpr int STW = ROW_O / 4;   // 576 stage words per warp
 constexpr int SMEM2_FLOATS = SMEM_FLOATS + NW * STW;
+constexpr int STW_RP = ROW_H / 4;   // 288: REPACK phase C reads straight to registers, only phase A stages
+constexpr int SMEM3_FLOATS = SMEM_FLOATS + NW * STW_RP;
 
 // RQK (C10, opt-in GGML_CUDA_OCCAMY_GDN_QKREUSE=1): phase-B items are handed out as contiguous per-block chunks in
 // (k head, v head of that k head, column group) order and the block keeps the l2-normalised q/k (smem qn/kn + the two
@@ -140,14 +161,15 @@ constexpr int SMEM2_FLOATS = SMEM_FLOATS + NW * STW;
 //      the S_in/S_out alias of the in-place row is safe). After the first item the first ssm_out row is staged into the
 //      warp's (phase-B-idle) stg buffer and the second row requested, so phase C starts with two rows in flight/staged.
 //   Every dot product, reduction and store is the same expression in the same order -> bit-identical results.
-template <int PHASE, int RQK = 0, int PCS = 0, int PF = 0>
-__global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
+template <int PHASE, int RQK = 0, int PCS = 0, int PF = 0, int RP = 0>
+__global__ void __launch_bounds__(NT, RP ? 3 : 2) gdn_fused(Params P) {
+    static_assert(!(PF && RP), "REPACK excludes PREF (phase-C staging is gone)");
     extern __shared__ float smem[];
     __shared__ float qn[SD], kn[SD], vv[CGC], red[NW], fac[NVH];
     __shared__ unsigned hc[PCS ? NVH : 1], fin[PCS ? NVH + 1 : 1];
     float * xs = smem;
     float2 * sums = (float2 *)(smem + DI / 64 * CH);
-    unsigned * stg = (unsigned *)(smem + SMEM_FLOATS) + (threadIdx.x >> 5) * STW; uint4 * stg4 = (uint4 *)stg;
+    unsigned * stg = (unsigned *)(smem + SMEM_FLOATS) + (threadIdx.x >> 5) * (RP ? STW_RP : STW); uint4 * stg4 = (uint4 *)stg;
     const int warp = threadIdx.x >> 5, lane = threadIdx.x & 31;
     const int gw = blockIdx.x * NW + warp, W = gridDim.x * NW;
     Scratch * s = P.s;
@@ -365,6 +387,22 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
         __syncthreads();
         block_sums(xs, sums, DI);
         }
+        if (RP) {
+            unsigned a[18];
+            int r = gw;
+            if (r < H) ldrp(L.out, r, lane, a);
+            for (; r < H; r += W) {
+                unsigned b[18];
+                const int rn = r + W;
+                if (rn < H) ldrp(L.out, rn, lane, b);
+                float acc = dot2v(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], xs + lane * CH, sums[lane]) +
+                            dot2v(a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], xs + (lane + 32) * CH, sums[lane + 32]);
+                acc = warp_sum(acc);
+                if (lane == 0) P.out[r] = P.h[r] + acc;
+#pragma unroll
+                for (int j = 0; j < 18; ++j) a[j] = b[j];
+            }
+        } else {
         uint4 c[5];
         int r = gw;
         if (PFX) {
@@ -391,13 +429,19 @@ __global__ void __launch_bounds__(NT, 2) gdn_fused(Params P) {
             if (lane == 0) P.out[r] = P.h[r] + acc;
             __syncwarp();
         }
+        }
     }
 }
 
 struct DevState {
     Scratch * scratch = nullptr;
     int grid = 0;
+    int grid_rp = 0;   // GDN3 card B: grid of the REPACK variant (co-resident blocks only)
 };
+__global__ void rp_pack(const unsigned * __restrict__ src, unsigned * __restrict__ dst) {
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;   // H * 576 words
+    if (i < H * (ROW_O / 4)) { const int r = i / (ROW_O / 4), q = i % (ROW_O / 4); dst[i] = src[r * (ROW_O / 4) + rp_src(q)]; }
+}
 static DevState g_dev[GGML_CUDA_MAX_DEVICES];
 static std::mutex g_mtx;
 
@@ -410,7 +454,10 @@ static bool qk_reuse() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_Q
 static bool pc_share() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_PCSHARE"); return on; }   // C11, default OFF
 // GDN1, default OFF; engaged only with QKREUSE=1 PCSHARE=1 and the fused single launch (not GDN_3L)
 static bool pref() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_PREF") && qk_reuse() && pc_share() && !env_flag("GGML_CUDA_OCCAMY_GDN_3L"); return on; }
+// GDN3 card B, default OFF: packed ssm_out layout for phase C (QKREUSE+PCSHARE fused path only; PREF is not combined)
+static bool repack() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_REPACK") && qk_reuse() && pc_share() && !env_flag("GGML_CUDA_OCCAMY_GDN_3L"); return on; }
 static long g_launch_pf = 0;    // GDN1 dispatch counter
+static long g_launch_rp = 0;    // GDN3 card B dispatch counter
 static long g_launch_rqk = 0;   // C10 dispatch counter (launches of the reuse variant)
 static long g_launch_pcs = 0;   // C11 dispatch counter (launches of the shared phase-C variant)
 static long g_engaged = 0, g_rejected_gdn = 0;   // windows fused / GDN-layer windows rejected (DEBUG counter)
@@ -458,6 +505,18 @@ static DevState & dev_state(int device) {
                     device, nsm, per_sm, d.grid, SMEM2_FLOATS * sizeof(float), (int) rqk, (int) pcs, (int) pref());
         }
         if (per_sm < 1) { d.grid = -1; }
+        if (repack()) {
+            // the spinning grid barrier needs every block co-resident: the grid is exactly the measured occupancy of this
+            // compiled specialization at its own smem size, never more
+            int per_sm_rp = 0;
+            CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_rp, gdn_fused<0, 1, 1, 0, 1>, NT, SMEM3_FLOATS * sizeof(float)));
+            d.grid_rp = per_sm_rp * nsm;
+            if (const char * e = getenv("GGML_CUDA_OCCAMY_GDN_RP_GRID")) {
+                const int cap = atoi(e);
+                if (cap > 0 && d.grid_rp > cap) { d.grid_rp = cap; }
+            }
+            fprintf(stderr, "occamy-gdn: repack variant %d blocks/SM -> grid %d (smem %zu B dyn)\n", per_sm_rp, d.grid_rp, SMEM3_FLOATS * sizeof(float));
+        }
         // GDN3 card A (measurement only): GGML_CUDA_OCCAMY_GDN_GRID=N caps the grid at N (fewer co-resident blocks stay safe)
         if (const char * e = getenv("GGML_CUDA_OCCAMY_GDN_GRID")) {
             const int cap = atoi(e);
@@ -750,6 +809,57 @@ bool ggml_cuda_occamy_gdn_match_window(ggml_backend_cuda_context & ctx, const gg
     return true;
 }
 
+// GDN3 card B: per-device map ssm_out weight -> packed copy (made once; GGML_CUDA_OCCAMY_GDN_REPACK_LAYERS=N packs only the
+// first N distinct layers seen, the rest keep the original layout and kernel). Packing runs on a private stream with a
+// sync, so it is legal while the compute stream is being captured (relaxed mode); the graph only sees the launch.
+static const uint8_t * rp_lookup(int device, const ggml_tensor * w, cudaStream_t st) {
+    static std::map<const void *, void *> pk[GGML_CUDA_MAX_DEVICES];
+    static int limit = getenv("GGML_CUDA_OCCAMY_GDN_REPACK_LAYERS") ? atoi(getenv("GGML_CUDA_OCCAMY_GDN_REPACK_LAYERS")) : 1 << 30;
+    static int made[GGML_CUDA_MAX_DEVICES] = {};
+    std::lock_guard<std::mutex> lk(g_mtx);
+    auto it = pk[device].find(w->data);
+    if (it != pk[device].end()) { return (const uint8_t *) it->second; }
+    if (made[device] >= limit) { pk[device][w->data] = nullptr; return nullptr; }
+    (void) st;
+    const size_t bytes = (size_t) H * ROW_O;
+    size_t f0 = 0, f1 = 0, tot = 0;
+    CUDA_CHECK(cudaMemGetInfo(&f0, &tot));
+    void * dst = nullptr;
+    CUDA_CHECK(cudaMalloc(&dst, bytes));
+    cudaStream_t ps;
+    CUDA_CHECK(cudaStreamCreateWithFlags(&ps, cudaStreamNonBlocking));
+    rp_pack<<<(H * (ROW_O / 4) + 255) / 256, 256, 0, ps>>>((const unsigned *) w->data, (unsigned *) dst);
+    CUDA_CHECK(cudaGetLastError());
+    CUDA_CHECK(cudaStreamSynchronize(ps));
+    CUDA_CHECK(cudaMemGetInfo(&f1, &tot));
+    long bad = 0;
+    if (g_debug) {   // byte-exact check on the host: every packed word equals its source word, and the map is a bijection
+        std::vector<unsigned> a((size_t) H * ROW_O / 4), b(a.size());
+        CUDA_CHECK(cudaMemcpyAsync(a.data(), w->data, bytes, cudaMemcpyDeviceToHost, ps));
+        CUDA_CHECK(cudaMemcpyAsync(b.data(), dst, bytes, cudaMemcpyDeviceToHost, ps));
+        CUDA_CHECK(cudaStreamSynchronize(ps));
+        std::vector<int> hit(ROW_O / 4, 0);
+        for (int q = 0; q < ROW_O / 4; ++q) { hit[rp_src(q)]++; }
+        for (int q = 0; q < ROW_O / 4; ++q) { if (hit[q] != 1) { bad++; } }
+        for (int r = 0; r < H; ++r) for (int q = 0; q < ROW_O / 4; ++q) {
+            if (b[(size_t) r * (ROW_O / 4) + q] != a[(size_t) r * (ROW_O / 4) + rp_src(q)]) { bad++; }
+        }
+        // inverse: unpack the packed row and compare it with the original bytes
+        std::vector<unsigned> u(ROW_O / 4);
+        for (int r = 0; r < H; ++r) {
+            for (int q = 0; q < ROW_O / 4; ++q) { u[rp_src(q)] = b[(size_t) r * (ROW_O / 4) + q]; }
+            if (memcmp(u.data(), a.data() + (size_t) r * (ROW_O / 4), ROW_O) != 0) { bad++; }
+        }
+    }
+    CUDA_CHECK(cudaStreamDestroy(ps));
+    made[device]++;
+    fprintf(stderr, "occamy-gdn: repacked ssm_out %s (%d/%d) %zu B, VRAM free %zu -> %zu MiB%s%ld\n", w->name, made[device],
+            limit, bytes, f0 >> 20, f1 >> 20, g_debug ? ", unpack mismatches " : "", g_debug ? bad : 0L);
+    if (bad) { CUDA_CHECK(cudaFree(dst)); pk[device][w->data] = nullptr; return nullptr; }
+    pk[device][w->data] = dst;
+    return (const uint8_t *) dst;
+}
+
 void ggml_cuda_occamy_gdn_launch(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m, float * out_override) {
     static const bool three = env_flag("GGML_CUDA_OCCAMY_GDN_3L");
     DevState & d = dev_state(ctx.device);
@@ -776,6 +886,15 @@ void ggml_cuda_occamy_gdn_launch(ggml_backend_cuda_context & ctx, const ggml_cud
     if (m.zero_ssm)  { CUDA_CHECK(cudaMemsetAsync(m.zero_ssm,  0, SSM_N  * sizeof(float), st)); }
     const size_t smem = SMEM2_FLOATS * sizeof(float);
     const bool rqk = qk_reuse();
+    if (!three && repack() && d.grid_rp > 0) {
+        if (const uint8_t * pk = rp_lookup(ctx.device, m.wout, st)) {
+            P.L.out = pk;
+            gdn_fused<0, 1, 1, 0, 1><<<d.grid_rp, NT, SMEM3_FLOATS * sizeof(float), st>>>(P);
+            if (g_debug && (++g_launch_rp == 1 || g_launch_rp % 3000 == 0)) { fprintf(stderr, "occamy-gdn: repack launches %ld\n", g_launch_rp); }
+            CUDA_CHECK(cudaGetLastError());
+            return;
+        }
+    }
     const bool pcs = pc_share();
     if (three) {
         gdn_fused<1><<<d.grid, NT, smem, st>>>(P);
