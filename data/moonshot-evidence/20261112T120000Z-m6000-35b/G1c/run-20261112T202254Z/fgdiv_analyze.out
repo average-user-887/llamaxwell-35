@@ -1,0 +1,11 @@
+cap0 vs cap1024 mode T rep 0       mean=0.00722 max=0.03523 same-top=100.0% (row0 KL 0.01224)
+cap0 vs cap1024 mode T rep 1       mean=0.00686 max=0.03523 same-top=100.0% (row0 KL 0.01224)
+A repeat noise mode T (rep0 vs rep1) mean=0.00011 max=0.00181 same-top=100.0% (row0 KL 0.00000)
+B repeat noise mode T (rep0 vs rep1) mean=0.00023 max=0.00495 same-top=100.0% (row0 KL 0.00000)
+cap0 vs cap1024 mode I rep 0       mean=0.00587 max=0.04192 same-top=100.0% (row0 KL 0.01047)
+A timing effect (T vs I) rep0      mean=0.00485 max=0.01890 same-top=100.0% (row0 KL 0.00583)
+B timing effect (T vs I) rep0      mean=0.00546 max=0.02921 same-top=100.0% (row0 KL 0.00814)
+
+scale: stock two-slot vs solo KL .00306 (336 rows; deep .00506)
+VERDICT: outside gate - reported, not judged [max cap0-vs-cap1024 mean KL 0.00722]
+Hypothesis (batch composition) check: if row0 KL >> rows 1..31 KL, divergence is prefill-arrival borne (chunking/co-batch during prefill); if rows 1..31 equal row0, it is decode-path. Pair with server_*.log batch lines (-lv 4).

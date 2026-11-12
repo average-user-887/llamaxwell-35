@@ -22,7 +22,7 @@ Rule today (advisor): measurement only. No adoptions, no prod changes, no pushes
 | G1 | GEMM prefill numerics, row 0, n~5/bucket | A-vs-B up to .294 at 65K, but stock tile-order change alone gives .259; controls bitwise deterministic | measurement; noise-dominated |
 | G1b | scheduler cap `--mixed-batch-size 1024` vs 0, GEMM off, 5 cycles | max visible gap -48% (90K append) / -45% (deep+16K); TTFT +0.6% / +2.2%; wall +0.4% / +1.5%; VRAM flat | candidate for owner decision; not adopted |
 | E9 | deep single-slot decode at 98.1K, `-lv 4` cost; gdb sampling | 19.025 vs 19.073 ms/tok (+0.25%); host in cudaStreamSynchronize 97.5% of decode samples, so GPU-bound | done |
-| G1c | GEMM multi-row gate (8 docs x 64 rows at 32K/65K/98K) + FGDIV | arm A done, arm B running at time of push | IN PROGRESS, follow-up commit |
+| G1c | GEMM multi-row gate (8 docs x 64 rows at 32K/65K/98K) + FGDIV | B-vs-A dmean +.00345/+.00253/+.00332, same-top -1.17/-0.78/-0.98 pt. 32K/65K comparable to the doc-0 A-vs-Ap floor (+.00447/+.00119); 98K is about 2x the floor (+.00168). FGDIV cap0 vs cap1024: mean KL .0059-.0072, same-top 100%, spread over decode rows rather than coming from prefill | FAIL in every bucket. 32K/65K: gate not meaningful at this depth (owner decision). 98K: plain fail. Noise floor rests on 1 doc |
 | E5 / E7 | MoE routing capture; upstream b12318 sm_52 smoke | not run today | queued |
 
 ## Advisor rulings
@@ -46,6 +46,7 @@ Rule today (advisor): measurement only. No adoptions, no prod changes, no pushes
 - E5: routing capture.
 - E7: b12318 runtime smoke (build exists, unsmoked).
 - E3: arm B.
+- G1c follow-up: a multi-doc noise floor (A-vs-Ap on more than one doc) and the first divergent index per FGDIV unit.
 
 ## Where things are
 - Branch `evidence-20261112`, dir `data/moonshot-evidence/20261112T120000Z-m6000-35b/`. Subdirs: G1, G1b, G1c, E4, E5, E9, Q8, S1, raw/C, harness, historical. summary.json is the machine index.

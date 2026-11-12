@@ -1,0 +1,6 @@
+{"arm": "A", "mode": "T", "rep": 0, "fg_prompt_n_row0": 4096, "bg_alive_at_end": false, "nbg": 1534}
+{"arm": "A", "mode": "T", "rep": 1, "fg_prompt_n_row0": 4096, "bg_alive_at_end": false, "nbg": 1536}
+{"arm": "A", "mode": "I", "rep": 0, "fg_prompt_n_row0": 4096, "bg_alive_at_end": false, "nbg": 1534}
+{"arm": "B", "mode": "T", "rep": 0, "fg_prompt_n_row0": 4096, "bg_alive_at_end": false, "nbg": 1536}
+{"arm": "B", "mode": "T", "rep": 1, "fg_prompt_n_row0": 4096, "bg_alive_at_end": false, "nbg": 1536}
+{"arm": "B", "mode": "I", "rep": 0, "fg_prompt_n_row0": 4096, "bg_alive_at_end": false, "nbg": 1534}
