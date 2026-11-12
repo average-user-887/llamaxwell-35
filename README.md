@@ -9,3 +9,5 @@ Start with [`audit/PROVENANCE.md`](audit/PROVENANCE.md). The upstream base is `g
 This separate branch contains a **default-off experimental** packed-GQA prefill path and mixed-scheduling cap. Deep-append prompt time improves approximately 26–27%, but a 65K checkpoint shows substantial probability drift: KL 0.294 and total variation 20.85%. This is not a quality-equivalent production release or a decode-speed claim.
 
 Read the [results and limitations](experiments/codex-20261112/PUBLIC_RESULTS.md), [build notes](experiments/codex-20261112/BUILD.md), and [artifact manifest](experiments/codex-20261112/MANIFEST.json). The evidence package includes the tested runtime, sanitized receipts and rejected experiments. Extract its category archives into one directory to resolve the report's evidence links.
+
+The [publication receipt](experiments/codex-20261112/PUBLICATION_RECEIPT.json) records successful downloads and matching hashes for the published runtime, manifest, report and independent package review. Main and production remain unchanged.

@@ -2,6 +2,8 @@
 
 This is an investigation build, not a production release or a claim of general quality equivalence. The new GEMM path and mixed-batch cap are both disabled by default. Model weights and user conversation caches are not distributed.
 
+The [tested runtime archive](archives/runtime-01.tar.gz) is 28,635,730 bytes with SHA256 `fa5b6d26482f1837b4a88b888465055413f4d846a81ec2c56d988a0fc82a9260`. Its downloaded GitHub copy and contained CUDA library were hash-verified. See the [publication receipt](PUBLICATION_RECEIPT.json) and [independent package review](PACKAGE_REVIEW.txt). Read [results and limitations](PUBLIC_RESULTS.md) before use.
+
 ## What was actually tested
 
 The runtime package combines the existing scheduler candidate server and its matching shared libraries with the exact v4 CUDA library used in the GPU experiments. This is the same overlay used by the deep mixed-serving tests, not a newly compiled monolithic build. The published source combines the two reviewed patches on BUNDLE3, while preserving the previous public audit history.

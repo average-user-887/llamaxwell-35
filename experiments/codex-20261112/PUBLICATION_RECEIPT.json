@@ -1,0 +1,53 @@
+{
+  "status": "download-verified",
+  "verified_utc": "2026-11-12T16:44:39.231324+00:00",
+  "repository": "https://github.com/average-user-887/llamaxwell-35",
+  "branch": "codex/maxwell-gqa-investigation-20261112",
+  "artifact_commit": "6d072275d60654615b6c650e6d8ecdad59a1ae75",
+  "remote_branch_commit": "6d072275d60654615b6c650e6d8ecdad59a1ae75",
+  "remote_main_commit": "f410f991bff88c2abdc7040ba0b01efed06764f1",
+  "main_matches_pre_campaign": true,
+  "downloads": [
+    {
+      "path": "experiments/codex-20261112/MANIFEST.json",
+      "http_status": 200,
+      "bytes": 497308,
+      "sha256": "0e227c8a9fcc7f55cd66adf1d5e4be17b2878635b7786b1b4bcf7a8148e79acb",
+      "matches_local": true,
+      "immutable_url": "https://raw.githubusercontent.com/average-user-887/llamaxwell-35/6d072275d60654615b6c650e6d8ecdad59a1ae75/experiments/codex-20261112/MANIFEST.json"
+    },
+    {
+      "path": "experiments/codex-20261112/PUBLIC_RESULTS.md",
+      "http_status": 200,
+      "bytes": 14582,
+      "sha256": "8ad6df416b09a2a5d4c8c962a69bbe119b4c62e293f2d5d6da25f545a952be42",
+      "matches_local": true,
+      "immutable_url": "https://raw.githubusercontent.com/average-user-887/llamaxwell-35/6d072275d60654615b6c650e6d8ecdad59a1ae75/experiments/codex-20261112/PUBLIC_RESULTS.md"
+    },
+    {
+      "path": "experiments/codex-20261112/PACKAGE_REVIEW.txt",
+      "http_status": 200,
+      "bytes": 5139,
+      "sha256": "b15b7c17a1b42379025ddbcc63717e493a2c6569945275c0f4f4af8d4e4183c9",
+      "matches_local": true,
+      "immutable_url": "https://raw.githubusercontent.com/average-user-887/llamaxwell-35/6d072275d60654615b6c650e6d8ecdad59a1ae75/experiments/codex-20261112/PACKAGE_REVIEW.txt"
+    },
+    {
+      "path": "experiments/codex-20261112/archives/runtime-01.tar.gz",
+      "http_status": 200,
+      "bytes": 28635730,
+      "sha256": "fa5b6d26482f1837b4a88b888465055413f4d846a81ec2c56d988a0fc82a9260",
+      "matches_local": true,
+      "immutable_url": "https://raw.githubusercontent.com/average-user-887/llamaxwell-35/6d072275d60654615b6c650e6d8ecdad59a1ae75/experiments/codex-20261112/archives/runtime-01.tar.gz"
+    }
+  ],
+  "downloaded_cuda_library_sha256": "0c7ffbde334686f17f5ed6a1676c0cd966ec931eaa388900befb06af493330d5",
+  "evidence_archives": 70,
+  "evidence_payload_records": 774,
+  "scope": "Remote branch SHA identifies the complete reviewed Git tree; runtime archive, manifest, report and independent review were separately downloaded and hash-compared. Other archives were not downloaded a second time.",
+  "production_deployed": false,
+  "pull_request_created": false,
+  "root_review_exceptions": [
+    "Two trailing-space lines in preserved raw SASS dumps are intentionally unchanged; source and authored documentation whitespace checks pass."
+  ]
+}
