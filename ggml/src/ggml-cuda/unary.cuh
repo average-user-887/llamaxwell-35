@@ -121,3 +121,6 @@ __device__ __forceinline__ float ggml_cuda_op_swiglu_clamp_single(float gate, fl
 
     return ggml_cuda_op_silu_single(gate) * up;
 }
+
+bool ggml_cuda_occamy_gate_sig_mul_ok(const ggml_tensor * cont, const ggml_tensor * sig, const ggml_tensor * mul);
+void ggml_cuda_occamy_gate_sig_mul(ggml_backend_cuda_context & ctx, const ggml_tensor * cont, const ggml_tensor * mul, void * q8);

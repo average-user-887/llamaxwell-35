@@ -778,3 +778,60 @@ void ggml_cuda_op_relu_sqr(ggml_backend_cuda_context & ctx, ggml_tensor * relu_n
         unary_cuda<op_relu_sqr>((const float *)src->data, (float *)sqr_node->data, k, stream);
     }
 }
+
+// GGML_CUDA_OCCAMY_SMALLFUSE bit 2: decode-time CONT(gate view) + SIGMOID + MUL, plus the q8_1 quantization of the
+// MUL result for the following matrix-vector product, in one launch. Arithmetic repeats unary_gated_op_kernel<op_sigmoid>
+// and quantize_q8_1 exactly.
+static __global__ void __launch_bounds__(256) occamy_gate_sig_mul_q8(
+        const float * gv, const int gne0, const int gs1, const float * other, float * dst, block_q8_1 * y, const int k) {
+    const int i = blockDim.x*blockIdx.x + threadIdx.x;
+    if (i >= k) {
+        return;
+    }
+    const float gx = gv[(i / gne0)*gs1 + i % gne0];
+    const float xi = op_sigmoid(gx) * other[i];
+    dst[i] = xi;
+    if (y == nullptr) {
+        return;
+    }
+
+    float amax = fabsf(xi);
+    float sum  = xi;
+    amax = warp_reduce_max<QK8_1>(amax);
+    sum  = warp_reduce_sum<QK8_1>(sum);
+
+    const float  d = amax / 127.0f;
+    const int8_t q = amax == 0.0f ? 0 : roundf(xi / d);
+
+    const int ib  = i / QK8_1;
+    const int iqs = i % QK8_1;
+    y[ib].qs[iqs] = q;
+    if (iqs > 0) {
+        return;
+    }
+    y[ib].ds = make_half2(d, sum);
+}
+
+bool ggml_cuda_occamy_gate_sig_mul_ok(const ggml_tensor * cont, const ggml_tensor * sig, const ggml_tensor * mul) {
+    const ggml_tensor * gv    = cont->src[0];
+    const ggml_tensor * other = mul->src[0] == sig ? mul->src[1] : mul->src[0];
+    const int64_t k = ggml_nelements(mul);
+    return cont->op == GGML_OP_CONT && sig->op == GGML_OP_UNARY && ggml_get_unary_op(sig) == GGML_UNARY_OP_SIGMOID &&
+           sig->src[0] == cont && mul->op == GGML_OP_MUL && (mul->src[0] == sig || mul->src[1] == sig) &&
+           cont->type == GGML_TYPE_F32 && gv->type == GGML_TYPE_F32 && sig->type == GGML_TYPE_F32 &&
+           mul->type == GGML_TYPE_F32 && other->type == GGML_TYPE_F32 &&
+           ggml_is_contiguous(cont) && ggml_is_contiguous(mul) && ggml_is_contiguous(other) && ggml_is_contiguous(sig) &&
+           ggml_nrows(mul) == 1 && ggml_nelements(other) == k && ggml_nelements(cont) == k && ggml_nelements(sig) == k &&
+           gv->nb[0] == sizeof(float) && gv->ne[2] == 1 && gv->ne[3] == 1 && gv->ne[0]*gv->ne[1] == k &&
+           k % 512 == 0 && k <= (1 << 20);
+}
+
+void ggml_cuda_occamy_gate_sig_mul(ggml_backend_cuda_context & ctx, const ggml_tensor * cont, const ggml_tensor * mul, void * q8) {
+    const ggml_tensor * gv    = cont->src[0];
+    const ggml_tensor * sig   = mul->src[0]->op == GGML_OP_UNARY ? mul->src[0] : mul->src[1];
+    const ggml_tensor * other = mul->src[0] == sig ? mul->src[1] : mul->src[0];
+    const int k = (int) ggml_nelements(mul);
+    occamy_gate_sig_mul_q8<<<k/256, 256, 0, ctx.stream()>>>((const float *) gv->data, (int) gv->ne[0], (int) (gv->nb[1]/sizeof(float)),
+        (const float *) other->data, (float *) mul->data, (block_q8_1 *) q8, k);
+    CUDA_CHECK(cudaGetLastError());
+}
