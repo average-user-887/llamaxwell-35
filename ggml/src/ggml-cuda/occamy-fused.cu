@@ -488,6 +488,16 @@ static DevState & dev_state(int device) {
                 fprintf(stderr, "occamy-fused: device %d: DOWNH=%d variant %d blocks/SM -> grid %d\n", device, k + 1, per_sm_dh[k], d.grid_dh[k]);
             }
         }
+        // GDN3 card A (measurement only): GGML_CUDA_OCCAMY_MOE_GRID=N caps every moe_v2 grid at N (fewer co-resident blocks stay safe)
+        if (const char * e = getenv("GGML_CUDA_OCCAMY_MOE_GRID")) {
+            const int cap = atoi(e);
+            if (cap > 0) {
+                if (d.grid > cap) d.grid = cap;
+                if (d.grid_dx > cap) d.grid_dx = cap;
+                for (int k = 0; k < 2; ++k) if (d.grid_dh[k] > cap) d.grid_dh[k] = cap;
+                fprintf(stderr, "occamy-fused: grid cap %d -> grid %d dx %d dh %d/%d\n", cap, d.grid, d.grid_dx, d.grid_dh[0], d.grid_dh[1]);
+            }
+        }
     }
     return d;
 }
