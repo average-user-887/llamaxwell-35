@@ -3117,6 +3117,10 @@ private:
         }
     }
 
+    // S1 prefill-single-stream state
+    int32_t s1_rr = 0;
+    int64_t s1_n_defer = 0;
+
     // @ngxson : for debugging only
     int64_t t_pre_decode  = 0;
     int64_t t_decode      = 0;
@@ -3475,6 +3479,26 @@ private:
         if (params_base.cont_batching || batch.size() == 0) {
             bool add_ok = true; // false means the batch is full, skip remaining slots
 
+            // S1: single-stream prefill. The slot that owns this batch's prompt tokens (>= 64 pending) is chosen
+            // round-robin; other slots with >= 64 pending prompt tokens are deferred to a later batch.
+            constexpr int32_t S1_MIN_PENDING = 64;
+            const bool s1_on = params_base.prefill_single_stream;
+            int32_t s1_owner = -1;
+            if (s1_on) {
+                const int32_t n_sl = (int32_t) slots.size();
+                for (int32_t k = 0; k < n_sl && s1_owner < 0; ++k) {
+                    const server_slot & c = slots[(s1_rr + k) % n_sl];
+                    if ((c.state == SLOT_STATE_PROCESSING_PROMPT || c.state == SLOT_STATE_STARTED) && c.task &&
+                        c.task->n_tokens() - (c.state == SLOT_STATE_STARTED ? 0 : c.prompt.n_tokens()) >= S1_MIN_PENDING &&
+                        (!slot_batched || slot_batched->can_batch_with(const_cast<server_slot &>(c)))) {
+                        s1_owner = (int32_t) ((s1_rr + k) % n_sl);
+                    }
+                }
+                if (s1_owner >= 0) {
+                    s1_rr = (s1_owner + 1) % n_sl;
+                }
+            }
+
             iterate(slots, [&](server_slot & slot) {
                 if (!add_ok || batch.size() >= n_batch) {
                     return; // batch is full, skip remaining slots
@@ -3497,6 +3521,15 @@ private:
 
                 // this slot still has a prompt to be processed
                 if (slot.state == SLOT_STATE_PROCESSING_PROMPT || slot.state == SLOT_STATE_STARTED) {
+                    if (s1_on && s1_owner >= 0 && (int32_t) slot.id != s1_owner &&
+                        slot.task->n_tokens() - (slot.state == SLOT_STATE_STARTED ? 0 : slot.prompt.n_tokens()) >= S1_MIN_PENDING) {
+                        // deferred: keeps this slot's prompt tokens out of the batch (single-stream ubatches)
+                        s1_n_defer++;
+                        if ((s1_n_defer & (s1_n_defer - 1)) == 0 || s1_n_defer % 256 == 0) {
+                            SRV_INF("prefill-single-stream: deferred slot prompt batches = %" PRId64 "\n", s1_n_defer);
+                        }
+                        return;
+                    }
                     const auto & input_tokens = slot.task->tokens;
                     int32_t n_batch_prompt = n_batch;
                     if (params_base.n_batch_mixed > 0 && n_generation > 0 && slot.can_split() &&
