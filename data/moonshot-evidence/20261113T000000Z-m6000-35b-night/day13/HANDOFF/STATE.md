@@ -28,5 +28,7 @@ Next swap: rename current to `llamacpp-m6000-b3gemm-prev`; never remove containe
 - cap1024 with GEMM: untested -> card C1.
 
 ## Open evidence for the night
-- Two-slot GEMM fallbacks: `ne3` 11,710 (both slots in one batch -> GEMM off) -> WP1 is needed.
+- Two-slot GEMM fallbacks: `ne3` 11,710. CAVEAT: `ne3` is checked before `q_lt_64` (fattn-maxwell-gemm.cuh:236-237),
+  so two-slot decode steps count as ne3. Most of the 11,710 are decode, not lost prefill. Split the counter
+  (ne3 with ne[1]>=64) before sizing WP1 / the server-side stream split.
 - `q_lt_64` 7,550 = decode, expected (GEMM is prefill only).
