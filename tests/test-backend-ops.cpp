@@ -8460,6 +8460,38 @@ struct test_flash_attn_ext : public test_case {
     }
 };
 
+// Maxwell GEMM FA path (GGML_CUDA_FA_MAXWELL_GEMM=1, optional _FUSED=1): causal-style mask over the
+// last nb keys plus, on odd rows, a fully masked first 4096-key split, so split-local softmax stats
+// with l == 0 and a partial tail split are exercised.
+struct test_flash_attn_ext_maxwell_causal : public test_flash_attn_ext {
+    using test_flash_attn_ext::test_flash_attn_ext;
+
+    std::string vars() override {
+        return test_flash_attn_ext::vars() + ",mask=causal_split0";
+    }
+
+    void initialize_tensors(ggml_context * ctx) override {
+        test_flash_attn_ext::initialize_tensors(ctx);
+        ggml_tensor * m = ggml_get_tensor(ctx, "m");
+        if (!m) {
+            return;
+        }
+        const int64_t ne0 = m->ne[0];
+        const int64_t ne1 = m->ne[1];
+        std::vector<float> data_f32(ne0*ne1);
+        std::vector<ggml_fp16_t> data_f16(ne0*ne1);
+        for (int64_t row = 0; row < ne1; ++row) {
+            const int64_t last = ne0 - ne1 + row;
+            for (int64_t key = 0; key < ne0; ++key) {
+                const bool masked = key > last || ((row & 1) && key < 4096 && ne0 > 4096);
+                data_f32[row*ne0 + key] = masked ? -INFINITY : -0.0625f * float((key + row) % 5);
+            }
+        }
+        ggml_fp32_to_fp16_row(data_f32.data(), data_f16.data(), data_f16.size());
+        ggml_backend_tensor_set(m, data_f16.data(), 0, data_f16.size()*sizeof(ggml_fp16_t));
+    }
+};
+
 // large Q values, so the online softmax has to rescale the partial results
 struct test_flash_attn_ext_large_logits : public test_flash_attn_ext {
     static constexpr int q_range = 20;
@@ -11606,6 +11638,16 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
                     test_cases.emplace_back(new test_flash_attn_ext(hs, hs, 8, {4, 1}, kv, nb, true, false, 0, 0, GGML_PREC_F32, type_KV, type_KV));
                 }
             }
+        }
+    }
+
+    // Maxwell GEMM FA path shapes (d=256, 16 q heads over 2 kv heads, nb >= 64, kv >= 4096).
+    // Only engages with GGML_CUDA_FA_MAXWELL_GEMM=1 on cc 5.2; elsewhere these run the normal FA kernels.
+    for (int kv : { 4096, 8448, 12544 }) {
+        for (int nb : { 64, 100 }) {
+            test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, kv, nb, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+            test_cases.emplace_back(new test_flash_attn_ext_maxwell_causal(256, 256, 2, {8, 1}, kv, nb, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+            test_cases.emplace_back(new test_flash_attn_ext_large_logits(256, 256, 2, {8, 1}, kv, nb, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
         }
     }
 
