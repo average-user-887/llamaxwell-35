@@ -63,4 +63,22 @@ Readings
 - Native q8 is not exact against the generic q8 read. The difference is within the reorder floor, but the gate asks for exactness, so it fails.
 - cap1024 costs no makespan and halves the worst token gap: still the owner's decision.
 
-Still open: GEMM makespan in N3 with the v4 lib; Q8N exactness doc 3 and the 98K CI; N5 (b12318 runtime smoke is covered by the stock baseline above, not as an ABBA).
+Still open: Q8N exactness doc 3 and the 98K CI; N5 (b12318 runtime smoke is covered by the stock baseline above, not as an ABBA).
+
+## N3B: GEMM makespan with the v4 lib (14:28-14:53 CET; subdir `day13/N3B/`)
+This reruns the void N3 "gemm" arm with a lib that has the GEMM path. GEMM arm: Codex integration-v4 lib (sha 0c7ffbde...) + `GGML_CUDA_FA_MAXWELL_GEMM=1`. b3 arm: BUNDLE3 (sha 94c777dc...). Short profile: 2 agents, 4 turns, 84K -> ~95.8K, ub 1024, cap 0. 3 paired blocks, counterbalanced (b3/gemm, gemm/b3, b3/gemm).
+
+| item | b3 | gemm | change |
+|---|---|---|---|
+| makespan, mean of 3 blocks | 210.72 s | 177.67 s | **-15.69%** (CI95 -15.88..-15.49) |
+| server prefill seconds | 201.75 | 164.33 | -18.5% |
+| 1K append prompt_ms, both slots | 14,853 | 12,741 | -14.2% |
+| 4K append prompt_ms, both slots | 35,585 | 28,342 | -20.4% |
+| peak VRAM | 23,110 MiB | 23,459 MiB | +349 MiB |
+
+Engagement: each GEMM run logs `maxwell_gemm: version=4 ...`, and the preflight refuses a lib without the GEMM path. nvprof GEMM session: sgemm is 29.2% of GPU time and masked_softmax 7.3%. flash_attn_tile still has 80 launches and 11.8% of GPU time, so part of the attention stays on the stock tile. A likely cause is the `ne[3] == 1` guard when both slots batch together; this is not yet confirmed (WP0 counters in WRAPUP).
+
+Readings
+- First end-to-end GEMM number on the target workload: -15.7%, with very little spread between blocks (+/-0.2 s). The wrap-up's -20..-25% estimate assumes full engagement.
+- The GEMM arm is the v4 lib, not BUNDLE3 + GEMM. It differs from b3 in more than the flag, so the -15.7% belongs to that lib as a whole. WP0 (one lib on BUNDLE3 + v4) separates the two.
+- Measurement only. Not adopted: N4 vs FP64 favours GEMM at depth, but GEMM fails the stock-relative KLD gate; the owner decides.
