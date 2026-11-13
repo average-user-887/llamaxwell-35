@@ -4,6 +4,8 @@
 //   GGML_CUDA_OCCAMY_3L=1     use the 3-launch variant (no grid barrier) instead of the persistent single launch
 //   GGML_CUDA_OCCAMY_DEBUG=1  log the first fused window and the first reason a candidate window was rejected
 //   GGML_CUDA_OCCAMY_CHECK=N  on the first N fused windows also run the unfused path and print max abs/rel diff
+//   GGML_CUDA_MOE_V3=1        WP4 occupancy rework (512-thr blocks, 32 warps/SM), bit-identical target to moe_v2<0, 61>
+//   GGML_CUDA_MOE_V3_CHECK=N  with MOE_V3: first N launches also run the moe_v2 dispatch and print the bitwise-diff count
 #include "common.cuh"
 
 struct ggml_cuda_occamy_moe_match {
