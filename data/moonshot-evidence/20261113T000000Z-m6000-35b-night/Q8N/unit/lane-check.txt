@@ -1,0 +1,1 @@
+rows=32768 vals=8388608 exact_mismatch=0 align_or_bounds_violations=0 zero_scale_blocks=26148 int8_-128=60474 int8_127=155160 max_rel_err_Kdot=3.368e-07 max_rel_err_Vscale=1.192e-07 base_offsets=0,4,8,12 -> PASS

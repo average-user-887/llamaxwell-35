@@ -1,0 +1,26 @@
+# Q8N: native q8_0 KV read in the occamy decode kernel (phase 1, design only)
+KILL RULE: NOT triggered. On sm_52 the int8->f32 convert (I2F, 1/4 rate) replaces today's f16->f32 F2F (also 1/4 rate) one for one, so the convert cost is about zero. The real cost is +16% issue (unaligned loads, realign, scale). K+V q8 becomes issue-bound at about 10-12 ms against 14.24 ms today: a gain of about 3-4 ms/step, not 2x. Details and arithmetic: DESIGN_NOTES.md.
+
+| deep fixture 98K+90K (E4), ofa kernel/step | DRAM GB | BW floor @271 GB/s* | issue est. | expected |
+|---|---|---|---|---|
+| F16/F16 today (measured 14.24 ms) | 3.86 | 14.2 | 8.5 | 14.24 |
+| q8 K + q8 V, layout A (hs split kept) | 2.05 | 7.6 | 9.9 | ~10-12 |
+| q8 K only or q8 V only, A | 2.95 | 10.9 | 9.2 | ~11 |
+| q8 K+V, layout B (dim split, 1 convert/elem) | 2.05 | 7.6 | ~8.7 | ~9-10 |
+*271 GB/s = the efficiency measured today (85% of 317). At 2x98,304: F16 4.03 GB, K+V q8 2.14 GB, one-sided 3.08 GB.
+
+1. Layout: block_q8_0 = f16 d + int8 qs[32] = 34 B. A 256-dim head row is 8 blocks = 272 B; row/head/stream strides are 544/272/kv_size*544, all %16 == 0, so rows stay 16-B aligned. Blocks inside a row are only 2-B aligned. Lane l keeps dims [8l,8l+8): block b=l>>2, qs at 34b+2+8(l&3), which is 4-B aligned only for odd b. No 16-B LDG is possible.
+   Load plan: 3 aligned LDG.32 per row (for odd b the 3rd address is clamped, so there is no overrun) + LDG.U16 for d (an L1 hit from the same sector), then 2 PRMT with a per-lane runtime selector (no divergence). DRAM bytes are unchanged by the redundant L1 reads.
+2. Scales: a lane's 8 dims sit inside one block. K: s[j,h] = d_k * (sum of 8 q*int8) is 1 FMUL per (token, head) BEFORE the xor 16/8/4 tree, because the tree crosses blocks. V: o += (p_j,h * d_v) * int8, which pre-scales p (1 FMUL per token/head). Both are fp32 with no int math.
+3. sm_52 instructions: no dp4a. I2F.F32.S8 with a byte selector (check the selector in probe SASS; without it, +1 BFE/elem, about +11% issue, still no kill). The magic-number trick (PRMT into 0x4B00xxxx then FADD) is rejected because it costs 2 issue slots/elem against 1, and issue is the binding limit, not the conversion pipe (5.4 ms).
+4. Budget (ptxas/cuobjdump of BUNDLE3 source): hs_ar is 118 regs, 0 spill, 33,664 B smem, 256 thr, so 2 blocks/SM (16 warps; regs and smem both cap at 2). That is NOT 3-4. q8 raw regs are 3 words + d per row against uint4 today (about neutral). Target <=128 regs, 0 spill, smem unchanged; the existing nba>=nb check keeps nsplit. Loop today: 486 instr/warp-unit (242 FFMA, 65 F2F, 48 FMUL); A adds ~80.
+5. KV write: no new code. llama uses ggml_set_rows for K and V (FA => V not transposed), and CUDA set_rows_cuda_quant<block_q8_0> already does f32->q8_0 (amax/127, d stored f16). Cost is negligible (2 tok x 10 layers/step).
+6. Prefill with a q8 cache today: tile FA (Q>2) sets need_f16_K/V, and the f16_extra path converts the WHOLE n_kv K and V to f16 scratch on every FA call. At 98K that is ~300 MB traffic, ~1.1 ms/layer, ~11 ms per 1024-ubatch, about +0.5% prefill. Scratch is 128 MiB per tensor at 128K (256 MiB for K+V, from the compute margin). The Maxwell GEMM path is F16-only, but it is off in prod. A native tile read is phase 2.
+   Generic decode gap: q8 K + f16 V (or the reverse) has no vec instance without GGML_CUDA_FA_ALL_QUANTS=ON (OFF in BUNDLE3), so stock falls back to a full f16 convert every decode step.
+7. Flag: GGML_CUDA_OCCAMY_KVQ8, enabled only by the exact string "1" (read once). It applies only on top of FA=1, PIPE=3, ADDR=1. The variant comes from the tensor types (K and/or V == Q8_0, the other F16), not from the flag, so flag and cache cannot disagree.
+   Template ofa_decode_hs_ar_q8<KQ8,VQ8>: only the combo that passes the Q8S quality screen is instantiated. Others fall to stock.
+8. Flag-off identity: the existing kernels' source is untouched, and the new kernel plus applicable_q8() are separate symbols. Gate: the cuobjdump -sass diff of every pre-existing function between BUNDLE3 and the patched build must be empty, plus F16 logits bitwise equal with the flag unset/0/2.
+9. Exactness gate, on the same q8 cache (G1c teacher-forced rows, shallow + deep). The orders differ by design. Native is fp32 Q x dequant: an 8-dim FMA chain per lane, scale per lane partial, the xor tree, online softmax per 4-token unit, split-K combine. Generic vec quantises Q to q8_1 and does an int32 dot per 4 B x dQ*dK (V dequant is fp32 on sm_52, because FP16_AVAILABLE is off); mixed types go through f16-rounded dequant.
+   Pass: native vs generic KL at the noise floor (dmean <= +.0010, same-top >= -.3 pt), and KL(native||F16) <= KL(generic||F16) + noise. Op-level: a compare env (test-only) logs max_rel against stock, plus an fp64 CPU check of one dumped layer.
+10. Speed: N1 single 98K (slot s0) and N2 two-slot deep (D0 slots s0_98k+s1_90k), ABBA x3 per E/C on the G1b harness, BUNDLE3 F16 against native q8 (passing combo). Add one nvprof run (kernel ms, dram_read_throughput, issue_slot_util) to confirm the regime. Then a 2x128K load-only fit check.
+Order: Q8S screen -> A (smallest delta from proven hs_ar) -> B only if nvprof shows issue-bound at >=10 ms.

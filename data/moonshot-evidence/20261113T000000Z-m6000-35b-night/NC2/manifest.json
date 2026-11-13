@@ -1,0 +1,2535 @@
+{
+ "summary": {
+  "files": 122,
+  "total_bytes": 3437750912,
+  "by_set": {
+   "G1": [
+    69,
+    68545152
+   ],
+   "G1c": [
+    53,
+    3369205760
+   ]
+  },
+  "files_over_50MB": 53,
+  "nv_expected": 248320,
+  "git_push_fit": {
+   "each_file_lt_50MB": false,
+   "total_lt_300MB": false,
+   "G1_alone_total_bytes": 68545152,
+   "G1c_alone_total_bytes": 3369205760,
+   "note": "MB = 10^6 bytes"
+  }
+ },
+ "files": [
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 16384,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/codex_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "9790b6dd3faf1b7b64f356941e2357a4993fdce218288a79f152bb7d92d2752f"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/codex_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "feeef5ae9b2b13843e422ed55c11ab6a2ad6992cbea916795336b1b96a847d00"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/codex_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "4e21832c66b509f177ededaffb743b836398ca68ea85d41bf972f458c9bc802a"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 16384,
+   "doc": "codexs",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/codexs_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "9790b6dd3faf1b7b64f356941e2357a4993fdce218288a79f152bb7d92d2752f"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "codexs",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/codexs_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "feeef5ae9b2b13843e422ed55c11ab6a2ad6992cbea916795336b1b96a847d00"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65836,
+   "doc": "codexs",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/codexs_r0_65836.npy",
+   "bytes": 993408,
+   "sha256": "ce9990f9155ec51344bddff7283aa25f55c1adffc76fa5d47d7326dc3ba9a2d2"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 16384,
+   "doc": "d0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/d0_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "f25e192fc238c0f9e76ae960c87108137c4c7d3423437b309094995ca53470d1"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "d0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/d0_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "0e68c8744293865c1cc403d4d62be971b151f701d63dfee9b0e9591189229e45"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "d0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/d0_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "84274da2cb09640d52d84e52b1916d05df5b863bf2e4dad09894414390e91d13"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 16384,
+   "doc": "d1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/d1_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "2d8795f97e359ddc34fbbfa9bb738cd39dd12ee9f81c0a7fba5cceed162da476"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "d1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/d1_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "153005ab8c85c291321938851e7185a9a193789fce940ac724161f54b20a6e06"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "d1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/d1_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "8552b9d9f76ceba37568933de1b0b57a00a5b898847e9df5633906759667c445"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 16384,
+   "doc": "fx1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/fx1_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "a784fe26c2f568cf1d480248f83d7802b9237ccdba8baade82c350785cab9509"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "fx1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/fx1_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "11ab048e86f764c1e89962a082252b6940e3c3bf2a93203f0bd1865032f03cb0"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "fx1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/fx1_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "86af017d244b002276ed548c7c9b5634e727b0ca35f4e189f86d9538464b595a"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 16384,
+   "doc": "u0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/u0_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "cfd4f90ed48bc80361583dd4f6f82b004f3b60f5454aef4d19a0b8e5adadf618"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "u0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/u0_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "f7cfd9d721d05a1e7e14de1610ca7ca8d9e416f4a831abc13abca0425057951d"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "u0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A/u0_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "2607071367e70b44d2a065704e1277d3774d1a9fe2dabb5c0c7554e53eb2b994"
+  },
+  {
+   "set": "G1",
+   "arm": "A2",
+   "arm_label": "A2(repeat)",
+   "bucket": 16384,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A2/codex_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "9790b6dd3faf1b7b64f356941e2357a4993fdce218288a79f152bb7d92d2752f"
+  },
+  {
+   "set": "G1",
+   "arm": "A2",
+   "arm_label": "A2(repeat)",
+   "bucket": 32768,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A2/codex_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "feeef5ae9b2b13843e422ed55c11ab6a2ad6992cbea916795336b1b96a847d00"
+  },
+  {
+   "set": "G1",
+   "arm": "A2",
+   "arm_label": "A2(repeat)",
+   "bucket": 65536,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/A2/codex_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "4e21832c66b509f177ededaffb743b836398ca68ea85d41bf972f458c9bc802a"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "arm_label": "Ap",
+   "bucket": 16384,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/Ap/codex_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "d2af50702118ec278d557ddc0dec668a2cb25cdd6f3e52fa8f76d745540f0334"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "arm_label": "Ap",
+   "bucket": 32768,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/Ap/codex_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "8894a9090fbdb4ad168b16c7a6f3a45fe003dd35b161499fc1858878672086d9"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "arm_label": "Ap",
+   "bucket": 65536,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/Ap/codex_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "3eea650b1f353a3a53611c12d450ad673acea8cbeb3408c4e0ae59b635f6f437"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "arm_label": "Ap",
+   "bucket": 16384,
+   "doc": "codexs",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/Ap/codexs_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "d2af50702118ec278d557ddc0dec668a2cb25cdd6f3e52fa8f76d745540f0334"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "arm_label": "Ap",
+   "bucket": 32768,
+   "doc": "codexs",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/Ap/codexs_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "8894a9090fbdb4ad168b16c7a6f3a45fe003dd35b161499fc1858878672086d9"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "arm_label": "Ap",
+   "bucket": 65836,
+   "doc": "codexs",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/Ap/codexs_r0_65836.npy",
+   "bytes": 993408,
+   "sha256": "de9c2f40eaeaf08829926bdd14cc6095b4e64f52e043ead9d39ad6b2d10f7163"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 16384,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/codex_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "9e9affea2a4fa719145d73834cf842cba0e705801cfc4dec73ab370931f1d1f8"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/codex_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "1d08149b26b8773e8fc6eda6d176837f8e58acdda8335ea5ce64c11030648370"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/codex_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "67aff4282b69f121bc4a4fcd3eb02e6e9aa04b2c98fd1a03644d990a905d2b26"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 16384,
+   "doc": "codexs",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/codexs_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "9e9affea2a4fa719145d73834cf842cba0e705801cfc4dec73ab370931f1d1f8"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "codexs",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/codexs_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "1d08149b26b8773e8fc6eda6d176837f8e58acdda8335ea5ce64c11030648370"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65836,
+   "doc": "codexs",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/codexs_r0_65836.npy",
+   "bytes": 993408,
+   "sha256": "024d5b93f65dccf0c1c379273cf8273625d05bd415ff02512135e10d1ee509e8"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 16384,
+   "doc": "d0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/d0_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "4c28b43d0455b99ccb334f6475a2a8d55cf48dcdfd9c386b5920dec9a8186226"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "d0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/d0_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "be113af95f6188eddcae800c532b293985f76bd5ebfbdffe5319306d139d9396"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "d0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/d0_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "786fab57249266dbd0881818c6a252c21e36cd4b4b4ffab1263265d8acd296ec"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 16384,
+   "doc": "d1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/d1_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "b176b07a36195814c82d415cdd5aec83a93cd015585a6af88b9745d605ce47a7"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "d1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/d1_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "40674ea678f476f8073ba5c29ba154064f61c339cb7428ae64e2d7aded69eb05"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "d1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/d1_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "b313d720bc3a9fbbc220b8634340dc5cbcb166da64bc35041288e7173536ec3b"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 16384,
+   "doc": "fx1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/fx1_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "6bcdc51fc1d06e5014aba9307e9f89d88ce948042d68e1e8c61f27ad3cb19d9f"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "fx1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/fx1_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "8d6d48ca5b333ce167302d33ddee0e3095d36fc69ee033a5e03c4dbeceab4088"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "fx1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/fx1_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "5af009636a1672edc056502622b834216597e725a3b1893d795fe2199bced47f"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 16384,
+   "doc": "fx2",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/fx2_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "9c60cbcb85b4da1e61e3b604578dddcec502084900fd0bd9300db15b58c804d7"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "fx2",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/fx2_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "ddc866cd5b36550f6f5fcb31f0f5117032b5d0e7e35024bb4f8268226f670259"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "fx2",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/fx2_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "0f86af92518eb4e7575c7d9a0bafd5795d10b7943826dd3f558178c8a0eae88a"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 16384,
+   "doc": "u0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/u0_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "40cb0ae25d827415b18118f4d80eb161157ab1adbf9949b0e061cbc27b7dcbff"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "u0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/u0_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "c49e67aab738077e38d90b8a0b3a19eadcee18956e45d21fa148302f1d0cfdab"
+  },
+  {
+   "set": "G1",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "u0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B/u0_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "7d1c1c0cb8b9ab7b529bea5ece6ea1450aa750c62cf72a78d0fc93db40d0200b"
+  },
+  {
+   "set": "G1",
+   "arm": "B2",
+   "arm_label": "B2(repeat)",
+   "bucket": 16384,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B2/codex_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "9e9affea2a4fa719145d73834cf842cba0e705801cfc4dec73ab370931f1d1f8"
+  },
+  {
+   "set": "G1",
+   "arm": "B2",
+   "arm_label": "B2(repeat)",
+   "bucket": 32768,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B2/codex_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "1d08149b26b8773e8fc6eda6d176837f8e58acdda8335ea5ce64c11030648370"
+  },
+  {
+   "set": "G1",
+   "arm": "B2",
+   "arm_label": "B2(repeat)",
+   "bucket": 65536,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/B2/codex_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "67aff4282b69f121bc4a4fcd3eb02e6e9aa04b2c98fd1a03644d990a905d2b26"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 16384,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/codex_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "f9dd94a3d16624d204264454c4226de3d9658070fa7dc59a9e5a89524b739db7"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 32768,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/codex_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "d2db3d823def2e57ca2f86d703d72367493e714d2d5681b529cbcc447940ca1a"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 65536,
+   "doc": "codex",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/codex_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "e32cec71df5d943f4a02112a93fbf7b25d5f998396aabf6747ccb549b9afd666"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 16384,
+   "doc": "codexs",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/codexs_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "f9dd94a3d16624d204264454c4226de3d9658070fa7dc59a9e5a89524b739db7"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 32768,
+   "doc": "codexs",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/codexs_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "d2db3d823def2e57ca2f86d703d72367493e714d2d5681b529cbcc447940ca1a"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 65836,
+   "doc": "codexs",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/codexs_r0_65836.npy",
+   "bytes": 993408,
+   "sha256": "48716a6c25724bd8087202e7c39b63865694acaf133057a06ea8a91b9f6812f9"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 16384,
+   "doc": "d0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/d0_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "c1b3f4b8d06be3c059f93728ac6bb9643c2b86d825e99bb1779af73daed76175"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 32768,
+   "doc": "d0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/d0_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "8b24850dd0739d0d5946de6bb8b9763693bc8bc371746e88c6c8d3e651e05a1e"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 65536,
+   "doc": "d0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/d0_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "5466a079d01f1da494ccd30c2d6deff608e57eca55ae1ee1ce73f6e669d478e5"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 16384,
+   "doc": "d1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/d1_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "f4d79a638bf2ecf1030c2f2768f785df7015011bba3bb43908e0e9383426d6ce"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 32768,
+   "doc": "d1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/d1_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "1d94ab358ab2b10b731a384d1db955fb296cccbc0f1b6a473e757cb12795b8ba"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 65536,
+   "doc": "d1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/d1_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "258caf37177e2d57876acc811aa97f58da1259f1b5bfc3cdbe682801ab38658b"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 16384,
+   "doc": "fx1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/fx1_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "e8f3f84a702aea6d52221f107ea18a2182e99a1936724ba94c83d64c3e90f53e"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 32768,
+   "doc": "fx1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/fx1_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "1c6a98ba864ca8dfe6fadd89618542eee332fdbff20dff682d63a3fe78e373e3"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 65536,
+   "doc": "fx1",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/fx1_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "1c54fdead2c22b24c910672bff5593c2d17e7070172a524e293c9fbdae51d458"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 16384,
+   "doc": "u0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/u0_r0_16384.npy",
+   "bytes": 993408,
+   "sha256": "53929da4bd3cc5f8c64decd4f4a63fd82e7e8a401b8127592a9a1d5cbddb68a5"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 32768,
+   "doc": "u0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/u0_r0_32768.npy",
+   "bytes": 993408,
+   "sha256": "104256919f58b323757679141d3a58ddd7e8ff092e7cb5a83ab9bf1bf8c29a8f"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 65536,
+   "doc": "u0",
+   "rep": 0,
+   "rows": 1,
+   "dims": [
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1/20261112T171109Z/C/u0_r0_65536.npy",
+   "bytes": 993408,
+   "sha256": "d8ccc2007f73587553e0176a869230cbfe86b4f7e52fa9aef1f3965446a9bdb4"
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "doc0",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc0_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "fff704976d248d8360ccfa7a07102898c19fab38021009bf750f4c735e0a0377",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "doc0",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc0_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "03059e8509255cf9a572ad57d42dd5710d7f07ed984ce1b2349d18a945591e72",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 98304,
+   "doc": "doc0",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc0_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "d0489ac79027f6061ab3d77c23adf822da8326b3daff9f128fa9607942ceba73",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "doc1",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc1_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "3eacffb2e5ba3a6f0d4c48148d76c220d1edb97c98396e20ea73c9bf16c67697",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "doc1",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc1_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "05d2cf9aaee8b72139eb3c3fc84cc4755b65d3bcbb9a1beac45537380e56fbbd",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 98304,
+   "doc": "doc1",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc1_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "8ffc244fa16205d350ec8e3be5ee290c0588e997c1ee450e43a4d8277ebff646",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "doc2",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc2_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "3b0c42f6e39d5781cf1d27a06973f8dbfb90b066629245b570796e0944013582",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "doc2",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc2_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "a2a654e4aacea560143e6f5cf3ab52b7ea5dedcb955d4503f4bb0d2f8d3a7bbc",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 98304,
+   "doc": "doc2",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc2_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "348a02a4d07bddd47f405f0b52941fc0187889bfc90d26d7a12f5d60126d666a",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "doc3",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc3_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "c2f08357a8138549c0add8840e70b328b152160897504d31606818940aef7500",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "doc3",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc3_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "0d09e6a669fccc2d3b0d9ca0ffe7674413c2f56cfae8934104443d4caa9b23dc",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 98304,
+   "doc": "doc3",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc3_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "93b450123560cad148833c152b30d90086c711fb0bcf8f9f7eb8c912dade1c2d",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "doc4",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc4_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "c582cc0c6df7aca16fd47e4070c7a0bbda28b872ca6ea1dae0c8456dc7200186",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "doc4",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc4_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "1ce50000771597ddabac123b0d443a6a114ec10dd2cae1ba933948f0eb76f0e9",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 98304,
+   "doc": "doc4",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc4_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "be17d0edf9df3803b03b13493476495c6091bc273921e65536c21c5be9827e19",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "doc5",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc5_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "8c6782afd91ae96dab85bfbbf39c4f89f9d9a5861702110fd888c93e2e4d6315",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "doc5",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc5_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "4c2ffe3890a317edfd35f9babfe7da5429714f51e1c08facab0fe22ce76dad38",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 98304,
+   "doc": "doc5",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc5_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "9f66f7d641b4d674baa6331aaa8fde1f00b2c59c3cbb206f2c5eb06217a18dd8",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "doc6",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc6_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "9f1d01016a4dfeb0e9b22218d6e10395e227f4877df62464004eb33ddd144142",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "doc6",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc6_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "4732ef4c42422287375bd5241001fac764d0a49b9a3c2c70dd8cc61831f6ee81",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 98304,
+   "doc": "doc6",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc6_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "2b91d6ec72e8800d78b371420731ca33b1ac41a935150abd93aad4dd4551cde9",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 32768,
+   "doc": "doc7",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc7_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "34c37f1f461c8206f2df105a43508439c7f3923121a5a437b9568ce33ec2fb6b",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 65536,
+   "doc": "doc7",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc7_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "8de3762ae53166561accb75c12820cc831220a41b1b9605c78ef5903277cb1af",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "A",
+   "arm_label": "A",
+   "bucket": 98304,
+   "doc": "doc7",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/A/doc7_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "bdb5bf979b1ac8ae1000f98147f0b60d5b7b5b9a87edcdec55553e43e16d653b",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "arm_label": "Ap",
+   "bucket": 32768,
+   "doc": "doc0",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/Ap/doc0_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "a4d07ef57448e1ec15225b08c79711813e6134a72395d903ebc022dcc9e15eca",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "arm_label": "Ap",
+   "bucket": 65536,
+   "doc": "doc0",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/Ap/doc0_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "bf9f80738f4ef5c6dfed984edaccffd6c5fe09e0f5d2ee5962f8a8f06ba8be3a",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "arm_label": "Ap",
+   "bucket": 98304,
+   "doc": "doc0",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/Ap/doc0_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "618a55ccfffb5a0bef33d5993d787109882677f3498162f217f54e5b640d1807",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "doc0",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc0_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "55aaef17fd8cc14e242abd072067ef141dfff4761fde23a7213297fe950cf249",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "doc0",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc0_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "5502d33199925f801b3baa25309e6b3c69125a04b8b7c117b9983a0e1c55627a",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 98304,
+   "doc": "doc0",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc0_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "926186671950b820f29a5bc5b078e6a9650c346d582f73df3f280c52f40f1225",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "doc1",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc1_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "e5943f6c9cf739b95bd836b0cd8bee196f8ae087da7e5a054b7f824885cf3bbb",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "doc1",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc1_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "f91b30fcd477fabcbbfab63c7616a37e2216026f4f2be71acfd4f65712b35aab",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 98304,
+   "doc": "doc1",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc1_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "7455a6dfbfc3dd1d9f102175a6a5c013e8e08719bf42eb817a9d354d5e8d0d0a",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "doc2",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc2_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "e71dd5bd81d4e1ed2be4fc5ff1039d199b02922c0d2e84490ed8d02af5b66abc",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "doc2",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc2_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "b507616d052294e10c442c483a87c075c67e72898d1cfc16d51bbcebeb2ae606",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 98304,
+   "doc": "doc2",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc2_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "5c1c41b6d1a816c8d09744b1e75a04dcfb4b98c7d5b19d65c51db5feced75c56",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "doc3",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc3_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "74c08df40d229552b2c37899adc497ab5fc76da88358bb5b2ac90fa75cd8b98b",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "doc3",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc3_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "6f39040c24db48bfed8c76242de66dab00d759b1dc684ecaea96bc008a5575c3",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 98304,
+   "doc": "doc3",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc3_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "8a6d506c7c65ff22460c494dfa766be46a873f3ed257fa71103b611d4a026670",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "doc4",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc4_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "ad900be6398063836f8a01d87e72c555d5c06a7964d4ce633937c9d5b5bedacb",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "doc4",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc4_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "af0275abc68f320ccfae897b3816393b7014471f9391a97fda238e3d53651eeb",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 98304,
+   "doc": "doc4",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc4_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "ec055c68903590d31ae1c6b87de2518a51b23e1ab6a12c699873cc98dd08c5b5",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "doc5",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc5_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "631e7b2077818daab7962f8862159409273c547964c9e8846d4adbfec7e4572b",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "doc5",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc5_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "f4bcef5ffc05acb62e3050d3de050e43531b36b50beffdef47c1ac5818d601a1",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 98304,
+   "doc": "doc5",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc5_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "ce343af75693fbf1a810244d0750073eb42b91e35594fa53aed66b9ffb5a3ac5",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "doc6",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc6_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "b92fff0e5a0d0260863c3d22b17c3584ddaf9751153c5dc4cc392fb1ba90faa0",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "doc6",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc6_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "b946e20fbd6b9000d641a1423d85aae515e37f4830b9b44cb80e64f45355c424",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 98304,
+   "doc": "doc6",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc6_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "d984d21eada6e6432efa3a0a53d5abd4a8815b5acc2ec4c2d424322b9565fffd",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 32768,
+   "doc": "doc7",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc7_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "2aedb0414a306c147188244eb8e8c2419627beaa55784da5cf22a5029d574d8c",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 65536,
+   "doc": "doc7",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc7_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "2f23b14edd1c6692f44c748c83779876515319464870c7ae0cdf6090e9ea1302",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "B",
+   "arm_label": "B",
+   "bucket": 98304,
+   "doc": "doc7",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/B/doc7_b98304.f32",
+   "bytes": 63569920,
+   "sha256": "b230c2ebdb43aa195aaacf03ee1ebf2248224a9ed5b7081382170835d20e8a0b",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 32768,
+   "doc": "doc0",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/C/doc0_b32768.f32",
+   "bytes": 63569920,
+   "sha256": "5f50ae278b451a8ff562631c68b9644886717415904d5e028bbd018b177521c5",
+   "size_ok": true
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "arm_label": "C(F32 ref)",
+   "bucket": 65536,
+   "doc": "doc0",
+   "rep": 0,
+   "rows": 64,
+   "dims": [
+    64,
+    248320
+   ],
+   "dtype": "<f4",
+   "file": "<M>/occamy35-day-20261112/evidence/G1c/run-20261112T202254Z/C/doc0_b65536.f32",
+   "bytes": 63569920,
+   "sha256": "a1370e5750a71b1c6f2bad080834ae8ce597bea8743ca0c61438a0ee99133aca",
+   "size_ok": true
+  }
+ ],
+ "missing": [
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc1",
+   "bucket": 32768,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc1",
+   "bucket": 65536,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc1",
+   "bucket": 98304,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc2",
+   "bucket": 32768,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc2",
+   "bucket": 65536,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc2",
+   "bucket": 98304,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc3",
+   "bucket": 32768,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc3",
+   "bucket": 65536,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc3",
+   "bucket": 98304,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc4",
+   "bucket": 32768,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc4",
+   "bucket": 65536,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc4",
+   "bucket": 98304,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc5",
+   "bucket": 32768,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc5",
+   "bucket": 65536,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc5",
+   "bucket": 98304,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc6",
+   "bucket": 32768,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc6",
+   "bucket": 65536,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc6",
+   "bucket": 98304,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc7",
+   "bucket": 32768,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc7",
+   "bucket": 65536,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "Ap",
+   "doc": "doc7",
+   "bucket": 98304,
+   "reason": "by design: noise arm ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc0",
+   "bucket": 98304,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2); 98K unreachable (cudaMalloc OOM at ctx 98560 with fa off/f32 KV; retry ctx 66000 covers 32K/65K only)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc1",
+   "bucket": 32768,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc1",
+   "bucket": 65536,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc1",
+   "bucket": 98304,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2); 98K unreachable (cudaMalloc OOM at ctx 98560 with fa off/f32 KV; retry ctx 66000 covers 32K/65K only)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc2",
+   "bucket": 32768,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc2",
+   "bucket": 65536,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc2",
+   "bucket": 98304,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2); 98K unreachable (cudaMalloc OOM at ctx 98560 with fa off/f32 KV; retry ctx 66000 covers 32K/65K only)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc3",
+   "bucket": 32768,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc3",
+   "bucket": 65536,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc3",
+   "bucket": 98304,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2); 98K unreachable (cudaMalloc OOM at ctx 98560 with fa off/f32 KV; retry ctx 66000 covers 32K/65K only)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc4",
+   "bucket": 32768,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc4",
+   "bucket": 65536,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc4",
+   "bucket": 98304,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2); 98K unreachable (cudaMalloc OOM at ctx 98560 with fa off/f32 KV; retry ctx 66000 covers 32K/65K only)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc5",
+   "bucket": 32768,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc5",
+   "bucket": 65536,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc5",
+   "bucket": 98304,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2); 98K unreachable (cudaMalloc OOM at ctx 98560 with fa off/f32 KV; retry ctx 66000 covers 32K/65K only)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc6",
+   "bucket": 32768,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc6",
+   "bucket": 65536,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc6",
+   "bucket": 98304,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2); 98K unreachable (cudaMalloc OOM at ctx 98560 with fa off/f32 KV; retry ctx 66000 covers 32K/65K only)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc7",
+   "bucket": 32768,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc7",
+   "bucket": 65536,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2)"
+  },
+  {
+   "set": "G1c",
+   "arm": "C",
+   "doc": "doc7",
+   "bucket": 98304,
+   "reason": "by design: F32 ref ran doc 0 only (tier 2); 98K unreachable (cudaMalloc OOM at ctx 98560 with fa off/f32 KV; retry ctx 66000 covers 32K/65K only)"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "doc": "fx2",
+   "bucket": 16384,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "doc": "fx2",
+   "bucket": 32768,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "A",
+   "doc": "fx2",
+   "bucket": 65536,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "d0",
+   "bucket": 16384,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "d0",
+   "bucket": 32768,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "d0",
+   "bucket": 65536,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "d1",
+   "bucket": 16384,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "d1",
+   "bucket": 32768,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "d1",
+   "bucket": 65536,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "fx1",
+   "bucket": 16384,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "fx1",
+   "bucket": 32768,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "fx1",
+   "bucket": 65536,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "fx2",
+   "bucket": 16384,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "fx2",
+   "bucket": 32768,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "fx2",
+   "bucket": 65536,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "u0",
+   "bucket": 16384,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "u0",
+   "bucket": 32768,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "Ap",
+   "doc": "u0",
+   "bucket": 65536,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "doc": "fx2",
+   "bucket": 16384,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "doc": "fx2",
+   "bucket": 32768,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  },
+  {
+   "set": "G1",
+   "arm": "C",
+   "doc": "fx2",
+   "bucket": 65536,
+   "reason": "absent (arm did not run this doc/checkpoint)"
+  }
+ ]
+}
