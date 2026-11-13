@@ -82,3 +82,19 @@ Readings
 - First end-to-end GEMM number on the target workload: -15.7%, with very little spread between blocks (+/-0.2 s). The wrap-up's -20..-25% estimate assumes full engagement.
 - The GEMM arm is the v4 lib, not BUNDLE3 + GEMM. It differs from b3 in more than the flag, so the -15.7% belongs to that lib as a whole. WP0 (one lib on BUNDLE3 + v4) separates the two.
 - Measurement only. Not adopted: N4 vs FP64 favours GEMM at depth, but GEMM fails the stock-relative KLD gate; the owner decides.
+
+## Day 13 Nov afternoon: WP0 and prod adoption (subdir `day13/WP0/`)
+Single tree `gemm-b3` (BUNDLE3 base + cap patch + GEMM v4 + counters + KVQ8 flag off); patches in `day13/WP0/patches/`.
+Owner decision 14:56: adopt GEMM, cap1024, ub2048 and K-only Q8 KV; gate reform approved. The data allowed only part of that:
+
+| arm | +4K@90K single | 2-slot makespan vs b3 | peak MiB | GEMM counter | adopted |
+|---|---|---|---|---|---|
+| b3 (old prod) | 31.25 s | 210.68 s | 23109 | - | rollback |
+| GEMM, F16 KV, ub1024, cap 0 | 23.09 s | -15.76% (N3B -15.69%, n=3) | 23459 | engaged; 2-slot fallback ne3 11,710 | **yes, prod since ~16:10** |
+| GEMM + K-only Q8 KV | 30.47 s | -0.46% | 22619 | engaged 0, reason `ktype` | no: GEMM rejects q8_0 K |
+| GEMM, F16, ub2048, cap1024 | 30.4 s | -12.35% (CI -14.36..-10.34, n=2) | 23867 | single engaged 0, reason `q_gt_1024` | no: guard rejects ub2048 |
+
+- Q8 slot round trip (save/restore): identical tokens on both slots.
+- Prod smoke via llama-swap: 9.9K-token prompt answered correctly in 19.1 s; server log `occamy_fa_gemm: engaged=70`.
+- Prod create script: `day13/WP0/prod-create-b3gemm.sh`. Rollback = rename the previous BUNDLE3 container back.
+- Next (night 13->14 Nov): WP3b (GEMM reads q8_0 K), G1 (Q-tile past 1024 so ub2048 engages), WP1 (per-stream GEMM for the ne3 fallback), C1 (cap1024+GEMM), WP2, Q4 KV rows, WP4. Plan: `day13/HANDOFF/NIGHT_PLAN_20261113.md`.

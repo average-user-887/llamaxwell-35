@@ -1,0 +1,27 @@
+From 2022216f4123f304108dc2300bb3ebdeda677207 Mon Sep 17 00:00:00 2001
+From: average-user-887 <average-user-887@users.noreply.github.com>
+Date: Fri, 13 Nov 2026 15:01:44 +0100
+Subject: [PATCH 5/5] fixup! fattn: occamy_fa_gemm counters
+
+---
+ ggml/src/ggml-cuda/fattn-maxwell-gemm.cuh | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/ggml/src/ggml-cuda/fattn-maxwell-gemm.cuh b/ggml/src/ggml-cuda/fattn-maxwell-gemm.cuh
+index ea633dc..52a4d49 100644
+--- a/ggml/src/ggml-cuda/fattn-maxwell-gemm.cuh
++++ b/ggml/src/ggml-cuda/fattn-maxwell-gemm.cuh
+@@ -60,6 +60,10 @@ static void occamy_fa_gemm_first_use() {
+     }
+ }
+ 
++static void occamy_fa_gemm_fallback(occamy_fa_gemm_reason r) {
++    occamy_fa_gemm_fallbacks[r].fetch_add(1, std::memory_order_relaxed);
++}
++
+ // Called from ggml_backend_cuda_free (defined in fattn.cu, declared in fattn.cuh).
+ static void occamy_fa_gemm_report_free_impl() {
+     if (occamy_fa_gemm_used.load(std::memory_order_relaxed)) {
+-- 
+2.43.0
+

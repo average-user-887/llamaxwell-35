@@ -1,0 +1,79 @@
+{
+ "tag": "single_prod_s1",
+ "arm": "prod",
+ "slot": 1,
+ "kind": "single",
+ "block": -1,
+ "ok": true,
+ "launch": {
+  "arm": "prod",
+  "binary": "wp0",
+  "lib": "libggml-cuda.so",
+  "lib_path": "<LAB>/occamy35-night-20261113/WP0/build/bin/libggml-cuda.so",
+  "env": [
+   "GGML_CUDA_MOE_DOWNX=1",
+   "GGML_CUDA_MOE_DOWNH=2",
+   "GGML_CUDA_OCCAMY_GDN_QKREUSE=1",
+   "GGML_CUDA_OCCAMY_GDN_PCSHARE=1",
+   "GGML_CUDA_MMVQ_SM52=1",
+   "GGML_CUDA_RMS_WARP=0",
+   "GGML_CUDA_HEAD_ROWPACK_SM52=1",
+   "GGML_CUDA_MMQ_COMPACT_SM52=1",
+   "GGML_CUDA_Q8_REUSE=1",
+   "GGML_CUDA_NORM_Q8=1",
+   "GGML_CUDA_CONCAT_T=1",
+   "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT=1",
+   "GGML_CUDA_GATE_COPY=1",
+   "GGML_CUDA_OCCAMY_GDN=1",
+   "GGML_CUDA_MMQ_XMAD_SM52=1",
+   "GGML_CUDA_GDN_COLS=2,4",
+   "GGML_CUDA_OCCAMY_FA=1",
+   "GGML_CUDA_OCCAMY_FUSED=1",
+   "GGML_CUDA_OCCAMY_FA_PIPE=3",
+   "GGML_CUDA_MOE_LOP3=1",
+   "GGML_CUDA_MOE_TAILBAL=1",
+   "GGML_CUDA_OCCAMY_GDN_PREF=1",
+   "GGML_CUDA_OCCAMY_HOSTGAP=1",
+   "GGML_CUDA_OCCAMY_SMALLFUSE=2",
+   "GGML_CUDA_MMQ_TAIL_SM52=1",
+   "GGML_CUDA_OCCAMY_GDN_REPACK=1",
+   "GGML_CUDA_OCCAMY_N2SPLIT=1",
+   "GGML_CUDA_OCCAMY_FA_ADDR=1",
+   "GGML_CUDA_OCCAMY_N2GDN=1",
+   "GGML_CUDA_FA_MAXWELL_GEMM=1"
+  ],
+  "cap": 1024,
+  "ub": 2048,
+  "gemm": true,
+  "container": "n3-single-prod-s1-81215",
+  "ready_s": 24.329137802124023
+ },
+ "n_restored": 84000,
+ "steps": [
+  {
+   "prompt_len": 90000,
+   "prompt_n": 6000,
+   "cache_n": 84000,
+   "prompt_ms": 43697.435,
+   "http": 200,
+   "err": null,
+   "wall_s": 43.72460150718689
+  },
+  {
+   "prompt_len": 94000,
+   "prompt_n": 4000,
+   "cache_n": 90000,
+   "prompt_ms": 30542.198,
+   "http": 200,
+   "err": null,
+   "wall_s": 30.568368434906006
+  }
+ ],
+ "gemm_check": {
+  "ok": false,
+  "engaged": 0,
+  "fallback": 90,
+  "reasons": "q_lt_64:40,q_gt_1024:50",
+  "n_lines": 3
+ }
+}

@@ -1,0 +1,21 @@
+WP0 receipt 2026-11-13T14:10:44Z
+branch gemm-b3 in <LAB>/occamy35-night-20261113/WP0/src
+2022216 fixup! fattn: occamy_fa_gemm counters
+406856a Q8N: native q8_0 K/V read in occamy hs_ar decode (GGML_CUDA_OCCAMY_KVQ8=1, default off)
+71a0822 fattn: occamy_fa_gemm engaged/fallback[reason] counters, printed at first use and backend free/exit
+0cd59b1 fattn: Maxwell packed-GQA GEMM attention integration v4 (GGML_CUDA_FA_MAXWELL_GEMM=1, default off)
+826fae7 feat(server): add opt-in mixed prompt batch cap [skip ci]
+2436f75 Merge day-d1bf: N2GDN fused two-sequence GDN (GGML_CUDA_OCCAMY_N2GDN, default off)
+
+3a91fb6415e97d82cbd3e592829c6be5d47e5f726fc4fb95fc6357abeb0024c5  llama-server
+5dd56941b2c711368cbe8f87aee83d43584e340ecb3a78bcf7bbc474f492723c  libllama.so
+5dd56941b2c711368cbe8f87aee83d43584e340ecb3a78bcf7bbc474f492723c  libllama.so.0
+5dd56941b2c711368cbe8f87aee83d43584e340ecb3a78bcf7bbc474f492723c  libllama.so.0.6.0
+aa1ab78609d88874fabaa434db6f62ebfd9c80c49d95b5fb593c8d7a62d23adc  libggml-cuda.so
+cac7e672c0926211542c1326cead42a32f0ba3bc39c7a61cad938ffcca8c47e5  libllama-server-impl.so
+
+strings FA_MAXWELL_GEMM count: 1
+strings occamy_fa_gemm count: 7
+llama-server --help: 1 line(s) with --mixed-batch-size
+build: build-wp0.sh rc=0 (attempt1 rc=2: missing occamy_fa_gemm_fallback, fixed in 2022216; log build.attempt1.log)
+fallback reasons: cc nullsrc qtype ktype vtype dst sinks headdim heads ne3 q_lt_64 q_gt_1024 keys_lt_4096 keys_gt_98304 shape stride mask opparams
