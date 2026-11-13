@@ -2,6 +2,7 @@
 
 #include "common.cuh"
 
+#include <algorithm>
 #include <atomic>
 #include <cmath>
 #include <cstdlib>
@@ -21,6 +22,8 @@ static const char * const occamy_fa_gemm_reason_names[OFG_COUNT] = {
     "q_lt_64", "q_gt_1024", "keys_lt_4096", "keys_gt_98304", "shape", "stride", "mask", "opparams",
 };
 static std::atomic<uint64_t> occamy_fa_gemm_engaged{0};
+static std::atomic<uint64_t> occamy_fa_gemm_q_tiled{0}; // engaged ops that were split into >1 Q chunks
+static constexpr int maxwell_gemm_max_chunk_queries = 1024; // scratch is sized for this many Q rows
 static std::atomic<uint64_t> occamy_fa_gemm_fallbacks[OFG_COUNT];
 static std::atomic<bool> occamy_fa_gemm_used{false};
 
@@ -41,8 +44,9 @@ static void occamy_fa_gemm_print(const char * when) {
             off += size_t(w);
         }
     }
-    std::fprintf(stderr, "occamy_fa_gemm: engaged=%llu fallback=%llu reasons=%s when=%s\n",
-        (unsigned long long) occamy_fa_gemm_engaged.load(std::memory_order_relaxed), (unsigned long long) total,
+    std::fprintf(stderr, "occamy_fa_gemm: engaged=%llu q_tiled=%llu fallback=%llu reasons=%s when=%s\n",
+        (unsigned long long) occamy_fa_gemm_engaged.load(std::memory_order_relaxed),
+        (unsigned long long) occamy_fa_gemm_q_tiled.load(std::memory_order_relaxed), (unsigned long long) total,
         off ? reasons : "-", when);
     std::fflush(stderr);
 }
@@ -235,7 +239,6 @@ static bool ggml_cuda_flash_attn_ext_maxwell_gemm(ggml_backend_cuda_context & ct
     if (queries->ne[2] != 16 || keys->ne[2] != 2 || values->ne[2] != 2) OFG_FALLBACK(heads);
     if (queries->ne[3] != 1 || keys->ne[3] != 1 || values->ne[3] != 1) OFG_FALLBACK(ne3);
     if (queries->ne[1] < 64) OFG_FALLBACK(q_lt_64);
-    if (queries->ne[1] > 1024) OFG_FALLBACK(q_gt_1024);
     if (keys->ne[1] < 4096) OFG_FALLBACK(keys_lt_4096);
     if (keys->ne[1] > 98304) OFG_FALLBACK(keys_gt_98304);
     if (values->ne[1] != keys->ne[1] || dst->ne[0] != 256 || dst->ne[1] != 16 ||
@@ -259,9 +262,11 @@ static bool ggml_cuda_flash_attn_ext_maxwell_gemm(ggml_backend_cuda_context & ct
     }
 #undef OFG_FALLBACK
     occamy_fa_gemm_engaged.fetch_add(1, std::memory_order_relaxed);
-    const int query_count = queries->ne[1];
+    const int total_queries = queries->ne[1];
+    if (total_queries > maxwell_gemm_max_chunk_queries) {
+        occamy_fa_gemm_q_tiled.fetch_add(1, std::memory_order_relaxed);
+    }
     const int key_count = keys->ne[1];
-    const int padded_queries = ((query_count + maxwell_gemm_tile_queries - 1) / maxwell_gemm_tile_queries) * maxwell_gemm_tile_queries;
     const int key_capacity = 98304;
     const int split_count = (key_count + maxwell_gemm_split_keys - 1) / maxwell_gemm_split_keys;
     const int full_splits = key_count / maxwell_gemm_split_keys;
@@ -291,50 +296,54 @@ static bool ggml_cuda_flash_attn_ext_maxwell_gemm(ggml_backend_cuda_context & ct
     const uint64_t call = calls.fetch_add(1, std::memory_order_relaxed) + 1;
     if (call == 1) {
         GGML_LOG_INFO("maxwell_gemm: version=4 softmax=online kv_staging_heads=1 call=%llu q=%d k=%d q_heads=16 kv_heads=2 d=256 mask_stride=%zu key_capacity=%d splits=%d tail=%d scratch_bytes=%zu pool_bytes=%zu cublas_workspace_bytes=%zu\n",
-            (unsigned long long) call, query_count, key_count, mask ? mask->nb[1] : 0, key_capacity, split_count, tail_keys,
+            (unsigned long long) call, total_queries, key_count, mask ? mask->nb[1] : 0, key_capacity, split_count, tail_keys,
             scratch_bytes, scratch.actual_size, ctx.cublas_workspace_sizes[ctx.device]);
     }
-    maxwell_gemm_pack_queries<<<4096, 256, 0, stream>>>(
-        static_cast<const char *>(queries->data), packed_queries, query_count, padded_queries, queries->nb[1], queries->nb[2]);
-    maxwell_gemm_pv_pointers<<<1, 256, 0, stream>>>(
-        values_float, scores, partials, pv_left, pv_right, pv_output, split_count);
-    CUDA_CHECK(cudaGetLastError());
-    const float one = 1.0f;
-    const float zero = 0.0f;
-    for (int group = 0; group < maxwell_gemm_kv_heads; ++group) {
-        maxwell_gemm_convert_kv<<<65535, 256, 0, stream>>>(
-            static_cast<const char *>(keys->data) + group * keys->nb[2],
-            static_cast<const char *>(values->data) + group * values->nb[2],
-            keys_float, values_float, key_count, keys->nb[1], values->nb[1]);
+    for (int q_off = 0; q_off < total_queries; q_off += maxwell_gemm_max_chunk_queries) {
+    const int query_count = std::min(maxwell_gemm_max_chunk_queries, total_queries - q_off);
+    const int padded_queries = ((query_count + maxwell_gemm_tile_queries - 1) / maxwell_gemm_tile_queries) * maxwell_gemm_tile_queries;
+        maxwell_gemm_pack_queries<<<4096, 256, 0, stream>>>(
+            static_cast<const char *>(queries->data) + size_t(q_off) * queries->nb[1], packed_queries, query_count, padded_queries, queries->nb[1], queries->nb[2]);
+        maxwell_gemm_pv_pointers<<<1, 256, 0, stream>>>(
+            values_float, scores, partials, pv_left, pv_right, pv_output, split_count);
         CUDA_CHECK(cudaGetLastError());
-        for (int query_start = 0; query_start < padded_queries; query_start += maxwell_gemm_tile_queries) {
-            const int chunk = (query_start / maxwell_gemm_tile_queries) * maxwell_gemm_kv_heads + group;
-            CUBLAS_CHECK(cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N,
-                key_count, packed_columns, maxwell_gemm_dimension, &scale,
-                keys_float, maxwell_gemm_dimension,
-                packed_queries + size_t(chunk) * product_elements, maxwell_gemm_dimension,
-                &zero, scores, key_count));
-            maxwell_gemm_masked_softmax<<<dim3(maxwell_gemm_tile_queries, maxwell_gemm_grouped_heads), 256, 0, stream>>>(
-                scores, mask ? static_cast<const char *>(mask->data) : nullptr, mask ? mask->nb[1] : 0,
-                key_count, query_count, query_start);
+        const float one = 1.0f;
+        const float zero = 0.0f;
+        for (int group = 0; group < maxwell_gemm_kv_heads; ++group) {
+            maxwell_gemm_convert_kv<<<65535, 256, 0, stream>>>(
+                static_cast<const char *>(keys->data) + group * keys->nb[2],
+                static_cast<const char *>(values->data) + group * values->nb[2],
+                keys_float, values_float, key_count, keys->nb[1], values->nb[1]);
             CUDA_CHECK(cudaGetLastError());
-            if (full_splits > 0) {
-                CUBLAS_CHECK(cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N,
-                    maxwell_gemm_dimension, packed_columns, maxwell_gemm_split_keys, &one,
-                    pv_left, maxwell_gemm_dimension,
-                    pv_right, key_count, &zero, pv_output, maxwell_gemm_dimension, full_splits));
+            for (int query_start = 0; query_start < padded_queries; query_start += maxwell_gemm_tile_queries) {
+                const int chunk = (query_start / maxwell_gemm_tile_queries) * maxwell_gemm_kv_heads + group;
+                CUBLAS_CHECK(cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N,
+                    key_count, packed_columns, maxwell_gemm_dimension, &scale,
+                    keys_float, maxwell_gemm_dimension,
+                    packed_queries + size_t(chunk) * product_elements, maxwell_gemm_dimension,
+                    &zero, scores, key_count));
+                maxwell_gemm_masked_softmax<<<dim3(maxwell_gemm_tile_queries, maxwell_gemm_grouped_heads), 256, 0, stream>>>(
+                    scores, mask ? static_cast<const char *>(mask->data) + size_t(q_off) * mask->nb[1] : nullptr, mask ? mask->nb[1] : 0,
+                    key_count, query_count, query_start);
+                CUDA_CHECK(cudaGetLastError());
+                if (full_splits > 0) {
+                    CUBLAS_CHECK(cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+                        maxwell_gemm_dimension, packed_columns, maxwell_gemm_split_keys, &one,
+                        pv_left, maxwell_gemm_dimension,
+                        pv_right, key_count, &zero, pv_output, maxwell_gemm_dimension, full_splits));
+                }
+                if (tail_keys > 0) {
+                    const int key_start = full_splits * maxwell_gemm_split_keys;
+                    CUBLAS_CHECK(cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+                        maxwell_gemm_dimension, packed_columns, tail_keys, &one,
+                        values_float + size_t(key_start) * maxwell_gemm_dimension, maxwell_gemm_dimension,
+                        scores + key_start, key_count, &zero,
+                        partials + size_t(full_splits) * product_elements, maxwell_gemm_dimension));
+                }
+                maxwell_gemm_reduce_products<<<(product_elements + 255) / 256, 256, 0, stream>>>(
+                    partials, static_cast<float *>(dst->data) + size_t(q_off) * maxwell_gemm_query_heads * maxwell_gemm_dimension, query_count, query_start, group * maxwell_gemm_grouped_heads, split_count);
+                CUDA_CHECK(cudaGetLastError());
             }
-            if (tail_keys > 0) {
-                const int key_start = full_splits * maxwell_gemm_split_keys;
-                CUBLAS_CHECK(cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
-                    maxwell_gemm_dimension, packed_columns, tail_keys, &one,
-                    values_float + size_t(key_start) * maxwell_gemm_dimension, maxwell_gemm_dimension,
-                    scores + key_start, key_count, &zero,
-                    partials + size_t(full_splits) * product_elements, maxwell_gemm_dimension));
-            }
-            maxwell_gemm_reduce_products<<<(product_elements + 255) / 256, 256, 0, stream>>>(
-                partials, static_cast<float *>(dst->data), query_count, query_start, group * maxwell_gemm_grouped_heads, split_count);
-            CUDA_CHECK(cudaGetLastError());
         }
     }
     return true;
