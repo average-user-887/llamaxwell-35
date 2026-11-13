@@ -12,16 +12,20 @@
 // occamy_fa_gemm counters: one reason per guard clause; printed at first use and at
 // CUDA backend free / process exit (only when GGML_CUDA_FA_MAXWELL_GEMM=1).
 enum occamy_fa_gemm_reason {
-    OFG_cc, OFG_nullsrc, OFG_qtype, OFG_ktype, OFG_vtype, OFG_dst, OFG_sinks, OFG_headdim, OFG_heads, OFG_ne3,
+    OFG_cc, OFG_nullsrc, OFG_qtype, OFG_ktype, OFG_vtype, OFG_dst, OFG_sinks, OFG_headdim, OFG_heads, OFG_ne3_q_ge_64, OFG_ne3_decode,
     OFG_q_lt_64, OFG_q_gt_1024, OFG_keys_lt_4096, OFG_keys_gt_98304, OFG_shape, OFG_stride, OFG_mask, OFG_opparams,
     OFG_COUNT
 };
 static const char * const occamy_fa_gemm_reason_names[OFG_COUNT] = {
-    "cc", "nullsrc", "qtype", "ktype", "vtype", "dst", "sinks", "headdim", "heads", "ne3",
+    "cc", "nullsrc", "qtype", "ktype", "vtype", "dst", "sinks", "headdim", "heads", "ne3_q_ge_64", "ne3_decode",
     "q_lt_64", "q_gt_1024", "keys_lt_4096", "keys_gt_98304", "shape", "stride", "mask", "opparams",
 };
 static std::atomic<uint64_t> occamy_fa_gemm_engaged{0};
 static std::atomic<uint64_t> occamy_fa_gemm_fallbacks[OFG_COUNT];
+// work = q_rows * keys * ne3 (real work, all streams); work_q64 = same but only for calls with q_rows >= 64.
+static std::atomic<uint64_t> occamy_fa_gemm_engaged_work{0};
+static std::atomic<uint64_t> occamy_fa_gemm_fallback_work[OFG_COUNT];
+static std::atomic<uint64_t> occamy_fa_gemm_fallback_work_q64[OFG_COUNT];
 static std::atomic<bool> occamy_fa_gemm_used{false};
 
 static void occamy_fa_gemm_print(const char * when) {
@@ -41,9 +45,32 @@ static void occamy_fa_gemm_print(const char * when) {
             off += size_t(w);
         }
     }
-    std::fprintf(stderr, "occamy_fa_gemm: engaged=%llu fallback=%llu reasons=%s when=%s\n",
+    // work totals (q_rows*keys*ne3): engaged plus per-reason fallback
+    char work[1024];
+    size_t woff = 0;
+    work[0] = '\0';
+    const uint64_t ew = occamy_fa_gemm_engaged_work.load(std::memory_order_relaxed);
+    uint64_t q64_fallback = 0;
+    int wn = std::snprintf(work, sizeof(work), "engaged:%llu", (unsigned long long) ew);
+    if (wn > 0) {
+        woff = size_t(wn);
+    }
+    for (int i = 0; i < OFG_COUNT; ++i) {
+        q64_fallback += occamy_fa_gemm_fallback_work_q64[i].load(std::memory_order_relaxed);
+        const uint64_t w = occamy_fa_gemm_fallback_work[i].load(std::memory_order_relaxed);
+        if (w == 0 || woff >= sizeof(work)) {
+            continue;
+        }
+        wn = std::snprintf(work + woff, sizeof(work) - woff, ",%s:%llu", occamy_fa_gemm_reason_names[i], (unsigned long long) w);
+        if (wn > 0) {
+            woff += size_t(wn);
+        }
+    }
+    const uint64_t lost = occamy_fa_gemm_fallback_work_q64[OFG_ne3_q_ge_64].load(std::memory_order_relaxed);
+    const double den = double(ew) + double(q64_fallback);
+    std::fprintf(stderr, "occamy_fa_gemm: engaged=%llu fallback=%llu reasons=%s work=%s prefill_work_share_lost_to_ne3=%.2f%% when=%s\n",
         (unsigned long long) occamy_fa_gemm_engaged.load(std::memory_order_relaxed), (unsigned long long) total,
-        off ? reasons : "-", when);
+        off ? reasons : "-", work, den > 0 ? 100.0 * double(lost) / den : 0.0, when);
     std::fflush(stderr);
 }
 
@@ -60,8 +87,12 @@ static void occamy_fa_gemm_first_use() {
     }
 }
 
-static void occamy_fa_gemm_fallback(occamy_fa_gemm_reason r) {
+static void occamy_fa_gemm_fallback(occamy_fa_gemm_reason r, uint64_t work, bool q_ge_64) {
     occamy_fa_gemm_fallbacks[r].fetch_add(1, std::memory_order_relaxed);
+    occamy_fa_gemm_fallback_work[r].fetch_add(work, std::memory_order_relaxed);
+    if (q_ge_64) {
+        occamy_fa_gemm_fallback_work_q64[r].fetch_add(work, std::memory_order_relaxed);
+    }
 }
 
 // Called from ggml_backend_cuda_free (defined in fattn.cu, declared in fattn.cuh).
@@ -219,12 +250,15 @@ static bool ggml_cuda_flash_attn_ext_maxwell_gemm(ggml_backend_cuda_context & ct
         return false;
     }
     occamy_fa_gemm_first_use();
-#define OFG_FALLBACK(r) do { occamy_fa_gemm_fallback(OFG_##r); return false; } while (0)
-    if (ggml_cuda_info().devices[ctx.device].cc != 520) OFG_FALLBACK(cc);
     const ggml_tensor * queries = dst->src[0];
     const ggml_tensor * keys = dst->src[1];
     const ggml_tensor * values = dst->src[2];
     const ggml_tensor * mask = dst->src[3];
+    const bool ofg_have_qk = queries && keys;
+    const uint64_t ofg_work = ofg_have_qk ? uint64_t(queries->ne[1]) * uint64_t(keys->ne[1]) * uint64_t(queries->ne[3] > 0 ? queries->ne[3] : 1) : 0;
+    const bool ofg_q64 = ofg_have_qk && queries->ne[1] >= 64;
+#define OFG_FALLBACK(r) do { occamy_fa_gemm_fallback(OFG_##r, ofg_work, ofg_q64); return false; } while (0)
+    if (ggml_cuda_info().devices[ctx.device].cc != 520) OFG_FALLBACK(cc);
     if (!queries || !keys || !values) OFG_FALLBACK(nullsrc);
     if (queries->type != GGML_TYPE_F32) OFG_FALLBACK(qtype);
     if (keys->type != GGML_TYPE_F16) OFG_FALLBACK(ktype);
@@ -233,7 +267,10 @@ static bool ggml_cuda_flash_attn_ext_maxwell_gemm(ggml_backend_cuda_context & ct
     if (dst->src[4]) OFG_FALLBACK(sinks);
     if (queries->ne[0] != 256 || keys->ne[0] != 256 || values->ne[0] != 256) OFG_FALLBACK(headdim);
     if (queries->ne[2] != 16 || keys->ne[2] != 2 || values->ne[2] != 2) OFG_FALLBACK(heads);
-    if (queries->ne[3] != 1 || keys->ne[3] != 1 || values->ne[3] != 1) OFG_FALLBACK(ne3);
+    if (queries->ne[3] != 1 || keys->ne[3] != 1 || values->ne[3] != 1) {
+        if (queries->ne[1] >= 64) OFG_FALLBACK(ne3_q_ge_64);
+        OFG_FALLBACK(ne3_decode);
+    }
     if (queries->ne[1] < 64) OFG_FALLBACK(q_lt_64);
     if (queries->ne[1] > 1024) OFG_FALLBACK(q_gt_1024);
     if (keys->ne[1] < 4096) OFG_FALLBACK(keys_lt_4096);
@@ -259,6 +296,7 @@ static bool ggml_cuda_flash_attn_ext_maxwell_gemm(ggml_backend_cuda_context & ct
     }
 #undef OFG_FALLBACK
     occamy_fa_gemm_engaged.fetch_add(1, std::memory_order_relaxed);
+    occamy_fa_gemm_engaged_work.fetch_add(ofg_work, std::memory_order_relaxed);
     const int query_count = queries->ne[1];
     const int key_count = keys->ne[1];
     const int padded_queries = ((query_count + maxwell_gemm_tile_queries - 1) / maxwell_gemm_tile_queries) * maxwell_gemm_tile_queries;
