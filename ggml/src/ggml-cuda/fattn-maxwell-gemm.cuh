@@ -5,7 +5,67 @@
 #include <atomic>
 #include <cmath>
 #include <cstdlib>
+#include <cstdio>
 #include <cstring>
+
+
+// occamy_fa_gemm counters: one reason per guard clause; printed at first use and at
+// CUDA backend free / process exit (only when GGML_CUDA_FA_MAXWELL_GEMM=1).
+enum occamy_fa_gemm_reason {
+    OFG_cc, OFG_nullsrc, OFG_qtype, OFG_ktype, OFG_vtype, OFG_dst, OFG_sinks, OFG_headdim, OFG_heads, OFG_ne3,
+    OFG_q_lt_64, OFG_q_gt_1024, OFG_keys_lt_4096, OFG_keys_gt_98304, OFG_shape, OFG_stride, OFG_mask, OFG_opparams,
+    OFG_COUNT
+};
+static const char * const occamy_fa_gemm_reason_names[OFG_COUNT] = {
+    "cc", "nullsrc", "qtype", "ktype", "vtype", "dst", "sinks", "headdim", "heads", "ne3",
+    "q_lt_64", "q_gt_1024", "keys_lt_4096", "keys_gt_98304", "shape", "stride", "mask", "opparams",
+};
+static std::atomic<uint64_t> occamy_fa_gemm_engaged{0};
+static std::atomic<uint64_t> occamy_fa_gemm_fallbacks[OFG_COUNT];
+static std::atomic<bool> occamy_fa_gemm_used{false};
+
+static void occamy_fa_gemm_print(const char * when) {
+    uint64_t total = 0;
+    char reasons[1024];
+    size_t off = 0;
+    reasons[0] = '\0';
+    for (int i = 0; i < OFG_COUNT; ++i) {
+        const uint64_t n = occamy_fa_gemm_fallbacks[i].load(std::memory_order_relaxed);
+        total += n;
+        if (n == 0 || off >= sizeof(reasons)) {
+            continue;
+        }
+        const int w = std::snprintf(reasons + off, sizeof(reasons) - off, "%s%s:%llu", off ? "," : "",
+            occamy_fa_gemm_reason_names[i], (unsigned long long) n);
+        if (w > 0) {
+            off += size_t(w);
+        }
+    }
+    std::fprintf(stderr, "occamy_fa_gemm: engaged=%llu fallback=%llu reasons=%s when=%s\n",
+        (unsigned long long) occamy_fa_gemm_engaged.load(std::memory_order_relaxed), (unsigned long long) total,
+        off ? reasons : "-", when);
+    std::fflush(stderr);
+}
+
+static void occamy_fa_gemm_atexit() {
+    occamy_fa_gemm_print("exit");
+}
+
+static void occamy_fa_gemm_first_use() {
+    bool expected = false;
+    if (!occamy_fa_gemm_used.load(std::memory_order_relaxed) &&
+        occamy_fa_gemm_used.compare_exchange_strong(expected, true)) {
+        std::atexit(occamy_fa_gemm_atexit);
+        occamy_fa_gemm_print("first_use");
+    }
+}
+
+// Called from ggml_backend_cuda_free (defined in fattn.cu, declared in fattn.cuh).
+static void occamy_fa_gemm_report_free_impl() {
+    if (occamy_fa_gemm_used.load(std::memory_order_relaxed)) {
+        occamy_fa_gemm_print("backend_free");
+    }
+}
 
 #if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA)
 
@@ -151,34 +211,38 @@ static bool ggml_cuda_flash_attn_ext_maxwell_gemm(ggml_backend_cuda_context & ct
         const char * value = std::getenv("GGML_CUDA_FA_MAXWELL_GEMM");
         return value && std::strcmp(value, "1") == 0;
     }();
-    if (!enabled || ggml_cuda_info().devices[ctx.device].cc != 520) {
+    if (!enabled) {
         return false;
     }
+    occamy_fa_gemm_first_use();
+#define OFG_FALLBACK(r) do { occamy_fa_gemm_fallback(OFG_##r); return false; } while (0)
+    if (ggml_cuda_info().devices[ctx.device].cc != 520) OFG_FALLBACK(cc);
     const ggml_tensor * queries = dst->src[0];
     const ggml_tensor * keys = dst->src[1];
     const ggml_tensor * values = dst->src[2];
     const ggml_tensor * mask = dst->src[3];
-    if (!queries || !keys || !values || queries->type != GGML_TYPE_F32 || keys->type != GGML_TYPE_F16 ||
-        values->type != GGML_TYPE_F16 || dst->type != GGML_TYPE_F32 || dst->src[4] || !ggml_is_contiguous(dst)) {
-        return false;
-    }
-    if (queries->ne[0] != 256 || keys->ne[0] != 256 || values->ne[0] != 256 ||
-        queries->ne[2] != 16 || keys->ne[2] != 2 || values->ne[2] != 2 ||
-        queries->ne[3] != 1 || keys->ne[3] != 1 || values->ne[3] != 1 ||
-        queries->ne[1] < 64 || queries->ne[1] > 1024 || keys->ne[1] < 4096 || keys->ne[1] > 98304 ||
-        values->ne[1] != keys->ne[1] || dst->ne[0] != 256 || dst->ne[1] != 16 ||
-        dst->ne[2] != queries->ne[1] || dst->ne[3] != 1) {
-        return false;
-    }
+    if (!queries || !keys || !values) OFG_FALLBACK(nullsrc);
+    if (queries->type != GGML_TYPE_F32) OFG_FALLBACK(qtype);
+    if (keys->type != GGML_TYPE_F16) OFG_FALLBACK(ktype);
+    if (values->type != GGML_TYPE_F16) OFG_FALLBACK(vtype);
+    if (dst->type != GGML_TYPE_F32 || !ggml_is_contiguous(dst)) OFG_FALLBACK(dst);
+    if (dst->src[4]) OFG_FALLBACK(sinks);
+    if (queries->ne[0] != 256 || keys->ne[0] != 256 || values->ne[0] != 256) OFG_FALLBACK(headdim);
+    if (queries->ne[2] != 16 || keys->ne[2] != 2 || values->ne[2] != 2) OFG_FALLBACK(heads);
+    if (queries->ne[3] != 1 || keys->ne[3] != 1 || values->ne[3] != 1) OFG_FALLBACK(ne3);
+    if (queries->ne[1] < 64) OFG_FALLBACK(q_lt_64);
+    if (queries->ne[1] > 1024) OFG_FALLBACK(q_gt_1024);
+    if (keys->ne[1] < 4096) OFG_FALLBACK(keys_lt_4096);
+    if (keys->ne[1] > 98304) OFG_FALLBACK(keys_gt_98304);
+    if (values->ne[1] != keys->ne[1] || dst->ne[0] != 256 || dst->ne[1] != 16 ||
+        dst->ne[2] != queries->ne[1] || dst->ne[3] != 1) OFG_FALLBACK(shape);
     if (queries->nb[0] != sizeof(float) || keys->nb[0] != sizeof(half) || values->nb[0] != sizeof(half) ||
         queries->nb[1] % sizeof(float) || queries->nb[2] % sizeof(float) ||
         keys->nb[1] % sizeof(half) || keys->nb[2] % sizeof(half) ||
-        values->nb[1] % sizeof(half) || values->nb[2] % sizeof(half)) {
-        return false;
-    }
+        values->nb[1] % sizeof(half) || values->nb[2] % sizeof(half)) OFG_FALLBACK(stride);
     if (mask && (mask->type != GGML_TYPE_F16 || mask->ne[0] < keys->ne[1] || mask->ne[1] < queries->ne[1] ||
                  mask->ne[2] != 1 || mask->ne[3] != 1 || mask->nb[0] != sizeof(half) || mask->nb[1] % sizeof(half))) {
-        return false;
+        OFG_FALLBACK(mask);
     }
     float scale;
     float max_bias;
@@ -187,8 +251,10 @@ static bool ggml_cuda_flash_attn_ext_maxwell_gemm(ggml_backend_cuda_context & ct
     std::memcpy(&max_bias, reinterpret_cast<const float *>(dst->op_params) + 1, sizeof(float));
     std::memcpy(&softcap, reinterpret_cast<const float *>(dst->op_params) + 2, sizeof(float));
     if (!std::isfinite(scale) || max_bias != 0.0f || softcap != 0.0f || ggml_get_op_params_i32(dst, 4) != 0) {
-        return false;
+        OFG_FALLBACK(opparams);
     }
+#undef OFG_FALLBACK
+    occamy_fa_gemm_engaged.fetch_add(1, std::memory_order_relaxed);
     const int query_count = queries->ne[1];
     const int key_count = keys->ne[1];
     const int padded_queries = ((query_count + maxwell_gemm_tile_queries - 1) / maxwell_gemm_tile_queries) * maxwell_gemm_tile_queries;
