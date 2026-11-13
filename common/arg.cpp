@@ -1683,6 +1683,14 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
         }
     ).set_env("LLAMA_ARG_UBATCH"));
     add_opt(common_arg(
+        {"--prefill-single-stream"},
+        "server: when a slot has >=64 prompt tokens pending, keep other slots' prompt tokens out of the batch "
+        "(alternating slots), so prefill ubatches are single-stream (default: disabled)",
+        [](common_params & params) {
+            params.prefill_single_stream = true;
+        }
+    ).set_env("LLAMA_PREFILL_SINGLE_STREAM").set_examples({LLAMA_EXAMPLE_SERVER}));
+    add_opt(common_arg(
         {"--mixed-batch-size"}, "N",
         "maximum total batch size when adding splittable text prompts to generation (default: 0, disabled); "
         "limited to the logical and physical batch sizes; pure prefill is unchanged",
