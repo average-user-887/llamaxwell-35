@@ -18,10 +18,12 @@
 // across the warp so lane l ends with score (token l>>3, head l&7). Partials (m, l, o) per block -> combine.
 #include "common.cuh"
 #include "fattn-occamy.cuh"
+#include "fattn-occamy-kvq8.cuh"
 
 #include <cstdio>
 #include <cstdlib>
 #include <cfloat>
+#include <cstring>
 
 #define OFA_D   256
 #define OFA_G   8
@@ -561,6 +563,194 @@ __global__ void __launch_bounds__(2*OFA_NT, 2) ofa_decode_hs_ar_kernel(const ofa
     }
 }
 
+// Q8N (13 Nov 2026), GGML_CUDA_OCCAMY_KVQ8=1 (exact "1") with FA=1, PIPE=3, ADDR=1: the hs_ar kernel reading q8_0 K and/or V
+// natively (no f16 conversion of the cache). KQ8/VQ8 select the K/V row format independently (F16/F16 stays on
+// ofa_decode_hs_ar_kernel, untouched). Lane math: fattn-occamy-kvq8.cuh. K: the lane's 8-dim QK partial is computed on the
+// int8 values and multiplied by its block scale d_k before the xor tree. V: p_j*d_v is formed once per (token, head).
+// Same split/unit/softmax/combine order as hs_ar; not bitwise vs the generic q8 path (that one quantises Q to q8_1).
+template <bool KQ8, bool VQ8>
+__global__ void __launch_bounds__(2*OFA_NT, 2) ofa_decode_hs_ar_q8_kernel(const ofa_params p) {
+    const int split = blockIdx.x;
+    const int kvh   = blockIdx.y;
+    const int i3    = blockIdx.z;
+    const int wid   = threadIdx.x >> 5;
+    const int warp  = wid & (OFA_NW - 1);
+    const int hg    = wid / OFA_NW;
+    const int lane  = threadIdx.x & 31;
+
+    __shared__ __align__(16) float s_p[2*OFA_NW][OFA_T*OFA_HG];
+    __shared__ __align__(16) float s_a[2*OFA_NW][OFA_HG];
+    __shared__ float  s_o[OFA_NW][OFA_G][OFA_D];
+    __shared__ float  s_m[OFA_NW][OFA_G];
+    __shared__ float  s_l[OFA_NW][OFA_G];
+
+    float q[OFA_HG][8];
+#pragma unroll
+    for (int h = 0; h < OFA_HG; ++h) {
+        const float4 * qp = (const float4 *) (p.Q + i3*p.nbq3 + (size_t)(kvh*OFA_G + hg*OFA_HG + h)*p.nbq2) + 2*lane;
+        const float4 a = qp[0], b = qp[1];
+        q[h][0] = a.x*p.scale_log2; q[h][1] = a.y*p.scale_log2; q[h][2] = a.z*p.scale_log2; q[h][3] = a.w*p.scale_log2;
+        q[h][4] = b.x*p.scale_log2; q[h][5] = b.y*p.scale_log2; q[h][6] = b.z*p.scale_log2; q[h][7] = b.w*p.scale_log2;
+    }
+    float o[OFA_HG][8];
+#pragma unroll
+    for (int h = 0; h < OFA_HG; ++h) {
+#pragma unroll
+        for (int i = 0; i < 8; ++i) o[h][i] = 0.0f;
+    }
+    const int   jl = lane >> 3;
+    float m_run = -FLT_MAX/2.0f;
+    float l_run = 0.0f;
+
+    const ofq_lane g = ofq_lane_geom(lane);
+    const char * Kb = p.K + i3*p.nbk3 + kvh*p.nbk2 + (KQ8 ? g.base : lane*16);
+    const char * Vb = p.V + i3*p.nbv3 + kvh*p.nbv2 + (VQ8 ? g.base : lane*16);
+    const half * Mb = (const half *) (p.mask + (i3 % p.mask_ne3)*p.nbm3);
+
+    const int nunits = p.n_kv / OFA_T;
+    const int u0 = (int) (((long long) split      * nunits) / p.nsplit);
+    const int u1 = (int) (((long long)(split + 1) * nunits) / p.nsplit);
+
+    const size_t nbk1 = p.nbk1, nbv1 = p.nbv1;
+    const char * kp = Kb + (size_t)(u0 + warp)*OFA_T*nbk1;
+    const char * vp = Vb + (size_t)(u0 + warp)*OFA_T*nbv1;
+    const half * mp = Mb + (u0 + warp)*OFA_T + jl;
+    const size_t kstep = (size_t) OFA_NW*OFA_T*nbk1;
+    const size_t vstep = (size_t) OFA_NW*OFA_T*nbv1;
+    for (int u = u0 + warp; u < u1; u += OFA_NW, kp += kstep, vp += vstep, mp += OFA_NW*OFA_T) {
+        uint4 kr[OFA_T], vr[OFA_T];      // f16: 8 halves; q8: x,y,z = words 0..2, w = f16 scale bits
+        {
+            const char * r = kp;
+#pragma unroll
+            for (int j = 0; j < OFA_T; ++j, r += nbk1) {
+                if (KQ8) {
+                    kr[j].x = __ldg((const unsigned int *) r);
+                    kr[j].y = __ldg((const unsigned int *) (r + 4));
+                    kr[j].z = __ldg((const unsigned int *) (r + g.w2off));
+                    kr[j].w = __ldg((const unsigned short *) (r + g.doff));
+                } else {
+                    kr[j] = __ldg((const uint4 *) r);
+                }
+            }
+        }
+        {
+            const char * r = vp;
+#pragma unroll
+            for (int j = 0; j < OFA_T; ++j, r += nbv1) {
+                if (VQ8) {
+                    vr[j].x = __ldg((const unsigned int *) r);
+                    vr[j].y = __ldg((const unsigned int *) (r + 4));
+                    vr[j].z = __ldg((const unsigned int *) (r + g.w2off));
+                    vr[j].w = __ldg((const unsigned short *) (r + g.doff));
+                } else {
+                    vr[j] = __ldg((const uint4 *) r);
+                }
+            }
+        }
+        const float mk = __half2float(*mp);
+
+        float s[OFA_T*OFA_HG];
+#pragma unroll
+        for (int j = 0; j < OFA_T; ++j) {
+            float k[8];
+            float dk = 1.0f;
+            if (KQ8) {
+                uint32_t lo, hi;
+                ofq_realign(kr[j].x, kr[j].y, kr[j].z, g.sel, lo, hi);
+                ofq_unpack8(lo, hi, k);
+                dk = __half2float(__ushort_as_half((unsigned short) kr[j].w));
+            } else {
+                ofa_cvt8(kr[j], k);
+            }
+#pragma unroll
+            for (int h = 0; h < OFA_HG; ++h) {
+                float acc = q[h][0]*k[0];
+#pragma unroll
+                for (int i = 1; i < 8; ++i) acc = fmaf(q[h][i], k[i], acc);
+                s[j*OFA_HG + h] = KQ8 ? acc*dk : acc;
+            }
+        }
+        ofa_rs_step_x<8, 16>(s, lane);
+        ofa_rs_step_x<4,  8>(s, lane);
+        ofa_rs_step_x<2,  4>(s, lane);
+        ofa_rs_step_x<1,  2>(s, lane);
+        s[0] = s[0] + __shfl_xor_sync(0xFFFFFFFF, s[0], 1, 32);
+        const float sc = s[0] + mk*1.4426950408889634f;
+        float gm = fmaxf(sc, __shfl_xor_sync(0xFFFFFFFF, sc, 8, 32));
+        gm = fmaxf(gm, __shfl_xor_sync(0xFFFFFFFF, gm, 16, 32));
+        const float m_new = fmaxf(m_run, gm);
+        const float alpha = exp2f(m_run - m_new);
+        const float pr    = exp2f(sc - m_new);
+        m_run = m_new;
+        l_run = l_run*alpha + pr;
+        if (!(lane & 1)) s_p[wid][lane >> 1] = pr;
+        if (lane < 2*OFA_HG && !(lane & 1)) s_a[wid][lane >> 1] = alpha;
+        __syncwarp();
+        float a[OFA_HG];
+        {
+            const float4 a0 = *(const float4 *) &s_a[wid][0];
+            a[0] = a0.x; a[1] = a0.y; a[2] = a0.z; a[3] = a0.w;
+        }
+#pragma unroll
+        for (int h = 0; h < OFA_HG; ++h) {
+#pragma unroll
+            for (int i = 0; i < 8; ++i) o[h][i] *= a[h];
+        }
+#pragma unroll
+        for (int j = 0; j < OFA_T; ++j) {
+            float v[8];
+            const float4 p0 = *(const float4 *) &s_p[wid][j*OFA_HG];
+            float pj[4] = {p0.x, p0.y, p0.z, p0.w};
+            if (VQ8) {
+                uint32_t lo, hi;
+                ofq_realign(vr[j].x, vr[j].y, vr[j].z, g.sel, lo, hi);
+                ofq_unpack8(lo, hi, v);
+                const float dv = __half2float(__ushort_as_half((unsigned short) vr[j].w));
+#pragma unroll
+                for (int h = 0; h < OFA_HG; ++h) pj[h] *= dv;
+            } else {
+                ofa_cvt8(vr[j], v);
+            }
+#pragma unroll
+            for (int h = 0; h < OFA_HG; ++h) {
+#pragma unroll
+                for (int i = 0; i < 8; ++i) o[h][i] = fmaf(pj[h], v[i], o[h][i]);
+            }
+        }
+        __syncwarp();
+    }
+
+    l_run += __shfl_xor_sync(0xFFFFFFFF, l_run, 8, 32);
+    l_run += __shfl_xor_sync(0xFFFFFFFF, l_run, 16, 32);
+    if (lane < 2*OFA_HG && !(lane & 1)) { s_m[warp][hg*OFA_HG + (lane >> 1)] = m_run; s_l[warp][hg*OFA_HG + (lane >> 1)] = l_run; }
+#pragma unroll
+    for (int h = 0; h < OFA_HG; ++h) {
+        float4 * dp = (float4 *) &s_o[warp][hg*OFA_HG + h][8*lane];
+        dp[0] = make_float4(o[h][0], o[h][1], o[h][2], o[h][3]);
+        dp[1] = make_float4(o[h][4], o[h][5], o[h][6], o[h][7]);
+    }
+    __syncthreads();
+
+    const int blk = (i3*p.nkvh + kvh)*p.nsplit + split;
+    float * po = p.part_o + (size_t) blk*OFA_G*OFA_D;
+    for (int idx = threadIdx.x; idx < OFA_G*OFA_D; idx += 2*OFA_NT) {
+        const int h = idx / OFA_D, d = idx % OFA_D;
+        float M = s_m[0][h];
+#pragma unroll
+        for (int w = 1; w < OFA_NW; ++w) M = fmaxf(M, s_m[w][h]);
+        float acc = 0.0f;
+#pragma unroll
+        for (int w = 0; w < OFA_NW; ++w) acc += s_o[w][h][d]*exp2f(s_m[w][h] - M);
+        po[idx] = acc;
+        if (d == 0) {
+            float L = 0.0f;
+#pragma unroll
+            for (int w = 0; w < OFA_NW; ++w) L += s_l[w][h]*exp2f(s_m[w][h] - M);
+            p.part_ml[(size_t) blk*OFA_G + h] = make_float2(M, L);
+        }
+    }
+}
+
 // grid (nkvh*8 q-heads, ns), block 256 = one thread per dim
 __global__ void __launch_bounds__(OFA_D) ofa_combine_kernel(const float * __restrict__ part_o, const float2 * __restrict__ part_ml,
         char * __restrict__ dst, const int nsplit, const int nkvh, const size_t nbd1, const size_t nbd3) {
@@ -632,7 +822,63 @@ bool ggml_cuda_occamy_fa_applicable(const ggml_tensor * dst) {
     return true;
 }
 
-static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst, char * out) {
+// Q8N: GGML_CUDA_OCCAMY_KVQ8 must be exactly "1"; it only acts with GGML_CUDA_OCCAMY_FA_PIPE=3 and GGML_CUDA_OCCAMY_FA_ADDR!=0.
+bool ggml_cuda_occamy_kvq8_enabled() {
+    static const bool v = []() {
+        const char * s  = getenv("GGML_CUDA_OCCAMY_KVQ8");
+        const char * sp = getenv("GGML_CUDA_OCCAMY_FA_PIPE");
+        const char * sa = getenv("GGML_CUDA_OCCAMY_FA_ADDR");
+        const bool on = s && strcmp(s, "1") == 0;
+        const bool ok = on && sp && atoi(sp) == 3 && sa && atoi(sa) != 0;
+        if (on) fprintf(stderr, "ggml_cuda: occamy FA kvq8 %s\n", ok ? "on" : "requested but inactive (needs PIPE=3, ADDR=1)");
+        return ok;
+    }();
+    return v;
+}
+
+static bool ofa_kv_ok(const ggml_tensor * t) {
+    if (t->type == GGML_TYPE_F16) {
+        if (t->nb[0] != 2 || (uintptr_t) t->data % 16) return false;
+        for (int i = 1; i < 4; ++i) if (t->nb[i] % 16) return false;
+        return true;
+    }
+    if (t->type == GGML_TYPE_Q8_0) {
+        if (t->nb[0] != sizeof(block_q8_0) || (uintptr_t) t->data % 4) return false;
+        for (int i = 1; i < 4; ++i) if (t->nb[i] % 4) return false;
+        return true;
+    }
+    return false;
+}
+
+// same shape rules as ggml_cuda_occamy_fa_applicable; K/V each F16 or Q8_0 with at least one Q8_0
+bool ggml_cuda_occamy_kvq8_applicable(const ggml_tensor * dst) {
+    if (!ggml_cuda_occamy_kvq8_enabled()) return false;
+    const ggml_tensor * Q = dst->src[0];
+    const ggml_tensor * K = dst->src[1];
+    const ggml_tensor * V = dst->src[2];
+    const ggml_tensor * mask = dst->src[3];
+    const ggml_tensor * sinks = dst->src[4];
+    float max_bias = 0.0f, softcap = 0.0f;
+    memcpy(&max_bias, (const float *) dst->op_params + 1, sizeof(float));
+    memcpy(&softcap,  (const float *) dst->op_params + 2, sizeof(float));
+    if (Q->type != GGML_TYPE_F32 || dst->type != GGML_TYPE_F32) return false;
+    if (K->type != GGML_TYPE_Q8_0 && V->type != GGML_TYPE_Q8_0) return false;
+    if (!ofa_kv_ok(K) || !ofa_kv_ok(V)) return false;
+    if (K->ne[0] != OFA_D || V->ne[0] != OFA_D || Q->ne[0] != OFA_D) return false;
+    if (K->ne[2] != V->ne[2] || Q->ne[2] != OFA_G*K->ne[2]) return false;
+    if (Q->ne[1] != 1) return false;
+    if (K->ne[3] != Q->ne[3] || V->ne[3] != Q->ne[3] || K->ne[1] != V->ne[1]) return false;
+    if (K->ne[1] % OFA_T != 0) return false;
+    if (!mask || mask->type != GGML_TYPE_F16 || mask->ne[2] != 1 || mask->ne[0] < K->ne[1]) return false;
+    if (Q->ne[3] % mask->ne[3] != 0) return false;
+    if (sinks || max_bias != 0.0f || softcap != 0.0f) return false;
+    if (Q->nb[0] != 4 || dst->nb[0] != 4) return false;
+    if ((uintptr_t) Q->data % 16 || (uintptr_t) mask->data % 8) return false;
+    for (int i = 1; i < 4; ++i) if (Q->nb[i] % 16) return false;
+    return true;
+}
+
+static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst, char * out, const bool kvq8 = false) {
     const ggml_tensor * Q = dst->src[0];
     const ggml_tensor * K = dst->src[1];
     const ggml_tensor * V = dst->src[2];
@@ -670,6 +916,9 @@ static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst,
                     CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nba, ofa_decode_hs_ar_kernel, 2*OFA_NT, 0));
                     fprintf(stderr, "ggml_cuda: occamy FA addr mode 1 (blocks/SM %d)\n", nba);
                     if (nba < nb) addr = 0;
+                    int nq = 0;
+                    CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nq, ofa_decode_hs_ar_q8_kernel<true, true>, 2*OFA_NT, 0));
+                    if (ggml_cuda_occamy_kvq8_enabled()) fprintf(stderr, "ggml_cuda: occamy FA kvq8 blocks/SM %d\n", nq);
                 }
             }
             fprintf(stderr, "ggml_cuda: occamy FA pipe mode %d (blocks/SM %d, flag-off %d)\n", pipe, nbp, nb);
@@ -701,10 +950,19 @@ static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst,
     switch (pipe) {
         case 1:  ofa_decode_kernel<1><<<dim3(nsplit, nkvh, ns), OFA_NT, 0, stream>>>(p); break;
         case 2:  ofa_decode_kernel<2><<<dim3(nsplit, nkvh, ns), OFA_NT, 0, stream>>>(p); break;
-        case 3:  if (addr) { ofa_decode_hs_ar_kernel<<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p); break; }
+        case 3:  if (kvq8) {
+                     GGML_ASSERT(addr && "occamy kvq8 needs FA_ADDR=1");
+                     const bool kq = K->type == GGML_TYPE_Q8_0, vq = V->type == GGML_TYPE_Q8_0;
+                     if (kq && vq) ofa_decode_hs_ar_q8_kernel<true,  true ><<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p);
+                     else if (kq)  ofa_decode_hs_ar_q8_kernel<true,  false><<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p);
+                     else          ofa_decode_hs_ar_q8_kernel<false, true ><<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p);
+                     break;
+                 }
+                 if (addr) { ofa_decode_hs_ar_kernel<<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p); break; }
                  ofa_decode_hs_kernel<false><<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p); break;
         case 4:  ofa_decode_hs_kernel<true ><<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p); break;
-        default: ofa_decode_kernel<0><<<dim3(nsplit, nkvh, ns), OFA_NT, 0, stream>>>(p); break;
+        default: GGML_ASSERT(!kvq8 && "occamy kvq8 needs FA_PIPE=3");
+                 ofa_decode_kernel<0><<<dim3(nsplit, nkvh, ns), OFA_NT, 0, stream>>>(p); break;
     }
     CUDA_CHECK(cudaGetLastError());
     ofa_combine_kernel<<<dim3(nkvh*OFA_G, ns), OFA_D, 0, stream>>>(part_o.get(), part_ml.get(), out, nsplit, nkvh, dst->nb[1], dst->nb[3]);
@@ -715,8 +973,12 @@ void ggml_cuda_occamy_fa(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
     ofa_launch(ctx, dst, (char *) dst->data);
 }
 
+void ggml_cuda_occamy_fa_kvq8(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
+    ofa_launch(ctx, dst, (char *) dst->data, true);
+}
+
 // mode 2: our result into a temp buffer, stock result already in dst; compare and log.
-void ggml_cuda_occamy_fa_compare(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
+void ggml_cuda_occamy_fa_compare(ggml_backend_cuda_context & ctx, ggml_tensor * dst, const bool kvq8) {
     static int ncalls = 0;
     ++ncalls;
     const bool log_it = ncalls <= 40 || ncalls % 200 == 0;
@@ -725,7 +987,7 @@ void ggml_cuda_occamy_fa_compare(ggml_backend_cuda_context & ctx, ggml_tensor * 
     const int n = (int) ggml_nelements(dst);
     ggml_cuda_pool_alloc<float> tmp(ctx.pool(), n);
     // dst is [D, nh, 1, ns] contiguous: our launch writes with dst strides into tmp
-    ofa_launch(ctx, dst, (char *) tmp.get());
+    ofa_launch(ctx, dst, (char *) tmp.get(), kvq8);
     ggml_cuda_pool_alloc<unsigned int> res(ctx.pool(), 4);
     cudaStream_t stream = ctx.stream();
     CUDA_CHECK(cudaMemsetAsync(res.get(), 0, 4*sizeof(unsigned int), stream));
@@ -735,6 +997,6 @@ void ggml_cuda_occamy_fa_compare(ggml_backend_cuda_context & ctx, ggml_tensor * 
     CUDA_CHECK(cudaStreamSynchronize(stream));
     float f[3];
     memcpy(f, h, sizeof(f));
-    fprintf(stderr, "occamy_fa_cmp call=%d n_kv=%lld ns=%lld max_abs=%.3e max_ref=%.3e max_rel=%.3e nan=%u\n",
-        ncalls, (long long) dst->src[1]->ne[1], (long long) dst->src[0]->ne[3], f[0], f[1], f[2], h[3]);
+    fprintf(stderr, "occamy_fa_cmp%s call=%d n_kv=%lld ns=%lld max_abs=%.3e max_ref=%.3e max_rel=%.3e nan=%u\n",
+        kvq8 ? "_kvq8" : "", ncalls, (long long) dst->src[1]->ne[1], (long long) dst->src[0]->ne[3], f[0], f[1], f[2], h[3]);
 }

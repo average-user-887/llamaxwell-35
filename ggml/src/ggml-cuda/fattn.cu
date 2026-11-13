@@ -799,6 +799,16 @@ void ggml_cuda_flash_attn_ext(ggml_backend_cuda_context & ctx, ggml_tensor * dst
         ggml_cuda_occamy_fa_compare(ctx, dst);
         return;
     }
+    // Q8N: native q8_0 K/V read (GGML_CUDA_OCCAMY_KVQ8=1); FA=2 runs the generic q8 path and logs the diff
+    if (ofa != 0 && ggml_cuda_occamy_kvq8_applicable(dst)) {
+        if (ofa == 1) {
+            ggml_cuda_occamy_fa_kvq8(ctx, dst);
+            return;
+        }
+        ggml_cuda_flash_attn_ext_stock(ctx, dst);
+        ggml_cuda_occamy_fa_compare(ctx, dst, true);
+        return;
+    }
     ggml_cuda_flash_attn_ext_stock(ctx, dst);
 }
 
