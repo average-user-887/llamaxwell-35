@@ -1,0 +1,74 @@
+{
+ "meta": {
+  "arm": "Q",
+  "env_extra": [
+   "GGML_CUDA_OCCAMY_KVQ8=1"
+  ],
+  "args": [
+   "-ctk",
+   "q8_0",
+   "-ctv",
+   "q8_0"
+  ]
+ },
+ "utc": "2026-11-13T08:36:21.117593+00:00",
+ "no_restore_src": "build prefill decode (fresh prefill, n=24, first 16)",
+ "build_s0_prefill": {
+  "cache_n": 4,
+  "prompt_n": 97996,
+  "prompt_ms": 482841.414,
+  "prompt_per_second": 202.95690708916695,
+  "predicted_n": 24,
+  "predicted_per_second": 53.58607321255498,
+  "http": 200
+ },
+ "n_restored": 98023,
+ "restore_decode": {
+  "cache_n": 97996,
+  "prompt_n": 4,
+  "prompt_ms": 146.692,
+  "prompt_per_second": 27.26801734245903,
+  "predicted_n": 16,
+  "predicted_per_second": 51.80613453707765,
+  "http": 200
+ },
+ "restore_tokens": [
+  15,
+  15,
+  18,
+  22,
+  19,
+  11,
+  220,
+  15,
+  87,
+  15,
+  15,
+  19,
+  15,
+  2069,
+  198,
+  90
+ ],
+ "no_restore_tokens": [
+  15,
+  15,
+  18,
+  22,
+  19,
+  11,
+  220,
+  15,
+  87,
+  15,
+  15,
+  19,
+  15,
+  2069,
+  198,
+  90
+ ],
+ "reprefill": false,
+ "tokens_equal": true,
+ "first_diff_idx": null
+}

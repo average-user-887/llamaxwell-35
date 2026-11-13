@@ -1,0 +1,1 @@
+{"start": 84000, "turns": 4, "orders": [["b3", "gdn4", "gemm", "cap1024"], ["gdn4", "cap1024", "b3", "gemm"], ["cap1024", "gemm", "gdn4", "b3"], ["gemm", "b3", "cap1024", "gdn4"], ["cap1024", "gemm", "gdn4", "b3"]], "sweep": [1024, 512, 2048, 2048, 512, 1024], "offset_s": 25.0}

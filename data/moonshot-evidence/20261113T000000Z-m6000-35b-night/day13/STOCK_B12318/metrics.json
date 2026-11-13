@@ -1,0 +1,101 @@
+{
+  "container": "stock-b12318-65509",
+  "units": {
+    "warm_4k": {
+      "tag": "warm_4k",
+      "slot": 0,
+      "prompt_len": 4096,
+      "n_predict": 128,
+      "wall_s": 17.755,
+      "prompt_n": 4096,
+      "cache_n": 0,
+      "prompt_ms": 14869.082,
+      "prompt_tps": 275.4709403041829,
+      "predicted_n": 128,
+      "predicted_ms": 2880.7,
+      "predicted_tps": 44.08650675183115,
+      "truncated": false
+    },
+    "prefill_90k_s0": {
+      "tag": "prefill_90k_s0",
+      "slot": 0,
+      "prompt_len": 90000,
+      "n_predict": 1,
+      "wall_s": 583.707,
+      "prompt_n": 85908,
+      "cache_n": 4092,
+      "prompt_ms": 583678.271,
+      "prompt_tps": 147.18382415164467,
+      "predicted_n": 1,
+      "predicted_ms": 0.001,
+      "predicted_tps": 0.0,
+      "truncated": false
+    },
+    "prefill_84k_s1": {
+      "tag": "prefill_84k_s1",
+      "slot": 1,
+      "prompt_len": 84000,
+      "n_predict": 1,
+      "wall_s": 538.575,
+      "prompt_n": 84000,
+      "cache_n": 0,
+      "prompt_ms": 538549.267,
+      "prompt_tps": 155.97458792938994,
+      "predicted_n": 1,
+      "predicted_ms": 0.001,
+      "predicted_tps": 0.0,
+      "truncated": false
+    },
+    "append_4k_s0": {
+      "tag": "append_4k_s0",
+      "slot": 0,
+      "prompt_len": 94096,
+      "n_predict": 64,
+      "wall_s": 42.962,
+      "prompt_n": 4096,
+      "cache_n": 90000,
+      "prompt_ms": 40630.188,
+      "prompt_tps": 100.81174125997153,
+      "predicted_n": 64,
+      "predicted_ms": 2303.756,
+      "predicted_tps": 27.34664608578339,
+      "truncated": false
+    },
+    "both_deep": {
+      "wall_s": 7.014,
+      "sum_predicted_tps": 37.83,
+      "s0": {
+        "tag": "deep2_s0",
+        "slot": 0,
+        "prompt_len": 94100,
+        "n_predict": 128,
+        "wall_s": 7.014,
+        "prompt_n": 8,
+        "cache_n": 94092,
+        "prompt_ms": 264.984,
+        "prompt_tps": 30.190502068049394,
+        "predicted_n": 128,
+        "predicted_ms": 6621.982,
+        "predicted_tps": 19.178548054041826,
+        "truncated": false
+      },
+      "s1": {
+        "tag": "deep2_s1",
+        "slot": 1,
+        "prompt_len": 84004,
+        "n_predict": 128,
+        "wall_s": 6.931,
+        "prompt_n": 4,
+        "cache_n": 84000,
+        "prompt_ms": 93.786,
+        "prompt_tps": 42.65028895570767,
+        "predicted_n": 128,
+        "predicted_ms": 6810.752,
+        "predicted_tps": 18.646986412073144,
+        "truncated": false
+      }
+    }
+  },
+  "ready_s": 14.26,
+  "peak_vram_mib": 22987
+}

@@ -1,0 +1,68 @@
+{
+ "F": {
+  "decode": {
+   "cache_n": 97996,
+   "prompt_n": 4,
+   "prompt_ms": 169.559,
+   "prompt_per_second": 23.59060857872481,
+   "predicted_n": 12,
+   "predicted_per_second": 50.876227388985754,
+   "http": 200
+  },
+  "ofa_launches_total": 110,
+  "ofa_kernel": "ofa_decode_hs_ar_kernel(ofa_params)",
+  "ofa_ms_per_step": 7.2529335,
+  "ofa_ms_per_launch": 0.7252933500000001,
+  "gpu_busy_ms_per_step_window": 18.172596624999954,
+  "grid": [
+   "24",
+   "2",
+   "1"
+  ],
+  "regs": "118"
+ },
+ "Q": {
+  "decode": {
+   "cache_n": 97996,
+   "prompt_n": 4,
+   "prompt_ms": 199.957,
+   "prompt_per_second": 20.00430092469881,
+   "predicted_n": 12,
+   "predicted_per_second": 50.83696124374937,
+   "http": 200
+  },
+  "ofa_launches_total": 110,
+  "ofa_kernel": "void ofa_decode_hs_ar_q8_kernel<bool=1, bool=1>(ofa_params)",
+  "ofa_ms_per_step": 6.833117875,
+  "ofa_ms_per_launch": 0.6833117875,
+  "gpu_busy_ms_per_step_window": 18.034263124999995,
+  "grid": [
+   "24",
+   "2",
+   "1"
+  ],
+  "regs": "127"
+ },
+ "K": {
+  "decode": {
+   "cache_n": 97996,
+   "prompt_n": 4,
+   "prompt_ms": 185.427,
+   "prompt_per_second": 21.571831502424136,
+   "predicted_n": 12,
+   "predicted_per_second": 50.53683905854462,
+   "http": 200
+  },
+  "ofa_launches_total": 110,
+  "ofa_kernel": "void ofa_decode_hs_ar_q8_kernel<bool=1, bool=0>(ofa_params)",
+  "ofa_ms_per_step": 6.4467887500000005,
+  "ofa_ms_per_launch": 0.6446788750000001,
+  "gpu_busy_ms_per_step_window": 17.778826750000015,
+  "grid": [
+   "24",
+   "2",
+   "1"
+  ],
+  "regs": "121"
+ }
+}

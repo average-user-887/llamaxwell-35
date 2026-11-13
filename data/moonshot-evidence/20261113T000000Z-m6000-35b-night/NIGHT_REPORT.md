@@ -41,3 +41,26 @@ Next session, in the advisor's order:
 - Excluded here: binaries, logits/state dumps and source clones; they stay on lab storage.
 - N1 nvprof traces are gzipped CSV.
 - Redactions: `<LAB>` lab storage root, `<MODELS>` models root, `<HOME>` home, `<lab-endpoint>` and `<gpu>` replace endpoint and device ids.
+
+## Day 13 Nov addendum (09:10-13:57 CET, GPU runs; subdir `day13/`)
+Runs: the Q8N GPU script (Claude card, detached) plus N3, N4 and the stock baseline (run by another lab agent while the Claude quota was out). The lead reviewed every number below against the files. Prod is unchanged (BUNDLE3); lock free, no test containers left.
+
+| id | result | status |
+|---|---|---|
+| Q8N exactness | native vs generic q8 read, K+V: 32K dmean +.00153 / top -0.52 pt (192 rows, 3 docs), 98K +.00179 / -1.56 pt (64 rows, 1 doc). K-only: 32K +.00197 / -0.78 (2 docs), 98K +.00137 / 0.00 (1 doc). Not bit-exact vs the generic path; size is at or below the Ap reorder floor (+.0026..+.0033). Cut before doc 3, so the 98K CI is missing | strict gate FAIL; thin |
+| Q8N slot restore | 98,023 tokens restored, prompt_n 4 (no re-prefill), 16 decoded tokens identical to the fresh-prefill run | PASS |
+| Q8N two-slot deep ABBA x3 (98K+90K) | F16 34.033 ms/tok, 23,047 MiB. K-only q8: 32.931 ms/tok, -3.24% (CI95 -1.53..-0.67 ms), 22,235 MiB. K+V q8: +0.05% (CI spans 0), 21,527 MiB (-1,520) | K-only is a real speed gain; quality still fails (Q8S) |
+| Q8N nvprof 98K | ofa kernel ms/step: F 7.253, K+V 6.833, K-only 6.447; regs 118/127/121 | done |
+| Q8N single 98K / append 4K (K+V) | +0.81% / -0.34%, 2 cycles | indicative |
+| N3 replay (4 arms x 5 blocks, Williams) | makespan b3 211.23 s. cap1024 -0.04% (CI +/-0.38), max token gap -48.6% (16.06 -> 8.26 s): predeclared verdict WORTH IT. GDN4 +1.40% makespan (BUNDLE3 is the faster lib in the end-to-end replay). ubatch 512/1024/2048: 107.59 / 103.69 / 102.17 s, VRAM 22,905 / 23,109 / 23,519 MiB. Context overflow (99,876 > 98,304): clean HTTP 400 in all arms, server stays healthy | done |
+| N3 "gemm" arm | DEFECT: the arm used the BUNDLE3 lib, which has no `GGML_CUDA_FA_MAXWELL_GEMM` path (only the Codex v4 lib has it). The arm is effectively a second b3 run: -0.06% +/-0.23 is an A-A noise floor, not a GEMM result | GEMM makespan NOT measured |
+| N4 GEMM vs stock FA, per-op vs FP64 | 3 layers x 6 stops. Short (4096/4160): stock is closer to FP64 (G/S RMSE ratio 1.19-2.12). Deep (32K-98K): GEMM is closer, ratio 0.05-0.95 (98,048 L39: 4.86e-07 vs 9.03e-06). In-situ dumps match the stock driver exactly | done |
+| Stock upstream b12318 | 2-slot deep 37.83 tok/s total (BUNDLE3 F16 here: ~58.9), prefill 90K 147 tok/s, append 4K 100.8 tok/s prompt, peak 22,987 MiB | baseline |
+
+Readings
+- N4 changes how the GEMM gate fails: at depth the stock tile, not GEMM, carries most of the error vs FP64. B-vs-A KL measures distance from a noisier reference. A gate scored against an F32/FP64 reference would treat GEMM differently. This is for the owner to decide; the gate is not relaxed here.
+- K-only q8 is the first KV change with a clear deep two-slot speed gain (-3.24%, above the 1% bar) and -812 MiB. Its quality (Q8S K-only +.0009..+.0022) fails the strict gate at all depths.
+- Native q8 is not exact against the generic q8 read. The difference is within the reorder floor, but the gate asks for exactness, so it fails.
+- cap1024 costs no makespan and halves the worst token gap: still the owner's decision.
+
+Still open: GEMM makespan in N3 with the v4 lib; Q8N exactness doc 3 and the 98K CI; N5 (b12318 runtime smoke is covered by the stock baseline above, not as an ABBA).
