@@ -11664,6 +11664,20 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
         }
     }
 
+    // Maxwell GEMM multi-stream (GGML_CUDA_FA_MAXWELL_GEMM_MS): d256, 16 q heads / 2 kv heads, ne3 = 2 streams,
+    // random per-stream mask (different -inf blocks per stream). Opt-in: TEST_FA_MAXWELL_MS=1 (large CPU references).
+    if (const char * ms = getenv("TEST_FA_MAXWELL_MS"); ms && strcmp(ms, "1") == 0) {
+        for (int64_t kv : { 4096, 8448, 12544 }) {
+            for (int64_t nb : { 64, 100, 512, 1024 }) {
+                test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 2}, kv, nb, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+            }
+        }
+        // q < 64 with ne3 = 2 must still fall back (ne3_decode); ne3 = 1 control must keep the old path
+        test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 2}, 4096, 1, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+        test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 2}, 8448, 32, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+        test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 8448, 512, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    }
+
     // asymmetric head_dim (hsk != hsv) with one or both sides not 64-aligned
     test_cases.emplace_back(new test_flash_attn_ext(72, 64, 4, {1, 1}, 256, 2, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
     test_cases.emplace_back(new test_flash_attn_ext(64, 72, 4, {1, 1}, 256, 2, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
