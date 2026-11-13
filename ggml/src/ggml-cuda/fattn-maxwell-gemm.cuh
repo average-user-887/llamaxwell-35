@@ -60,6 +60,10 @@ static void occamy_fa_gemm_first_use() {
     }
 }
 
+static void occamy_fa_gemm_fallback(occamy_fa_gemm_reason r) {
+    occamy_fa_gemm_fallbacks[r].fetch_add(1, std::memory_order_relaxed);
+}
+
 // Called from ggml_backend_cuda_free (defined in fattn.cu, declared in fattn.cuh).
 static void occamy_fa_gemm_report_free_impl() {
     if (occamy_fa_gemm_used.load(std::memory_order_relaxed)) {
