@@ -418,12 +418,196 @@ __global__ void __launch_bounds__(NT, 2) moe_v2(Params P) {
     }
 }
 
+// WP4 moe_v3 (GGML_CUDA_MOE_V3=1, default off): occupancy rework of moe_v2<0, 61>.
+// 512-thread blocks share one activation copy (xs/sums) across 16 warps, and each warp stages 1152 B instead of
+// 2592 B: a gate/up row is staged as two 72-uint4 chunks (gate, then up), a down row as three chunks (experts 0-3,
+// experts 4-7, shared expert). Target: <=64 regs, ~39 KB smem -> 2 x 512 threads = 32 warps/SM (was 16).
+// Bit-identity with moe_v2<0, 61>: every row keeps its lane -> unit mapping, dot2c form (LOP3), butterfly order
+// and the EX combine of the MOE2 tail; load_norm keeps the 256-thread sum-of-squares split; activation group sums
+// are per 32-element group as before. Only the grid / warp -> row assignment and the staging granularity change.
+constexpr int NT3 = 512, NW3 = NT3 / 32;
+constexpr int STW3 = 72 * 4;
+constexpr int SMEM3_FLOATS = SMEM_FLOATS + NW3 * STW3;
+
+__device__ __forceinline__ void load_norm3(float * xs, float2 * sums, const float * h, const float * w, float * red, float eps) {
+    const int warp = threadIdx.x >> 5, lane = threadIdx.x & 31;
+    if (threadIdx.x < NT) {   // the first 256 threads reproduce moe_v2's per-thread / per-warp sum-of-squares split
+        float ss = 0.f;
+        for (int i = threadIdx.x; i < H; i += NT) { float v = h[i]; xs[(i >> 6) * CH + (i & 63)] = v; ss += v * v; }
+        ss = wsum(ss);
+        if (lane == 0) red[warp] = ss;
+    }
+    __syncthreads();
+    float tot = 0.f;
+#pragma unroll
+    for (int i = 0; i < NW; ++i) tot += red[i];
+    const float sc = rsqrtf(tot / H + eps);
+    for (int i = threadIdx.x; i < H; i += NT3) xs[(i >> 6) * CH + (i & 63)] *= sc * __ldg(w + i);
+    __syncthreads();
+    for (int b = warp; b < H / 32; b += NW3) {
+        float s = wsum(xs[(b >> 1) * CH + (b & 1) * 32 + lane]);
+        if (lane == 0) ((float *)sums)[b] = s;
+    }
+    __syncthreads();
+}
+// one 72-uint4 chunk (a 1152 B gate or up row) per warp: lane holds uint4 lane, lane+32 and (lane < 8) lane+64
+__device__ __forceinline__ void ld72(const uint8_t * p, int lane, uint4 * v) {
+    const uint4 * p4 = (const uint4 *)p;
+    v[0] = __ldg(p4 + lane); v[1] = __ldg(p4 + lane + 32);
+    if (lane < 8) v[2] = __ldg(p4 + lane + 64);
+}
+__device__ __forceinline__ void st72(uint4 * stg4, int lane, const uint4 * v) {
+    stg4[lane] = v[0]; stg4[lane + 32] = v[1];
+    if (lane < 8) stg4[lane + 64] = v[2];
+}
+// down chunk c of row r: c < 2 -> selected experts 4c..4c+3 (72 uint4, = moe_v2 units 32c..32c+31),
+// c == 2 -> shared-expert row (18 uint4 in lanes < 18, = moe_v2 units 64..71)
+__device__ __forceinline__ void ldD(const Layer & L, const int * sel, int r, int c, int lane, uint4 * v) {
+    if (c < 2) {
+#pragma unroll
+        for (int i = 0; i < 3; ++i) {
+            const int k = lane + 32 * i;
+            if (i < 2 || lane < 8) {
+                const int m = 4 * c + k / 18, w = k % 18;
+                v[i] = __ldg((const uint4 *)(L.down_exps + ((size_t)sel[m] * H + r) * ROW_D) + w);
+            }
+        }
+    } else if (lane < 18) {
+        v[0] = __ldg((const uint4 *)(L.down_sh + (size_t)r * ROW_D) + lane);
+    }
+}
+
+template <bool L3>
+__global__ void __launch_bounds__(NT3, 2) moe_v3(Params P) {
+    extern __shared__ float smem[];
+    __shared__ int sel[TOPK];
+    __shared__ float selw[TOPK];
+    __shared__ float red[NW];
+    float * xs = smem;
+    float2 * sums = (float2 *)(smem + (TOPK * FF + FFS) / 64 * CH);
+    const int warp = threadIdx.x >> 5, lane = threadIdx.x & 31;
+    unsigned * stg = (unsigned *)(smem + SMEM_FLOATS) + warp * STW3;
+    uint4 * stg4 = (uint4 *)stg;
+    const int gw = blockIdx.x * NW3 + warp, W = gridDim.x * NW3;
+    Scratch * s = P.s;
+    const Layer & L = P.L;
+
+    // A: rmsnorm + router logits / shexp-gate quarter-row partials (per task identical to moe_v2)
+    {
+        float4 cw[4];
+        int t = gw;
+        if (t < NTA) ldA(L, t, lane, cw);
+        load_norm3(xs, sums, P.h, P.norm, red, P.eps);
+        for (; t < NTA; t += W) {
+            const int row = t >> 2, q = t & 3;
+            float a = 0.f;
+#pragma unroll
+            for (int i = 0; i < 4; ++i) {
+                const int e = q * (QK / 4) + lane + 32 * i;
+                const float4 xv = *(const float4 *)(xs + ((4 * e) >> 6) * CH + ((4 * e) & 63));
+                a = fmaf(cw[i].x, xv.x, a); a = fmaf(cw[i].y, xv.y, a); a = fmaf(cw[i].z, xv.z, a); a = fmaf(cw[i].w, xv.w, a);
+            }
+            a = wsum(a);
+            if (lane == 0) { if (row < NE) s->lpart[q][row] = a; else s->gpart[q] = a; }
+            if (t + W < NTA) ldA(L, t + W, lane, cw);
+        }
+    }
+    grid_barrier(s);
+    // B: route; gate row chunk, then up row chunk, per row
+    {
+        uint4 cv[3];
+        bool have = false;
+        const uint8_t * g, * u;
+        if (gw < FFS) { rowB(L, sel, gw, g, u); ld72(g, lane, cv); have = true; }
+        if (warp == 0) route(s, lane, sel, selw);
+        __syncthreads();
+        const float * xc = xs + lane * CH; const float2 sx = sums[lane];
+        for (int t = gw; t < NTB; t += W) {
+            if (!have) { rowB(L, sel, t, g, u); ld72(g, lane, cv); }
+            st72(stg4, lane, cv);
+            __syncwarp();
+            ld72(u, lane, cv);
+            const float gg = wsum(dot2c<L3>(lds9(stg + lane * 9), xc, sx));
+            __syncwarp();
+            st72(stg4, lane, cv);
+            __syncwarp();
+            const int tn = t + W; have = tn < NTB;
+            if (have) { rowB(L, sel, tn, g, u); ld72(g, lane, cv); }
+            const float uu = wsum(dot2c<L3>(lds9(stg + lane * 9), xc, sx));
+            if (lane == 0) { if (t < FFS) s->h_sh[t] = silu(gg) * uu; else s->h_exp[t - FFS] = silu(gg) * uu; }
+            __syncwarp();
+        }
+    }
+    // C: down. First chunk of each warp's first row and the shexp gate logit are issued before barrier 2 (as DOWNH=2).
+    int r = warp * gridDim.x + blockIdx.x;   // warp-major rows: the partial last wave is spread over every block
+    uint4 cv[3];
+    if (r < H) ldD(L, sel, r, 0, lane, cv);
+    float gl = 0.f;
+    {
+        float gp[NQ];
+#pragma unroll
+        for (int q = 0; q < NQ; ++q) gp[q] = __ldcg(&s->gpart[q]);
+#pragma unroll
+        for (int q = 0; q < NQ; ++q) gl += gp[q];
+    }
+    grid_barrier(s);
+    {
+        constexpr int NX = (TOPK * FF + FFS) / NT3, NXE = TOPK * FF / NT3;
+        float hv[NX];
+#pragma unroll
+        for (int j = 0; j < NX; ++j) {
+            const int i = threadIdx.x + NT3 * j;
+            hv[j] = j < NXE ? __ldcg(&s->h_exp[i]) : __ldcg(&s->h_sh[i - TOPK * FF]);
+        }
+        // thread (warp, lane) slot j holds element 512j + 32warp + lane = 32-element group 16j + warp
+#pragma unroll
+        for (int j = 0; j < NX; ++j) {
+            const int i = threadIdx.x + NT3 * j;
+            xs[(i >> 6) * CH + (i & 63)] = hv[j];
+            const float sm = wsum(hv[j]);
+            if (lane == 0) ((float *)sums)[NW3 * j + warp] = sm;
+        }
+        __syncthreads();
+    }
+    const float gs = 1.f / (1.f + expf(-gl));
+    const float w0 = selw[lane >> 3], w1 = selw[(lane >> 3) + 4];
+    for (; r < H; r += W) {
+        st72(stg4, lane, cv);
+        __syncwarp();
+        ldD(L, sel, r, 1, lane, cv);
+        const float dA = dot2c<L3, true>(lds9(stg + lane * 9), xs + lane * CH, sums[lane]);
+        __syncwarp();
+        st72(stg4, lane, cv);
+        __syncwarp();
+        ldD(L, sel, r, 2, lane, cv);
+        const float dB = dot2c<L3, true>(lds9(stg + lane * 9), xs + (lane + 32) * CH, sums[lane + 32]);
+        __syncwarp();
+        if (lane < 18) stg4[lane] = cv[0];
+        __syncwarp();
+        if (r + W < H) ldD(L, sel, r + W, 0, lane, cv);
+        float acc = __fmaf_rn(w0, dA, __fmul_rn(w1, dB));
+        if (lane < 8) acc = __fmaf_rn(gs, dot2c<L3, true>(lds9(stg + lane * 9), xs + (lane + 64) * CH, sums[lane + 64]), acc);
+        acc = wsum(acc);
+        if (lane == 0) P.out[r] = P.h[r] + acc;
+        __syncwarp();
+    }
+}
+__global__ void moe_v3_cmp(const float * a, const float * b, unsigned * res) {
+    for (int i = threadIdx.x; i < H; i += blockDim.x) {
+        const unsigned x = __float_as_uint(a[i]), y = __float_as_uint(b[i]);
+        if (x != y) { atomicAdd(&res[0], 1u); atomicMax(&res[1], __float_as_uint(fabsf(a[i] - b[i]))); }
+    }
+}
+
 struct DevState {
     Scratch * scratch = nullptr;
     int grid = 0;
     int grid_dx = 0;   // co-resident grid of moe_v2<0, 3> (GGML_CUDA_MOE_DOWNX; >= that of <0, 1> / <0, 2>)
     int grid_dh[2] = { 0, 0 };
     int grid_tb = 0;   // MOE2: co-resident grid of moe_v2<0, 61> (GGML_CUDA_MOE_TAILBAL=1 with LOP3)
+    int grid_v3 = 0;   // WP4: co-resident grid of moe_v3 (512-thread blocks)
+    float * v3_ref = nullptr;      // GGML_CUDA_MOE_V3_CHECK: reference output (2 rows)
+    unsigned * v3_res = nullptr;   // [mismatch count, max |diff| bits]
     int grid_l3 = 0;   // MOE1: co-resident grid of moe_v2<0, 1|4|8|16> (GGML_CUDA_MOE_LOP3=1 with DOWNH=2)   // C07: co-resident grids of moe_v2<0, 1|4> and moe_v2<0, 1|4|8> (GGML_CUDA_MOE_DOWNH=1|2)
 };
 static DevState g_dev[GGML_CUDA_MAX_DEVICES];
@@ -482,6 +666,10 @@ static DevState & dev_state(int device) {
             if ((T + d.grid_tb - 1) / d.grid_tb > 3) { d.grid_tb = -1; }
         }
         if (g_debug) { fprintf(stderr, "occamy-fused: device %d: TAILBAL variant %d blocks/SM -> grid %d\n", device, per_sm_tb, d.grid_tb); }
+        int per_sm_v3 = 0;
+        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_v3, moe_v3<true>, NT3, SMEM3_FLOATS * sizeof(float)));
+        d.grid_v3 = per_sm_v3 < 1 ? -1 : per_sm_v3 * nsm;
+        if (g_debug) { fprintf(stderr, "occamy-fused: device %d: MOE_V3 variant %d blocks/SM x %d thr -> grid %d, smem %zu B\n", device, per_sm_v3, NT3, d.grid_v3, SMEM3_FLOATS * sizeof(float)); }
         for (int k = 0; k < 2; ++k) {
             d.grid_dh[k] = per_sm_dh[k] < 1 ? -1 : per_sm_dh[k] * nsm;
             if (g_debug) {
@@ -495,6 +683,7 @@ static DevState & dev_state(int device) {
                 if (d.grid > cap) d.grid = cap;
                 if (d.grid_dx > cap) d.grid_dx = cap;
                 for (int k = 0; k < 2; ++k) if (d.grid_dh[k] > cap) d.grid_dh[k] = cap;
+                if (d.grid_v3 > cap) d.grid_v3 = cap;
                 fprintf(stderr, "occamy-fused: grid cap %d -> grid %d dx %d dh %d/%d\n", cap, d.grid, d.grid_dx, d.grid_dh[0], d.grid_dh[1]);
             }
         }
@@ -684,7 +873,60 @@ bool ggml_cuda_occamy_moe_match_window(ggml_backend_cuda_context & ctx, const gg
 
 bool ggml_cuda_occamy_n2split() { static const bool on = env_flag("GGML_CUDA_OCCAMY_N2SPLIT"); return on; }
 
+static void moe_launch_v2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_moe_match & m, float * out_override, int row);
+
+// WP4: GGML_CUDA_MOE_V3=1 (default off) runs moe_v3 instead of the moe_v2 dispatch below (not with GGML_CUDA_OCCAMY_3L).
+// GGML_CUDA_MOE_V3_CHECK=N: on the first N launches also run the moe_v2 dispatch (same env) into a scratch row first,
+// then moe_v3 into the real output, and print the count of bitwise-different floats (expected 0) and max |diff|.
 void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_moe_match & m, float * out_override, int row) {
+    static const bool v3 = env_flag("GGML_CUDA_MOE_V3") && !env_flag("GGML_CUDA_OCCAMY_3L");
+    static int v3_check = getenv("GGML_CUDA_MOE_V3_CHECK") ? atoi(getenv("GGML_CUDA_MOE_V3_CHECK")) : 0;
+    DevState & d = dev_state(ctx.device);
+    if (!v3 || d.grid_v3 <= 0) { moe_launch_v2(ctx, m, out_override, row); return; }
+    cudaStream_t st = ctx.stream();
+    const bool chk = v3_check > 0;
+    if (chk) {
+        --v3_check;
+        if (d.v3_ref == nullptr) {
+            CUDA_CHECK(cudaMalloc((void **)&d.v3_ref, 2 * H * sizeof(float)));
+            CUDA_CHECK(cudaMalloc((void **)&d.v3_res, 2 * sizeof(unsigned)));
+        }
+        moe_launch_v2(ctx, m, d.v3_ref, row);   // reference first: the real output may alias h
+        CUDA_CHECK(cudaMemsetAsync(d.v3_res, 0, 2 * sizeof(unsigned), st));
+    }
+    Params P;
+    P.L.gate_inp    = (const float *) m.gate_inp->data;
+    P.L.gate_inp_sh = (const float *) m.gate_inp_sh->data;
+    P.L.gate_exps   = (const uint8_t *) m.gate_exps->data;
+    P.L.up_exps     = (const uint8_t *) m.up_exps->data;
+    P.L.down_exps   = (const uint8_t *) m.down_exps->data;
+    P.L.gate_sh     = (const uint8_t *) m.gate_sh->data;
+    P.L.up_sh       = (const uint8_t *) m.up_sh->data;
+    P.L.down_sh     = (const uint8_t *) m.down_sh->data;
+    P.h    = (const float *) m.h->data + (size_t) row * H;
+    P.norm = (const float *) m.norm_w->data;
+    P.out  = (out_override ? out_override : (float *) m.out->data) + (size_t) row * H;
+    P.s    = d.scratch;
+    P.eps  = m.eps;
+    moe_v3<true><<<d.grid_v3, NT3, SMEM3_FLOATS * sizeof(float), st>>>(P);
+    CUDA_CHECK(cudaGetLastError());
+    if (g_debug) {
+        static unsigned long long n_v3 = 0;
+        ++n_v3;
+        if ((n_v3 & (n_v3 - 1)) == 0) { fprintf(stderr, "occamy-fused: MOE_V3 launches %llu\n", n_v3); }
+    }
+    if (chk) {
+        unsigned res[2];
+        moe_v3_cmp<<<1, 256, 0, st>>>(d.v3_ref + (size_t) row * H, P.out, d.v3_res);
+        CUDA_CHECK(cudaGetLastError());
+        CUDA_CHECK(cudaMemcpyAsync(res, d.v3_res, sizeof(res), cudaMemcpyDeviceToHost, st));
+        CUDA_CHECK(cudaStreamSynchronize(st));
+        float mx; memcpy(&mx, &res[1], sizeof(mx));
+        fprintf(stderr, "occamy-fused MOE_V3 CHECK %s row %d: bitwise-diff %u / %d, max_abs %.3e\n", m.out->name, row, res[0], H, (double) mx);
+    }
+}
+
+static void moe_launch_v2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_moe_match & m, float * out_override, int row) {
     static const bool three = env_flag("GGML_CUDA_OCCAMY_3L");
     DevState & d = dev_state(ctx.device);
     Params P;
