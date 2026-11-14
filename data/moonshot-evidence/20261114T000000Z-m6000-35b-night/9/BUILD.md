@@ -1,0 +1,5 @@
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+a7eb566c145e50d879c80b82eb40f8b46627e67cf0e82dfd13cf24ee5b9f58f5  libggml-cuda.so
+b75d48964ff65e16380cbb731c7ab42bf3894759006070dbc6698c5ac852fb29  test-backend-ops
+
+build: bash build-n9.sh; branch stack-moe3 d4c13eb

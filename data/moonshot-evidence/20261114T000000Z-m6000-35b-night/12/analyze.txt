@@ -1,0 +1,5 @@
+unit         nA nB  medA_tps  medB_tps  B/A-1    shaA==shaB  invalid
+single_30k    6  6     71.17     71.28   +0.15%  yes         0
+both_30k      6  6     85.41     85.11   -0.35%  yes         0
+single_90k    6  6     54.53     54.36   -0.30%  yes         0
+both_deep     6  6     59.54     60.40   +1.43%  NO 2/1      0

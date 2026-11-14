@@ -1,0 +1,5 @@
+3fccd7bb12c5864a9e3ac4689469d26cbfca6d83270543ad2d8bb3a763b6e351  llama-server
+be01a2fe028d34b071942c7f19303971ded38c1cfff24cea31949862092c0fa4  libggml-cuda.so
+484a36d31da219a6403c474fb295a9b5f49aad60d7b22da59e484bad9ff326cd  test-backend-ops
+
+build: bash build-n12.sh; branch dec2 30d56ad
