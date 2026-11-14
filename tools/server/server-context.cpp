@@ -3120,6 +3120,7 @@ private:
     // S1 prefill-single-stream state
     int32_t s1_rr = 0;
     int64_t s1_n_defer = 0;
+    int64_t gap15_n_capped = 0;
 
     // @ngxson : for debugging only
     int64_t t_pre_decode  = 0;
@@ -3535,6 +3536,16 @@ private:
                     if (params_base.n_batch_mixed > 0 && n_generation > 0 && slot.can_split() &&
                         slot.task->type == SERVER_TASK_TYPE_COMPLETION && !input_tokens.has_mtmd) {
                         n_batch_prompt = std::min({n_batch, n_ubatch, params_base.n_batch_mixed});
+                        if (params_base.n_batch_mixed_prefill_max > 0) {
+                            // gap15: generation tokens + at most N prompt tokens per mixed batch
+                            const int32_t n_lim = n_generation + params_base.n_batch_mixed_prefill_max;
+                            if (n_lim < n_batch_prompt) {
+                                n_batch_prompt = n_lim;
+                                if ((++gap15_n_capped & (gap15_n_capped - 1)) == 0 || gap15_n_capped % 256 == 0) {
+                                    SRV_INF("mixed-batch-prefill-max: capped mixed batches = %" PRId64 " (limit %d)\n", gap15_n_capped, n_lim);
+                                }
+                            }
+                        }
                         if (batch.size() >= n_batch_prompt) {
                             return;
                         }

@@ -1702,6 +1702,16 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
         }
     ).set_env("LLAMA_ARG_MIXED_BATCH_SIZE").set_examples({LLAMA_EXAMPLE_SERVER}));
     add_opt(common_arg(
+        {"--mixed-batch-prefill-max"}, "N",
+        "max prompt tokens added next to generation tokens in one batch (bounds max token gap under a large --mixed-batch-size; default: 0, disabled)",
+        [](common_params & params, int value) {
+            if (value < 0) {
+                throw std::invalid_argument("--mixed-batch-prefill-max must be non-negative");
+            }
+            params.n_batch_mixed_prefill_max = value;
+        }
+    ).set_env("LLAMA_ARG_MIXED_BATCH_PREFILL_MAX").set_examples({LLAMA_EXAMPLE_SERVER}));
+    add_opt(common_arg(
         {"--keep"}, "N",
         string_format("number of tokens to keep from the initial prompt (default: %d, -1 = all)", params.n_keep),
         [](common_params & params, int value) {
