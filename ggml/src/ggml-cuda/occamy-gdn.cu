@@ -634,7 +634,8 @@ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
         }
     }
     if (IL) {   // ---- phase B (RQK + PCS), card 18: both sequences per item ----
-        __shared__ float qn1[SD], kn1[SD], vv1[CGC], red1[NW];
+        // float4 reads of qn1/kn1: static __shared__ arrays are only 4-byte aligned by default (GPU gate 15 Nov: misaligned address at +0x564)
+        __shared__ __align__(16) float qn1[SD], kn1[SD], vv1[CGC], red1[NW];
         __shared__ unsigned hc1[NVH], fin1[NVH + 1];
         float * const QN[2] = { qn, qn1 }, * const KN[2] = { kn, kn1 }, * const VV[2] = { vv, vv1 }, * const RD[2] = { red, red1 };
         unsigned * const HC[2] = { hc, hc1 }, * const FN[2] = { fin, fin1 };
