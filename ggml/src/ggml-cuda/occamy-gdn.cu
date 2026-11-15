@@ -474,6 +474,10 @@ __device__ __forceinline__ void dot2v2(unsigned w0, unsigned w1, unsigned w2, un
 struct Params2 { Params p[2]; };
 constexpr int XS_HALF = H / 64 * CH;   // 2176 floats: one K=2048 activation set
 constexpr int N2R = 4;                 // max ssm_out rows per warp
+// Card 18 (GGML_CUDA_OCCAMY_GDN18=1, default OFF): IL=1 runs phase B for both sequences per item (one item loop,
+// both state tiles loaded back to back, one set of block barriers per item) instead of sequence 0 then sequence 1.
+// Per sequence every value is the same expression in the same order as IL=0, so the output is bit-identical.
+template <int IL>
 __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
     extern __shared__ float smem[];
     __shared__ float qn[SD], kn[SD], vv[CGC], red[NW];
@@ -527,7 +531,7 @@ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
     }
     grid_barrier(s0);
 #pragma unroll
-    for (int k = 0; k < 2; ++k) {   // ---- phase B (RQK + PCS), one sequence at a time ----
+    for (int k = 0; k < (IL ? 0 : 2); ++k) {   // ---- phase B (RQK + PCS), one sequence at a time ----
         const Params & P = PP.p[k];
         Scratch * s = P.s;
         const int row = __ldg(P.s_copy);
@@ -629,6 +633,142 @@ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
             }
         }
     }
+    if (IL) {   // ---- phase B (RQK + PCS), card 18: both sequences per item ----
+        __shared__ float qn1[SD], kn1[SD], vv1[CGC], red1[NW];
+        __shared__ unsigned hc1[NVH], fin1[NVH + 1];
+        float * const QN[2] = { qn, qn1 }, * const KN[2] = { kn, kn1 }, * const VV[2] = { vv, vv1 }, * const RD[2] = { red, red1 };
+        unsigned * const HC[2] = { hc, hc1 }, * const FN[2] = { fin, fin1 };
+        const float * CI[2], * SI[2];
+#pragma unroll
+        for (int k = 0; k < 2; ++k) {
+            const int row = __ldg(PP.p[k].s_copy);
+            CI[k] = PP.p[k].conv_base + (size_t)row * PP.p[k].conv_stride;
+            SI[k] = PP.p[k].ssm_base  + (size_t)row * PP.p[k].ssm_stride;
+        }
+        if (threadIdx.x < NVH) { hc[threadIdx.x] = 0; hc1[threadIdx.x] = 0; if (threadIdx.x == 0) { fin[NVH] = 0; fin1[NVH] = 0; } }
+        const int it_lo = (int)(((long long)blockIdx.x * (NVH * NCG)) / gridDim.x);
+        const int it_hi = (int)(((long long)(blockIdx.x + 1) * (NVH * NCG)) / gridDim.x);
+        int kh_c = -1, hv_c = -1;
+        float qs[2] = { 0.f, 0.f }, ks[2] = { 0.f, 0.f }, gexp[2] = { 0.f, 0.f }, beta[2] = { 0.f, 0.f };
+        for (int it = it_lo; it < it_hi; ++it) {
+            const int hv = it / (2 * NCG) + NKH * ((it / NCG) & 1);
+            const int cg = it % NCG, kh = hv % NKH;
+            const bool need_qk = kh != kh_c;
+            const int col0 = cg * CGC + warp * 2;
+            float4 st[2][2];
+#pragma unroll
+            for (int k = 0; k < 2; ++k) {   // state tiles first: they do not depend on this item's conv/norm
+                const float4 * si = (const float4 *)(SI[k] + ((size_t)hv * SD + col0) * SD) + lane;
+                st[k][0] = si[0]; st[k][1] = si[SD / 4];
+            }
+            {
+                const int t = threadIdx.x;
+#pragma unroll
+                for (int k = 0; k < 2; ++k) {
+                    const Params & P = PP.p[k];
+                    if (need_qk) {
+                    const int c = t < SD ? kh * SD + t : H + kh * SD + (t - SD);
+                    const float * ci = CI[k] + c * 3; const float * w = L.conv_w + c * 4;
+                    float xnew = __ldcg(&P.s->qkv[c]);
+                    float y = ci[0] * w[0] + ci[1] * w[1] + ci[2] * w[2] + xnew * w[3];
+                    y = silu(y);
+                    float sq = warp_sum(y * y);
+                    if (lane == 0) RD[k][warp] = sq;
+                    if (t < SD) QN[k][t] = y; else KN[k][t - SD] = y;
+                    }
+                    if (t < CGC) {
+                        const int cv = 2 * H + hv * SD + cg * CGC + t;
+                        const float * cvi = CI[k] + cv * 3; const float * wv = L.conv_w + cv * 4;
+                        float xv = __ldcg(&P.s->qkv[cv]);
+                        float c1 = cvi[1], c2 = cvi[2];
+                        float yv = cvi[0] * wv[0] + c1 * wv[1] + c2 * wv[2] + xv * wv[3];
+                        VV[k][t] = silu(yv);
+                        float * co = P.conv_out + cv * 3; co[0] = c1; co[1] = c2; co[2] = xv;
+                    }
+                }
+            }
+            __syncthreads();
+#pragma unroll
+            for (int k = 0; k < 2; ++k) {
+                const Params & P = PP.p[k];
+                if (need_qk) {
+                qs[k] = rsqrtf((RD[k][0] + RD[k][1] + RD[k][2] + RD[k][3]) / SD + P.eps_l2) * P.scale_l2;
+                ks[k] = rsqrtf((RD[k][4] + RD[k][5] + RD[k][6] + RD[k][7]) / SD + P.eps_l2) * P.scale_l2;
+                }
+                if (hv != hv_c) {
+                const float al = __ldcg(&P.s->ab[hv]) + __ldg(L.dt_bias + hv);
+                const float sp = al > 20.f ? al : logf(1.f + expf(al));
+                gexp[k] = expf(sp * __ldg(L.ssm_a + hv));
+                beta[k] = 1.f / (1.f + expf(-__ldcg(&P.s->ab[NVH + hv])));
+                }
+            }
+            if (need_qk) kh_c = kh;
+            hv_c = hv;
+            float ssq[2] = { 0.f, 0.f };
+#pragma unroll
+            for (int k = 0; k < 2; ++k) {
+                const Params & P = PP.p[k];
+                const float4 q4 = *(const float4 *)(QN[k] + 4 * lane), k4r = *(const float4 *)(KN[k] + 4 * lane);
+                const float4 qv = make_float4(q4.x * qs[k], q4.y * qs[k], q4.z * qs[k], q4.w * qs[k]);
+                const float4 kv4 = make_float4(k4r.x * ks[k], k4r.y * ks[k], k4r.z * ks[k], k4r.w * ks[k]);
+                float4 * so = (float4 *)(P.S_out + ((size_t)hv * SD + col0) * SD) + lane;
+#pragma unroll
+                for (int j = 0; j < 2; ++j) {
+                    float4 a = st[k][j];
+                    float kvd = warp_sum(a.x * kv4.x + a.y * kv4.y + a.z * kv4.z + a.w * kv4.w);
+                    float delta = (VV[k][warp * 2 + j] - gexp[k] * kvd) * beta[k];
+                    a.x = gexp[k] * a.x + kv4.x * delta; a.y = gexp[k] * a.y + kv4.y * delta;
+                    a.z = gexp[k] * a.z + kv4.z * delta; a.w = gexp[k] * a.w + kv4.w * delta;
+                    float att = warp_sum(a.x * qv.x + a.y * qv.y + a.z * qv.z + a.w * qv.w) * rsqrtf((float)SD);
+                    so[j * SD / 4] = a;
+                    if (lane == 0) P.s->attn[hv * SD + col0 + j] = att;
+                    ssq[k] += att * att;
+                }
+            }
+            __syncthreads();
+            if (lane == 0) { red[warp] = ssq[0]; red1[warp] = ssq[1]; }
+            __syncthreads();
+            if (threadIdx.x == 0 || threadIdx.x == 32) {
+                const int k = threadIdx.x >> 5;
+                const float * rk = k ? red1 : red;   // selects, not a dynamically indexed pointer array (no local memory)
+                float t = 0.f; for (int i = 0; i < NW; ++i) t += rk[i];
+                (k ? PP.p[1].s : PP.p[0].s)->ssq[hv * NCG + cg] = t; (k ? hc1 : hc)[hv]++;
+            }
+            __syncthreads();
+        }
+        __threadfence();
+        __syncthreads();
+        if (threadIdx.x < 2 * NVH) {
+            const int k = threadIdx.x / NVH, h = threadIdx.x % NVH;
+            unsigned * const hk = k ? hc1 : hc, * const fk = k ? fin1 : fin;
+            if (hk[h] != 0) {
+                const unsigned c = hk[h];
+                const unsigned old = atomicAdd(&(k ? PP.p[1].s : PP.p[0].s)->hcnt[h], c);
+                if ((old % NCG) + c == NCG) { fk[atomicAdd(&fk[NVH], 1u)] = h; }
+            }
+        }
+        __syncthreads();
+#pragma unroll
+        for (int k = 0; k < 2; ++k) {
+            const Params & P = PP.p[k];
+            Scratch * s = P.s;
+            const unsigned nf = FN[k][NVH];
+            if (nf) {
+                __threadfence();
+                for (unsigned f = threadIdx.x >> 7; f < nf; f += NT / SD) {
+                    const int hv = FN[k][f], t = threadIdx.x & (SD - 1), i = hv * SD + t;
+                    float tt = 0.f;
+#pragma unroll
+                    for (int q = 0; q < NCG; ++q) tt += __ldcg(&s->ssq[hv * NCG + q]);
+                    const float fh = rsqrtf(tt / SD + P.eps_gated);
+                    const float v = __ldcg(&s->attn[i]) * fh * __ldg(L.ssm_norm + t) * silu(__ldcg(&s->z[i]));
+                    s->xg[i] = v;
+                    const float bs = warp_sum(v);
+                    if (lane == 0) s->sg[i >> 5] = bs;
+                }
+            }
+        }
+    }
     grid_barrier(s0);
     {   // ---- phase C ----
 #pragma unroll
@@ -702,6 +842,7 @@ struct DevState {
     int grid_rp = 0;   // GDN3 card B: grid of the REPACK variant (co-resident blocks only)
     Scratch * scratch2 = nullptr;   // D1BF: second sequence's scratch
     int grid2 = 0;                  // D1BF: grid of gdn_fused2 (co-resident, <= grid_rp)
+    bool il_ok = false;             // card 18: gdn_fused2<1> has the same blocks/SM as gdn_fused2<0>
 };
 __global__ void rp_pack(const unsigned * __restrict__ src, unsigned * __restrict__ dst) {
     const int i = blockIdx.x * blockDim.x + threadIdx.x;   // H * 576 words
@@ -723,7 +864,10 @@ static bool pref() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_PREF"
 static bool repack() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_REPACK") && qk_reuse() && pc_share() && !env_flag("GGML_CUDA_OCCAMY_GDN_3L"); return on; }
 // D1BF, default OFF: one gdn_fused2 launch for the N2SPLIT two-sequence window (REPACK path only)
 static bool n2gdn() { static const bool on = env_flag("GGML_CUDA_OCCAMY_N2GDN") && repack(); return on; }
+// Card 18, default OFF: gdn_fused2<1> (phase B of both sequences per item); engaged only on the N2GDN path
+static bool gdn18() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN18") && n2gdn(); return on; }
 static long g_launch_n2 = 0;    // D1BF dispatch counter
+static long g_launch_il = 0;    // card 18 dispatch counter
 static long g_launch_pf = 0;    // GDN1 dispatch counter
 static long g_launch_rp = 0;    // GDN3 card B dispatch counter
 static long g_launch_rqk = 0;   // C10 dispatch counter (launches of the reuse variant)
@@ -786,7 +930,13 @@ static DevState & dev_state(int device) {
             fprintf(stderr, "occamy-gdn: repack variant %d blocks/SM -> grid %d (smem %zu B dyn)\n", per_sm_rp, d.grid_rp, SMEM3_FLOATS * sizeof(float));
             if (n2gdn()) {
                 int per_sm2 = 0;
-                CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm2, gdn_fused2, NT, SMEM3_FLOATS * sizeof(float)));
+                CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm2, gdn_fused2<0>, NT, SMEM3_FLOATS * sizeof(float)));
+                if (gdn18()) {   // the IL variant must keep the same co-residency (same grid, same row split)
+                    int per_sm_il = 0;
+                    CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_il, gdn_fused2<1>, NT, SMEM3_FLOATS * sizeof(float)));
+                    d.il_ok = per_sm_il >= per_sm2;
+                    fprintf(stderr, "occamy-gdn: gdn18 variant %d blocks/SM (n2gdn %d) -> %s\n", per_sm_il, per_sm2, d.il_ok ? "on" : "OFF (occupancy)");
+                }
                 d.grid2 = std::min(per_sm2 * nsm, d.grid_rp);
                 if (d.grid2 * NW * N2R < H) { d.grid2 = 0; }   // phase C holds at most N2R rows per warp
                 if (d.grid2 > 0) {
@@ -1195,8 +1345,59 @@ bool ggml_cuda_occamy_gdn_split2(ggml_backend_cuda_context & ctx, const ggml_cud
         if (pk) { PP.p[k] = fill_params(m, nullptr, &ov, k ? d.scratch2 : d.scratch); PP.p[k].L.out = pk; }
         else    { gdn_launch_impl(ctx, m, nullptr, &ov); }
     }
+    // card 18 gate (GGML_CUDA_OCCAMY_GDN18_CHECK=N, needs GDN18=1): for the first N windows run gdn_fused2<0> and
+    // gdn_fused2<1> on the same snapshotted inputs (in-place states restored between) and compare every output byte
+    static int il_check = getenv("GGML_CUDA_OCCAMY_GDN18_CHECK") ? atoi(getenv("GGML_CUDA_OCCAMY_GDN18_CHECK")) : 0;
+    if (pk && gdn18() && d.il_ok && il_check > 0) {
+        --il_check;
+        static long n_chk = 0, n_bad = 0; ++n_chk;
+        const size_t NCV = 2 * (size_t) CONV_N, NSS = 2 * (size_t) SSM_N;
+        std::vector<float> c0(NCV), s0(NSS), h0(2 * H), o0(2 * H), r[2][4];
+        CUDA_CHECK(cudaMemcpyAsync(c0.data(), m.conv_out,  NCV * sizeof(float), cudaMemcpyDeviceToHost, st));
+        CUDA_CHECK(cudaMemcpyAsync(s0.data(), m.state_out, NSS * sizeof(float), cudaMemcpyDeviceToHost, st));
+        for (int k = 0; k < 2; ++k) {
+            CUDA_CHECK(cudaMemcpyAsync(h0.data() + k * H, PP.p[k].h,   H * sizeof(float), cudaMemcpyDeviceToHost, st));
+            CUDA_CHECK(cudaMemcpyAsync(o0.data() + k * H, PP.p[k].out, H * sizeof(float), cudaMemcpyDeviceToHost, st));
+        }
+        CUDA_CHECK(cudaStreamSynchronize(st));
+        for (int v = 0; v < 2; ++v) {
+            if (v) {   // restore inputs (h before out: out may alias h)
+                CUDA_CHECK(cudaMemcpyAsync(m.conv_out,  c0.data(), NCV * sizeof(float), cudaMemcpyHostToDevice, st));
+                CUDA_CHECK(cudaMemcpyAsync(m.state_out, s0.data(), NSS * sizeof(float), cudaMemcpyHostToDevice, st));
+                for (int k = 0; k < 2; ++k) {
+                    CUDA_CHECK(cudaMemcpyAsync(PP.p[k].out, o0.data() + k * H, H * sizeof(float), cudaMemcpyHostToDevice, st));
+                    CUDA_CHECK(cudaMemcpyAsync((void *) PP.p[k].h, h0.data() + k * H, H * sizeof(float), cudaMemcpyHostToDevice, st));
+                }
+            }
+            if (v) { gdn_fused2<1><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP); }
+            else   { gdn_fused2<0><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP); }
+            CUDA_CHECK(cudaGetLastError());
+            r[v][0].resize(NCV); r[v][1].resize(NSS); r[v][2].resize(H); r[v][3].resize(H);
+            CUDA_CHECK(cudaMemcpyAsync(r[v][0].data(), m.conv_out,  NCV * sizeof(float), cudaMemcpyDeviceToHost, st));
+            CUDA_CHECK(cudaMemcpyAsync(r[v][1].data(), m.state_out, NSS * sizeof(float), cudaMemcpyDeviceToHost, st));
+            CUDA_CHECK(cudaMemcpyAsync(r[v][2].data(), PP.p[0].out, H * sizeof(float), cudaMemcpyDeviceToHost, st));
+            CUDA_CHECK(cudaMemcpyAsync(r[v][3].data(), PP.p[1].out, H * sizeof(float), cudaMemcpyDeviceToHost, st));
+            CUDA_CHECK(cudaStreamSynchronize(st));
+        }
+        size_t diff[4] = { 0, 0, 0, 0 }; double mx = 0.0;
+        for (int q = 0; q < 4; ++q) {
+            for (size_t i = 0; i < r[0][q].size(); ++i) {
+                if (memcmp(&r[0][q][i], &r[1][q][i], sizeof(float)) != 0) { ++diff[q]; mx = std::max(mx, (double) fabsf(r[0][q][i] - r[1][q][i])); }
+            }
+        }
+        const bool eq = !diff[0] && !diff[1] && !diff[2] && !diff[3];
+        if (!eq) { ++n_bad; }
+        fprintf(stderr, "occamy-gdn: gdn18 check window %ld bitequal=%d diff conv=%zu state=%zu out0=%zu out1=%zu maxabs=%.3e bad=%ld\n",
+                n_chk, (int) eq, diff[0], diff[1], diff[2], diff[3], mx, n_bad);
+        return true;   // the window's outputs are those of the last (IL) launch
+    }
     if (pk) {
-        gdn_fused2<<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
+        if (gdn18() && d.il_ok) {
+            gdn_fused2<1><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
+            if (++g_launch_il == 1 || (g_debug && g_launch_il % 3000 == 0)) { fprintf(stderr, "occamy-gdn: gdn18 engaged launches %ld\n", g_launch_il); }
+        } else {
+            gdn_fused2<0><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
+        }
         CUDA_CHECK(cudaGetLastError());
         if (g_debug && (++g_launch_n2 == 1 || g_launch_n2 % 3000 == 0)) { fprintf(stderr, "occamy-gdn: n2gdn launches %ld\n", g_launch_n2); }
     }
