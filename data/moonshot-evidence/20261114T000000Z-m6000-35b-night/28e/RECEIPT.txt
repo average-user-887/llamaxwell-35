@@ -1,0 +1,22 @@
+card: 28e prefill MoE mmq tuning (microbench only; gate failed, no integration)
+branch: none created (night15-mmq28e not needed; no source tree changes)
+reference source: 9/src stack-moe3 @ d4c13eb (read only)
+build (CPU-side, container local/m6000-build-tools:20261013, from 28e/mb):
+  docker run --rm -u $(id -u):$(id -g) -e TMPDIR=/tmp -v $PWD:/w -w /w local/m6000-build-tools:20261013 nvcc -std=c++17 -O3 -arch=sm_52 -Xptxas -v -o mb mb.cu
+  (mb_fakeA: same command, mb_fakeA.cu -> mb_fakeA, without -Xptxas -v)
+GPU rows (run.sh, flock gpu-bench.lock, prod unloaded via handbook POST, containers n28e-* --rm):
+  17:40:46-17:40:57 v1 | 17:45:05-17:45:20 v2 | 17:48:37-17:48:52 v3 | 17:49:23-17:49:38 fakeA probe | 17:50:16-17:50:36 v4
+sha256:
+  4288611f4655be9482d4908ae1a871ffcdc14b57f862675c37fb0d4b37c55727  28e/mb/mb
+  68fde991b3d794cf4867d2c273be617ef302af4673bd75b1586297d5658cc83a  28e/mb/mb_fakeA
+  28e/mb/dcc609a18c8022de8fe194188031528ce0203af41e4d37ff2dbae2ad2227b7b1  mb.cu
+  71fc951f2386631d50fb0a15f9c2d50f4dc1c9788bc06971098b1cd59cfd8e94  28e/mb/mb_v1.cu
+  90127450dfbd3f352b2f7b0e93d2f66259149e430e51533b4223cbcf7ecd32a6  28e/mb/mb_v2.cu
+  59b73247f36b3b6077b7e1c48aeb1f0effe2dba14b92cf41f18a572cdeaa8b10  28e/mb/mb_fakeA.cu
+  37add39c31c5a10fe61d64d44975b1fa3f5f9a13992c49377388f893578ca711  28e/mb/run.sh
+  42bef95d61dc0b851c2ad74e45f5517598a26e694bcd869e548568373d79a950  28e/mb/result-mb_fakeA.txt
+  590c4d1b9b422b248754714410a010782da9b8a1f4f43adf2a873ca873b732fd  28e/mb/result-mb.txt
+  748780ae1783e259ba0f5178f650c4d57b94072d14b7dfa2e31f354cebbd7142  28e/mb/result-v2-tails.txt
+  4f22c88851e058c85e6ad1a1722ae869f4357106725821f3a8d893bddfa67f12  28e/mb/result-v3-warpmap.txt
+  590c4d1b9b422b248754714410a010782da9b8a1f4f43adf2a873ca873b732fd  28e/mb/result-v4-t8.txt
+  (result-v4-t8.txt = copy of final result-mb.txt; v1 result was overwritten by v2 run, v1 numbers reproduced by the J64only-bk32 rows)

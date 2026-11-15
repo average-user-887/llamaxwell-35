@@ -1,0 +1,30 @@
+
+==========
+== CUDA ==
+==========
+tr: misaligned [:upper:] and/or [:lower:] construct
+
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+per_sm 3 grid 72 smem 27392 Scratch 83856
+bitequal A2ROW vs base after 3 chained launches: out 1 conv 1 ssm 1 scratch(qkv,z,ab,attn,ssq) 1
+A2ROW=0 grid 72 rep0 gdn_fused2 201.42 us/launch  27.7 MB  138 GB/s
+A2ROW=0 grid 72 rep1 gdn_fused2 201.50 us/launch  27.7 MB  138 GB/s
+A2ROW=0 grid 72 phase stamps (us, min/max over blocks, mean of 8): start 0.0/0.5 A-end 101.5/106.4 bar1-out 108.4/109.1 B0-end 127.2/134.5 B1-end 144.9/153.7 bar2-out 155.5/156.5 Cpass1-end 174.2/177.4 C-end 193.9/198.1
+A2ROW=1 grid 72 rep0 gdn_fused2 177.87 us/launch  27.7 MB  156 GB/s
+A2ROW=1 grid 72 rep1 gdn_fused2 177.74 us/launch  27.7 MB  156 GB/s
+A2ROW=1 grid 72 phase stamps (us, min/max over blocks, mean of 8): start 0.0/0.5 A-end 74.6/83.8 bar1-out 86.5/87.2 B0-end 105.2/113.4 B1-end 122.6/132.1 bar2-out 133.9/134.9 Cpass1-end 151.6/155.9 C-end 170.6/174.8
+A2ROW=0 grid 66 rep0 gdn_fused2 207.02 us/launch  27.7 MB  134 GB/s
+A2ROW=0 grid 66 rep1 gdn_fused2 206.99 us/launch  27.7 MB  134 GB/s
+A2ROW=0 grid 66 phase stamps (us, min/max over blocks, mean of 8): start 0.0/0.8 A-end 81.7/112.4 bar1-out 114.4/114.8 B0-end 132.6/139.8 B1-end 150.4/159.9 bar2-out 161.8/162.6 Cpass1-end 179.6/184.3 C-end 198.5/203.6
+A2ROW=1 grid 66 rep0 gdn_fused2 181.50 us/launch  27.7 MB  153 GB/s
+A2ROW=1 grid 66 rep1 gdn_fused2 181.55 us/launch  27.7 MB  153 GB/s
+A2ROW=1 grid 66 phase stamps (us, min/max over blocks, mean of 8): start 0.0/0.6 A-end 67.8/85.6 bar1-out 88.1/89.0 B0-end 107.1/114.6 B1-end 125.6/134.9 bar2-out 136.8/137.5 Cpass1-end 154.2/159.6 C-end 172.9/178.3
+out checksum -2.292232e+02 nan 0

@@ -1,0 +1,18 @@
+
+==========
+== CUDA ==
+==========
+tr: misaligned [:upper:] and/or [:lower:] construct
+
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+keys=30720 serial 3.963 ms/tile pipelined 3.925 ms/tile gain 0.96% max|diff| 0 err=no error
+keys=61440 serial 7.899 ms/tile pipelined 7.820 ms/tile gain 1.00% max|diff| 0 err=no error
+keys=92160 serial 11.497 ms/tile pipelined 11.375 ms/tile gain 1.06% max|diff| 0 err=no error

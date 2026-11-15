@@ -1,0 +1,96 @@
+
+==========
+== CUDA ==
+==========
+tr: misaligned [:upper:] and/or [:lower:] construct
+
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+keys=30720 TN-batched4096 1.704 ms NN-batched4096 1.674 ms
+keys=30720 ST(TN, M=512) 1.705 ms
+keys=30720 algo 0 TN 0.002 (4324.02 TF) NN 0.000 (49344.76 TF)
+keys=30720 algo 1 TN 0.002 (4338.94 TF) NN 0.000 (49344.76 TF)
+keys=30720 algo 2 TN 2.329 (3.46 TF) NN 2.090 (3.85 TF)
+keys=30720 algo 3 TN 3.631 (2.22 TF) NN 1.858 (4.34 TF)
+keys=30720 algo 4 TN 6.648 (1.21 TF) NN 2.429 (3.32 TF)
+keys=30720 algo 5 TN 3.476 (2.32 TF) NN 1.891 (4.26 TF)
+keys=30720 algo 6 TN 1.831 (4.40 TF) NN 1.636 (4.92 TF)
+keys=30720 algo 7 TN 2.501 (3.22 TF) NN 2.453 (3.28 TF)
+keys=30720 algo 8 TN 4.006 (2.01 TF) NN 2.086 (3.86 TF)
+keys=30720 algo 9 TN 7.140 (1.13 TF) NN 2.543 (3.17 TF)
+keys=30720 algo 10 TN 3.954 (2.04 TF) NN 1.873 (4.30 TF)
+keys=30720 algo 11 TN 2.291 (3.52 TF) NN 1.752 (4.60 TF)
+keys=30720 algo 12 TN 1.697 (4.74 TF) NN 1.695 (4.75 TF)
+keys=30720 algo 13 TN 2.484 (3.24 TF) NN 2.518 (3.20 TF)
+keys=30720 algo 14 TN 0.002 (4391.94 TF) NN 0.000 (49344.76 TF)
+keys=30720 algo 15 TN 0.002 (4361.49 TF) NN 0.000 (49344.76 TF)
+keys=30720 algo 16 TN 0.002 (4399.62 TF) NN 0.000 (49344.76 TF)
+keys=30720 algo 17 TN 0.002 (4422.82 TF) NN 0.000 (49344.76 TF)
+keys=30720 algo 18 TN 0.002 (4353.95 TF) NN 0.000 (49344.76 TF)
+keys=30720 algo 19 TN 0.002 (4201.31 TF) NN 0.000 (49344.76 TF)
+keys=30720 algo 20 TN 0.002 (4361.49 TF) NN 0.000 (49344.76 TF)
+keys=30720 algo 21 TN 0.002 (4446.26 TF) NN 0.000 (49344.76 TF)
+keys=30720 algo 22 TN 0.002 (4369.07 TF) NN 0.000 (49344.76 TF)
+keys=30720 algo 23 TN 0.002 (4331.47 TF) NN 0.000 (49344.76 TF)
+keys=30720 TN 1.669 ms (4.83 TFLOPS) NN 1.665 ms (4.84 TFLOPS) speedup 1.002 | max|TN-NN| 0 rmse_vs_fp64 TN 2.84e-07 NN 2.84e-07 (rms ref 1, n=15776)
+keys=61440 TN-batched4096 3.808 ms NN-batched4096 3.005 ms
+keys=61440 ST(TN, M=512) 3.381 ms
+keys=61440 algo 0 TN 0.002 (8516.35 TF) NN 0.000 (98689.51 TF)
+keys=61440 algo 1 TN 0.002 (8559.80 TF) NN 0.000 (98689.51 TF)
+keys=61440 algo 2 TN 4.191 (3.84 TF) NN 4.327 (3.72 TF)
+keys=61440 algo 3 TN 6.788 (2.37 TF) NN 3.564 (4.52 TF)
+keys=61440 algo 4 TN 13.200 (1.22 TF) NN 4.482 (3.59 TF)
+keys=61440 algo 5 TN 6.980 (2.31 TF) NN 3.222 (5.00 TF)
+keys=61440 algo 6 TN 3.694 (4.36 TF) NN 3.240 (4.97 TF)
+keys=61440 algo 7 TN 0.002 (8516.35 TF) NN 0.000 (96791.63 TF)
+keys=61440 algo 8 TN 0.002 (8501.97 TF) NN 0.000 (98689.51 TF)
+keys=61440 algo 9 TN 0.002 (8589.02 TF) NN 0.000 (91512.09 TF)
+keys=61440 algo 10 TN 7.913 (2.04 TF) NN 3.699 (4.35 TF)
+keys=61440 algo 11 TN 4.625 (3.48 TF) NN 3.541 (4.55 TF)
+keys=61440 algo 12 TN 3.320 (4.85 TF) NN 3.356 (4.80 TF)
+keys=61440 algo 13 TN 4.909 (3.28 TF) NN 4.897 (3.29 TF)
+keys=61440 algo 14 TN 0.002 (8814.65 TF) NN 0.000 (98689.51 TF)
+keys=61440 algo 15 TN 0.002 (8799.24 TF) NN 0.000 (98689.51 TF)
+keys=61440 algo 16 TN 0.002 (8768.58 TF) NN 0.000 (98689.51 TF)
+keys=61440 algo 17 TN 0.002 (8783.88 TF) NN 0.000 (98689.51 TF)
+keys=61440 algo 18 TN 0.002 (8648.05 TF) NN 0.000 (98689.51 TF)
+keys=61440 algo 19 TN 0.002 (8618.43 TF) NN 0.000 (98689.51 TF)
+keys=61440 algo 20 TN 0.002 (8692.86 TF) NN 0.000 (98689.51 TF)
+keys=61440 algo 21 TN 0.002 (8753.33 TF) NN 0.000 (98689.51 TF)
+keys=61440 algo 22 TN 0.002 (8830.11 TF) NN 0.000 (98689.51 TF)
+keys=61440 algo 23 TN 0.002 (8861.21 TF) NN 0.000 (98689.51 TF)
+keys=61440 TN 3.275 ms (4.92 TFLOPS) NN 3.326 ms (4.84 TFLOPS) speedup 0.985 | max|TN-NN| 0 rmse_vs_fp64 TN 2.85e-07 NN 2.85e-07 (rms ref 1, n=31552)
+keys=92160 TN-batched4096 5.440 ms NN-batched4096 4.770 ms
+keys=92160 ST(TN, M=512) 5.148 ms
+keys=92160 algo 0 TN 0.002 (12927.65 TF) NN 0.000 (145187.45 TF)
+keys=92160 algo 1 TN 0.002 (12603.92 TF) NN 0.000 (145187.45 TF)
+keys=92160 algo 2 TN 6.617 (3.65 TF) NN 6.787 (3.56 TF)
+keys=92160 algo 3 TN 10.001 (2.42 TF) NN 5.476 (4.41 TF)
+keys=92160 algo 4 TN 19.832 (1.22 TF) NN 6.721 (3.59 TF)
+keys=92160 algo 5 TN 10.420 (2.32 TF) NN 4.833 (5.00 TF)
+keys=92160 algo 6 TN 5.500 (4.39 TF) NN 4.869 (4.96 TF)
+keys=92160 algo 7 TN 0.002 (12688.65 TF) NN 0.000 (125829.13 TF)
+keys=92160 algo 8 TN 0.002 (12972.07 TF) NN 0.000 (145187.45 TF)
+keys=92160 algo 9 TN 0.002 (12752.95 TF) NN 0.000 (145187.45 TF)
+keys=92160 algo 10 TN 0.002 (12646.14 TF) NN 0.000 (145187.45 TF)
+keys=92160 algo 11 TN 6.911 (3.50 TF) NN 5.273 (4.58 TF)
+keys=92160 algo 12 TN 4.910 (4.92 TF) NN 4.972 (4.86 TF)
+keys=92160 algo 13 TN 7.268 (3.32 TF) NN 7.352 (3.29 TF)
+keys=92160 algo 14 TN 0.002 (12817.91 TF) NN 0.000 (150994.95 TF)
+keys=92160 algo 15 TN 0.002 (13175.82 TF) NN 0.000 (148034.27 TF)
+keys=92160 algo 16 TN 0.002 (13338.78 TF) NN 0.000 (148034.27 TF)
+keys=92160 algo 17 TN 0.002 (12972.07 TF) NN 0.000 (148034.27 TF)
+keys=92160 algo 18 TN 0.002 (13338.78 TF) NN 0.000 (148034.27 TF)
+keys=92160 algo 19 TN 0.002 (13198.86 TF) NN 0.000 (148034.27 TF)
+keys=92160 algo 20 TN 0.002 (12972.07 TF) NN 0.000 (148034.27 TF)
+keys=92160 algo 21 TN 0.002 (13338.78 TF) NN 0.000 (150994.95 TF)
+keys=92160 algo 22 TN 0.002 (13433.71 TF) NN 0.000 (148034.27 TF)
+keys=92160 algo 23 TN 0.002 (13362.38 TF) NN 0.000 (150994.95 TF)
+keys=92160 TN 4.846 ms (4.99 TFLOPS) NN 4.913 ms (4.92 TFLOPS) speedup 0.986 | max|TN-NN| 0 rmse_vs_fp64 TN 2.9e-07 NN 2.9e-07 (rms ref 1, n=47328)

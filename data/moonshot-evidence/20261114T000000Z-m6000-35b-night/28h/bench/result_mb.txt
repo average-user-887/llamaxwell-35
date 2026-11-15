@@ -1,0 +1,26 @@
+
+==========
+== CUDA ==
+==========
+tr: misaligned [:upper:] and/or [:lower:] construct
+
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+per_sm 3 grid 72 smem 27392 Scratch 83856
+grid 72 rep0 gdn_fused2 201.65 us/launch  27.7 MB  138 GB/s
+grid 72 rep1 gdn_fused2 201.61 us/launch  27.7 MB  138 GB/s
+grid 72 phase stamps (us, min/max over blocks, mean of 8): start 0.0/0.5 A-end 97.5/105.7 bar1-out 107.8/108.3 B0-end 127.0/135.0 B1-end 144.5/154.0 bar2-out 155.6/156.5 Cpass1-end 175.7/178.3 C-end 194.0/198.9
+grid 66 rep0 gdn_fused2 207.33 us/launch  27.7 MB  134 GB/s
+grid 66 rep1 gdn_fused2 207.18 us/launch  27.7 MB  134 GB/s
+grid 66 phase stamps (us, min/max over blocks, mean of 8): start 0.0/0.3 A-end 81.5/111.5 bar1-out 113.7/114.3 B0-end 132.2/139.3 B1-end 150.3/159.5 bar2-out 161.3/162.3 Cpass1-end 179.7/183.8 C-end 198.8/203.3
+grid 64 rep0 gdn_fused2 209.22 us/launch  27.7 MB  133 GB/s
+grid 64 rep1 gdn_fused2 209.23 us/launch  27.7 MB  133 GB/s
+grid 64 phase stamps (us, min/max over blocks, mean of 8): start 0.0/0.1 A-end 83.6/114.2 bar1-out 116.2/116.9 B0-end 136.6/141.7 B1-end 156.3/161.9 bar2-out 163.5/164.4 Cpass1-end 182.1/186.4 C-end 201.2/206.0
+out checksum -2.292232e+02 nan 0

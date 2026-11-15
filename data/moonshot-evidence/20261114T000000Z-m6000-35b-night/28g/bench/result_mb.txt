@@ -1,0 +1,35 @@
+
+==========
+== CUDA ==
+==========
+tr: misaligned [:upper:] and/or [:lower:] construct
+
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+grid 48 (2/SM), smem 39424
+grid 48 rep0 moe_v3 93.11 us/launch (no error)
+grid 48 rep1 moe_v3 93.18 us/launch (no error)
+phase stamps (us from first block start, min/max over blocks): start 0.0/0.0 A-end 10.2/12.3 bar1-out 14.3/14.3 B-end 55.3/61.4 bar2-out 63.5/63.5 C-end 88.1/90.1
+grid 40 (2/SM), smem 39424
+grid 40 rep0 moe_v3 100.80 us/launch (no error)
+grid 40 rep1 moe_v3 100.77 us/launch (no error)
+phase stamps (us from first block start, min/max over blocks): start 0.0/1.0 A-end 9.2/12.3 bar1-out 14.3/14.3 B-end 45.1/65.5 bar2-out 68.6/69.6 C-end 87.0/99.3
+grid 36 (2/SM), smem 39424
+grid 36 rep0 moe_v3 105.58 us/launch (no error)
+grid 36 rep1 moe_v3 105.56 us/launch (no error)
+phase stamps (us from first block start, min/max over blocks): start 0.0/0.0 A-end 8.2/11.3 bar1-out 13.3/13.3 B-end 46.1/67.6 bar2-out 69.6/69.6 C-end 88.1/102.4
+grid 32 (2/SM), smem 39424
+grid 32 rep0 moe_v3 114.11 us/launch (no error)
+grid 32 rep1 moe_v3 114.10 us/launch (no error)
+phase stamps (us from first block start, min/max over blocks): start 0.0/0.0 A-end 8.2/12.3 bar1-out 13.3/14.3 B-end 49.2/73.7 bar2-out 75.8/76.8 C-end 95.2/111.6
+grid 24 (2/SM), smem 39424
+grid 24 rep0 moe_v3 94.05 us/launch (no error)
+grid 24 rep1 moe_v3 94.09 us/launch (no error)
+phase stamps (us from first block start, min/max over blocks): start 0.0/0.0 A-end 7.2/12.3 bar1-out 13.3/14.3 B-end 57.3/61.4 bar2-out 62.5/63.5 C-end 89.1/91.1

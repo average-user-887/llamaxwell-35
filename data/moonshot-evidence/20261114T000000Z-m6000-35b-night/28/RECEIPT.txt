@@ -1,0 +1,26 @@
+Card 28 receipt (2026-11-15)
+Branch: none created (night15-prefill28 not needed; no llama.cpp source change). Profiled libs: $N2/9/bin (batch8, stack-moe3 d4c13eb), unmodified.
+Built artifacts:
+  qkbench/qkbench     sha256 b51a66cd751a91880b733a91b129bf07fe4a5f04b3b8b4e4d0ca1307912ec052
+  qkbench/qkbench.cu  sha256 eb7a1c8d664bd6332aa522ad889924dc059bce0d39bd0db841e7189fbb7a6b16
+Build command (CPU only): docker run --rm -u UID:GID -e TMPDIR=/tmp -v $N2/28/qkbench:/w -w /w local/m6000-build-tools:20261013 nvcc -std=c++17 -O2 -arch=sm_52 -o qkbench qkbench.cu -lcublas
+GPU rows (under $M/gpu-bench.lock): nvprof profile 17:09:51-17:16:21 (prof/a-20261115T160951Z); qkbench 17:21:19-17:21:28 and 17:22:13-17:22:27.
+Scripts: prof.sh, an28.py, qkbench/run.sh. GGML_CUDA_MAXWELL_GRAPHS unset; no power/clock changes.
+Card 28b: branch none (night15-prefill28b not created). Built:
+  qkbench/pipe     sha256 6d8d3ff46c3a61e3fd35176dd984ee06b6c13cc16a475550d6f30c3229af879e
+  qkbench/pipe.cu  sha256 48d6ae3c0ce8541995ee50e132e124d0c1492668585e0d12a87a36a20661ca96
+Build: same nvcc command with -o pipe pipe.cu. GPU row 17:26:02-17:26:10 via qkbench/run.sh pipe (containers n28b-).
+
+== Card 28c (fused exp-on-load PV microbench; accept failed, no branch, no integration) ==
+Branch: none (microbench only; source worktree stack-moe3 d4c13eb untouched; prod libs untouched)
+Build (CPU, image local/m6000-build-tools:20261013):
+  nvcc -std=c++17 -O3 -arch=sm_52 [-DBK=8|16] -Xptxas -v -o <bin> pvexp.cu -lcublas
+sha256:
+  8f3cdc8564869df670c45bf933490f0a02971e995c9b226ce69bc789fb763882  qkbench/pvexp      (built from pvexp_v2.cu, the reported rows)
+  fc0fe6f7ded530073d05b8f46541deb2a08b64afadfe46be444a1953c7f4fc0f  qkbench/pvexp_bk8  (pvexp.cu -DBK=8, not run)
+  dd07490cd0751cbb54f05dfddf21b2eb649b7c3f73fb65d0f4f1a12af6418334  qkbench/pvexp_bk16 (pvexp.cu -DBK=16)
+  b5c106963931bfbb7aad13f9598df0e43003a4d89c9f447e9d3296c06fc718c6  qkbench/pvexp.cu   (v3, BK-generic)
+  4eebc5424edcdaf253eafd96040731675d56111196a8e28d307b3113bf98bfd6  qkbench/pvexp_v1.cu
+  1dc1f69e28a34234d4364ceebcb9c03d4f90356bdb972c8a3cf12ab86bd0c9c5  qkbench/pvexp_v2.cu
+  db41016eff8faf92bf90f346a561ddd570328fa792d267962123528134f4c745  qkbench/run.sh     (container prefix n28c-)
+Results: qkbench/resultpvexp.txt (v2 sweep), qkbench/resultpvexp_bk16.txt; nvprof*.txt alongside. GPU rows 17:32-17:38 under gpu-bench.lock.

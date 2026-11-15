@@ -1,0 +1,48 @@
+
+==========
+== CUDA ==
+==========
+tr: misaligned [:upper:] and/or [:lower:] construct
+
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+keys=92160 sub1 run0 current 7.158 ms fused 6.915 ms ratio 0.966 | gemm cuBLAS 4.936 (4.79 TF) pvexp 6.371 (3.71 TF) speed 77.5% | softmax_w 1.487 stats_ro 0.710 err=no error
+keys=92160 sub1 run1 current 6.734 ms fused 6.657 ms ratio 0.989 | gemm cuBLAS 4.846 (4.87 TF) pvexp 6.210 (3.80 TF) speed 78.0% | softmax_w 1.482 stats_ro 0.732 err=no error
+keys=92160 sub2 run0 current 6.482 ms fused 6.438 ms ratio 0.993 | gemm cuBLAS 4.765 (4.96 TF) pvexp 5.922 (3.99 TF) speed 80.5% | softmax_w 1.481 stats_ro 0.710 err=no error
+keys=92160 sub2 run1 current 6.309 ms fused 6.428 ms ratio 1.019 | gemm cuBLAS 4.728 (5.00 TF) pvexp 5.977 (3.95 TF) speed 79.1% | softmax_w 1.482 stats_ro 0.713 err=no error
+keys=92160 sub3 run0 current 6.362 ms fused 6.331 ms ratio 0.995 | gemm cuBLAS 4.779 (4.94 TF) pvexp 5.801 (4.07 TF) speed 82.4% | softmax_w 1.486 stats_ro 0.710 err=no error
+keys=92160 sub3 run1 current 6.384 ms fused 6.279 ms ratio 0.984 | gemm cuBLAS 4.736 (4.99 TF) pvexp 5.750 (4.11 TF) speed 82.4% | softmax_w 1.483 stats_ro 0.711 err=no error
+keys=92160 sub4 run0 current 6.385 ms fused 6.381 ms ratio 0.999 | gemm cuBLAS 4.781 (4.94 TF) pvexp 5.803 (4.07 TF) speed 82.4% | softmax_w 1.481 stats_ro 0.721 err=no error
+keys=92160 sub4 run1 current 6.335 ms fused 6.289 ms ratio 0.993 | gemm cuBLAS 4.801 (4.92 TF) pvexp 5.811 (4.06 TF) speed 82.6% | softmax_w 1.484 stats_ro 0.710 err=no error
+keys=92160 sub6 run0 current 6.317 ms fused 6.452 ms ratio 1.021 | gemm cuBLAS 4.746 (4.98 TF) pvexp 5.815 (4.06 TF) speed 81.6% | softmax_w 1.483 stats_ro 0.713 err=no error
+keys=92160 sub6 run1 current 6.405 ms fused 6.489 ms ratio 1.013 | gemm cuBLAS 4.810 (4.91 TF) pvexp 5.812 (4.06 TF) speed 82.7% | softmax_w 1.481 stats_ro 0.729 err=no error
+keys=92160 rmse_vs_fp64 (fused sub3) current 2.525e-08 fused 1.466e-08 (rms ref 0.02113, n=3584)
+keys=61440 sub1 run0 current 4.938 ms fused 4.983 ms ratio 1.009 | gemm cuBLAS 3.378 (4.77 TF) pvexp 4.543 (3.55 TF) speed 74.4% | softmax_w 1.013 stats_ro 0.483 err=no error
+keys=61440 sub1 run1 current 4.717 ms fused 4.747 ms ratio 1.006 | gemm cuBLAS 3.362 (4.79 TF) pvexp 4.397 (3.66 TF) speed 76.5% | softmax_w 1.013 stats_ro 0.481 err=no error
+keys=61440 sub2 run0 current 4.564 ms fused 4.192 ms ratio 0.918 | gemm cuBLAS 3.316 (4.86 TF) pvexp 3.852 (4.18 TF) speed 86.1% | softmax_w 1.013 stats_ro 0.483 err=no error
+keys=61440 sub2 run1 current 4.326 ms fused 4.204 ms ratio 0.972 | gemm cuBLAS 3.303 (4.88 TF) pvexp 3.820 (4.22 TF) speed 86.4% | softmax_w 1.013 stats_ro 0.482 err=no error
+keys=61440 sub3 run0 current 4.436 ms fused 4.338 ms ratio 0.978 | gemm cuBLAS 3.210 (5.02 TF) pvexp 3.977 (4.05 TF) speed 80.7% | softmax_w 1.011 stats_ro 0.481 err=no error
+keys=61440 sub3 run1 current 4.528 ms fused 4.340 ms ratio 0.958 | gemm cuBLAS 3.261 (4.94 TF) pvexp 4.004 (4.02 TF) speed 81.4% | softmax_w 1.011 stats_ro 0.481 err=no error
+keys=61440 sub4 run0 current 4.417 ms fused 4.282 ms ratio 0.969 | gemm cuBLAS 3.282 (4.91 TF) pvexp 3.934 (4.09 TF) speed 83.4% | softmax_w 1.012 stats_ro 0.481 err=no error
+keys=61440 sub4 run1 current 4.315 ms fused 4.273 ms ratio 0.990 | gemm cuBLAS 3.231 (4.98 TF) pvexp 3.960 (4.07 TF) speed 81.6% | softmax_w 1.012 stats_ro 0.481 err=no error
+keys=61440 sub6 run0 current 4.397 ms fused 4.344 ms ratio 0.988 | gemm cuBLAS 3.203 (5.03 TF) pvexp 3.954 (4.07 TF) speed 81.0% | softmax_w 1.012 stats_ro 0.481 err=no error
+keys=61440 sub6 run1 current 4.317 ms fused 4.363 ms ratio 1.011 | gemm cuBLAS 3.245 (4.96 TF) pvexp 3.937 (4.09 TF) speed 82.4% | softmax_w 1.012 stats_ro 0.481 err=no error
+keys=61440 rmse_vs_fp64 (fused sub3) current 2.759e-08 fused 1.606e-08 (rms ref 0.02516, n=3584)
+keys=30720 sub1 run0 current 2.370 ms fused 3.161 ms ratio 1.334 | gemm cuBLAS 1.963 (3.83 TF) pvexp 2.561 (2.93 TF) speed 76.7% | softmax_w 0.483 stats_ro 0.232 err=no error
+keys=30720 sub1 run1 current 2.386 ms fused 2.925 ms ratio 1.226 | gemm cuBLAS 1.869 (4.02 TF) pvexp 2.655 (2.83 TF) speed 70.4% | softmax_w 0.484 stats_ro 0.252 err=no error
+keys=30720 sub2 run0 current 2.428 ms fused 2.328 ms ratio 0.959 | gemm cuBLAS 1.679 (4.48 TF) pvexp 2.129 (3.53 TF) speed 78.9% | softmax_w 0.485 stats_ro 0.233 err=no error
+keys=30720 sub2 run1 current 2.319 ms fused 2.284 ms ratio 0.985 | gemm cuBLAS 1.687 (4.46 TF) pvexp 2.087 (3.60 TF) speed 80.8% | softmax_w 0.484 stats_ro 0.233 err=no error
+keys=30720 sub3 run0 current 2.272 ms fused 2.121 ms ratio 0.933 | gemm cuBLAS 1.649 (4.56 TF) pvexp 1.916 (3.92 TF) speed 86.0% | softmax_w 0.484 stats_ro 0.252 err=no error
+keys=30720 sub3 run1 current 2.280 ms fused 2.120 ms ratio 0.930 | gemm cuBLAS 1.625 (4.63 TF) pvexp 1.917 (3.92 TF) speed 84.7% | softmax_w 0.485 stats_ro 0.233 err=no error
+keys=30720 sub4 run0 current 2.211 ms fused 2.051 ms ratio 0.928 | gemm cuBLAS 1.678 (4.48 TF) pvexp 1.810 (4.15 TF) speed 92.7% | softmax_w 0.484 stats_ro 0.251 err=no error
+keys=30720 sub4 run1 current 2.196 ms fused 2.050 ms ratio 0.934 | gemm cuBLAS 1.677 (4.48 TF) pvexp 1.849 (4.06 TF) speed 90.7% | softmax_w 0.484 stats_ro 0.233 err=no error
+keys=30720 sub6 run0 current 2.174 ms fused 2.011 ms ratio 0.925 | gemm cuBLAS 1.602 (4.69 TF) pvexp 1.775 (4.23 TF) speed 90.2% | softmax_w 0.484 stats_ro 0.232 err=no error
+keys=30720 sub6 run1 current 2.175 ms fused 2.015 ms ratio 0.926 | gemm cuBLAS 1.667 (4.51 TF) pvexp 1.714 (4.39 TF) speed 97.3% | softmax_w 0.488 stats_ro 0.233 err=no error
+keys=30720 rmse_vs_fp64 (fused sub3) current 4.929e-08 fused 2.9e-08 (rms ref 0.04201, n=3584)

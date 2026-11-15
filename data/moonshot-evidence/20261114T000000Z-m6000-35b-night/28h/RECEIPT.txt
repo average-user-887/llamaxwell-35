@@ -1,0 +1,61 @@
+Card 28h RECEIPT
+branch: night15-gdn28h (worktree 28h/src; git dir 7/src/.git), commit 54efa6df4928e3865a9d48ebf2904c7333e1d845, parent d4c13eb607188e09d2dc4feba9202ec7b7c31db8
+tree clean: 0 changes
+build: bash 28h/build-n28h.sh (incremental, from a copy of 9/build; 28h src mounted at 9/src path in container only; targets llama-server test-backend-ops ggml-cuda); libs copied with cp -aL from 28h/build/bin to 28h/bin
+microbench build: docker local/m6000-build-tools:20261013: nvcc -std=c++17 -O3 -arch=sm_52 -Xptxas -v '-DKINC="kern2_ts.inc"' -o mb2 mb2.cu (mb likewise with kern_ts.inc)
+N3 row: N3_GPU/N3_UNLOAD_URL on the command line only; bash 28h/gpu_ab.sh; run dir 28h/run-20261115T172404Z
+prod libs unchanged: prod-libs/batch8-20261115 (arm A, read-only mount)
+
+sha256:
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  bin/libggml-base.so
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  bin/libggml-base.so.0
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  bin/libggml-base.so.0.26.0
+b0fe234c014904e4351494a06fbb67c8e26b6e08cd4b515f715b553cc7c631fc  bin/libggml-cpu-alderlake.so
+239a41e10249ad461b0ad56d662b903e7b7b971aa154c611dec10d14893bb099  bin/libggml-cpu-cannonlake.so
+9a3043e244eeb0a0d725c95a7db98750a6c63fad6eb3c3f9acf4795834fb76fc  bin/libggml-cpu-cascadelake.so
+8cf04feb8efd8636ad7fd345c0dab100c95bba011d9e792c3d57b60e2a8a29b7  bin/libggml-cpu-cooperlake.so
+75c8a2a2b7d3d9a31e9db010bf48914dd9b7af093ad7e7ed94919d912ef4bcb8  bin/libggml-cpu-haswell.so
+ec96d3f9cc2d5351dd3ab07267629a342aba00db959d18307f5c7de7a7392490  bin/libggml-cpu-icelake.so
+5b93b804cf41b587bf57b7b5ad581d7878b8233717dc2905adf6d0218eae8e89  bin/libggml-cpu-ivybridge.so
+7c0e7db58b990b874684f9ff86f1269f4c9e2dce709f35da48243308148023cc  bin/libggml-cpu-piledriver.so
+6b0b929280cf4a665edcb2fac23505aa303a71c94af61295296fe5ec25430487  bin/libggml-cpu-sandybridge.so
+2ab60c6b2b41802cad830c8210009b662065b804a53c9eeb61c6cd83d96da7d5  bin/libggml-cpu-sapphirerapids.so
+1cd7cdc7dd5d68346f074f346d637675832f88499b0baef0507f4ffd09771c04  bin/libggml-cpu-skylakex.so
+abbf21fdaf3e76e6f2d139340ea75c062824e109b0f3d0204398a0fa00420b75  bin/libggml-cpu-sse42.so
+0fbfc2fa1bae7843bd509f25e7d060779d10590082aa70f6ab7c7a4023d4b72e  bin/libggml-cpu-x64.so
+eac5eee188f423cc3c4b7dfa0857029b24dd6c5045156b8233769e2bde1c6643  bin/libggml-cpu-zen4.so
+a62de519583252e7b63912e05146bf3d7ec0da734ab5ba29dd31cddc5c4da27e  bin/libggml-cuda.so
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  bin/libggml.so
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  bin/libggml.so.0
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  bin/libggml.so.0.26.0
+0c750bc9b6ef4e5b0a559fa0e6075104ca1b71d109ef4369bbd0818b7bb3fe5a  bin/libllama-common.so
+0c750bc9b6ef4e5b0a559fa0e6075104ca1b71d109ef4369bbd0818b7bb3fe5a  bin/libllama-common.so.0
+0c750bc9b6ef4e5b0a559fa0e6075104ca1b71d109ef4369bbd0818b7bb3fe5a  bin/libllama-common.so.0.6.0
+093a17ef49fbaabd4fd7caa08469678800a3c2977921cc3e62c04644e1ad43d9  bin/libllama-server-impl.so
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  bin/libllama.so
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  bin/libllama.so.0
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  bin/libllama.so.0.6.0
+423320bef2ef489f2ae3cb06937d4d1b16b187a57d3b5fc7fd5736b84217e0dd  bin/libmtmd.so
+423320bef2ef489f2ae3cb06937d4d1b16b187a57d3b5fc7fd5736b84217e0dd  bin/libmtmd.so.0
+423320bef2ef489f2ae3cb06937d4d1b16b187a57d3b5fc7fd5736b84217e0dd  bin/libmtmd.so.0.6.0
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  bin/llama-server
+b75d48964ff65e16380cbb731c7ab42bf3894759006070dbc6698c5ac852fb29  bin/test-backend-ops
+7ce0df18deb2e6997363565fc95df183594e3cb31150295e6682f1b4142db57f  bench/mb
+b77012ca9b94c5d633765097b789d2a5181716758863b8b082602f4400d456f0  bench/mb2
+e78dcd140f87cce70dc60892ab8b95c95c232c4cf4509f707d6f509d633df400  bench/mb2.cu
+a47b00bfe93023259d817a85d6731cb71abd4b1388bd9dbe712403e544dfccaa  bench/mb.cu
+b3a945684a2aa5bf431ad0846dc7dab9e382fd047ee675f13bcc65440ffe37e4  bench/kern2_abhoist_cpre.inc
+aea9b1a1b462ace45eba47954825ac866f9e52b64ce7c9fb6a4cdf692b14619c  bench/kern2.inc
+a4cb811ae84ead03de2c38fd54466368745a0bac77f1affa6f9aed926a065ef7  bench/kern2_prefetchB.inc
+555144f5ffdfd80d531be5a8332e8b4511cdce902542eca4050312620beb7f0a  bench/kern2_ts_abhoist_cpre.inc
+0eeb6498e2a6970bf30f7e4e74969877e2ebb29c919d213157de931a6313a409  bench/kern2_ts.inc
+bae71166471a21d37b9249b389673fc847514becbac4681d7fd957e7aed8b794  bench/kern2_ts_prefetchB.inc
+34063f1c4b541dfe4fcab9550d015dfec78fa67dc99d3799a788cee943130947  bench/kern.inc
+cb13c64c4256b2fdf60ae5bf637d249eeea5414af7d2dead6ba3169121500615  bench/kern_ts.inc
+0301658a139eb3041ab22670b13a205a49e3638b99aceb4d1e6c2cef1be16b75  bench/gen_ts.py
+85cd863e694351cfcb412d8cf3e9e9856be498aa94156da7ffd254187dc9c9ff  bench/run.sh
+c0643a6aa1d5173ce2c0cabc68c9ab5222bd7edca6c283ba1d79bfb9c589fb14  build-n28h.sh
+7fa7aae51845bbbbb1a3c5e173c5d40f448fc26ae2404efa98b80769ce687b50  gpu_ab.sh
+ba67b9d907df86178cc310467fb6acc902cb36a1827676cdcb7cb12b3b82fd3d  summ28h.py
+a618593efc4f92cb866b3dc7f820958581835d9ff462d6c8ce76e25d25e37eb4  h/n3_replay.py
+f793fab745c0ea6166f0cdbc108541a0524efac35173e5d82ea99ac185063f5e  h/n3_analyze.py

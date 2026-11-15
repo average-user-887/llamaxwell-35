@@ -1,0 +1,11 @@
+Card 28g receipt
+branch: none (gate missed; no commits). Source read from stack-moe3 @ d4c13eb (unchanged, clean)
+sha256 occamy-fused.cu @ d4c13eb: 95560be54eb1cbca38f4db6977d8bf46c96cbe1fb0c3cf5cdf239847b9e97f0a
+sha256 bench/mb (binary, built with kern_ts.inc): 506a8f567330e2eeb3062b76a725656ea7f6b9ea8467a4c174a48488d6e27f0f
+sha256 bench/mb.cu:       3fa8e1835aec36cd2689d66d2e23c2e1ca26a7b18f438d5e67c1cbbe920f20aa
+sha256 bench/kern.inc:    09e66b500303b4fb71c8823fbca8046d0f88d2bc1abb1cd284b6d334f088eaa4
+sha256 bench/kern_ts.inc: 898cf04ae93450a3281d816967ccbcaabf21089f862e4c804bf24f230dc931c2
+sha256 bench/run.sh:      720b9f061a0f11434e85e25c0dd2dfe700121a79ea9ee2b4cd58be6a6a073e6a
+build: docker run --rm --name n28g-build -u UID:GID -e TMPDIR=/tmp -v <bench>:/w -w /w local/m6000-build-tools:20261013 nvcc -std=c++17 -O3 -arch=sm_52 '-DKINC="kern_ts.inc"' -o mb mb.cu
+run: bash bench/run.sh mb (GPU lock, POST unload of the prod model, container n28g-mb, image nvidia/cuda:12.8.1-devel-ubuntu24.04, --network none)
+prod libs: untouched. GGML_CUDA_MAXWELL_GRAPHS: unset. Power/clocks: unchanged.

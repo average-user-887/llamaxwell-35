@@ -1,0 +1,48 @@
+
+==========
+== CUDA ==
+==========
+tr: misaligned [:upper:] and/or [:lower:] construct
+
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+device Quadro M6000 24GB sm_52 nsm 24
+gate/up rows 512 K 2048 routing uniform (tiles 371, max/expert 91) var J64only-bk32: median 12.322 ms min 12.184  2.79 TFLOPS | relRMSE vs FP64: cand 7.471e-07  q8_1-emul 5.420e-03  cand max abs 3.843e-06 zeros 0
+gate/up rows 512 K 2048 routing uniform (tiles 371, max/expert 91) var tail-bk32-mb2: median 12.147 ms min 12.128  2.83 TFLOPS | relRMSE vs FP64: cand 7.743e-07  q8_1-emul 5.470e-03  cand max abs 4.695e-06 zeros 0
+gate/up rows 512 K 2048 routing uniform (tiles 371, max/expert 91) var tail-bk16-mb2: median 10.981 ms min 10.929  3.13 TFLOPS | relRMSE vs FP64: cand 7.833e-07  q8_1-emul 5.556e-03  cand max abs 4.795e-06 zeros 0
+gate/up rows 512 K 2048 routing uniform (tiles 371, max/expert 91) var tail-bk16-mb3: median 10.779 ms min 10.569  3.19 TFLOPS | relRMSE vs FP64: cand 7.383e-07  q8_1-emul 5.415e-03  cand max abs 3.078e-06 zeros 0
+gate/up rows 512 K 2048 routing uniform (tiles 371, max/expert 91) var tail-bk32-mb3: median 12.882 ms min 12.831  2.67 TFLOPS | relRMSE vs FP64: cand 7.737e-07  q8_1-emul 5.369e-03  cand max abs 4.536e-06 zeros 0
+gate/up rows 512 K 2048 routing uniform (tiles 371, max/expert 91) var t8-bk16-mb2: median 11.347 ms min 11.276  3.03 TFLOPS | relRMSE vs FP64: cand 7.791e-07  q8_1-emul 5.434e-03  cand max abs 4.174e-06 zeros 0
+gate/up rows 512 K 2048 routing uniform (tiles 371, max/expert 91) var t8-bk16-mb1: median 11.367 ms min 11.314  3.02 TFLOPS | relRMSE vs FP64: cand 7.622e-07  q8_1-emul 5.454e-03  cand max abs 3.705e-06 zeros 0
+gate/up rows 512 K 2048 routing uniform (tiles 371, max/expert 91) var t8-bk32-mb1: median 14.204 ms min 14.167  2.42 TFLOPS | relRMSE vs FP64: cand 7.668e-07  q8_1-emul 5.371e-03  cand max abs 3.497e-06 zeros 0
+gate/up rows 512 K 2048 routing skew0.8 (tiles 388, max/expert 470) var J64only-bk32: median 12.468 ms min 12.439  2.76 TFLOPS | relRMSE vs FP64: cand 7.340e-07  q8_1-emul 5.554e-03  cand max abs 3.546e-06 zeros 0
+gate/up rows 512 K 2048 routing skew0.8 (tiles 388, max/expert 470) var tail-bk32-mb2: median 11.954 ms min 11.928  2.87 TFLOPS | relRMSE vs FP64: cand 7.552e-07  q8_1-emul 5.322e-03  cand max abs 3.786e-06 zeros 0
+gate/up rows 512 K 2048 routing skew0.8 (tiles 388, max/expert 470) var tail-bk16-mb2: median 11.441 ms min 11.378  3.00 TFLOPS | relRMSE vs FP64: cand 7.470e-07  q8_1-emul 5.359e-03  cand max abs 3.458e-06 zeros 0
+gate/up rows 512 K 2048 routing skew0.8 (tiles 388, max/expert 470) var tail-bk16-mb3: median 11.021 ms min 10.955  3.12 TFLOPS | relRMSE vs FP64: cand 7.532e-07  q8_1-emul 5.478e-03  cand max abs 4.404e-06 zeros 0
+gate/up rows 512 K 2048 routing skew0.8 (tiles 388, max/expert 470) var tail-bk32-mb3: median 12.660 ms min 12.643  2.71 TFLOPS | relRMSE vs FP64: cand 7.312e-07  q8_1-emul 5.341e-03  cand max abs 3.876e-06 zeros 0
+gate/up rows 512 K 2048 routing skew0.8 (tiles 388, max/expert 470) var t8-bk16-mb2: median 12.179 ms min 12.098  2.82 TFLOPS | relRMSE vs FP64: cand 7.631e-07  q8_1-emul 5.407e-03  cand max abs 4.010e-06 zeros 0
+gate/up rows 512 K 2048 routing skew0.8 (tiles 388, max/expert 470) var t8-bk16-mb1: median 12.180 ms min 12.096  2.82 TFLOPS | relRMSE vs FP64: cand 7.533e-07  q8_1-emul 5.555e-03  cand max abs 3.789e-06 zeros 0
+gate/up rows 512 K 2048 routing skew0.8 (tiles 388, max/expert 470) var t8-bk32-mb1: median 15.857 ms min 15.796  2.17 TFLOPS | relRMSE vs FP64: cand 7.491e-07  q8_1-emul 5.436e-03  cand max abs 3.802e-06 zeros 0
+down rows 2048 K 512 routing uniform (tiles 379, max/expert 84) var J64only-bk32: median 12.747 ms min 12.413  2.70 TFLOPS | relRMSE vs FP64: cand 3.725e-07  q8_1-emul 7.600e-03  cand max abs 3.040e-07 zeros 0
+down rows 2048 K 512 routing uniform (tiles 379, max/expert 84) var tail-bk32-mb2: median 12.263 ms min 12.246  2.80 TFLOPS | relRMSE vs FP64: cand 3.800e-07  q8_1-emul 7.552e-03  cand max abs 3.821e-07 zeros 0
+down rows 2048 K 512 routing uniform (tiles 379, max/expert 84) var tail-bk16-mb2: median 10.872 ms min 10.705  3.16 TFLOPS | relRMSE vs FP64: cand 3.746e-07  q8_1-emul 7.526e-03  cand max abs 3.023e-07 zeros 0
+down rows 2048 K 512 routing uniform (tiles 379, max/expert 84) var tail-bk16-mb3: median 10.439 ms min 10.141  3.29 TFLOPS | relRMSE vs FP64: cand 3.782e-07  q8_1-emul 7.452e-03  cand max abs 2.914e-07 zeros 0
+down rows 2048 K 512 routing uniform (tiles 379, max/expert 84) var tail-bk32-mb3: median 12.929 ms min 12.907  2.66 TFLOPS | relRMSE vs FP64: cand 3.774e-07  q8_1-emul 7.617e-03  cand max abs 4.319e-07 zeros 0
+down rows 2048 K 512 routing uniform (tiles 379, max/expert 84) var t8-bk16-mb2: median 10.203 ms min 10.139  3.37 TFLOPS | relRMSE vs FP64: cand 3.745e-07  q8_1-emul 7.474e-03  cand max abs 3.134e-07 zeros 0
+down rows 2048 K 512 routing uniform (tiles 379, max/expert 84) var t8-bk16-mb1: median 10.203 ms min 10.181  3.37 TFLOPS | relRMSE vs FP64: cand 3.677e-07  q8_1-emul 7.478e-03  cand max abs 2.906e-07 zeros 0
+down rows 2048 K 512 routing uniform (tiles 379, max/expert 84) var t8-bk32-mb1: median 14.067 ms min 14.047  2.44 TFLOPS | relRMSE vs FP64: cand 3.765e-07  q8_1-emul 7.481e-03  cand max abs 3.351e-07 zeros 0
+down rows 2048 K 512 routing skew0.8 (tiles 393, max/expert 566) var J64only-bk32: median 12.811 ms min 12.802  2.68 TFLOPS | relRMSE vs FP64: cand 3.730e-07  q8_1-emul 7.561e-03  cand max abs 3.328e-07 zeros 0
+down rows 2048 K 512 routing skew0.8 (tiles 393, max/expert 566) var tail-bk32-mb2: median 12.042 ms min 12.024  2.85 TFLOPS | relRMSE vs FP64: cand 3.783e-07  q8_1-emul 7.434e-03  cand max abs 3.302e-07 zeros 0
+down rows 2048 K 512 routing skew0.8 (tiles 393, max/expert 566) var tail-bk16-mb2: median 11.073 ms min 11.056  3.10 TFLOPS | relRMSE vs FP64: cand 3.832e-07  q8_1-emul 7.461e-03  cand max abs 3.871e-07 zeros 0
+down rows 2048 K 512 routing skew0.8 (tiles 393, max/expert 566) var tail-bk16-mb3: median 10.552 ms min 10.542  3.26 TFLOPS | relRMSE vs FP64: cand 3.875e-07  q8_1-emul 7.467e-03  cand max abs 2.684e-07 zeros 0
+down rows 2048 K 512 routing skew0.8 (tiles 393, max/expert 566) var tail-bk32-mb3: median 12.707 ms min 12.692  2.70 TFLOPS | relRMSE vs FP64: cand 3.735e-07  q8_1-emul 7.506e-03  cand max abs 3.428e-07 zeros 0
+down rows 2048 K 512 routing skew0.8 (tiles 393, max/expert 566) var t8-bk16-mb2: median 11.139 ms min 11.102  3.08 TFLOPS | relRMSE vs FP64: cand 3.788e-07  q8_1-emul 7.532e-03  cand max abs 3.615e-07 zeros 0
+down rows 2048 K 512 routing skew0.8 (tiles 393, max/expert 566) var t8-bk16-mb1: median 11.149 ms min 11.112  3.08 TFLOPS | relRMSE vs FP64: cand 3.874e-07  q8_1-emul 7.441e-03  cand max abs 3.766e-07 zeros 0
+down rows 2048 K 512 routing skew0.8 (tiles 393, max/expert 566) var t8-bk32-mb1: median 16.202 ms min 16.113  2.12 TFLOPS | relRMSE vs FP64: cand 3.786e-07  q8_1-emul 7.502e-03  cand max abs 4.022e-07 zeros 0

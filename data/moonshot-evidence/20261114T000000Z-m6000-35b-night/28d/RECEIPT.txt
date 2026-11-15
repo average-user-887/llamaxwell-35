@@ -1,0 +1,4 @@
+card 28d: no code changes, no branch/commits. Libs: <LAB>/occamy35-night-20261114/9/bin (batch8). Scripts run28d.sh, an28d_shapes.py.
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+a7eb566c145e50d879c80b82eb40f8b46627e67cf0e82dfd13cf24ee5b9f58f5  libggml-cuda.so
+build: none (existing batch8 build)

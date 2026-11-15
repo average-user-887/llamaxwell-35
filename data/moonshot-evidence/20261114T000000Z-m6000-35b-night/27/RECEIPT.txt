@@ -1,0 +1,3 @@
+card 27: log analysis only, no branch, no build, no binaries.
+script: reuse_check.py sha256 83b483a701af68e85bc439f2109bcab9bdba1c9bcdcbe67714933421d6f252d8
+run: python3 -I reuse_check.py
