@@ -1,0 +1,297 @@
+mv1d	FA g103/t128 stock_vec q=[256,2,16,1] kv=q8_0[256,<=8k,2] mask=y	n=413	ms=0.000
+mv1d	FA g103/t256 stock_tile q=[256,4,16,1] kv=q8_0[256,<=8k,2] mask=y	n=4	ms=0.000
+mv1d	FA g103/t62208 stock_tile q=[256,972,16,1] kv=q8_0[256,<=8k,2] mask=y	n=4	ms=0.000
+mv1d	FA g103/t64 stock_vec q=[256,1,16,1] kv=q8_0[256,<=8k,2] mask=y	n=416	ms=0.000
+mv1d	FA g103/t65536 stock_tile q=[256,1024,16,1] kv=q8_0[256,<=8k,2] mask=y	n=4	ms=0.000
+mv1d	FA g3936/t1 occamy_splitk q=[256,1,16,1] kv=f16[256,<=8k,2] mask=y	n=40	ms=0.000
+mv1d	FA g3936/t1024 stock_tile q=[256,1024,16,1] kv=f16[256,<=8k,2] mask=y	n=40	ms=0.000
+mv1d	FA g3936/t2 stock_tile q=[256,2,16,1] kv=f16[256,<=8k,2] mask=y	n=4120	ms=0.000
+mv1d	FA g3936/t4 stock_tile q=[256,4,16,1] kv=f16[256,<=8k,2] mask=y	n=40	ms=0.000
+mv1d	FA g3936/t972 stock_tile q=[256,972,16,1] kv=f16[256,<=8k,2] mask=y	n=40	ms=0.000
+mv1d	FA g3937/t2 stock_tile q=[256,2,16,1] kv=f16[256,<=8k,2] mask=y	n=10	ms=0.000
+mv1d	FUSED g103/t128 first=ADD skip=1 x=f32[2048,2,1,1]	n=413	ms=0.000
+mv1d	FUSED g103/t128 first=MUL skip=15 x=f32[2048,8,2,1]	n=413	ms=0.000
+mv1d	FUSED g103/t128 first=RMS_NORM skip=1 x=f32[2048,2,1,1]	n=2065	ms=0.000
+mv1d	FUSED g103/t128 first=RMS_NORM skip=1 x=f32[256,16,2,1]	n=413	ms=0.000
+mv1d	FUSED g103/t128 first=RMS_NORM skip=1 x=f32[256,2,2,1]	n=413	ms=0.000
+mv1d	FUSED g103/t128 first=SOFT_MAX skip=9 x=f32[256,2,1,1]	n=413	ms=0.000
+mv1d	FUSED g103/t128 first=UNARY skip=1 x=f32[4096,2,1,1]	n=413	ms=0.000
+mv1d	FUSED g103/t256 first=ADD skip=1 x=f32[2048,4,1,1]	n=4	ms=0.000
+mv1d	FUSED g103/t256 first=MUL skip=15 x=f32[2048,8,4,1]	n=4	ms=0.000
+mv1d	FUSED g103/t256 first=RMS_NORM skip=1 x=f32[2048,4,1,1]	n=20	ms=0.000
+mv1d	FUSED g103/t256 first=RMS_NORM skip=1 x=f32[256,16,4,1]	n=4	ms=0.000
+mv1d	FUSED g103/t256 first=RMS_NORM skip=1 x=f32[256,2,4,1]	n=4	ms=0.000
+mv1d	FUSED g103/t256 first=SOFT_MAX skip=9 x=f32[256,4,1,1]	n=4	ms=0.000
+mv1d	FUSED g103/t256 first=UNARY skip=1 x=f32[4096,4,1,1]	n=4	ms=0.000
+mv1d	FUSED g103/t62208 first=ADD skip=1 x=f32[2048,972,1,1]	n=4	ms=0.000
+mv1d	FUSED g103/t62208 first=MUL skip=15 x=f32[2048,8,972,1]	n=4	ms=0.000
+mv1d	FUSED g103/t62208 first=RMS_NORM skip=1 x=f32[2048,972,1,1]	n=20	ms=0.000
+mv1d	FUSED g103/t62208 first=RMS_NORM skip=1 x=f32[256,16,972,1]	n=4	ms=0.000
+mv1d	FUSED g103/t62208 first=RMS_NORM skip=1 x=f32[256,2,972,1]	n=4	ms=0.000
+mv1d	FUSED g103/t62208 first=SOFT_MAX skip=9 x=f32[256,972,1,1]	n=4	ms=0.000
+mv1d	FUSED g103/t62208 first=UNARY skip=1 x=f32[4096,972,1,1]	n=4	ms=0.000
+mv1d	FUSED g103/t64 first=ADD skip=1 x=f32[2048,1,1,1]	n=416	ms=0.000
+mv1d	FUSED g103/t64 first=MUL skip=15 x=f32[2048,8,1,1]	n=416	ms=0.000
+mv1d	FUSED g103/t64 first=RMS_NORM skip=1 x=f32[2048,1,1,1]	n=2080	ms=0.000
+mv1d	FUSED g103/t64 first=RMS_NORM skip=1 x=f32[256,16,1,1]	n=416	ms=0.000
+mv1d	FUSED g103/t64 first=RMS_NORM skip=1 x=f32[256,2,1,1]	n=416	ms=0.000
+mv1d	FUSED g103/t64 first=SOFT_MAX skip=9 x=f32[256,1,1,1]	n=416	ms=0.000
+mv1d	FUSED g103/t65536 first=ADD skip=1 x=f32[2048,1024,1,1]	n=4	ms=0.000
+mv1d	FUSED g103/t65536 first=MUL skip=15 x=f32[2048,8,1024,1]	n=4	ms=0.000
+mv1d	FUSED g103/t65536 first=RMS_NORM skip=1 x=f32[2048,1024,1,1]	n=20	ms=0.000
+mv1d	FUSED g103/t65536 first=RMS_NORM skip=1 x=f32[256,16,1024,1]	n=4	ms=0.000
+mv1d	FUSED g103/t65536 first=RMS_NORM skip=1 x=f32[256,2,1024,1]	n=4	ms=0.000
+mv1d	FUSED g103/t65536 first=SOFT_MAX skip=9 x=f32[256,1024,1,1]	n=4	ms=0.000
+mv1d	FUSED g103/t65536 first=UNARY skip=1 x=f32[4096,1024,1,1]	n=4	ms=0.000
+mv1d	FUSED g3936/t1 first=GATED_DELTA_NET skip=3 x=f32[128,16,1,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t1 first=RMS_NORM skip=1 x=f32[128,16,1,1]	n=240	ms=0.000
+mv1d	FUSED g3936/t1 first=RMS_NORM skip=1 x=f32[128,32,1,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t1 first=RMS_NORM skip=1 x=f32[2048,1,1,1]	n=164	ms=0.000
+mv1d	FUSED g3936/t1 first=RMS_NORM skip=1 x=f32[256,16,1,1]	n=40	ms=0.000
+mv1d	FUSED g3936/t1 first=RMS_NORM skip=1 x=f32[256,2,1,1]	n=40	ms=0.000
+mv1d	FUSED g3936/t1 first=RMS_NORM skip=42 x=f32[2048,1,1,1] +MUL_MAT_ID +MUL_MAT_ID +MUL_MAT_ID	n=160	ms=0.000
+mv1d	FUSED g3936/t1 first=SSM_CONV skip=1 x=f32[4,8192,1,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t1 first=UNARY skip=1 x=f32[128,32,1,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t1 first=UNARY skip=1 x=f32[32,1,1,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t1024 first=ADD skip=1 x=f32[2048,1024,1,1]	n=160	ms=0.000
+mv1d	FUSED g3936/t1024 first=GATED_DELTA_NET skip=3 x=f32[128,16,1024,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t1024 first=MUL skip=15 x=f32[2048,8,1024,1]	n=160	ms=0.000
+mv1d	FUSED g3936/t1024 first=RMS_NORM skip=1 x=f32[128,16,1024,1]	n=240	ms=0.000
+mv1d	FUSED g3936/t1024 first=RMS_NORM skip=1 x=f32[128,32,1024,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t1024 first=RMS_NORM skip=1 x=f32[2048,1024,1,1]	n=324	ms=0.000
+mv1d	FUSED g3936/t1024 first=RMS_NORM skip=1 x=f32[256,16,1024,1]	n=40	ms=0.000
+mv1d	FUSED g3936/t1024 first=RMS_NORM skip=1 x=f32[256,2,1024,1]	n=40	ms=0.000
+mv1d	FUSED g3936/t1024 first=SOFT_MAX skip=9 x=f32[256,1024,1,1]	n=160	ms=0.000
+mv1d	FUSED g3936/t1024 first=SSM_CONV skip=1 x=f32[1027,8192,1,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t1024 first=UNARY skip=1 x=f32[128,32,1024,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t1024 first=UNARY skip=1 x=f32[4096,1024,1,1]	n=40	ms=0.000
+mv1d	FUSED g3936/t2 first=GATED_DELTA_NET skip=3 x=f32[128,16,2,1]	n=12360	ms=0.000
+mv1d	FUSED g3936/t2 first=RMS_NORM skip=1 x=f32[128,16,2,1]	n=24720	ms=0.000
+mv1d	FUSED g3936/t2 first=RMS_NORM skip=1 x=f32[128,32,2,1]	n=12360	ms=0.000
+mv1d	FUSED g3936/t2 first=RMS_NORM skip=1 x=f32[2048,2,1,1]	n=16892	ms=0.000
+mv1d	FUSED g3936/t2 first=RMS_NORM skip=1 x=f32[256,16,2,1]	n=4120	ms=0.000
+mv1d	FUSED g3936/t2 first=RMS_NORM skip=1 x=f32[256,2,2,1]	n=4120	ms=0.000
+mv1d	FUSED g3936/t2 first=RMS_NORM skip=42 x=f32[2048,2,1,1] +MUL_MAT_ID +MUL_MAT_ID +MUL_MAT_ID	n=16480	ms=0.000
+mv1d	FUSED g3936/t2 first=SSM_CONV skip=1 x=f32[5,8192,1,1]	n=12360	ms=0.000
+mv1d	FUSED g3936/t2 first=UNARY skip=1 x=f32[128,32,2,1]	n=12360	ms=0.000
+mv1d	FUSED g3936/t2 first=UNARY skip=1 x=f32[4096,2,1,1]	n=4120	ms=0.000
+mv1d	FUSED g3936/t4 first=ADD skip=1 x=f32[2048,4,1,1]	n=160	ms=0.000
+mv1d	FUSED g3936/t4 first=GATED_DELTA_NET skip=3 x=f32[128,16,4,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t4 first=MUL skip=15 x=f32[2048,8,4,1]	n=160	ms=0.000
+mv1d	FUSED g3936/t4 first=RMS_NORM skip=1 x=f32[128,16,4,1]	n=240	ms=0.000
+mv1d	FUSED g3936/t4 first=RMS_NORM skip=1 x=f32[128,32,4,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t4 first=RMS_NORM skip=1 x=f32[2048,4,1,1]	n=324	ms=0.000
+mv1d	FUSED g3936/t4 first=RMS_NORM skip=1 x=f32[256,16,4,1]	n=40	ms=0.000
+mv1d	FUSED g3936/t4 first=RMS_NORM skip=1 x=f32[256,2,4,1]	n=40	ms=0.000
+mv1d	FUSED g3936/t4 first=SOFT_MAX skip=9 x=f32[256,4,1,1]	n=160	ms=0.000
+mv1d	FUSED g3936/t4 first=SSM_CONV skip=1 x=f32[7,8192,1,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t4 first=UNARY skip=1 x=f32[128,32,4,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t4 first=UNARY skip=1 x=f32[4096,4,1,1]	n=40	ms=0.000
+mv1d	FUSED g3936/t972 first=ADD skip=1 x=f32[2048,972,1,1]	n=160	ms=0.000
+mv1d	FUSED g3936/t972 first=GATED_DELTA_NET skip=3 x=f32[128,16,972,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t972 first=MUL skip=15 x=f32[2048,8,972,1]	n=160	ms=0.000
+mv1d	FUSED g3936/t972 first=RMS_NORM skip=1 x=f32[128,16,972,1]	n=240	ms=0.000
+mv1d	FUSED g3936/t972 first=RMS_NORM skip=1 x=f32[128,32,972,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t972 first=RMS_NORM skip=1 x=f32[2048,972,1,1]	n=324	ms=0.000
+mv1d	FUSED g3936/t972 first=RMS_NORM skip=1 x=f32[256,16,972,1]	n=40	ms=0.000
+mv1d	FUSED g3936/t972 first=RMS_NORM skip=1 x=f32[256,2,972,1]	n=40	ms=0.000
+mv1d	FUSED g3936/t972 first=SOFT_MAX skip=9 x=f32[256,972,1,1]	n=160	ms=0.000
+mv1d	FUSED g3936/t972 first=SSM_CONV skip=1 x=f32[975,8192,1,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t972 first=UNARY skip=1 x=f32[128,32,972,1]	n=120	ms=0.000
+mv1d	FUSED g3936/t972 first=UNARY skip=1 x=f32[4096,972,1,1]	n=40	ms=0.000
+mv1d	FUSED g3937/t2 first=GATED_DELTA_NET skip=3 x=f32[128,16,2,1]	n=30	ms=0.000
+mv1d	FUSED g3937/t2 first=RMS_NORM skip=1 x=f32[128,16,2,1]	n=60	ms=0.000
+mv1d	FUSED g3937/t2 first=RMS_NORM skip=1 x=f32[128,32,2,1]	n=30	ms=0.000
+mv1d	FUSED g3937/t2 first=RMS_NORM skip=1 x=f32[2048,1,1,1]	n=1	ms=0.000
+mv1d	FUSED g3937/t2 first=RMS_NORM skip=1 x=f32[2048,2,1,1]	n=40	ms=0.000
+mv1d	FUSED g3937/t2 first=RMS_NORM skip=1 x=f32[256,16,2,1]	n=10	ms=0.000
+mv1d	FUSED g3937/t2 first=RMS_NORM skip=1 x=f32[256,2,2,1]	n=10	ms=0.000
+mv1d	FUSED g3937/t2 first=RMS_NORM skip=42 x=f32[2048,1,1,1] +MUL_MAT_ID +MUL_MAT_ID +MUL_MAT_ID	n=1	ms=0.000
+mv1d	FUSED g3937/t2 first=RMS_NORM skip=42 x=f32[2048,2,1,1] +MUL_MAT_ID +MUL_MAT_ID +MUL_MAT_ID	n=39	ms=0.000
+mv1d	FUSED g3937/t2 first=SSM_CONV skip=1 x=f32[5,8192,1,1]	n=30	ms=0.000
+mv1d	FUSED g3937/t2 first=UNARY skip=1 x=f32[128,32,2,1]	n=30	ms=0.000
+mv1d	FUSED g3937/t2 first=UNARY skip=1 x=f32[4096,2,1,1]	n=10	ms=0.000
+mv1d	GRAPH g103/t128	n=413	ms=0.000
+mv1d	GRAPH g103/t256	n=4	ms=0.000
+mv1d	GRAPH g103/t62208	n=4	ms=0.000
+mv1d	GRAPH g103/t64	n=416	ms=0.000
+mv1d	GRAPH g103/t65536	n=4	ms=0.000
+mv1d	GRAPH g3936/t1	n=4	ms=0.000
+mv1d	GRAPH g3936/t1024	n=4	ms=0.000
+mv1d	GRAPH g3936/t2	n=412	ms=0.000
+mv1d	GRAPH g3936/t4	n=4	ms=0.000
+mv1d	GRAPH g3936/t972	n=4	ms=0.000
+mv1d	GRAPH g3937/t2	n=1	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=CUDA##attn_inp_k_rot#:f32 x=f32[256,32,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=CUDA##attn_inp_k_rot#:f32 x=f32[256,4,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=CUDA##attn_inp_v_rot#:f32 x=f32[64,128,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=CUDA##attn_inp_v_rot#:f32 x=f32[64,16,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=blk.#.attn_k.weight:q8_0 x=f32[2048,2,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=blk.#.attn_output.weight:q8_0 x=f32[4096,2,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=blk.#.attn_q.weight:q8_0 x=f32[2048,2,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=blk.#.attn_v.weight:q8_0 x=f32[2048,2,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=blk.#.ffn_down_shexp.weight:q8_0 x=f32[512,2,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=blk.#.ffn_gate_inp.weight:f32 x=f32[2048,2,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=blk.#.ffn_gate_inp_shexp.weight:f32 x=f32[2048,2,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=blk.#.ffn_gate_shexp.weight:q8_0 x=f32[2048,2,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=blk.#.ffn_up_shexp.weight:q8_0 x=f32[2048,2,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=blk.#.nextn.eh_proj.weight:q8_0 x=f32[4096,2,1,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT w=output.weight:q4_0 x=f32[2048,1,1,1]	n=1	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT_ID w=blk.#.ffn_down_exps.weight:q4_0 x=f32[512,8,2,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT_ID w=blk.#.ffn_gate_exps.weight:q4_0 x=f32[2048,1,2,1]	n=413	ms=0.000
+mv1d	NODE g103/t128 stock MUL_MAT_ID w=blk.#.ffn_up_exps.weight:q4_0 x=f32[2048,1,2,1]	n=413	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=CUDA##attn_inp_k_rot#:f32 x=f32[256,64,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=CUDA##attn_inp_k_rot#:f32 x=f32[256,8,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=CUDA##attn_inp_v_rot#:f32 x=f32[64,256,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=CUDA##attn_inp_v_rot#:f32 x=f32[64,32,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=blk.#.attn_k.weight:q8_0 x=f32[2048,4,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=blk.#.attn_output.weight:q8_0 x=f32[4096,4,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=blk.#.attn_q.weight:q8_0 x=f32[2048,4,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=blk.#.attn_v.weight:q8_0 x=f32[2048,4,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=blk.#.ffn_down_shexp.weight:q8_0 x=f32[512,4,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=blk.#.ffn_gate_inp.weight:f32 x=f32[2048,4,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=blk.#.ffn_gate_inp_shexp.weight:f32 x=f32[2048,4,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=blk.#.ffn_gate_shexp.weight:q8_0 x=f32[2048,4,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=blk.#.ffn_up_shexp.weight:q8_0 x=f32[2048,4,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT w=blk.#.nextn.eh_proj.weight:q8_0 x=f32[4096,4,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT_ID w=blk.#.ffn_down_exps.weight:q4_0 x=f32[512,8,4,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT_ID w=blk.#.ffn_gate_exps.weight:q4_0 x=f32[2048,1,4,1]	n=4	ms=0.000
+mv1d	NODE g103/t256 stock MUL_MAT_ID w=blk.#.ffn_up_exps.weight:q4_0 x=f32[2048,1,4,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=CUDA##attn_inp_k_rot#:f32 x=f32[256,15552,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=CUDA##attn_inp_k_rot#:f32 x=f32[256,1944,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=CUDA##attn_inp_v_rot#:f32 x=f32[64,62208,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=CUDA##attn_inp_v_rot#:f32 x=f32[64,7776,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=blk.#.attn_k.weight:q8_0 x=f32[2048,972,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=blk.#.attn_output.weight:q8_0 x=f32[4096,972,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=blk.#.attn_q.weight:q8_0 x=f32[2048,972,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=blk.#.attn_v.weight:q8_0 x=f32[2048,972,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=blk.#.ffn_down_shexp.weight:q8_0 x=f32[512,972,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=blk.#.ffn_gate_inp.weight:f32 x=f32[2048,972,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=blk.#.ffn_gate_inp_shexp.weight:f32 x=f32[2048,972,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=blk.#.ffn_gate_shexp.weight:q8_0 x=f32[2048,972,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=blk.#.ffn_up_shexp.weight:q8_0 x=f32[2048,972,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT w=blk.#.nextn.eh_proj.weight:q8_0 x=f32[4096,972,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT_ID w=blk.#.ffn_down_exps.weight:q4_0 x=f32[512,8,972,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT_ID w=blk.#.ffn_gate_exps.weight:q4_0 x=f32[2048,1,972,1]	n=4	ms=0.000
+mv1d	NODE g103/t62208 stock MUL_MAT_ID w=blk.#.ffn_up_exps.weight:q4_0 x=f32[2048,1,972,1]	n=4	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=CUDA##attn_inp_k_rot#:f32 x=f32[256,16,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=CUDA##attn_inp_k_rot#:f32 x=f32[256,2,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=CUDA##attn_inp_v_rot#:f32 x=f32[64,64,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=CUDA##attn_inp_v_rot#:f32 x=f32[64,8,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=blk.#.attn_k.weight:q8_0 x=f32[2048,1,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=blk.#.attn_output.weight:q8_0 x=f32[4096,1,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=blk.#.attn_q.weight:q8_0 x=f32[2048,1,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=blk.#.attn_v.weight:q8_0 x=f32[2048,1,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=blk.#.ffn_down_shexp.weight:q8_0 x=f32[512,1,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=blk.#.ffn_gate_inp.weight:f32 x=f32[2048,1,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=blk.#.ffn_gate_inp_shexp.weight:f32 x=f32[2048,1,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=blk.#.ffn_gate_shexp.weight:q8_0 x=f32[2048,1,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=blk.#.ffn_up_shexp.weight:q8_0 x=f32[2048,1,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=blk.#.nextn.eh_proj.weight:q8_0 x=f32[4096,1,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT w=output.weight:q4_0 x=f32[2048,1,1,1]	n=412	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT_ID w=blk.#.ffn_down_exps.weight:q4_0 x=f32[512,8,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT_ID w=blk.#.ffn_gate_exps.weight:q4_0 x=f32[2048,1,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t64 stock MUL_MAT_ID w=blk.#.ffn_up_exps.weight:q4_0 x=f32[2048,1,1,1]	n=416	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=CUDA##attn_inp_k_rot#:f32 x=f32[256,16384,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=CUDA##attn_inp_k_rot#:f32 x=f32[256,2048,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=CUDA##attn_inp_v_rot#:f32 x=f32[64,65536,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=CUDA##attn_inp_v_rot#:f32 x=f32[64,8192,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=blk.#.attn_k.weight:q8_0 x=f32[2048,1024,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=blk.#.attn_output.weight:q8_0 x=f32[4096,1024,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=blk.#.attn_q.weight:q8_0 x=f32[2048,1024,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=blk.#.attn_v.weight:q8_0 x=f32[2048,1024,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=blk.#.ffn_down_shexp.weight:q8_0 x=f32[512,1024,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=blk.#.ffn_gate_inp.weight:f32 x=f32[2048,1024,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=blk.#.ffn_gate_inp_shexp.weight:f32 x=f32[2048,1024,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=blk.#.ffn_gate_shexp.weight:q8_0 x=f32[2048,1024,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=blk.#.ffn_up_shexp.weight:q8_0 x=f32[2048,1024,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT w=blk.#.nextn.eh_proj.weight:q8_0 x=f32[4096,1024,1,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT_ID w=blk.#.ffn_down_exps.weight:q4_0 x=f32[512,8,1024,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT_ID w=blk.#.ffn_gate_exps.weight:q4_0 x=f32[2048,1,1024,1]	n=4	ms=0.000
+mv1d	NODE g103/t65536 stock MUL_MAT_ID w=blk.#.ffn_up_exps.weight:q4_0 x=f32[2048,1,1024,1]	n=4	ms=0.000
+mv1d	NODE g3936/t1 stock MUL_MAT w=blk.#.attn_gate.weight:q4_0 x=f32[2048,1,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t1 stock MUL_MAT w=blk.#.attn_k.weight:q4_0 x=f32[2048,1,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t1 stock MUL_MAT w=blk.#.attn_output.weight:q4_0 x=f32[4096,1,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t1 stock MUL_MAT w=blk.#.attn_q.weight:q4_0 x=f32[2048,1,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t1 stock MUL_MAT w=blk.#.attn_qkv.weight:q4_0 x=f32[2048,1,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t1 stock MUL_MAT w=blk.#.attn_v.weight:q4_0 x=f32[2048,1,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t1 stock MUL_MAT w=blk.#.ssm_alpha.weight:q4_0 x=f32[2048,1,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t1 stock MUL_MAT w=blk.#.ssm_beta.weight:q4_0 x=f32[2048,1,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t1 stock MUL_MAT w=blk.#.ssm_out.weight:q4_0 x=f32[4096,1,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t1 stock MUL_MAT w=output.weight:q4_0 x=f32[2048,1,1,1]	n=4	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.attn_gate.weight:q4_0 x=f32[2048,1024,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.attn_k.weight:q4_0 x=f32[2048,1024,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.attn_output.weight:q4_0 x=f32[4096,1024,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.attn_q.weight:q4_0 x=f32[2048,1024,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.attn_qkv.weight:q4_0 x=f32[2048,1024,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.attn_v.weight:q4_0 x=f32[2048,1024,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.ffn_down_shexp.weight:q4_0 x=f32[512,1024,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.ffn_gate_inp.weight:f32 x=f32[2048,1024,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.ffn_gate_inp_shexp.weight:f32 x=f32[2048,1024,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.ffn_gate_shexp.weight:q4_0 x=f32[2048,1024,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.ffn_up_shexp.weight:q4_0 x=f32[2048,1024,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.ssm_alpha.weight:q4_0 x=f32[2048,1024,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.ssm_beta.weight:q4_0 x=f32[2048,1024,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT w=blk.#.ssm_out.weight:q4_0 x=f32[4096,1024,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT_ID w=blk.#.ffn_down_exps.weight:q4_0 x=f32[512,8,1024,1]	n=160	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT_ID w=blk.#.ffn_gate_exps.weight:q4_0 x=f32[2048,1,1024,1]	n=160	ms=0.000
+mv1d	NODE g3936/t1024 stock MUL_MAT_ID w=blk.#.ffn_up_exps.weight:q4_0 x=f32[2048,1,1024,1]	n=160	ms=0.000
+mv1d	NODE g3936/t2 stock MUL_MAT w=blk.#.attn_gate.weight:q4_0 x=f32[2048,2,1,1]	n=12360	ms=0.000
+mv1d	NODE g3936/t2 stock MUL_MAT w=blk.#.attn_k.weight:q4_0 x=f32[2048,2,1,1]	n=4120	ms=0.000
+mv1d	NODE g3936/t2 stock MUL_MAT w=blk.#.attn_output.weight:q4_0 x=f32[4096,2,1,1]	n=4120	ms=0.000
+mv1d	NODE g3936/t2 stock MUL_MAT w=blk.#.attn_q.weight:q4_0 x=f32[2048,2,1,1]	n=4120	ms=0.000
+mv1d	NODE g3936/t2 stock MUL_MAT w=blk.#.attn_qkv.weight:q4_0 x=f32[2048,2,1,1]	n=12360	ms=0.000
+mv1d	NODE g3936/t2 stock MUL_MAT w=blk.#.attn_v.weight:q4_0 x=f32[2048,2,1,1]	n=4120	ms=0.000
+mv1d	NODE g3936/t2 stock MUL_MAT w=blk.#.ssm_alpha.weight:q4_0 x=f32[2048,2,1,1]	n=12360	ms=0.000
+mv1d	NODE g3936/t2 stock MUL_MAT w=blk.#.ssm_beta.weight:q4_0 x=f32[2048,2,1,1]	n=12360	ms=0.000
+mv1d	NODE g3936/t2 stock MUL_MAT w=blk.#.ssm_out.weight:q4_0 x=f32[4096,2,1,1]	n=12360	ms=0.000
+mv1d	NODE g3936/t2 stock MUL_MAT w=output.weight:q4_0 x=f32[2048,2,1,1]	n=412	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.attn_gate.weight:q4_0 x=f32[2048,4,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.attn_k.weight:q4_0 x=f32[2048,4,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.attn_output.weight:q4_0 x=f32[4096,4,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.attn_q.weight:q4_0 x=f32[2048,4,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.attn_qkv.weight:q4_0 x=f32[2048,4,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.attn_v.weight:q4_0 x=f32[2048,4,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.ffn_down_shexp.weight:q4_0 x=f32[512,4,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.ffn_gate_inp.weight:f32 x=f32[2048,4,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.ffn_gate_inp_shexp.weight:f32 x=f32[2048,4,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.ffn_gate_shexp.weight:q4_0 x=f32[2048,4,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.ffn_up_shexp.weight:q4_0 x=f32[2048,4,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.ssm_alpha.weight:q4_0 x=f32[2048,4,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.ssm_beta.weight:q4_0 x=f32[2048,4,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=blk.#.ssm_out.weight:q4_0 x=f32[4096,4,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT w=output.weight:q4_0 x=f32[2048,1,1,1]	n=4	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT_ID w=blk.#.ffn_down_exps.weight:q4_0 x=f32[512,8,4,1]	n=160	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT_ID w=blk.#.ffn_gate_exps.weight:q4_0 x=f32[2048,1,4,1]	n=160	ms=0.000
+mv1d	NODE g3936/t4 stock MUL_MAT_ID w=blk.#.ffn_up_exps.weight:q4_0 x=f32[2048,1,4,1]	n=160	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.attn_gate.weight:q4_0 x=f32[2048,972,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.attn_k.weight:q4_0 x=f32[2048,972,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.attn_output.weight:q4_0 x=f32[4096,972,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.attn_q.weight:q4_0 x=f32[2048,972,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.attn_qkv.weight:q4_0 x=f32[2048,972,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.attn_v.weight:q4_0 x=f32[2048,972,1,1]	n=40	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.ffn_down_shexp.weight:q4_0 x=f32[512,972,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.ffn_gate_inp.weight:f32 x=f32[2048,972,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.ffn_gate_inp_shexp.weight:f32 x=f32[2048,972,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.ffn_gate_shexp.weight:q4_0 x=f32[2048,972,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.ffn_up_shexp.weight:q4_0 x=f32[2048,972,1,1]	n=160	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.ssm_alpha.weight:q4_0 x=f32[2048,972,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.ssm_beta.weight:q4_0 x=f32[2048,972,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT w=blk.#.ssm_out.weight:q4_0 x=f32[4096,972,1,1]	n=120	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT_ID w=blk.#.ffn_down_exps.weight:q4_0 x=f32[512,8,972,1]	n=160	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT_ID w=blk.#.ffn_gate_exps.weight:q4_0 x=f32[2048,1,972,1]	n=160	ms=0.000
+mv1d	NODE g3936/t972 stock MUL_MAT_ID w=blk.#.ffn_up_exps.weight:q4_0 x=f32[2048,1,972,1]	n=160	ms=0.000
+mv1d	NODE g3937/t2 stock MUL_MAT w=blk.#.attn_gate.weight:q4_0 x=f32[2048,2,1,1]	n=30	ms=0.000
+mv1d	NODE g3937/t2 stock MUL_MAT w=blk.#.attn_k.weight:q4_0 x=f32[2048,2,1,1]	n=10	ms=0.000
+mv1d	NODE g3937/t2 stock MUL_MAT w=blk.#.attn_output.weight:q4_0 x=f32[4096,2,1,1]	n=10	ms=0.000
+mv1d	NODE g3937/t2 stock MUL_MAT w=blk.#.attn_q.weight:q4_0 x=f32[2048,2,1,1]	n=10	ms=0.000
+mv1d	NODE g3937/t2 stock MUL_MAT w=blk.#.attn_qkv.weight:q4_0 x=f32[2048,2,1,1]	n=30	ms=0.000
+mv1d	NODE g3937/t2 stock MUL_MAT w=blk.#.attn_v.weight:q4_0 x=f32[2048,2,1,1]	n=10	ms=0.000
+mv1d	NODE g3937/t2 stock MUL_MAT w=blk.#.ssm_alpha.weight:q4_0 x=f32[2048,2,1,1]	n=30	ms=0.000
+mv1d	NODE g3937/t2 stock MUL_MAT w=blk.#.ssm_beta.weight:q4_0 x=f32[2048,2,1,1]	n=30	ms=0.000
+mv1d	NODE g3937/t2 stock MUL_MAT w=blk.#.ssm_out.weight:q4_0 x=f32[4096,2,1,1]	n=30	ms=0.000
+mv1d	NODE g3937/t2 stock MUL_MAT w=output.weight:q4_0 x=f32[2048,1,1,1]	n=1	ms=0.000
+mv1d	WINDOW g3936/t1 moe_matched nt=1 n_nodes=43	n=160	ms=0.000
+mv1d	WINDOW g3936/t2 moe_matched nt=2 n_nodes=43	n=16480	ms=0.000
+mv1d	WINDOW g3937/t2 moe_matched nt=1 n_nodes=43	n=1	ms=0.000
+mv1d	WINDOW g3937/t2 moe_matched nt=2 n_nodes=43	n=39	ms=0.000

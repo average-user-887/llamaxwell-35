@@ -1,0 +1,188 @@
+diff --git a/ggml/src/ggml-cuda/fattn.cu b/ggml/src/ggml-cuda/fattn.cu
+index f75de72..1d04d60 100644
+--- a/ggml/src/ggml-cuda/fattn.cu
++++ b/ggml/src/ggml-cuda/fattn.cu
+@@ -783,36 +783,29 @@ static void ggml_cuda_flash_attn_ext_stock(ggml_backend_cuda_context & ctx, ggml
+     }
+ }
+ 
+-// MV1: per-path FA counters (GGML_CUDA_MV1=1, default off)
+-#include <map>
+-#include <string>
+-#include <cstdio>
+-struct mv1_fa_stat { long n = 0; double ms = 0; };
+-static std::map<std::string, mv1_fa_stat> g_mv1_fa;
+-static bool mv1_fa_on() { static const int v = [] { const char * e = getenv("GGML_CUDA_MV1"); return (e && e[0] && e[0] != '0') ? 1 : 0; }(); return v; }
+-static void mv1_fa_dump() {
+-    for (auto & kv : g_mv1_fa) {
+-        fprintf(stderr, "mv1_fa: %s n=%ld ms=%.3f\n", kv.first.c_str(), kv.second.n, kv.second.ms);
+-    }
+-}
++#include "mv1-counters.h"
+ static void mv1_fa_record(const ggml_tensor * dst, const char * path, float ms) {
+-    static bool reg = false;
+-    if (!reg) { reg = true; atexit(mv1_fa_dump); }
+-    char key[160];
+-    snprintf(key, sizeof(key), "%s qrows=%d kv=%s ctx=%s", path, (int) dst->src[0]->ne[1], ggml_type_name(dst->src[1]->type), dst->src[1]->ne[1] >= 32768 ? "long" : "short");
+-    auto & st = g_mv1_fa[key]; st.n++; st.ms += ms;
+-    static long calls = 0;
+-    if (++calls % 20000 == 0) { mv1_fa_dump(); }
++    char key[256];
++    snprintf(key, sizeof(key), "FA %s %s q=[%d,%d,%d,%d] kv=%s[%d,<=%dk,%d] mask=%s", mv1::tag().c_str(), path,
++        (int) dst->src[0]->ne[0], (int) dst->src[0]->ne[1], (int) dst->src[0]->ne[2], (int) dst->src[0]->ne[3],
++        ggml_type_name(dst->src[1]->type), (int) dst->src[1]->ne[0], (int) (((dst->src[1]->ne[1] + 8191) / 8192) * 8), (int) dst->src[1]->ne[2], dst->src[3] ? "y" : "n");
++    mv1::R().add(key, ms);
+ }
+ 
+ static void ggml_cuda_flash_attn_ext_impl(ggml_backend_cuda_context & ctx, ggml_tensor * dst, const char ** path_out);
+ 
+ void ggml_cuda_flash_attn_ext(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
+-    if (!mv1_fa_on()) {
++    if (!mv1::mode()) {
+         const char * p = nullptr;
+         ggml_cuda_flash_attn_ext_impl(ctx, dst, &p);
+         return;
+     }
++    if (mv1::mode() == 1) {
++        const char * path1 = "?";
++        ggml_cuda_flash_attn_ext_impl(ctx, dst, &path1);
++        mv1_fa_record(dst, path1, 0.0f);
++        return;
++    }
+     cudaEvent_t e0, e1;
+     cudaEventCreate(&e0); cudaEventCreate(&e1);
+     cudaEventRecord(e0, ctx.stream());
+diff --git a/ggml/src/ggml-cuda/ggml-cuda.cu b/ggml/src/ggml-cuda/ggml-cuda.cu
+index 68eb2a9..2535c93 100644
+--- a/ggml/src/ggml-cuda/ggml-cuda.cu
++++ b/ggml/src/ggml-cuda/ggml-cuda.cu
+@@ -58,6 +58,8 @@
+ #include "ggml-cuda/mean.cuh"
+ #include "ggml-cuda/tsembd.cuh"
+ #include "ggml-cuda/topk-moe.cuh"
++#include "mv1-counters.h"
++#include <string>
+ #include "ggml-cuda/unary.cuh"
+ #include "ggml-cuda/upscale.cuh"
+ #include "ggml-cuda/wkv.cuh"
+@@ -3810,6 +3812,7 @@ static int ggml_cuda_try_fuse(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph
+     if (!inside_state_direct && node->op == GGML_OP_RMS_NORM && ggml_cuda_occamy_gdn_enabled() && cuda_ctx->stream_context().concurrent_events.empty()) {
+         ggml_cuda_occamy_gdn_match m;
+         if (ggml_cuda_occamy_gdn_match_window(*cuda_ctx, cgraph, i, m)) {
++            if (mv1::mode()) { mv1::R().add("WINDOW " + mv1::tag() + " gdn_matched n_seqs=" + std::to_string(m.n_seqs) + " n_nodes=" + std::to_string(m.n_nodes)); }
+             if(m.n_seqs==2 && ggml_cuda_occamy_n2split() && ggml_cuda_occamy_gdn_split2(*cuda_ctx, m)) {
+                 cuda_ctx->q8r_valid = false;
+                 cuda_ctx->q8r_pend  = false;
+@@ -3958,6 +3961,7 @@ static int ggml_cuda_try_fuse(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph
+     if (node->op == GGML_OP_RMS_NORM && ggml_cuda_occamy_enabled() && cuda_ctx->stream_context().concurrent_events.empty()) {
+         ggml_cuda_occamy_moe_match m;
+         if (ggml_cuda_occamy_moe_match_window(*cuda_ctx, cgraph, i, m)) {
++            if (mv1::mode()) { mv1::R().add("WINDOW " + mv1::tag() + " moe_matched nt=" + std::to_string(m.nt) + " n_nodes=" + std::to_string(m.n_nodes)); }
+             if (m.nt == 2) {   // D1b N2SPLIT: MoE is per-token independent; one fused launch per row
+                 ggml_cuda_occamy_moe_launch(*cuda_ctx, m, nullptr, 0);
+                 ggml_cuda_occamy_moe_launch(*cuda_ctx, m, nullptr, 1);
+@@ -4945,6 +4949,24 @@ static int occamy_sf1_plan(const ggml_cgraph * g, const int i, ggml_tensor ** gr
+     return last;
+ }
+ 
++// MV2 helpers
++static std::string mv1_shape(const ggml_tensor * t) { char b[96]; snprintf(b, sizeof(b), "%s[%d,%d,%d,%d]", ggml_type_name(t->type), (int) t->ne[0], (int) t->ne[1], (int) t->ne[2], (int) t->ne[3]); return b; }
++static std::string mv1_strip(const char * nm) { std::string r; for (const char * p = nm; *p; ++p) { if (*p >= '0' && *p <= '9') { if (!r.empty() && r.back() != '#') r += '#'; } else r += *p; } return r; }
++static void mv1_graph_tag(const ggml_cgraph * g) {
++    long ntok = 1; for (int i = 0; i < g->n_nodes; i++) { const ggml_tensor * t = g->nodes[i];
++        if (t->op == GGML_OP_MUL_MAT && t->src[1]) ntok = std::max<long>(ntok, t->src[1]->ne[1]);
++        if (t->op == GGML_OP_MUL_MAT_ID && t->src[1]) ntok = std::max<long>(ntok, t->src[1]->ne[2]); }
++    char b[64]; snprintf(b, sizeof(b), "g%d/t%ld", g->n_nodes, ntok); mv1::tag() = b; mv1::R().add(std::string("GRAPH ") + b);
++}
++static void mv1_node(const ggml_tensor * t, const char * how) {
++    const ggml_op o = t->op;
++    if (o == GGML_OP_RMS_NORM && t->src[0] && t->src[0]->ne[0] == 2048) { mv1::R().add("NODE " + mv1::tag() + " stock RMS_NORM_unfused_hidden x=" + mv1_shape(t->src[0])); return; }
++    if (o != GGML_OP_MUL_MAT_ID && o != GGML_OP_GATED_DELTA_NET && o != GGML_OP_SSM_CONV && o != GGML_OP_MUL_MAT) return;
++    std::string k = std::string("NODE ") + mv1::tag() + " " + how + " " + ggml_op_name(o);
++    if (o == GGML_OP_MUL_MAT || o == GGML_OP_MUL_MAT_ID) { k += " w=" + mv1_strip(t->src[0]->name) + ":" + ggml_type_name(t->src[0]->type) + " x=" + mv1_shape(t->src[1]); }
++    else { for (int j = 0; j < 3 && t->src[j]; j++) k += " s" + std::to_string(j) + "=" + mv1_shape(t->src[j]); }
++    mv1::R().add(k);
++}
+ // L2: GGML_CUDA_NODE_TIMING=<file> (default off). Per-node cudaEvent boundaries on non-captured graphs; a sync per graph.
+ // Interval between marks i and i+1 is attributed to node i (including nodes fused into it). TSV rewritten every 20 graphs.
+ #include <map>
+@@ -5123,6 +5145,8 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
+             int           sf2_last = -1;
+             const bool l2_on = l2_nt().on && !use_cuda_graph;
+             if (l2_on) { l2_nt().begin(); }
++            const bool mv1_on = mv1::mode() != 0 && !use_cuda_graph;
++            if (mv1_on) { mv1_graph_tag(cgraph); }
+             for (int i = 0; i < cgraph->n_nodes; i++) {
+                 ggml_tensor * node = cgraph->nodes[i];
+                 if (l2_on) { l2_nt().mark(cuda_ctx->stream(), node, i); }
+@@ -5242,6 +5266,7 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
+                 int nodes_to_skip = ggml_cuda_try_fuse(cuda_ctx, cgraph, i);
+ 
+                 if (nodes_to_skip != 0) {
++                    if (mv1_on) { std::string k = "FUSED " + mv1::tag() + " first=" + ggml_op_name(node->op) + " skip=" + std::to_string(nodes_to_skip) + " x=" + (node->src[0] ? mv1_shape(node->src[0]) : std::string("-")); for (int j = 1; j <= nodes_to_skip && j < 40; ++j) { const ggml_op oj = cgraph->nodes[i + j]->op; if (oj == GGML_OP_MUL_MAT_ID || oj == GGML_OP_GATED_DELTA_NET || oj == GGML_OP_SSM_CONV || oj == GGML_OP_FLASH_ATTN_EXT) k += std::string(" +") + ggml_op_name(oj); } mv1::R().add(k); }
+                     for (int j = 1; j <= nodes_to_skip; ++j) {
+                         cuda_ctx->q8r_invalidate_if_overlaps(cgraph->nodes[i + j]);
+                     }
+@@ -5275,6 +5300,7 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
+                 GGML_UNUSED(integrated);
+ #endif  // NDEBUG
+ 
++                if (mv1_on) { mv1_node(node, "stock"); }
+                 bool ok = ggml_cuda_compute_forward(*cuda_ctx, node);
+                 if (!ok) {
+                     GGML_LOG_ERROR("%s: op not supported %s (%s)\n", __func__, node->name, ggml_op_name(node->op));
+diff --git a/ggml/src/ggml-cuda/mv1-counters.h b/ggml/src/ggml-cuda/mv1-counters.h
+new file mode 100644
+index 0000000..6a4a3ff
+--- /dev/null
++++ b/ggml/src/ggml-cuda/mv1-counters.h
+@@ -0,0 +1,28 @@
++// MV2: dispatch/shape counters, default off. GGML_CUDA_MV1=1 counters only, =2 also per-FA-call cudaEvent timing (adds a sync per call).
++// Output: GGML_CUDA_MV1_OUT=<file> (rewritten every 256 events, on normal exit, and by mv1::flush()); stderr when unset.
++#pragma once
++#include <cstdio>
++#include <cstdlib>
++#include <map>
++#include <mutex>
++#include <string>
++namespace mv1 {
++struct stat_t { long n = 0; double ms = 0; };
++struct reg_t {
++    std::map<std::string, stat_t> m; std::mutex mu; long events = 0; int mode = 0; const char * path = nullptr;
++    reg_t() { const char * e = getenv("GGML_CUDA_MV1"); if (e && e[0] && e[0] != '0') { mode = atoi(e); if (mode == 0) mode = 1; } path = getenv("GGML_CUDA_MV1_OUT"); }
++    void dump_locked() {
++        FILE * f = (path && path[0]) ? fopen(path, "w") : stderr; if (!f) return;
++        for (auto & kv : m) fprintf(f, "mv1d\t%s\tn=%ld\tms=%.3f\n", kv.first.c_str(), kv.second.n, kv.second.ms);
++        fflush(f); if (f != stderr) fclose(f);
++    }
++    void add(const std::string & k, double ms = 0) {
++        std::lock_guard<std::mutex> g(mu); auto & s = m[k]; s.n++; s.ms += ms; if (++events % 256 == 0) dump_locked();
++    }
++    void flush() { std::lock_guard<std::mutex> g(mu); dump_locked(); }
++    ~reg_t() { if (mode) { dump_locked(); } }
++};
++inline reg_t & R() { static reg_t r; return r; }
++inline int mode() { static const int v = R().mode; return v; }
++inline std::string & tag() { static thread_local std::string t; return t; }   // per-graph tag "g<nodes>/t<ntok>"
++}
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+index 223564f..a1e26e9 100644
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -86,6 +86,7 @@ struct mv1_host_t {
+     double us[8] = {0};
+     long   n[8]  = {0};
+     long   restore = 0, rounds = 0, hist[8] = {0};
++    ~mv1_host_t() { if (on && rounds) dump(); }
+     mv1_host_t() { const char * e = getenv("LLAMA_MV1_TRACE"); on = e && e[0] && e[0] != '0'; }
+     void dump() {
+         static const char * nm[5] = {"draft", "tgt_decode", "spec_process", "sample_accept", "unused"};
+@@ -4562,7 +4563,7 @@ private:
+             if (g_mv1.on) {
+                 g_mv1.rounds++;
+                 g_mv1.hist[std::min<size_t>(n_accepted, 3)]++;
+-                if (g_mv1.rounds % 50 == 0) { g_mv1.dump(); }
++                if (g_mv1.rounds % 25 == 0) { g_mv1.dump(); }
+             }
+ 
+             auto & n_accepted_per_pos = slot.n_accepted_per_pos;
