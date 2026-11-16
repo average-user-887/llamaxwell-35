@@ -1,0 +1,26 @@
+# MH0 step 1: Accio-Lab/occamy-1.0-MTP inspection (CPU + network only, 2026-11-16)
+
+| # | Fact | Value | Source |
+|---|---|---|---|
+| 1 | Prod GGUF | <MEDIA>/Storage/uroboros-models/occamy-1.0-Q4_0-headq40b.gguf, 19583940352 B, mtime 2026-10-12 08:16 (sha256 not computed; per-tensor sha in M1h/M1h_hashes.json) | ls; run-35b-batch8-20261115.sh `-m` |
+| 1 | Prod build | batch8 = d4c13eb607188e09d2dc4feba9202ec7b7c31db8 (stack-moe3, "Merge moe2"); llama-server sha256 592908f5...196813c5, libggml-cuda.so a7eb566c...f9ee58f5 in prod-libs/batch8-20261115 | run-35b-batch8 header L2; git rev-parse in D1b/src |
+| 1 | Launch flags | -np 2 -c 196608 (2x98304) -b 2048 -ub 2048 --mixed-batch-size 1024 --prefill-single-stream --cache-ram 12288 --ctx-checkpoints 16 --checkpoint-min-step 2048 -fa on --jinja --metrics --override-kv tokenizer.ggml.pre=str:qwen35 -ngl 999, plus ~35 GGML_CUDA_* env (MOE_V3=1 etc.) | run-35b-batch8-20261115.sh L4-9 |
+| 1 | GPU memory now | 17 MiB used of 24576 (no llama container running; llama-swap idle, nothing touched). Recorded prod peak 23.9 GB | nvidia-smi by UUID; task text |
+| 2 | Prod GGUF MTP tensors | NONE. 733 tensors, 40 blocks, no mtp/nextn/eagle names, no nextn_predict_layers KV. output.weight is plain Q4_0 [2048,248320] (the "head q4_0" quant, unrelated to MTP) | GGUFReader dump (gguf-py of src-b11552) |
+| 2 | Earlier MTP GGUF | <MEDIA>/Storage/uroboros-models/occamy-1.0-Q4_0-headq40b-mtp.gguf, 20080296992 B (+0.50 GB), 753 tensors, block_count 41, nextn_predict_layers 1; 20 extra blk.40.* (attn q/k/v/o + norms Q8_0, experts Q4_0, shexp Q8_0, gate_inp F32, nextn.eh_proj Q8_0, nextn.enorm/hnorm/shared_head_norm F32). Trunk 733 tensors sha-equal to prod | same dump; M1h/RESULT.md |
+| 2 | n-gram | not a model artefact (no tensors); separate spec type | DECISIONS.md L25 |
+| 3 | HF repo | safetensors only (mtp-trained.safetensors 1689283656 B, sha256 56baea0e...9001df verified = SHA256SUMS), no GGUF. BF16, 19 tensors, 844,640,768 params, `mtp.*` names (fc [2048,4096], 1 full-attn layer q8192/k512/v512, 256 experts fused gate_up [256,1024,2048]/down [256,2048,512], shared expert, norms). Apache-2.0. Repo rev 808a5e39. Local copy: <MEDIA>/Models/hf-occamy-mtp-20261116/repo (Models disk, 84 GB free) | HF API; header parse |
+| 3 | Base match | target Accio-Lab/occamy-1.0 rev c1ce8477 per mtp_head_config.json (current base rev is 72ca9603: head target rev differs, weights of trunk not checked). hidden 2048, 40 layers, 256 experts, vocab_size 248320 equal to prod GGUF (embedding rows 248320, tokens 248320). HF tokenizer.json sha256 06b95093...e523 (real vocab 248077 + padding; GGUF keeps pre=qwen35 override) | base config.json; GGUF dump |
+| 3 | Claims | Trained only fc + 2 norms (8.39M params), 512 steps; target top-1 agreement 73.57 -> 74.66%; MTP1 greedy acceptance 87.6% BF16 (85.9% NVFP4) in SGLang, bs1, ctx 2048, deterministic. Native MTP3 only with a patched SGLang on H200. Authors state GGUF, sampling, concurrency, MTP2 NOT validated; no speed claim ("not a meaningful speed improvement" vs donor head) | README.md, NATIVE-MTP3.md |
+| 4 | Fork support | YES: qwen35moe loads blk.N.nextn.* (src/models/qwen35moe.cpp:106-133), load_mtp flag, common/speculative.cpp draft-mtp type (L76, L1390), separate draft path via speculative.draft.mparams.path, converter conversion/qwen.py _QwenMtpMixin maps mtp.fc/pre_fc_norm_*/norm/layers.* (+ --mtp head-only export) | source grep at d4c13eb |
+| 4 | KEY FINDING | The earlier MTP GGUF ALREADY CONTAINS this head. Q8_0 requantization of the HF bf16 fc, attn_q and attn_k is byte-identical to the GGUF data; enorm, hnorm, shared_head_norm, attn norms equal HF+1 exactly (llama converter norm offset); ffn_gate_inp equal. Trained tensors (fc, enorm, hnorm) therefore match the released 512-step head | /tmp script cmp.py (gguf quantize vs bf16) |
+| 5 | Verdict | **LOADABLE_AS_IS** (via the existing -mtp.gguf); the HF file alone would be NEEDS_CONVERSION but conversion is redundant. Testing it = repeating M1/M2 (already closed: decode step 57-73 ms vs 32 ms break-even, prefill -6..-10%) | see below |
+
+## Memory beyond the head (from M1/D1 measured, not predicted)
+- Head in GGUF form is +0.50 GB (Q4/Q8), not 1.69 GB (BF16 would not fit 24 GB anyway; requantizing to those types is what M1 used). Model buffer 18867 vs 18393 MiB (+474).
+- MTP draft ctx KV 344 MiB @ 88064 (F16; q8 less) + MTP compute 504 MiB; target compute 776 MiB @ ub2048; logits/embedding rows for every verified position are inside those compute buffers. Snapshot buffers: ctx-checkpoints (16 prod; D1 used 2) and recurrent-state rollback = 1 checkpoint + replay.
+- Total extra at 2x98K: about 474 + ~375 + 504 = ~1.35 GiB vs ~0.7 GiB free at prod peak 23.9 GB: does NOT fit at 2x98K (M1: alloc FAIL at 98304/96000/91904).
+- Feasible: 2x84224 with -ub 1024, q8 draft KV, ckpt 2 (peak 24313 MiB of 24576, margin ~263 MiB with owner reserve dropped; D1). 2x88064 allocs but OOMs in generation. Expect 2x80-84K.
+
+## Conclusion
+No new artefact to test: the released head == the head already in the +0.5 GB GGUF. Only genuinely new content would be a different head revision (none: repo rev 808a5e39, 2026-10-02) or SGLang-only native MTP3. Downloaded files untouched elsewhere; nothing converted; no GPU/prod change.

@@ -1,0 +1,16 @@
+card L2 (prefill kernel share)
+branch l2-nodetime (worktree L2/src) HEAD 3173befc4264183b24823782e256fee78fb13831, base d4c13eb607188e09d2dc4feba9202ec7b7c31db8 (prod batch8)
+change: ggml/src/ggml-cuda/ggml-cuda.cu only (+64): GGML_CUDA_NODE_TIMING=<file> per-node cudaEvent timing, non-graph path only, sync per graph; default off
+build: bash L2/build-l2.sh (docker local/m6000-build-tools:20261013, incremental on a copy of L0/build, sm_52, CPU only); log L2/build.log, 0 errors
+sha256 (L2/build/bin):
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+92ba2516b516bef47dd3a0f9583e0a4a48a4b39f3ecab892b295b8a97ad1f321  libggml-cuda.so
+093a17ef49fbaabd4fd7caa08469678800a3c2977921cc3e62c04644e1ad43d9  libllama-server-impl.so
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  libggml-base.so.0.26.0
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  libggml.so.0.26.0
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  libllama.so.0.6.0
+b75d48964ff65e16380cbb731c7ab42bf3894759006070dbc6698c5ac852fb29  test-backend-ops
+note: libggml-cuda.so differs from prod batch8 (instrumented); with the env unset the node path is unchanged
+run (NOT run): N3_GPU=<gpu> N3_UNLOAD_URL=<lab-endpoint>/api/models/unload/qwen36-35b-moe bash L2/l2_gpu.sh ; then output L2/run-*/summary.md (LATEST)
+harness: n3_replay_l2.py = L0 copy, N3_NT_DIR mount + GGML_CUDA_NODE_TIMING, prefix nl2-; summarize.py
+tools: nsys/ncu/nvprof not installed

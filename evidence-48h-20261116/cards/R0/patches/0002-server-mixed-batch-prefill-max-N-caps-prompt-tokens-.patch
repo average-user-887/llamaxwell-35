@@ -1,0 +1,75 @@
+From d206361faf7f2aa358b816564d268884f5f4b430 Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Sat, 14 Nov 2026 20:46:10 +0100
+Subject: [PATCH 2/7] server: --mixed-batch-prefill-max N caps prompt tokens
+ per mixed batch (default off)
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ common/arg.cpp                  | 10 ++++++++++
+ common/common.h                 |  1 +
+ tools/server/server-context.cpp | 11 +++++++++++
+ 3 files changed, 22 insertions(+)
+
+diff --git a/common/arg.cpp b/common/arg.cpp
+index 952a138..84bbe70 100644
+--- a/common/arg.cpp
++++ b/common/arg.cpp
+@@ -1701,6 +1701,16 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
+             params.n_batch_mixed = value;
+         }
+     ).set_env("LLAMA_ARG_MIXED_BATCH_SIZE").set_examples({LLAMA_EXAMPLE_SERVER}));
++    add_opt(common_arg(
++        {"--mixed-batch-prefill-max"}, "N",
++        "max prompt tokens added next to generation tokens in one batch (bounds max token gap under a large --mixed-batch-size; default: 0, disabled)",
++        [](common_params & params, int value) {
++            if (value < 0) {
++                throw std::invalid_argument("--mixed-batch-prefill-max must be non-negative");
++            }
++            params.n_batch_mixed_prefill_max = value;
++        }
++    ).set_env("LLAMA_ARG_MIXED_BATCH_PREFILL_MAX").set_examples({LLAMA_EXAMPLE_SERVER}));
+     add_opt(common_arg(
+         {"--keep"}, "N",
+         string_format("number of tokens to keep from the initial prompt (default: %d, -1 = all)", params.n_keep),
+diff --git a/common/common.h b/common/common.h
+index a9f56fb..8a2c503 100644
+--- a/common/common.h
++++ b/common/common.h
+@@ -456,6 +456,7 @@ struct common_params {
+     int32_t n_batch               =  2048; // logical batch size for prompt processing (must be >=32 to use BLAS)
+     int32_t n_ubatch              =   512; // physical batch size for prompt processing (must be >=32 to use BLAS)
+     int32_t n_batch_mixed         =     0;
++    int32_t n_batch_mixed_prefill_max = 0; // server: max prompt tokens added to a batch that already has decode tokens (0 = off)
+     bool    prefill_single_stream = false; // server: one slot's prompt tokens per batch when >=64 pending (S1)
+     int32_t n_keep                =     0; // number of tokens to keep from initial prompt
+     int32_t n_chunks              =    -1; // max number of chunks to process (-1 = unlimited)
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+index baacdb4..2910072 100644
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -3120,6 +3120,7 @@ private:
+     // S1 prefill-single-stream state
+     int32_t s1_rr = 0;
+     int64_t s1_n_defer = 0;
++    int64_t gap15_n_capped = 0;
+ 
+     // @ngxson : for debugging only
+     int64_t t_pre_decode  = 0;
+@@ -3535,6 +3536,16 @@ private:
+                     if (params_base.n_batch_mixed > 0 && n_generation > 0 && slot.can_split() &&
+                         slot.task->type == SERVER_TASK_TYPE_COMPLETION && !input_tokens.has_mtmd) {
+                         n_batch_prompt = std::min({n_batch, n_ubatch, params_base.n_batch_mixed});
++                        if (params_base.n_batch_mixed_prefill_max > 0) {
++                            // gap15: generation tokens + at most N prompt tokens per mixed batch
++                            const int32_t n_lim = n_generation + params_base.n_batch_mixed_prefill_max;
++                            if (n_lim < n_batch_prompt) {
++                                n_batch_prompt = n_lim;
++                                if ((++gap15_n_capped & (gap15_n_capped - 1)) == 0 || gap15_n_capped % 256 == 0) {
++                                    SRV_INF("mixed-batch-prefill-max: capped mixed batches = %" PRId64 " (limit %d)\n", gap15_n_capped, n_lim);
++                                }
++                            }
++                        }
+                         if (batch.size() >= n_batch_prompt) {
+                             return;
+                         }

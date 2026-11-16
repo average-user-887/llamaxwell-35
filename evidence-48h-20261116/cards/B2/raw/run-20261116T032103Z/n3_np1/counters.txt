@@ -1,0 +1,11 @@
+      1 occamy_fa_gemm_fused: calls=0 softmax_launches=0 when=first_use
+      1 occamy_fa_gemm: engaged=0 q_tiled=0 fallback=0 reasons=- when=first_use
+      1 5.30.658.302 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    1     57     57, #gen drafts =     57, #acc drafts =    52, #gen tokens =    169, #acc tokens =   134, #mean acc len = 3.35, #acc rate/pos = (0.912, 0.807, 0.
+      1 5.30.657.711 I slot print_timing: id  0 | task 0 | draft acceptance = 0.79290 (  134 accepted /   169 generated), mean len =  3.35
+      1 0.33.398.450 I srv    load_model: speculative decoding context initialized
+      1 0.33.206.357 I spec common_specu: - gpu_layers=-1, cache_k=q8_0, cache_v=q8_0, ctx_tgt=yes, ctx_dft=yes, devices=[default]
+      1 0.33.206.354 I spec common_specu: - n_max=3, n_min=0, p_min=0.00, n_embd=2048, backend_sampling=1
+      1 0.33.206.353 I spec common_specu: adding speculative implementation 'draft-mtp'
+      1 0.33.084.096 I common_speculative_init_result: creating MTP draft context against the target model '/models/occamy-1.0-Q4_0-headq40b-mtp.gguf'
+      1 0.32.984.344 I ggml_cuda_hg_try_defer: GGML_CUDA_OCCAMY_HOSTGAP engaged on device 0
+      1 0.01.289.177 I load: special tokens cache size = 33

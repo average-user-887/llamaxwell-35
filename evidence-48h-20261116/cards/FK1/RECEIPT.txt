@@ -1,0 +1,16 @@
+card FK1 MoE prefill FP32 FFMA GEMM, Fable (opt-in GGML_CUDA_MOE_FABLE_PREFILL, default off)
+branch fk1-moe-fable
+base d4c13eb (batch8, prod)
+commit 40ea6a60867454e2e883f95957c95deb4e77e499
+build: bash FK1/build-fk1.sh (docker local/m6000-build-tools:20261013, container nfb-build, cmake --build incremental on a copy of the batch8 build tree, targets llama-server test-backend-ops ggml-cuda, sm_52, CPU only); rc=0; rebuilt units: ggml-cuda.cu, mmid.cu, test-backend-ops.cpp
+registers (cuobjdump, dis/mmid.sass): moe_fable_mm<8> ~125, <4> ~90; FFMA 2080/1056/544/288 for NC 8/4/2/1
+GPU: not run by coder
+flag strings in lib: 3 (prod batch8 lib: 0)
+sha256:
+23aac4cb8383a4c06f865903070261825f611cd13a78fefbe07b0f93c97e8004  libggml-cuda.so
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  libggml-base.so.0.26.0
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  libggml.so.0.26.0
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  libllama.so.0.6.0
+423320bef2ef489f2ae3cb06937d4d1b16b187a57d3b5fc7fd5736b84217e0dd  libmtmd.so.0.6.0
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+b0fd3e61431f0c810627a96830692ef286233cade2f707e5e8f70d8204b93b91  test-backend-ops

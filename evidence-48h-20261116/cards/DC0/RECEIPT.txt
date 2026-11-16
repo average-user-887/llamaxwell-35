@@ -1,0 +1,13 @@
+card DC0; branch dc0 (worktree DC0/src) base l2-nodetime 3173bef; HEAD f4fa4959205eea151ea3488863955df1dfaebbfb
+change: ggml/src/ggml-cuda/ggml-cuda.cu +21/-10, env GGML_CUDA_NODE_TIMING_SPLIT (default off, requires GGML_CUDA_NODE_TIMING)
+build: bash DC0/build-dc0.sh (docker local/m6000-build-tools:20261013, incremental on copy of L2/build, sm_52, CPU only, container ndc-build), rc=0
+sha256 (DC0/build/bin):
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+79d6c1146397f7cdd44b67468ecd61a26635b30237a1432d3201d4e2a8163f4d  libggml-cuda.so
+093a17ef49fbaabd4fd7caa08469678800a3c2977921cc3e62c04644e1ad43d9  libllama-server-impl.so
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  libggml-base.so.0.26.0
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  libggml.so.0.26.0
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  libllama.so.0.6.0
+b75d48964ff65e16380cbb731c7ab42bf3894759006070dbc6698c5ac852fb29  test-backend-ops
+scripts: dc0_gpu.sh (not run), dc0_summarize.py, n3_replay_dc0.py (copy of FA0 env-driven replay, prefix ndc-)
+no GPU work run; GGML_CUDA_MAXWELL_GRAPHS never set

@@ -1,0 +1,15 @@
+# B0 N3R fixture and runner
+Private: everything under private/ (fixture text from real local agent session transcripts, token cache) is never published. Do not copy it out of this directory.
+- build_fixture.py: builds private/fixture (prefix0/1.txt ~420K chars each, turns.json: 6 turns per slot, kinds edit/copy-heavy, tool-call, prose; sizes 1K/4K alternating).
+- run_n3r.sh URL ARM [flags]: takes GPU lock (exec 9>$M/gpu-bench.lock; flock 9; N3R_LOCK_HELD=1 to skip), runs n3r_replay.py against a running server. Out: runs/<arm>-<utc>/{run.json,turns.md,tokens/}.
+- flags: --ctx 98304|90112|88K=90112|81920 (cuts start depth, clips n_predict), --turns, --n-predict 800, --temp/--seed (sampled row), --slots NAME (restore/save slot files, needs --slot-save-path), --server-log F (occamy_spec lines), --extra-body JSON, --dry-run.
+- n3r_compare.py A_dir B_dir: per-turn token sha equality + makespan delta.
+- mock_server.py PORT: CPU mock for validation.
+Notes: tokenisation via server /tokenize (cached in private/tokcache); the 1 token sampled at prefill is part of history in every arm. Slot files hold KV from the arm that built them: use fresh --slots names per arm family.
+
+## B0b update (16 Nov): fixture repair after B1
+Diagnosis (B1 turns.md, mtp3/offA): the runner sent RAW transcript text with no chat template. Slot 0 prompts ended on a plain-text instruction with no assistant turn open, so the model emitted <|im_end|> after 1-23 tokens (stop_type=eos). Slot 1 gave the same 800-token token sha (843d9f91...) on several turns even with MTP off (offA), so it is a model repetition loop at temp 0 (599/599 accepted drafts), not an MTP artefact; in the raw prompt the history was a pasted transcript the model just continues.
+Fix (runtime only, nothing private copied): n3r_replay.py now wraps the history in ChatML by default: system turn + user turn holding the prefix/turn text, each turn closed with `<|im_end|><|im_start|>assistant` and an empty think block, generated text appended (trailing im_end stripped) and a fresh user turn reopened. Same token cache and fixtures; token shas differ from B1 (the prompts changed), so re-run both A arms. `--raw` restores the old behaviour.
+Void guard: each turn records gen_tokens, void and void_reason (generated <64 tokens, or >50% repeated 4-grams = loop). turns.md has a void column; run.json has n_void; the driver prints `void_turns=N/M`; `--fail-void` makes the exit code 3 when any turn is void. Use temp 0 plus `--extra-body '{"repeat_penalty":1.05}'` only if loops persist (breaks nothing in A-vs-A since the same for every arm, but changes numerics vs prod; avoid unless needed).
+n3r_compare.py: two dirs = A vs A token-sha check; three dirs `A1 A2 B` = floor compare (floor = |A2-A1|/mean for makespan and per-agent decode time; B vs mean(A) reported WITHIN FLOOR / B faster / B slower; exit 1 if A1 != A2 tokens). Both print void counts.
+Validated on the mock server only (3-arm run, A1==A2==B shas, void column). The mock cannot show whether real generations are now realistic: check void_turns on the first GPU run.

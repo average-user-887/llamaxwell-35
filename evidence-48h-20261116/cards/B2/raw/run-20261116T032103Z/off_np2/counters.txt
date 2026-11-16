@@ -1,0 +1,8 @@
+      1 occamy_fa_gemm_fused: calls=0 softmax_launches=0 when=first_use
+      1 occamy_fa_gemm: engaged=0 q_tiled=0 fallback=0 reasons=- when=first_use
+      1 8.55.693.970 I srv   prompt_save:  - saving prompt with length 80191, total state size = 1630.879 MiB (draft: 0.000 MiB)
+      1 4.31.837.129 I srv   prompt_save:  - saving prompt with length 80191, total state size = 1630.879 MiB (draft: 0.000 MiB)
+      1 0.04.380.924 I spec common_specu: no implementations specified for speculative decoding
+      1 0.04.380.903 I srv    load_model: speculative decoding will use checkpoints
+      1 0.04.262.296 I ggml_cuda_hg_try_defer: GGML_CUDA_OCCAMY_HOSTGAP engaged on device 0
+      1 0.00.923.883 I load: special tokens cache size = 33

@@ -1,0 +1,17 @@
+card A4 MoE FP32 prefill (opt-in, default off)
+branch a4-moe-fp32
+base 52c9e84 (bundle9)
+commit 622f643b8a8d6487bf3fa1314cc21d912535b942
+build: bash A4/build-a4.sh (docker local/m6000-build-tools:20261013, gcc-14, cmake --build incremental on copy of R0 build tree, targets llama-server test-backend-ops ggml-cuda, sm_52, CPU only); rc=0, 0 spills in moe_fp32_q40 instances (80/144/95/108 regs)
+GPU: not run by coder
+sha256:
+634786054cf7537f94a9d04a0a66dba099cc20a0caf121fefa94f57dbf2cf4c6  libggml-cuda.so
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  libggml-base.so.0.26.0
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  libggml.so.0.26.0
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  libllama.so.0.6.0
+423320bef2ef489f2ae3cb06937d4d1b16b187a57d3b5fc7fd5736b84217e0dd  libmtmd.so.0.6.0
+b4f6280549da97bbeed78cb97190a94a2cee19375aeb696ba2d5853138893681  libllama-server-impl.so
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+b75d48964ff65e16380cbb731c7ab42bf3894759006070dbc6698c5ac852fb29  test-backend-ops
+132fdf0998060e52b907317d6a7c503364a0167dde42a694d29c5c8b9e64202d  build-a4.sh
+67b000b56c49d25d92a42685b384ccaea574e2dc09dede5783f6fb1ecc0c603a  a4_gpu.sh

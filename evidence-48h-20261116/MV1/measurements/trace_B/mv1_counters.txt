@@ -1,0 +1,2 @@
+mv1_host: rounds=50 restores=0 draft_ms=409.824(n=50) tgt_decode_ms=267766.068(n=91) spec_process_ms=26909.890(n=91) sample_accept_ms=21.659(n=50) acc_hist=[0,50,0,0]
+mv1_host: rounds=100 restores=0 draft_ms=818.755(n=100) tgt_decode_ms=269822.015(n=141) spec_process_ms=27356.939(n=141) sample_accept_ms=39.918(n=100) acc_hist=[5,95,0,0]

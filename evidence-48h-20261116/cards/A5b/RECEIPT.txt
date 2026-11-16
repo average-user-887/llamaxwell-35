@@ -1,0 +1,13 @@
+A5b receipt
+branch: a5b-codecode (worktree A5b/src), base 97c4ede (a5-sched), commit 083c5d4f43141da13dfe1c9e0a55edbf8383ff77
+build: A5b/build-a5b.sh (container na5b-build, incremental from copy of A5/build, CPU only, 0 warnings/errors); log A5b/build.log
+sha256 (A5b/build/bin):
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+a7eb566c145e50d879c80b82eb40f8b46627e67cf0e82dfd13cf24ee5b9f58f5  libggml-cuda.so
+fb29d0b34d4f46c93ac774a2d247d06e3eb7cbf011260d573c64c4964ab1e72e  libllama-server-impl.so
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  libllama.so.0
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  libggml-base.so.0.26.0
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  libggml.so.0.26.0
+423320bef2ef489f2ae3cb06937d4d1b16b187a57d3b5fc7fd5736b84217e0dd  libmtmd.so.0
+llama-server and libggml-cuda.so are byte-identical to prod batch8 (592908f5..., a7eb566c...). Only libllama-server-impl.so differs.
+harness: a5b_gpu.sh (policies 0,4; A5B_P3=1 adds 3; ABBA n=6), n3_replay_a5b.py (arm p4, prefix na5b-), summarize.py (makespan, VRAM, gap, identity). NOT RUN.

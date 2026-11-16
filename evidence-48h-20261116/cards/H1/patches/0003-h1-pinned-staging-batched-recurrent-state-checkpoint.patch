@@ -1,0 +1,170 @@
+From abf77116cf1f91235a6a01b34cc93789de7d39c6 Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Mon, 16 Nov 2026 12:43:40 +0100
+Subject: [PATCH 3/3] h1: pinned-staging batched recurrent-state checkpoint
+ copy (LLAMA_H1_CKPT=1, default off) + ledger ckpt_wait_gpu/ckpt_copy split
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ src/llama-context.cpp           | 97 ++++++++++++++++++++++++++++++++-
+ tools/server/server-context.cpp | 10 +++-
+ 2 files changed, 104 insertions(+), 3 deletions(-)
+
+diff --git a/src/llama-context.cpp b/src/llama-context.cpp
+index 7e69744..9984761 100644
+--- a/src/llama-context.cpp
++++ b/src/llama-context.cpp
+@@ -1,5 +1,8 @@
+ #include "llama-context.h"
+ 
++#include <atomic>
++#include <mutex>
++
+ #include "ggml.h"
+ #include "llama-arch.h"
+ #include "llama-graph.h"
+@@ -2782,9 +2785,14 @@ private:
+ class llama_io_write_host : public llama_io_write_i {
+ public:
+     llama_io_write_host(
+-            uint8_t * p, size_t len) : ptr(p), buf_size(len) {}
++            uint8_t * p, size_t len, std::vector<ggml_backend_t> h1_backends = {}) : ptr(p), buf_size(len), h1_be(std::move(h1_backends)) {}
+ 
+     ~llama_io_write_host() {
++        // H1 (LLAMA_H1_CKPT=1): one pinned staging buffer, async gets queued on the owning backend
++        // stream, a single sync per backend, then a host memcpy. Bytes are identical to the per-tensor path.
++        if (!h1_be.empty() && h1_flush()) {
++            return;
++        }
+         // TODO: add backend support to batch tensor_get? or some other way to speed this up
+         for (const auto & winfo : winfos) {
+             ggml_backend_tensor_get(winfo.tensor, winfo.ptr, winfo.offset, winfo.size);
+@@ -2823,6 +2831,8 @@ private:
+     size_t buf_size = 0;
+     size_t size_written = 0;
+ 
++    std::vector<ggml_backend_t> h1_be;
++
+     struct write_info {
+         ggml_tensor * tensor;
+         uint8_t * ptr;
+@@ -2830,6 +2840,82 @@ private:
+         size_t offset;
+     };
+     std::vector<write_info> winfos;
++
++    // returns false (nothing copied) when the fast path does not apply
++    bool h1_flush() {
++        static std::mutex mtx;
++        static ggml_backend_buffer_t stage_buf = nullptr; // pinned host memory, grown on demand, intentionally never freed at exit
++        static size_t stage_cap = 0;
++        static std::atomic<uint64_t> n_engaged{0};
++
++        size_t total = 0;
++        std::vector<ggml_backend_t> owner(winfos.size(), nullptr);
++        ggml_backend_t be0 = nullptr;
++        for (size_t i = 0; i < winfos.size(); ++i) {
++            ggml_backend_buffer_t buf = winfos[i].tensor->view_src ? winfos[i].tensor->view_src->buffer : winfos[i].tensor->buffer;
++            if (buf == nullptr || ggml_backend_buffer_is_host(buf)) {
++                continue;
++            }
++            for (auto b : h1_be) {
++                if (ggml_backend_dev_type(ggml_backend_get_device(b)) != GGML_BACKEND_DEVICE_TYPE_CPU &&
++                        ggml_backend_supports_buft(b, ggml_backend_buffer_get_type(buf))) {
++                    owner[i] = b;
++                    break;
++                }
++            }
++            if (owner[i] == nullptr) {
++                return false;
++            }
++            if (be0 == nullptr) {
++                be0 = owner[i];
++            } else if (be0 != owner[i]) {
++                return false; // keep it simple: one device only
++            }
++            total += winfos[i].size;
++        }
++        if (be0 == nullptr || total == 0) {
++            return false;
++        }
++
++        std::lock_guard<std::mutex> lk(mtx);
++        if (stage_cap < total) {
++            ggml_backend_buffer_type_t hb = ggml_backend_dev_host_buffer_type(ggml_backend_get_device(be0));
++            if (hb == nullptr) {
++                return false;
++            }
++            ggml_backend_buffer_t nb = ggml_backend_buft_alloc_buffer(hb, total);
++            if (nb == nullptr) {
++                return false;
++            }
++            if (stage_buf != nullptr) {
++                ggml_backend_buffer_free(stage_buf);
++            }
++            stage_buf = nb;
++            stage_cap = total;
++        }
++        uint8_t * base = (uint8_t *) ggml_backend_buffer_get_base(stage_buf);
++        size_t off = 0;
++        std::vector<size_t> at(winfos.size(), 0);
++        for (size_t i = 0; i < winfos.size(); ++i) {
++            if (owner[i] == nullptr) {
++                continue;
++            }
++            at[i] = off;
++            ggml_backend_tensor_get_async(owner[i], winfos[i].tensor, base + off, winfos[i].offset, winfos[i].size);
++            off += winfos[i].size;
++        }
++        ggml_backend_synchronize(be0);
++        for (size_t i = 0; i < winfos.size(); ++i) {
++            if (owner[i] == nullptr) {
++                ggml_backend_tensor_get(winfos[i].tensor, winfos[i].ptr, winfos[i].offset, winfos[i].size);
++            } else {
++                memcpy(winfos[i].ptr, base + at[i], winfos[i].size);
++            }
++        }
++        const uint64_t n = n_engaged.fetch_add(1) + 1;
++        LLAMA_LOG_INFO("%s: H1_CKPT_ENGAGED n=%llu bytes=%zu tensors=%zu\n", __func__, (unsigned long long) n, total, winfos.size());
++        return true;
++    }
+ };
+ 
+ class llama_io_read_host : public llama_io_read_i {
+@@ -3296,7 +3382,14 @@ size_t llama_context::state_seq_get_data(llama_seq_id seq_id, uint8_t * dst, siz
+     if (flags & LLAMA_STATE_SEQ_FLAGS_ON_DEVICE) {
+         io = std::make_unique<llama_io_write_device>(dst, size, mem_storage[seq_id]);
+     } else {
+-        io = std::make_unique<llama_io_write_host>(dst, size);
++        std::vector<ggml_backend_t> h1_be;
++        static const bool h1_on = getenv("LLAMA_H1_CKPT") && atoi(getenv("LLAMA_H1_CKPT")) != 0;
++        if (h1_on) {
++            for (auto & b : backends) {
++                h1_be.push_back(b.get());
++            }
++        }
++        io = std::make_unique<llama_io_write_host>(dst, size, std::move(h1_be));
+     }
+ 
+     try {
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+index cb8f703..ce3cba7 100644
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -2628,7 +2628,15 @@ private:
+         //       this is not true for SWA models: https://github.com/ggml-org/llama.cpp/pull/24411#issuecomment-4677983225
+         cur.update_pos(slot.prompt.n_tokens() - n_tokens_cur, pos_min, pos_max);
+ 
+-        cur.update_tgt(ctx_tgt, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY);
++        if (g_n3l.fs) {
++            // measurement only: split the in-flight GPU wait (async prefill decode) from the actual copy
++            n3l_scope n3l_w("ckpt_wait_gpu", slot.id, -1, slot.prompt.n_tokens());
++            llama_synchronize(ctx_tgt);
++        }
++        {
++            n3l_scope n3l_c("ckpt_copy", slot.id, -1, slot.prompt.n_tokens());
++            cur.update_tgt(ctx_tgt, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY);
++        }
+         cur.update_dft(ctx_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY);
+         // stash the draft's speculative state with the checkpoint
+         common_speculative_get_state(spec.get(), slot.id, cur.data_spec);

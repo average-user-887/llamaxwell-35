@@ -1,0 +1,40 @@
+      1 occamy_fa_gemm_fused: calls=0 softmax_launches=0 when=first_use
+      1 occamy_fa_gemm: engaged=0 q_tiled=0 fallback=0 reasons=- when=first_use
+      1 5.15.663.427 I srv   prompt_save:  - saving prompt with length 80191, total state size = 1715.921 MiB (draft: 85.041 MiB)
+      1 5.15.029.762 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    1     85     85, #gen drafts =     85, #acc drafts =    59, #gen tokens =    169, #acc tokens =   105, #mean acc len = 2.24, #acc rate/pos = (0.694, 0.541), d
+      1 5.15.029.706 I slot print_timing: id  0 | task 0 | draft acceptance = 0.62130 (  105 accepted /   169 generated), mean len =  2.24
+      1 12.42.444.848 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =   12    731    815, #gen drafts =    815, #acc drafts =   726, #gen tokens =   1625, #acc tokens =  1375, #mean acc len = 2.69, #acc rate/pos = (0.891, 0.796), 
+      1 12.42.444.838 I slot print_timing: id  0 | task 717 | draft acceptance = 0.94964 (  264 accepted /   278 generated), mean len =  2.90
+      1 12.31.602.363 I srv   prompt_save:  - saving prompt with length 22732, total state size = 531.425 MiB (draft: 24.107 MiB)
+      1 12.30.591.796 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =   11    592    676, #gen drafts =    676, #acc drafts =   592, #gen tokens =   1347, #acc tokens =  1111, #mean acc len = 2.64, #acc rate/pos = (0.876, 0.768), 
+      1 12.30.591.786 I slot print_timing: id  0 | task 556 | draft acceptance = 0.82026 (  251 accepted /   306 generated), mean len =  2.64
+      1 12.26.767.326 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =   11    502    586, #gen drafts =    586, #acc drafts =   511, #gen tokens =   1167, #acc tokens =   969, #mean acc len = 2.65, #acc rate/pos = (0.872, 0.782), 
+      1 12.26.767.316 I slot print_timing: id  1 | task 621 | draft acceptance = 0.00000 (    0 accepted /     2 generated), mean len =  1.00
+      1 12.22.329.275 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =   10    473    556, #gen drafts =    556, #acc drafts =   487, #gen tokens =   1107, #acc tokens =   923, #mean acc len = 2.66, #acc rate/pos = (0.876, 0.784), 
+      1 12.22.329.265 I slot print_timing: id  1 | task 588 | draft acceptance = 1.00000 (    2 accepted /     2 generated), mean len =  3.00
+      1 12.09.492.729 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    9    441    523, #gen drafts =    523, #acc drafts =   454, #gen tokens =   1041, #acc tokens =   862, #mean acc len = 2.65, #acc rate/pos = (0.868, 0.780), 
+      1 12.09.492.719 I slot print_timing: id  1 | task 560 | draft acceptance = 0.50000 (    1 accepted /     2 generated), mean len =  2.00
+      1 11.55.378.831 I srv   prompt_save:  - saving prompt with length 16560, total state size = 404.192 MiB (draft: 17.562 MiB)
+      1 11.54.367.028 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    7    439    520, #gen drafts =    520, #acc drafts =   451, #gen tokens =   1035, #acc tokens =   857, #mean acc len = 2.65, #acc rate/pos = (0.867, 0.781), 
+      1 11.54.367.019 I slot print_timing: id  0 | task 286 | draft acceptance = 0.99812 (  532 accepted /   533 generated), mean len =  2.99
+      1 11.40.678.070 I srv   prompt_save:  - saving prompt with length 16560, total state size = 404.192 MiB (draft: 17.562 MiB)
+      1 11.38.665.377 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    6    172    253, #gen drafts =    253, #acc drafts =   184, #gen tokens =    502, #acc tokens =   325, #mean acc len = 2.28, #acc rate/pos = (0.727, 0.557), 
+      1 11.02.151.692 I srv   prompt_save:  - saving prompt with length 16560, total state size = 404.192 MiB (draft: 17.562 MiB)
+      1 11.02.150.702 I srv   prompt_save:  - saving prompt with length 80263, total state size = 1717.405 MiB (draft: 85.118 MiB)
+      1 11.02.139.062 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    5    172    253, #gen drafts =    253, #acc drafts =   184, #gen tokens =    502, #acc tokens =   325, #mean acc len = 2.28, #acc rate/pos = (0.727, 0.557), 
+      1 <IP> I srv   prompt_save:  - saving prompt with length 80263, total state size = 1717.405 MiB (draft: 85.118 MiB)
+      1 <IP> I srv   prompt_save:  - saving prompt with length 80447, total state size = 1721.198 MiB (draft: 85.313 MiB)
+      1 <IP> I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    4    172    253, #gen drafts =    253, #acc drafts =   184, #gen tokens =    502, #acc tokens =   325, #mean acc len = 2.28, #acc rate/pos = (0.727, 0.557), 
+      1 <IP> I slot print_timing: id  1 | task 174 | draft acceptance = 0.65455 (  108 accepted /   165 generated), mean len =  2.30
+      1 <IP> I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    4    170    250, #gen drafts =    251, #acc drafts =   181, #gen tokens =    499, #acc tokens =   320, #mean acc len = 2.28, #acc rate/pos = (0.724, 0.556), 
+      1 <IP> I slot print_timing: id  0 | task 175 | draft acceptance = 0.66871 (  109 accepted /   163 generated), mean len =  2.33
+      1 <IP> I srv   prompt_save:  - saving prompt with length 80191, total state size = 1715.921 MiB (draft: 85.041 MiB)
+      1 <IP> I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    2     88     88, #gen drafts =     88, #acc drafts =    61, #gen tokens =    174, #acc tokens =   108, #mean acc len = 2.23, #acc rate/pos = (0.693, 0.534), 
+      1 <IP> I slot print_timing: id  1 | task 128 | draft acceptance = 0.60000 (    3 accepted /     5 generated), mean len =  2.00
+      1 0.17.685.012 I srv    load_model: speculative decoding context initialized
+      1 0.17.508.153 I spec common_specu: - gpu_layers=-1, cache_k=q8_0, cache_v=q8_0, ctx_tgt=yes, ctx_dft=yes, devices=[default]
+      1 0.17.508.152 I spec common_specu: - n_max=2, n_min=0, p_min=0.00, n_embd=2048, backend_sampling=1
+      1 0.17.508.149 I spec common_specu: adding speculative implementation 'draft-mtp'
+      1 0.17.393.856 I common_speculative_init_result: creating MTP draft context against the target model '/models/occamy-1.0-Q4_0-headq40b-mtp.gguf'
+      1 0.17.315.307 I ggml_cuda_hg_try_defer: GGML_CUDA_OCCAMY_HOSTGAP engaged on device 0
+      1 0.01.254.566 I load: special tokens cache size = 33

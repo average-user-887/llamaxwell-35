@@ -1,0 +1,244 @@
+From 5df383c5c598c5e7bcda792fdcbeb30c7d915332 Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Mon, 16 Nov 2026 04:39:24 +0100
+Subject: [PATCH 8/8] A3: GDN phase-B two-sequence chain interleave
+ (GGML_CUDA_OCCAMY_GDN_A3=1|2, default off)
+
+gdn_fused2<A2, IL=2>: card-18 item loop with the four (sequence, column) delta-rule
+chains reduced in one interleaved butterfly and a parity double-buffered ssq array
+(2 block barriers per item instead of 4). IL=3 adds next-item state prefetch.
+Same expressions and order as IL=0/1. Counter: 'occamy-gdn: a3 engaged launches N'.
+GDN18_CHECK=N also gates the A3 variant (bitwise vs IL=0).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ ggml/src/ggml-cuda/occamy-gdn.cu | 137 +++++++++++++++++++++++++++++--
+ 1 file changed, 128 insertions(+), 9 deletions(-)
+
+diff --git a/ggml/src/ggml-cuda/occamy-gdn.cu b/ggml/src/ggml-cuda/occamy-gdn.cu
+index b852b03..3214bbb 100644
+--- a/ggml/src/ggml-cuda/occamy-gdn.cu
++++ b/ggml/src/ggml-cuda/occamy-gdn.cu
+@@ -517,6 +517,11 @@ constexpr int N2R = 4;                 // max ssm_out rows per warp
+ // Card 18 (GGML_CUDA_OCCAMY_GDN18=1, default OFF): IL=1 runs phase B for both sequences per item (one item loop,
+ // both state tiles loaded back to back, one set of block barriers per item) instead of sequence 0 then sequence 1.
+ // Per sequence every value is the same expression in the same order as IL=0, so the output is bit-identical.
++// Card A3 (GGML_CUDA_OCCAMY_GDN_A3=1|2, default OFF): IL=2 keeps the card-18 item loop and interleaves the four
++// delta-rule chains of an item (2 sequences x 2 columns): the 4 k.S dots are reduced in one interleaved butterfly,
++// then the 4 q.S' dots, so the 10 shuffle levels of each chain overlap instead of running per sequence. The per-item
++// ssq reduction goes to a parity double-buffered smem array, which drops 2 of the 4 block barriers per item.
++// IL=3 adds the next item's state tiles (both sequences) loaded one item ahead. Same expressions, same order: bit-identical.
+ template <int A2 = 0, int IL = 0>   // bundle9: A2 = card 28h phase-A row pairs, IL = card 18 phase-B interleave (independent)
+ 
+ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+@@ -721,6 +726,9 @@ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+         // float4 reads of qn1/kn1: static __shared__ arrays are only 4-byte aligned by default (GPU gate 15 Nov: misaligned address at +0x564)
+         __shared__ __align__(16) float qn1[SD], kn1[SD], vv1[CGC], red1[NW];
+         __shared__ unsigned hc1[NVH], fin1[NVH + 1];
++        constexpr bool XI = IL >= 2, PFN = IL == 3;   // card A3: chain interleave + 2 barriers/item; next-item state prefetch
++        __shared__ float sq2[XI ? 2 : 1][2][NW];      // A3: per-item ssq partials, parity double-buffered
++        int par = 0;
+         float * const QN[2] = { qn, qn1 }, * const KN[2] = { kn, kn1 }, * const VV[2] = { vv, vv1 }, * const RD[2] = { red, red1 };
+         unsigned * const HC[2] = { hc, hc1 }, * const FN[2] = { fin, fin1 };
+         const float * CI[2], * SI[2];
+@@ -735,17 +743,41 @@ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+         const int it_hi = (int)(((long long)(blockIdx.x + 1) * (NVH * NCG)) / gridDim.x);
+         int kh_c = -1, hv_c = -1;
+         float qs[2] = { 0.f, 0.f }, ks[2] = { 0.f, 0.f }, gexp[2] = { 0.f, 0.f }, beta[2] = { 0.f, 0.f };
++        float4 stn[PFN ? 2 : 1][2];   // A3 IL=3: next item's state tiles
++        if constexpr (PFN) {
++            if (it_lo < it_hi) {
++                const int hv = it_lo / (2 * NCG) + NKH * ((it_lo / NCG) & 1), col0 = (it_lo % NCG) * CGC + warp * 2;
++#pragma unroll
++                for (int k = 0; k < 2; ++k) {
++                    const float4 * si = (const float4 *)(SI[k] + ((size_t)hv * SD + col0) * SD) + lane;
++                    stn[k][0] = si[0]; stn[k][1] = si[SD / 4];
++                }
++            }
++        }
+         for (int it = it_lo; it < it_hi; ++it) {
+             const int hv = it / (2 * NCG) + NKH * ((it / NCG) & 1);
+             const int cg = it % NCG, kh = hv % NKH;
+             const bool need_qk = kh != kh_c;
+             const int col0 = cg * CGC + warp * 2;
+             float4 st[2][2];
++            if constexpr (PFN) {   // state rows are disjoint per item, so the in-place write of item it cannot alias item it+1
++#pragma unroll
++                for (int k = 0; k < 2; ++k) { st[k][0] = stn[k][0]; st[k][1] = stn[k][1]; }
++                if (it + 1 < it_hi) {
++                    const int hn = (it + 1) / (2 * NCG) + NKH * (((it + 1) / NCG) & 1), cn = ((it + 1) % NCG) * CGC + warp * 2;
++#pragma unroll
++                    for (int k = 0; k < 2; ++k) {
++                        const float4 * si = (const float4 *)(SI[k] + ((size_t)hn * SD + cn) * SD) + lane;
++                        stn[k][0] = si[0]; stn[k][1] = si[SD / 4];
++                    }
++                }
++            } else {
+ #pragma unroll
+             for (int k = 0; k < 2; ++k) {   // state tiles first: they do not depend on this item's conv/norm
+                 const float4 * si = (const float4 *)(SI[k] + ((size_t)hv * SD + col0) * SD) + lane;
+                 st[k][0] = si[0]; st[k][1] = si[SD / 4];
+             }
++            }
+             {
+                 const int t = threadIdx.x;
+ #pragma unroll
+@@ -790,6 +822,55 @@ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+             if (need_qk) kh_c = kh;
+             hv_c = hv;
+             float ssq[2] = { 0.f, 0.f };
++            if constexpr (XI) {   // A3: the four (sequence, column) chains of this item, reductions interleaved
++                float4 qv[2], kv4[2];
++#pragma unroll
++                for (int k = 0; k < 2; ++k) {
++                    const float4 q4 = *(const float4 *)(QN[k] + 4 * lane), k4r = *(const float4 *)(KN[k] + 4 * lane);
++                    qv[k]  = make_float4(q4.x * qs[k], q4.y * qs[k], q4.z * qs[k], q4.w * qs[k]);
++                    kv4[k] = make_float4(k4r.x * ks[k], k4r.y * ks[k], k4r.z * ks[k], k4r.w * ks[k]);
++                }
++                float r[2][2];
++#pragma unroll
++                for (int k = 0; k < 2; ++k)
++#pragma unroll
++                    for (int j = 0; j < 2; ++j) { const float4 a = st[k][j]; r[k][j] = a.x * kv4[k].x + a.y * kv4[k].y + a.z * kv4[k].z + a.w * kv4[k].w; }
++#pragma unroll
++                for (int o = 16; o > 0; o >>= 1)   // warp_sum of each chain, levels interleaved across chains
++#pragma unroll
++                    for (int k = 0; k < 2; ++k)
++#pragma unroll
++                        for (int j = 0; j < 2; ++j) r[k][j] += __shfl_xor_sync(0xffffffffu, r[k][j], o);
++#pragma unroll
++                for (int k = 0; k < 2; ++k)
++#pragma unroll
++                    for (int j = 0; j < 2; ++j) {
++                        float4 a = st[k][j];
++                        const float delta = (VV[k][warp * 2 + j] - gexp[k] * r[k][j]) * beta[k];
++                        a.x = gexp[k] * a.x + kv4[k].x * delta; a.y = gexp[k] * a.y + kv4[k].y * delta;
++                        a.z = gexp[k] * a.z + kv4[k].z * delta; a.w = gexp[k] * a.w + kv4[k].w * delta;
++                        st[k][j] = a;
++                        r[k][j] = a.x * qv[k].x + a.y * qv[k].y + a.z * qv[k].z + a.w * qv[k].w;
++                    }
++#pragma unroll
++                for (int o = 16; o > 0; o >>= 1)
++#pragma unroll
++                    for (int k = 0; k < 2; ++k)
++#pragma unroll
++                        for (int j = 0; j < 2; ++j) r[k][j] += __shfl_xor_sync(0xffffffffu, r[k][j], o);
++#pragma unroll
++                for (int k = 0; k < 2; ++k) {
++                    const Params & P = PP.p[k];
++                    float4 * so = (float4 *)(P.S_out + ((size_t)hv * SD + col0) * SD) + lane;
++#pragma unroll
++                    for (int j = 0; j < 2; ++j) {
++                        const float att = r[k][j] * rsqrtf((float)SD);
++                        so[j * SD / 4] = st[k][j];
++                        if (lane == 0) P.s->attn[hv * SD + col0 + j] = att;
++                        ssq[k] += att * att;
++                    }
++                }
++            } else {
+ #pragma unroll
+             for (int k = 0; k < 2; ++k) {
+                 const Params & P = PP.p[k];
+@@ -810,6 +891,19 @@ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+                     ssq[k] += att * att;
+                 }
+             }
++            }
++            if constexpr (XI) {   // A3: readers of qn/kn/vv/red of this item are all before this barrier
++                if (lane == 0) { sq2[par][0][warp] = ssq[0]; sq2[par][1][warp] = ssq[1]; }
++                __syncthreads();
++                if (threadIdx.x == 0 || threadIdx.x == 32) {
++                    const int k = threadIdx.x >> 5;
++                    const float * rk = sq2[par][k];
++                    float t = 0.f; for (int i = 0; i < NW; ++i) t += rk[i];
++                    (k ? PP.p[1].s : PP.p[0].s)->ssq[hv * NCG + cg] = t; (k ? hc1 : hc)[hv]++;
++                }
++                par ^= 1;
++                continue;
++            }
+             __syncthreads();
+             if (lane == 0) { red[warp] = ssq[0]; red1[warp] = ssq[1]; }
+             __syncthreads();
+@@ -952,6 +1046,29 @@ static bool n2gdn() { static const bool on = env_flag("GGML_CUDA_OCCAMY_N2GDN")
+ static bool a2row() { static const bool on = env_flag("GGML_CUDA_GDN2_A2ROW"); return on; }   // 28h, default OFF
+ // Card 18, default OFF: gdn_fused2<1> (phase B of both sequences per item); engaged only on the N2GDN path
+ static bool gdn18() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN18") && n2gdn(); return on; }
++// Card A3, default OFF: GGML_CUDA_OCCAMY_GDN_A3=1 -> gdn_fused2<A2, 2> (card-18 loop + chain interleave, 2 barriers/item),
++// =2 -> gdn_fused2<A2, 3> (+ next-item state prefetch). Engaged only on the N2GDN path; takes precedence over GDN18.
++static int a3mode() {
++    static const int m = [] { const char * e = getenv("GGML_CUDA_OCCAMY_GDN_A3"); const int v = e ? atoi(e) : 0; return (v == 1 || v == 2) && n2gdn() ? v + 1 : 0; }();
++    return m;
++}
++static int il_sel() { return a3mode() ? a3mode() : (gdn18() ? 1 : 0); }   // phase-B variant of gdn_fused2 (0 = per sequence)
++static void launch_f2(int il, int grid, cudaStream_t st, const Params2 & PP) {
++    const size_t sm = SMEM3_FLOATS * sizeof(float);
++    if (a2row()) {
++        switch (il) { case 1: gdn_fused2<1, 1><<<grid, NT, sm, st>>>(PP); break; case 2: gdn_fused2<1, 2><<<grid, NT, sm, st>>>(PP); break;
++                      case 3: gdn_fused2<1, 3><<<grid, NT, sm, st>>>(PP); break; default: gdn_fused2<1, 0><<<grid, NT, sm, st>>>(PP); }
++    } else {
++        switch (il) { case 1: gdn_fused2<0, 1><<<grid, NT, sm, st>>>(PP); break; case 2: gdn_fused2<0, 2><<<grid, NT, sm, st>>>(PP); break;
++                      case 3: gdn_fused2<0, 3><<<grid, NT, sm, st>>>(PP); break; default: gdn_fused2<0, 0><<<grid, NT, sm, st>>>(PP); }
++    }
++}
++static const void * f2_ptr(int il) {
++    const void * t1[4] = { (const void *) gdn_fused2<1, 0>, (const void *) gdn_fused2<1, 1>, (const void *) gdn_fused2<1, 2>, (const void *) gdn_fused2<1, 3> };
++    const void * t0[4] = { (const void *) gdn_fused2<0, 0>, (const void *) gdn_fused2<0, 1>, (const void *) gdn_fused2<0, 2>, (const void *) gdn_fused2<0, 3> };
++    return a2row() ? t1[il] : t0[il];
++}
++static long g_launch_a3 = 0;    // card A3 dispatch counter
+ static long g_launch_n2 = 0;    // D1BF dispatch counter
+ static long g_launch_il = 0;    // card 18 dispatch counter
+ static long g_launch_pf = 0;    // GDN1 dispatch counter
+@@ -1017,11 +1134,11 @@ static DevState & dev_state(int device) {
+             if (n2gdn()) {
+                 int per_sm2 = 0;
+                 CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm2, a2row() ? gdn_fused2<1, 0> : gdn_fused2<0, 0>, NT, SMEM3_FLOATS * sizeof(float)));
+-                if (gdn18()) {   // the IL variant must keep the same co-residency (same grid, same row split)
++                if (il_sel()) {   // the IL variant must keep the same co-residency (same grid, same row split)
+                     int per_sm_il = 0;
+-                    CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_il, a2row() ? gdn_fused2<1, 1> : gdn_fused2<0, 1>, NT, SMEM3_FLOATS * sizeof(float)));
++                    CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_il, f2_ptr(il_sel()), NT, SMEM3_FLOATS * sizeof(float)));
+                     d.il_ok = per_sm_il >= per_sm2;
+-                    fprintf(stderr, "occamy-gdn: gdn18 variant %d blocks/SM (n2gdn %d) -> %s\n", per_sm_il, per_sm2, d.il_ok ? "on" : "OFF (occupancy)");
++                    fprintf(stderr, "occamy-gdn: %s variant IL=%d %d blocks/SM (n2gdn %d) -> %s\n", a3mode() ? "a3" : "gdn18", il_sel(), per_sm_il, per_sm2, d.il_ok ? "on" : "OFF (occupancy)");
+                 }
+                 d.grid2 = std::min(per_sm2 * nsm, d.grid_rp);
+                 if (d.grid2 * NW * N2R < H) { d.grid2 = 0; }   // phase C holds at most N2R rows per warp
+@@ -1434,7 +1551,7 @@ bool ggml_cuda_occamy_gdn_split2(ggml_backend_cuda_context & ctx, const ggml_cud
+     // card 18 gate (GGML_CUDA_OCCAMY_GDN18_CHECK=N, needs GDN18=1): for the first N windows run gdn_fused2<0> and
+     // gdn_fused2<1> on the same snapshotted inputs (in-place states restored between) and compare every output byte
+     static int il_check = getenv("GGML_CUDA_OCCAMY_GDN18_CHECK") ? atoi(getenv("GGML_CUDA_OCCAMY_GDN18_CHECK")) : 0;
+-    if (pk && gdn18() && d.il_ok && il_check > 0) {
++    if (pk && il_sel() && d.il_ok && il_check > 0) {
+         --il_check;
+         static long n_chk = 0, n_bad = 0; ++n_chk;
+         const size_t NCV = 2 * (size_t) CONV_N, NSS = 2 * (size_t) SSM_N;
+@@ -1455,8 +1572,7 @@ bool ggml_cuda_occamy_gdn_split2(ggml_backend_cuda_context & ctx, const ggml_cud
+                     CUDA_CHECK(cudaMemcpyAsync((void *) PP.p[k].h, h0.data() + k * H, H * sizeof(float), cudaMemcpyHostToDevice, st));
+                 }
+             }
+-            if (v) { if (a2row()) { gdn_fused2<1, 1><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP); } else { gdn_fused2<0, 1><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP); } }
+-            else   { if (a2row()) { gdn_fused2<1, 0><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP); } else { gdn_fused2<0, 0><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP); } }
++            launch_f2(v ? il_sel() : 0, d.grid2, st, PP);
+             CUDA_CHECK(cudaGetLastError());
+             r[v][0].resize(NCV); r[v][1].resize(NSS); r[v][2].resize(H); r[v][3].resize(H);
+             CUDA_CHECK(cudaMemcpyAsync(r[v][0].data(), m.conv_out,  NCV * sizeof(float), cudaMemcpyDeviceToHost, st));
+@@ -1473,12 +1589,15 @@ bool ggml_cuda_occamy_gdn_split2(ggml_backend_cuda_context & ctx, const ggml_cud
+         }
+         const bool eq = !diff[0] && !diff[1] && !diff[2] && !diff[3];
+         if (!eq) { ++n_bad; }
+-        fprintf(stderr, "occamy-gdn: gdn18 check window %ld bitequal=%d diff conv=%zu state=%zu out0=%zu out1=%zu maxabs=%.3e bad=%ld\n",
+-                n_chk, (int) eq, diff[0], diff[1], diff[2], diff[3], mx, n_bad);
++        fprintf(stderr, "occamy-gdn: %s check IL=%d window %ld bitequal=%d diff conv=%zu state=%zu out0=%zu out1=%zu maxabs=%.3e bad=%ld\n",
++                a3mode() ? "a3" : "gdn18", il_sel(), n_chk, (int) eq, diff[0], diff[1], diff[2], diff[3], mx, n_bad);
+         return true;   // the window's outputs are those of the last (IL) launch
+     }
+     if (pk) {
+-        if (gdn18() && d.il_ok) {
++        if (a3mode() && d.il_ok) {
++            launch_f2(a3mode(), d.grid2, st, PP);
++            if (++g_launch_a3 == 1 || (g_debug && g_launch_a3 % 3000 == 0)) { fprintf(stderr, "occamy-gdn: a3 engaged launches %ld (IL=%d)\n", g_launch_a3, a3mode()); }
++        } else if (gdn18() && d.il_ok) {
+             if (a2row()) { gdn_fused2<1, 1><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP); } else { gdn_fused2<0, 1><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP); }
+             if (++g_launch_il == 1 || (g_debug && g_launch_il % 3000 == 0)) { fprintf(stderr, "occamy-gdn: gdn18 engaged launches %ld\n", g_launch_il); }
+         } else {

@@ -1,0 +1,13 @@
+card FA0 (pre-gate)
+branch fa0-split (worktree FA0/src) HEAD e2c0677e54febbae34e79533cf009646faabaf44, base l2-nodetime 3173befc4264183b24823782e256fee78fb13831
+change: ggml/src/ggml-cuda/fattn-maxwell-gemm.cuh only; GGML_CUDA_FA_SPLIT=<file> per-phase cudaEvents; GGML_CUDA_FA_GEMM_{TILEQ,SPLITK,CHUNKQ,CONV_BLOCK,CONV_GRID}; defaults unchanged
+build: bash FA0/build-fa0.sh (docker local/m6000-build-tools:20261013, incremental on copy of L2/build, sm_52, CPU only); log FA0/build.log
+sha256:
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+6933331192bef2be322a4051b360653c2c88c918448179f5202172917ba6ad1f  libggml-cuda.so
+093a17ef49fbaabd4fd7caa08469678800a3c2977921cc3e62c04644e1ad43d9  libllama-server-impl.so
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  libggml-base.so.0.26.0
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  libggml.so.0.26.0
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  libllama.so.0.6.0
+b75d48964ff65e16380cbb731c7ab42bf3894759006070dbc6698c5ac852fb29  test-backend-ops
+scripts: fa0_gpu.sh fa0_summarize.py n3_replay_fa0.py (endpoint/port via env only). GPU NOT run.

@@ -1,0 +1,35 @@
+{
+ "tag": "trace_B",
+ "np": 1,
+ "prompt_tokens": 80000,
+ "n_predict": 256,
+ "sampling": "greedy(temp0)",
+ "wall_s": 300.12,
+ "slots_after": [
+  {
+   "id": 0,
+   "n_ctx": 84224,
+   "is_processing": false
+  }
+ ],
+ "done": true,
+ "slots": {
+  "0": {
+   "t_first_s": 292.3994,
+   "latency_s": 300.12,
+   "n_out": 256,
+   "timings": {
+    "prompt_n": 80000,
+    "prompt_ms": 292375.632,
+    "prompt_per_second": 273.6206141830589,
+    "predicted_n": 256,
+    "predicted_ms": 7708.831,
+    "predicted_per_second": 33.07894543284189,
+    "draft_n": 130,
+    "draft_n_accepted": 125
+   },
+   "accept_rate": 0.9615,
+   "occupancy": 0.9529
+  }
+ }
+}

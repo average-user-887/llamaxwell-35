@@ -1,0 +1,11 @@
+card D1b (CUDA graphs on Maxwell, TEST containers nd2-* only)
+branch d1b-graphcount (worktree D1b/src), commit a37a3c27994957018569a430cde41cf3e2433f18, base d4c13eb607188e09d2dc4feba9202ec7b7c31db8 (prod batch8). change: ggml/src/ggml-cuda/ggml-cuda.cu +16 (counters, env GGML_CUDA_D1B_COUNT, default off, no behaviour change)
+build: bash D1b/build-d1b.sh (docker local/m6000-build-tools:20261013, container nd1b-build, incremental copy of A5/build, target ggml-cuda only, CPU, sm_52). log D1b/build.log
+sha256:
+2b9c9a4010f20bcea1df92e09ba5b6eec07f9f8a88f478c508de352b35b8dd51  libggml-cuda.so
+prod libs (unchanged, mounted for all other files): <M6000_ROOT>/prod-libs/batch8-20261115
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+093a17ef49fbaabd4fd7caa08469678800a3c2977921cc3e62c04644e1ad43d9  libllama-server-impl.so
+scripts: D1b/d1b_gpu.sh, n3_replay_d1b.py, summarize_d1b.py (CPU checks: bash -n, --plan, ast parse)
+run: N3_GPU=<gpu> N3_UNLOAD_URL=<lab-endpoint>/api/models/unload/qwen36-35b-moe bash D1b/d1b_gpu.sh   (output run-*/summary.md; LATEST)
+launched detached under the GPU lock, PID 845742, waits behind H1/FA0. MAXWELL_GRAPHS set only inside arm gr test container; never in prod or the host env.

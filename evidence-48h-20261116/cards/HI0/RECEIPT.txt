@@ -1,0 +1,1 @@
+HI0: analysis only. No branch, no commit, no build, no binaries/libs, no GPU run. Sources: L1/run-20261116T084807Z, H1/run-20261116T114434Z (6 ledgers, in progress), DC0/n3_replay_dc0.py, DECISIONS.md.

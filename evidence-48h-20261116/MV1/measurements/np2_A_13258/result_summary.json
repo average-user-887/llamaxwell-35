@@ -1,0 +1,57 @@
+{
+ "tag": "np2_A_13258",
+ "np": 2,
+ "prompt_tokens": 80000,
+ "n_predict": 384,
+ "sampling": "greedy(temp0)",
+ "wall_s": 534.82,
+ "agg_window_tps": 67.33,
+ "agg_window_s": 11.3,
+ "slots_after": [
+  {
+   "id": 0,
+   "n_ctx": 84224,
+   "is_processing": false
+  },
+  {
+   "id": 1,
+   "n_ctx": 84224,
+   "is_processing": false
+  }
+ ],
+ "done": true,
+ "slots": {
+  "0": {
+   "t_first_s": 523.319,
+   "latency_s": 534.8,
+   "n_out": 384,
+   "timings": {
+    "prompt_n": 80000,
+    "prompt_ms": 523295.167,
+    "prompt_per_second": 152.87739127925101,
+    "predicted_n": 384,
+    "predicted_ms": 11471.4,
+    "predicted_per_second": 33.38738079048765,
+    "draft_n": null,
+    "draft_n_accepted": null
+   },
+   "occupancy": 0.9544
+  },
+  "1": {
+   "t_first_s": 523.4428,
+   "latency_s": 534.82,
+   "n_out": 384,
+   "timings": {
+    "prompt_n": 80000,
+    "prompt_ms": 520527.391,
+    "prompt_per_second": 153.69027909618688,
+    "predicted_n": 384,
+    "predicted_ms": 11369.951,
+    "predicted_per_second": 33.68528149329756,
+    "draft_n": null,
+    "draft_n_accepted": null
+   },
+   "occupancy": 0.9544
+  }
+ }
+}

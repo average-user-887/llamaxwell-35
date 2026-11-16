@@ -1,0 +1,9 @@
+card L1 (Lever C split). branch l0-ledger (worktree L0/src), commits 4b0fcfb373ef (L0) + 20ec583680fd (L1), base d4c13eb607188e09d2dc4feba9202ec7b7c31db8
+flag: LLAMA_N3_LEDGER=<file> writes <file>, <file>.tasks, <file>.stages (default off)
+build: bash L0/build-l0.sh (incremental; only libllama-server-impl.so + llama-server relinked)
+libllama-server-impl.so 9384b816c1cb7f6dbc25af1c8a33e3878eca1be6e3bec7c9cc59a5da6470b5fd (L0 sha a056832e... is stale)
+llama-server 592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5 (= prod)
+libggml-cuda.so a7eb566c145e50d879c80b82eb40f8b46627e67cf0e82dfd13cf24ee5b9f58f5 (= prod)
+all other libs: L1/shas.txt
+run (not run by me): N3_GPU=<gpu> N3_UNLOAD_URL=<lab-endpoint> bash L1/l1_gpu.sh   (3x N3 replay, flock held inside, then L1/summarize.py)
+summarizer: python3 -I L1/summarize.py <run dir> [idle_s]  (tested on synthetic data only)

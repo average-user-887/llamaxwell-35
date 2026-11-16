@@ -1,0 +1,182 @@
+From a12c0fa78713efef14e0fd83d851f4deb2414760 Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Mon, 16 Nov 2026 17:27:25 +0100
+Subject: [PATCH] mv1: default-off FA path counters (GGML_CUDA_MV1=1) and
+ server host timers (LLAMA_MV1_TRACE=1) for MTP verify diagnosis
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ ggml/src/ggml-cuda/fattn.cu     | 49 +++++++++++++++++++++++++++++++++
+ tools/server/server-context.cpp | 31 +++++++++++++++++++++
+ 2 files changed, 80 insertions(+)
+
+diff --git a/ggml/src/ggml-cuda/fattn.cu b/ggml/src/ggml-cuda/fattn.cu
+index 1e10e85..f75de72 100644
+--- a/ggml/src/ggml-cuda/fattn.cu
++++ b/ggml/src/ggml-cuda/fattn.cu
+@@ -783,15 +783,59 @@ static void ggml_cuda_flash_attn_ext_stock(ggml_backend_cuda_context & ctx, ggml
+     }
+ }
+ 
++// MV1: per-path FA counters (GGML_CUDA_MV1=1, default off)
++#include <map>
++#include <string>
++#include <cstdio>
++struct mv1_fa_stat { long n = 0; double ms = 0; };
++static std::map<std::string, mv1_fa_stat> g_mv1_fa;
++static bool mv1_fa_on() { static const int v = [] { const char * e = getenv("GGML_CUDA_MV1"); return (e && e[0] && e[0] != '0') ? 1 : 0; }(); return v; }
++static void mv1_fa_dump() {
++    for (auto & kv : g_mv1_fa) {
++        fprintf(stderr, "mv1_fa: %s n=%ld ms=%.3f\n", kv.first.c_str(), kv.second.n, kv.second.ms);
++    }
++}
++static void mv1_fa_record(const ggml_tensor * dst, const char * path, float ms) {
++    static bool reg = false;
++    if (!reg) { reg = true; atexit(mv1_fa_dump); }
++    char key[160];
++    snprintf(key, sizeof(key), "%s qrows=%d kv=%s ctx=%s", path, (int) dst->src[0]->ne[1], ggml_type_name(dst->src[1]->type), dst->src[1]->ne[1] >= 32768 ? "long" : "short");
++    auto & st = g_mv1_fa[key]; st.n++; st.ms += ms;
++    static long calls = 0;
++    if (++calls % 20000 == 0) { mv1_fa_dump(); }
++}
++
++static void ggml_cuda_flash_attn_ext_impl(ggml_backend_cuda_context & ctx, ggml_tensor * dst, const char ** path_out);
++
+ void ggml_cuda_flash_attn_ext(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
++    if (!mv1_fa_on()) {
++        const char * p = nullptr;
++        ggml_cuda_flash_attn_ext_impl(ctx, dst, &p);
++        return;
++    }
++    cudaEvent_t e0, e1;
++    cudaEventCreate(&e0); cudaEventCreate(&e1);
++    cudaEventRecord(e0, ctx.stream());
++    const char * path = "?";
++    ggml_cuda_flash_attn_ext_impl(ctx, dst, &path);
++    cudaEventRecord(e1, ctx.stream());
++    cudaEventSynchronize(e1);
++    float ms = 0; cudaEventElapsedTime(&ms, e0, e1);
++    cudaEventDestroy(e0); cudaEventDestroy(e1);
++    mv1_fa_record(dst, path, ms);
++}
++
++static void ggml_cuda_flash_attn_ext_impl(ggml_backend_cuda_context & ctx, ggml_tensor * dst, const char ** path_out) {
+     ggml_cuda_set_device(ctx.device);
+     if (ggml_cuda_flash_attn_ext_maxwell_gemm(ctx, dst)) {
++        *path_out = "maxwell_gemm";
+         return;
+     }
+     // Track F: occamy GQA split-K decode kernel (env-gated, default off)
+     const int ofa = ggml_cuda_occamy_fa_mode();
+     if (ofa != 0 && ggml_cuda_occamy_fa_applicable(dst)) {
+         if (ofa == 1) {
++            *path_out = "occamy_splitk";
+             ggml_cuda_occamy_fa(ctx, dst);
+             return;
+         }
+@@ -802,6 +846,7 @@ void ggml_cuda_flash_attn_ext(ggml_backend_cuda_context & ctx, ggml_tensor * dst
+     // Q8N: native q8_0 K/V read (GGML_CUDA_OCCAMY_KVQ8=1); FA=2 runs the generic q8 path and logs the diff
+     if (ofa != 0 && ggml_cuda_occamy_kvq8_applicable(dst)) {
+         if (ofa == 1) {
++            *path_out = "occamy_kvq8";
+             ggml_cuda_occamy_fa_kvq8(ctx, dst);
+             return;
+         }
+@@ -809,6 +854,10 @@ void ggml_cuda_flash_attn_ext(ggml_backend_cuda_context & ctx, ggml_tensor * dst
+         ggml_cuda_occamy_fa_compare(ctx, dst, true);
+         return;
+     }
++    {
++        const best_fattn_kernel k = ggml_cuda_get_best_fattn_kernel(ctx.device, dst);
++        *path_out = k == BEST_FATTN_KERNEL_TILE ? "stock_tile" : k == BEST_FATTN_KERNEL_VEC ? "stock_vec" : k == BEST_FATTN_KERNEL_MMA_F16 ? "stock_mma" : "stock_other";
++    }
+     ggml_cuda_flash_attn_ext_stock(ctx, dst);
+ }
+ 
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+index baacdb4..223564f 100644
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -80,6 +80,27 @@ static std::vector<llama_token> server_accept_replay(
+ 
+ // synthetic draft verification for benchmarking - accept draft tokens at random instead of by match with the target
+ // on replay the draft was already accepted before a context checkpoint restore, so repeat the same decisions
++// MV1 host-side timing (LLAMA_MV1_TRACE=1, default off)
++struct mv1_host_t {
++    bool on = false;
++    double us[8] = {0};
++    long   n[8]  = {0};
++    long   restore = 0, rounds = 0, hist[8] = {0};
++    mv1_host_t() { const char * e = getenv("LLAMA_MV1_TRACE"); on = e && e[0] && e[0] != '0'; }
++    void dump() {
++        static const char * nm[5] = {"draft", "tgt_decode", "spec_process", "sample_accept", "unused"};
++        fprintf(stderr, "mv1_host: rounds=%ld restores=%ld", rounds, restore);
++        for (int i = 0; i < 4; i++) fprintf(stderr, " %s_ms=%.3f(n=%ld)", nm[i], us[i]/1000.0, n[i]);
++        fprintf(stderr, " acc_hist=[%ld,%ld,%ld,%ld]\n", hist[0], hist[1], hist[2], hist[3]);
++    }
++};
++static mv1_host_t g_mv1;
++struct mv1_scope {
++    int id; int64_t t0;
++    explicit mv1_scope(int i) : id(i), t0(g_mv1.on ? ggml_time_us() : 0) {}
++    ~mv1_scope() { if (g_mv1.on) { g_mv1.us[id] += (double)(ggml_time_us() - t0); g_mv1.n[id]++; } }
++};
++
+ static std::vector<llama_token> server_sample_and_accept_synth(
+         common_sampler * smpl,
+         llama_context * ctx,
+@@ -3410,6 +3431,7 @@ private:
+         // generate the actual drafts (if any)
+         if (!drafting.empty()) {
+             queue_tasks.yield_to_queue([&]() {
++                mv1_scope _mv1(0);
+                 common_speculative_draft(spec.get());
+             });
+         }
+@@ -4211,6 +4233,7 @@ private:
+         // note: the sync is done here too, so that the wait is also covered by the yield
+         int ret = 0;
+         queue_tasks.yield_to_queue([&]() {
++            mv1_scope _mv1(1);
+             ret = llama_process(ctx_tgt, LLAMA_PROCESS_TYPE_DECODE, batch.view.get());
+             if (ret == 0 && has_output) {
+                 llama_synchronize(ctx_tgt);
+@@ -4276,6 +4299,7 @@ private:
+         if (spec) {
+             bool ok = true;
+             queue_tasks.yield_to_queue([&]() {
++                mv1_scope _mv1(2);
+                 ok = common_speculative_process(spec.get(), batch.view);
+             });
+ 
+@@ -4459,6 +4483,7 @@ private:
+                 const bool use_rejection = slot.use_spec_rejection() && !slot.spec_draft_q.empty();
+ 
+                 std::vector<llama_token> accepted;
++                mv1_scope _mv1_sa(3);
+                 if (!synth_probs.empty()) {
+                     // synthetic acceptance replaces verification entirely, so it comes first
+                     accepted = server_sample_and_accept_synth(
+@@ -4496,6 +4521,7 @@ private:
+ 
+                         SLT_DBG(slot, "restoring speculative checkpoint (pos_min = %d, pos_max = %d, size = %zu)\n", ckpt.pos_min, ckpt.pos_max, ckpt.size());
+ 
++                        g_mv1.restore++;
+                         GGML_ASSERT(ckpt.load_tgt(slot.ctx_tgt, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY));
+ 
+                         if (slot.ctx_dft) {
+@@ -4533,6 +4559,11 @@ private:
+             // update how many tokens out of those tested were accepted
+             slot.stats.n_draft_accepted += n_accepted;
+             slot.stats.n_draft_verif_steps += 1;
++            if (g_mv1.on) {
++                g_mv1.rounds++;
++                g_mv1.hist[std::min<size_t>(n_accepted, 3)]++;
++                if (g_mv1.rounds % 50 == 0) { g_mv1.dump(); }
++            }
+ 
+             auto & n_accepted_per_pos = slot.n_accepted_per_pos;
+             if (n_accepted_per_pos.empty()) {
+-- 
+2.43.0
+

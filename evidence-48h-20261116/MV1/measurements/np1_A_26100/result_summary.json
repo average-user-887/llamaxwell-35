@@ -1,0 +1,34 @@
+{
+ "tag": "np1_A_26100",
+ "np": 1,
+ "prompt_tokens": 80000,
+ "n_predict": 384,
+ "sampling": "greedy(temp0)",
+ "wall_s": 267.88,
+ "slots_after": [
+  {
+   "id": 0,
+   "n_ctx": 84224,
+   "is_processing": false
+  }
+ ],
+ "done": true,
+ "slots": {
+  "0": {
+   "t_first_s": 261.2862,
+   "latency_s": 267.88,
+   "n_out": 384,
+   "timings": {
+    "prompt_n": 80000,
+    "prompt_ms": 261267.079,
+    "prompt_per_second": 306.2000781200604,
+    "predicted_n": 384,
+    "predicted_ms": 6585.157,
+    "predicted_per_second": 58.16110382789658,
+    "draft_n": null,
+    "draft_n_accepted": null
+   },
+   "occupancy": 0.9544
+  }
+ }
+}

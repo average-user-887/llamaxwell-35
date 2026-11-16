@@ -1,0 +1,10 @@
+card S0 (service soak filler): harness only, no source change, no git commit, no build. NOT RUN.
+files (sha256):
+b498ba5074fb8089feded73a3f8123005e617365f812172f720b4e3862d3ec49  s0_gpu.sh
+ce19c9f06d5389ead05d6f6d89114f5b3b0d05be5ae280146a6ee7fb03817dbf  soak.py
+7659305fe3d9a81518fa424c60019014616b8513e212118abfb407155b1e47a7  summarize.py
+libs used at run time (existing, unchanged): prod-libs/batch8-20261115 llama-server 592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5, libggml-cuda.so a7eb566c145e50d879c80b82eb40f8b46627e67cf0e82dfd13cf24ee5b9f58f5 (per L0/RECEIPT.txt; s0_gpu.sh re-hashes into run dir libs.sha256)
+build command: none
+checks done: bash -n, py_compile, CPU-only launch_cmd inspection, summarizer on empty dir
+run: N3_GPU=<gpu> N3_UNLOAD_URL=<lab-endpoint>/api/models/unload/qwen36-35b-moe [SOAK_MIN=60] bash S0/s0_gpu.sh   (output S0/run-*/RESULT.md; LATEST)
+df -h Storage at start: 916G size, 27G avail (97%); run writes ~4.3 GB slot files (removed in cleanup) plus logs

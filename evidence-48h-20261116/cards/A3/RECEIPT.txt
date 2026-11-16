@@ -1,0 +1,19 @@
+A3 RECEIPT  2026-11-16T03:40:56Z
+branch a3-gdn-il  base 52c9e84 (bundle9, R0/src)  commit 5df383c5c598c5e7bcda792fdcbeb30c7d915332
+worktree A3/src; build dir A3/build (seeded from R0/build)
+build: A3/build-a3.sh (container a3-build, image local/m6000-build-tools:20261013, gcc-14, cmake --build targets llama-server test-backend-ops ggml-cuda) rc=0; only occamy-gdn.cu rebuilt
+microbench: A3/tools/build-mb.sh (awk-extract occamy_gdn ns -> a3_kern.inc; nvcc -arch=sm_52 -use_fast_math, container a3-mb-build); ptxas IL0-IL3 80 regs 0 spill
+sha256:
+bf46e0a5cfe0b751e94a5b97d7b2053973824d15b1d5e4bf7fba57d89b986ea9  build/bin/libggml-cuda.so
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  build/bin/libggml-base.so
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  build/bin/libggml.so
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  build/bin/libllama.so
+423320bef2ef489f2ae3cb06937d4d1b16b187a57d3b5fc7fd5736b84217e0dd  build/bin/libmtmd.so
+b4f6280549da97bbeed78cb97190a94a2cee19375aeb696ba2d5853138893681  build/bin/libllama-server-impl.so
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  build/bin/llama-server
+b75d48964ff65e16380cbb731c7ab42bf3894759006070dbc6698c5ac852fb29  build/bin/test-backend-ops
+8f1aa926711c98f6a010fbb0840b5b19b1315f7b79dfeb23a3b9e76924e74b88  tools/a3_mb
+c8c7dde7d45efb96dddd6abcbb46e4f1e87b9ae42a11bc38a212b3e7afab2428  a3_gpu.sh
+b982fb042388a6db65e822d181cc1d51248d1f0ec6691ad33a5213b24cec2831  build-a3.sh
+4038398cb2e536d0412d2988c5650b984f9cf3014f77fbab2a3a3b7052036b50  tools/build-mb.sh
+GPU: not run by coder.

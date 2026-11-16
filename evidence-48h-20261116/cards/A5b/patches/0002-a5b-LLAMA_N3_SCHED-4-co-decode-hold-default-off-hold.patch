@@ -1,0 +1,104 @@
+From 083c5d4f43141da13dfe1c9e0a55edbf8383ff77 Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Mon, 16 Nov 2026 12:19:40 +0100
+Subject: [PATCH 2/2] a5b: LLAMA_N3_SCHED=4 co-decode hold (default off): hold
+ the sole generating slot's decode row while the other slot is mid-prompt
+ within reach, bounded by LLAMA_N3_SCHED_HOLD ms / HOLDB batches / REACH
+ tokens; empty-batch fallback; hold counters line
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ tools/server/server-context.cpp | 55 ++++++++++++++++++++++++++++++++-
+ 1 file changed, 54 insertions(+), 1 deletion(-)
+
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+index 0451659..8314b14 100644
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -3128,16 +3128,26 @@ private:
+         int policy = 0; int32_t chunk = 512; int32_t maxdefer = 64;
+         int64_t n_batches = 0, n_defer_b = 0, n_cap_b = 0, n_defer_ev = 0, n_cap_rows = 0;
+         std::vector<int32_t> run;
++        // policy 4 (co-decode hold): when exactly one slot generates and another slot is mid-prompt with <= reach tokens left, skip the generating
++        // slot's decode row for up to hold_ms / hold_b batches per episode, so both slots start decoding together (2-row steps).
++        int32_t hold_ms = 150, hold_b = 4, reach = 4096;
++        int64_t hold_t0 = 0, t_held_begin = 0, n_holds = 0, hold_us_total = 0, n_merged = 0, n_hold_fallback = 0, n_steps1 = 0, n_steps2 = 0;
++        bool hold_expired = false, held_prev = false, hold_armed = false; int32_t hold_nb = 0;
+         a5_sched_state() {
+             const char * e = getenv("LLAMA_N3_SCHED");          if (e) { policy   = atoi(e); }
+             e = getenv("LLAMA_N3_SCHED_CHUNK");                 if (e) { chunk    = std::max(1, atoi(e)); }
+             e = getenv("LLAMA_N3_SCHED_MAXDEFER");              if (e) { maxdefer = std::max(1, atoi(e)); }
+-            if (policy < 0 || policy > 3) { policy = 0; }
++            e = getenv("LLAMA_N3_SCHED_HOLD");                  if (e) { hold_ms  = std::max(1, atoi(e)); }
++            e = getenv("LLAMA_N3_SCHED_HOLDB");                 if (e) { hold_b   = std::max(1, atoi(e)); }
++            e = getenv("LLAMA_N3_SCHED_REACH");                 if (e) { reach    = std::max(1, atoi(e)); }
++            if (policy < 0 || policy > 4) { policy = 0; }
+         }
+         ~a5_sched_state() {
+             if (policy) {
+                 fprintf(stderr, "n3_sched: policy=%d chunk=%d maxdefer=%d batches_seen=%" PRId64 " batches_deferred=%" PRId64 " defer_events=%" PRId64 " batches_capped=%" PRId64 " rows_removed_by_cap=%" PRId64 "\n",
+                         policy, chunk, maxdefer, n_batches, n_defer_b, n_defer_ev, n_cap_b, n_cap_rows);
++                fprintf(stderr, "n3_sched_hold: hold_ms=%d hold_b=%d reach=%d holds=%" PRId64 " hold_ms_total=%.1f steps_merged=%" PRId64 " empty_batch_fallbacks=%" PRId64 " decode_steps_1row=%" PRId64 " decode_steps_2row=%" PRId64 "\n",
++                        hold_ms, hold_b, reach, n_holds, hold_us_total / 1000.0, n_merged, n_hold_fallback, n_steps1, n_steps2);
+             }
+         }
+     } a5;
+@@ -3483,8 +3493,45 @@ private:
+             }
+         });
+ 
++        // A5b policy 4: co-decode hold
++        server_slot * a5_held_slot = nullptr;
++        if (a5.policy == 4 && !spec) {
++            bool cond = false;
++            if (generating.size() == 1) {
++                for (auto & o : slots) {
++                    if (&o != generating[0] && o.state == SLOT_STATE_PROCESSING_PROMPT && o.task &&
++                        o.task->type == SERVER_TASK_TYPE_COMPLETION && !o.task->tokens.has_mtmd && o.can_split() &&
++                        o.task->n_tokens() > o.prompt.n_tokens() && o.task->n_tokens() - o.prompt.n_tokens() <= a5.reach &&
++                        slot_batched && slot_batched->can_batch_with(o)) {
++                        cond = true;
++                    }
++                }
++            }
++            const int64_t t_now = ggml_time_us();
++            bool hold = false;
++            if (cond) {
++                if (a5.hold_t0 == 0) { a5.hold_t0 = t_now; a5.hold_nb = 0; a5.hold_expired = false; }
++                if (!a5.hold_expired && (t_now - a5.hold_t0) / 1000 < a5.hold_ms && a5.hold_nb < a5.hold_b) {
++                    hold = true; a5.hold_nb++; a5.n_holds++; a5.hold_armed = true; a5_held_slot = generating[0];
++                } else {
++                    a5.hold_expired = true;
++                }
++            } else {
++                a5.hold_t0 = 0; a5.hold_expired = false;
++            }
++            if (hold && !a5.held_prev) { a5.t_held_begin = t_now; }
++            if (!hold && a5.held_prev) { a5.hold_us_total += t_now - a5.t_held_begin; }
++            a5.held_prev = hold;
++            if (!hold && generating.size() >= 2 && a5.hold_armed) { a5.n_merged++; a5.hold_armed = false; }
++        }
++        if (a5.policy) {
++            const size_t n_dec = generating.size() - (a5_held_slot ? 1 : 0);
++            if (n_dec == 1) { a5.n_steps1++; } else if (n_dec >= 2) { a5.n_steps2++; }
++        }
++
+         // update the batch with the sampled/drafted tokens
+         iterate(generating, [&](server_slot & slot) {
++            if (&slot == a5_held_slot) { return; }
+             slot.handle_last_sampled_token(batch);
+         });
+ 
+@@ -4160,6 +4207,12 @@ private:
+                 }
+             });
+         }
++
++        if (a5_held_slot && batch.size() == 0) {
++            // A5b: nothing else made it into the batch, do not stall the held slot
++            a5_held_slot->handle_last_sampled_token(batch);
++            a5.n_hold_fallback++;
++        }
+     }
+ 
+     // see https://github.com/ggml-org/llama.cpp/pull/29969

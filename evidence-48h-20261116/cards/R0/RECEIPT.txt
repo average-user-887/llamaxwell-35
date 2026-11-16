@@ -1,0 +1,13 @@
+card R0 bundle9
+branch bundle9 (worktree R0/src) HEAD 52c9e8465755cf09e06d46fa8366cb71e70ed588
+base night15-gdn28h 54efa6d; merged night14-ragged14 6b837ea, night14-gdn18 5b1e570, night14-gap15 5efe290; guard 52c9e84
+build: bash R0/build-r0.sh (docker local/m6000-build-tools:20261013, cmake incremental, sm_52; targets llama-server test-backend-ops ggml-cuda)
+sha256:
+2bf2df8a2340ae842458cac43569b2d275bc93fc98d3c4aef3605b64bd7de538  libggml-cuda.so
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  libggml-base.so.0.26.0
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  libggml.so.0.26.0
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  libllama.so.0.6.0
+35a7d594afce46544916a592ccf4f7d5ce8ae214e96575162224e8446fc94884  libllama-common.so.0.6.0
+b4f6280549da97bbeed78cb97190a94a2cee19375aeb696ba2d5853138893681  libllama-server-impl.so
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+b75d48964ff65e16380cbb731c7ab42bf3894759006070dbc6698c5ac852fb29  test-backend-ops

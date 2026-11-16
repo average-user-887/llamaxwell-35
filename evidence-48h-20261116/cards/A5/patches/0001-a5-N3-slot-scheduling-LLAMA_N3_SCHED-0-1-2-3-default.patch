@@ -1,0 +1,90 @@
+From 97c4ede88383c3ee20e6799c69a777c50e6878b9 Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Mon, 16 Nov 2026 09:51:13 +0100
+Subject: [PATCH] a5: N3 slot scheduling LLAMA_N3_SCHED=0|1|2|3 (default 0
+ unchanged): defer prompt chunk while other slot generates (bounded), cap
+ prompt rows (LLAMA_N3_SCHED_CHUNK); exit counter line
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ tools/server/server-context.cpp | 46 +++++++++++++++++++++++++++++++++
+ 1 file changed, 46 insertions(+)
+
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+index baacdb4..0451659 100644
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -3121,6 +3121,27 @@ private:
+     int32_t s1_rr = 0;
+     int64_t s1_n_defer = 0;
+ 
++    // A5 N3 slot scheduling (LLAMA_N3_SCHED=0|1|2|3, default 0 = unchanged). 1 = defer a prompt slot's chunk while another slot generates
++    // (at most LLAMA_N3_SCHED_MAXDEFER consecutive deferrals per slot, default 64); 2 = cap prompt rows per batch to LLAMA_N3_SCHED_CHUNK
++    // (default 512) while another slot generates; 3 = both. Counters are printed when the server context is destroyed.
++    struct a5_sched_state {
++        int policy = 0; int32_t chunk = 512; int32_t maxdefer = 64;
++        int64_t n_batches = 0, n_defer_b = 0, n_cap_b = 0, n_defer_ev = 0, n_cap_rows = 0;
++        std::vector<int32_t> run;
++        a5_sched_state() {
++            const char * e = getenv("LLAMA_N3_SCHED");          if (e) { policy   = atoi(e); }
++            e = getenv("LLAMA_N3_SCHED_CHUNK");                 if (e) { chunk    = std::max(1, atoi(e)); }
++            e = getenv("LLAMA_N3_SCHED_MAXDEFER");              if (e) { maxdefer = std::max(1, atoi(e)); }
++            if (policy < 0 || policy > 3) { policy = 0; }
++        }
++        ~a5_sched_state() {
++            if (policy) {
++                fprintf(stderr, "n3_sched: policy=%d chunk=%d maxdefer=%d batches_seen=%" PRId64 " batches_deferred=%" PRId64 " defer_events=%" PRId64 " batches_capped=%" PRId64 " rows_removed_by_cap=%" PRId64 "\n",
++                        policy, chunk, maxdefer, n_batches, n_defer_b, n_defer_ev, n_cap_b, n_cap_rows);
++            }
++        }
++    } a5;
++
+     // @ngxson : for debugging only
+     int64_t t_pre_decode  = 0;
+     int64_t t_decode      = 0;
+@@ -3499,6 +3520,12 @@ private:
+                 }
+             }
+ 
++            bool a5_def_flag = false, a5_cap_flag = false;
++            if (a5.policy) {
++                a5.n_batches++;
++                if (a5.run.size() != slots.size()) { a5.run.assign(slots.size(), 0); }
++                if (n_generation == 0) { std::fill(a5.run.begin(), a5.run.end(), 0); }
++            }
+             iterate(slots, [&](server_slot & slot) {
+                 if (!add_ok || batch.size() >= n_batch) {
+                     return; // batch is full, skip remaining slots
+@@ -3532,6 +3559,17 @@ private:
+                     }
+                     const auto & input_tokens = slot.task->tokens;
+                     int32_t n_batch_prompt = n_batch;
++                    const bool a5_elig = a5.policy && n_generation > 0 && slot.can_split() &&
++                        slot.task->type == SERVER_TASK_TYPE_COMPLETION && !input_tokens.has_mtmd;
++                    if (a5_elig && (a5.policy & 1)) {
++                        int32_t & r = a5.run[slot.id];
++                        if (r < a5.maxdefer) {
++                            r++; a5.n_defer_ev++;
++                            if (!a5_def_flag) { a5_def_flag = true; a5.n_defer_b++; }
++                            return; // A5 policy 1: let the generating slot finish its burst, bounded by maxdefer batches
++                        }
++                        r = 0;
++                    }
+                     if (params_base.n_batch_mixed > 0 && n_generation > 0 && slot.can_split() &&
+                         slot.task->type == SERVER_TASK_TYPE_COMPLETION && !input_tokens.has_mtmd) {
+                         n_batch_prompt = std::min({n_batch, n_ubatch, params_base.n_batch_mixed});
+@@ -3539,6 +3577,14 @@ private:
+                             return;
+                         }
+                     }
++                    if (a5_elig && (a5.policy & 2) && a5.chunk < n_batch_prompt) {
++                        a5.n_cap_rows += n_batch_prompt - a5.chunk;
++                        n_batch_prompt = a5.chunk;
++                        if (!a5_cap_flag) { a5_cap_flag = true; a5.n_cap_b++; }
++                        if (batch.size() >= n_batch_prompt) {
++                            return;
++                        }
++                    }
+ 
+                     // used to determine the number of tokens added to the batch for the current slot
+                     const auto n_tokens_prev = batch.size();

@@ -1,0 +1,93 @@
+From f4fa4959205eea151ea3488863955df1dfaebbfb Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Mon, 16 Nov 2026 14:44:39 +0100
+Subject: [PATCH 2/2] dc0: GGML_CUDA_NODE_TIMING_SPLIT=1 (2-row phase dec2,
+ fused-chain tags, per-phase graph ms); default off
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ ggml/src/ggml-cuda/ggml-cuda.cu | 31 +++++++++++++++++++++----------
+ 1 file changed, 21 insertions(+), 10 deletions(-)
+
+diff --git a/ggml/src/ggml-cuda/ggml-cuda.cu b/ggml/src/ggml-cuda/ggml-cuda.cu
+index 5a9f6ad..68eb2a9 100644
+--- a/ggml/src/ggml-cuda/ggml-cuda.cu
++++ b/ggml/src/ggml-cuda/ggml-cuda.cu
+@@ -4949,16 +4949,18 @@ static int occamy_sf1_plan(const ggml_cgraph * g, const int i, ggml_tensor ** gr
+ // Interval between marks i and i+1 is attributed to node i (including nodes fused into it). TSV rewritten every 20 graphs.
+ #include <map>
+ #include <chrono>
+-struct l2_nt_acc { double ms = 0; double flops = 0; double bytes = 0; long calls = 0; };
++struct l2_nt_acc { double ms = 0; double flops = 0; double bytes = 0; long calls = 0; long skipped = 0; };
+ struct l2_nt_t {
+     const char * path = getenv("GGML_CUDA_NODE_TIMING");
+     bool on = path != nullptr && path[0] != 0;
+-    std::vector<cudaEvent_t> ev; std::vector<const ggml_tensor *> nodes; int n = 0; long graphs = 0;
++    std::vector<cudaEvent_t> ev; std::vector<const ggml_tensor *> nodes; std::vector<int> idx; int n = 0; long graphs = 0;
++    // DC0: GGML_CUDA_NODE_TIMING_SPLIT=1 -> graphs with exactly 2 rows get their own phase 'dec2'; fused-chain tags + per-phase graph ms
++    bool split = getenv("GGML_CUDA_NODE_TIMING_SPLIT") != nullptr; std::map<std::string, double> gms;
+     std::map<std::string, l2_nt_acc> acc; std::map<std::string, long> gcount;
+-    void begin() { n = 0; nodes.clear(); }
+-    void mark(cudaStream_t s, const ggml_tensor * node) {
++    void begin() { n = 0; nodes.clear(); idx.clear(); }
++    void mark(cudaStream_t s, const ggml_tensor * node, int gi) {
+         if ((int) ev.size() <= n) { cudaEvent_t e; cudaEventCreate(&e); ev.push_back(e); }
+-        cudaEventRecord(ev[n++], s); nodes.push_back(node);
++        cudaEventRecord(ev[n++], s); nodes.push_back(node); idx.push_back(gi);
+     }
+     static std::string strip(const char * nm) { std::string r; for (const char * p = nm; *p; ++p) { if (*p >= '0' && *p <= '9') { if (!r.empty() && r.back() != '#') r += '#'; } else r += *p; } return r; }
+     void end(cudaStream_t s, const ggml_cgraph * g) {
+@@ -4969,7 +4971,8 @@ struct l2_nt_t {
+         for (int i = 0; i < g->n_nodes; i++) { const ggml_tensor * t = g->nodes[i];
+             if (t->op == GGML_OP_MUL_MAT && t->src[1]) ntok = std::max<long>(ntok, t->src[1]->ne[1]);
+             if (t->op == GGML_OP_MUL_MAT_ID && t->src[1]) ntok = std::max<long>(ntok, t->src[1]->ne[2]); }
+-        const char * ph = ntok >= 1024 ? "prefill" : ntok >= 2 ? "small" : "decode";
++        const char * ph = ntok >= 1024 ? "prefill" : (split && ntok == 2) ? "dec2" : ntok >= 2 ? "small" : "decode";
++        { float gm = 0; cudaEventElapsedTime(&gm, ev[0], ev[n]); gms[ph] += gm; }
+         gcount[ph]++;
+         for (int i = 0; i < n; i++) {
+             float ms = 0; cudaEventElapsedTime(&ms, ev[i], ev[i + 1]);
+@@ -4977,6 +4980,12 @@ struct l2_nt_t {
+             for (int j = 0; j < GGML_MAX_SRC; j++) if (t->src[j]) by += (double) ggml_nbytes(t->src[j]);
+             by += (double) ggml_nbytes(t);
+             std::string key = std::string(ph) + "\t" + ggml_op_name(t->op);
++            long skipped = 0;
++            if (split) { // tag the node with what the nodes fused/skipped after it contain
++                const int nxt = (i + 1 < n) ? idx[i + 1] : g->n_nodes; bool moe = false, gdn = false, fa = false;
++                for (int k = idx[i] + 1; k < nxt; k++) { skipped++; const ggml_op o = g->nodes[k]->op; moe |= o == GGML_OP_MUL_MAT_ID; gdn |= o == GGML_OP_GATED_DELTA_NET; fa |= o == GGML_OP_FLASH_ATTN_EXT; }
++                if (moe) key += "@MoE"; else if (gdn) key += "@GDN"; else if (fa) key += "@FA"; else if (skipped) key += "@fused";
++            }
+             if (t->op == GGML_OP_MUL_MAT || t->op == GGML_OP_MUL_MAT_ID) {
+                 key += ":" + strip(t->src[0]->name);
+                 if (t->op == GGML_OP_MUL_MAT) { fl = 2.0 * t->src[0]->ne[0] * t->src[0]->ne[1] * t->src[1]->ne[1] * t->src[1]->ne[2]; by = (double) ggml_nbytes(t->src[0]) + ggml_nbytes(t->src[1]) + ggml_nbytes(t); }
+@@ -4988,7 +4997,7 @@ struct l2_nt_t {
+                 fl = 4.0 * t->src[0]->ne[0] * t->src[0]->ne[1] * t->src[0]->ne[2] * t->src[1]->ne[1];
+                 by = (double) ggml_nbytes(t->src[0]) + ggml_nbytes(t->src[1]) + ggml_nbytes(t->src[2]) + ggml_nbytes(t);
+             }
+-            auto & a = acc[key]; a.ms += ms; a.flops += fl; a.bytes += by; a.calls++;
++            auto & a = acc[key]; a.ms += ms; a.flops += fl; a.bytes += by; a.calls++; a.skipped += skipped;
+         }
+         if (++graphs % 20 == 0) dump();
+     }
+@@ -4996,8 +5005,10 @@ struct l2_nt_t {
+         FILE * f = fopen(path, "w"); if (!f) return;
+         fprintf(f, "#graphs");
+         for (auto & kv : gcount) fprintf(f, "\t%s=%ld", kv.first.c_str(), kv.second);
+-        fprintf(f, "\n#phase\top[:weight]\tcalls\tms\tflops\tbytes\n");
+-        for (auto & kv : acc) fprintf(f, "%s\t%ld\t%.4f\t%.6e\t%.6e\n", kv.first.c_str(), kv.second.calls, kv.second.ms, kv.second.flops, kv.second.bytes);
++        fprintf(f, "\n#graphms");
++        for (auto & kv : gms) fprintf(f, "\t%s=%.3f", kv.first.c_str(), kv.second);
++        fprintf(f, "\n#phase\top[:weight]\tcalls\tms\tflops\tbytes\tskipped\n");
++        for (auto & kv : acc) fprintf(f, "%s\t%ld\t%.4f\t%.6e\t%.6e\t%ld\n", kv.first.c_str(), kv.second.calls, kv.second.ms, kv.second.flops, kv.second.bytes, kv.second.skipped);
+         fclose(f);
+     }
+     ~l2_nt_t() { if (on && graphs) dump(); }
+@@ -5114,7 +5125,7 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
+             if (l2_on) { l2_nt().begin(); }
+             for (int i = 0; i < cgraph->n_nodes; i++) {
+                 ggml_tensor * node = cgraph->nodes[i];
+-                if (l2_on) { l2_nt().mark(cuda_ctx->stream(), node); }
++                if (l2_on) { l2_nt().mark(cuda_ctx->stream(), node, i); }
+                 if (is_concurrent_event_active) {
+                     GGML_ASSERT(concurrent_event);
+ 

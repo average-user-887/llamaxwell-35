@@ -1,0 +1,362 @@
+From 622f643b8a8d6487bf3fa1314cc21d912535b942 Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Mon, 16 Nov 2026 07:06:51 +0100
+Subject: [PATCH 8/8] cuda: opt-in FP32 SGEMM path for Q4_0 MoE prefill
+ (GGML_CUDA_MOE_FP32_PREFILL, default off)
+
+Card A4, from 28e: dequant-in-smem FP32 tile kernel (BN64/32/16 tail split, BK16),
+hooked before the mmq branch of ggml_cuda_mul_mat_id on sm_52 for >=512 tokens
+(GGML_CUDA_MOE_FP32_PREFILL_MIN). Mode 2 uses TN8 for non-broadcast full tiles.
+Engagement counter on stderr under GGML_CUDA_OCCAMY_DEBUG; GGML_CUDA_MOE_FP32_CHECK=N
+compares against mmq for the first N ops.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ ggml/src/ggml-cuda/ggml-cuda.cu |  13 ++
+ ggml/src/ggml-cuda/mmid.cu      | 284 ++++++++++++++++++++++++++++++++
+ ggml/src/ggml-cuda/mmid.cuh     |  10 ++
+ 3 files changed, 307 insertions(+)
+
+diff --git a/ggml/src/ggml-cuda/ggml-cuda.cu b/ggml/src/ggml-cuda/ggml-cuda.cu
+index e2a57f2..edb324c 100644
+--- a/ggml/src/ggml-cuda/ggml-cuda.cu
++++ b/ggml/src/ggml-cuda/ggml-cuda.cu
+@@ -2199,6 +2199,19 @@ static void ggml_cuda_mul_mat_id(ggml_backend_cuda_context & ctx, ggml_tensor *
+             }
+         }
+ 
++        if (ggml_cuda_moe_fp32_prefill_eligible(src0, src1, ids, dst, cc)) {
++            ggml_cuda_moe_fp32_prefill(ctx, src0, src1, ids, dst);
++            if (ggml_cuda_moe_fp32_check_budget() && ggml_cuda_should_use_mmq(src0->type, cc, ne12, /*n_experts=*/ne02)) {
++                // numerics probe: recompute with the default mmq path into scratch and compare
++                ggml_cuda_pool_alloc<float> ref(ctx.pool(), ggml_nelements(dst));
++                ggml_tensor tmp = *dst;
++                tmp.data = ref.get();
++                ggml_cuda_mul_mat_q(ctx, src0, src1, ids, &tmp);
++                ggml_cuda_moe_fp32_compare((const float *) dst->data, ref.get(), ggml_nelements(dst), dst->name, ctx.stream());
++            }
++            return;
++        }
++
+         if (ggml_cuda_should_use_mmq(src0->type, cc, ne12, /*n_experts=*/ne02)) {
+             ggml_cuda_mul_mat_q(ctx, src0, src1, ids, dst);
+             return;
+diff --git a/ggml/src/ggml-cuda/mmid.cu b/ggml/src/ggml-cuda/mmid.cu
+index 04849dd..ba46586 100644
+--- a/ggml/src/ggml-cuda/mmid.cu
++++ b/ggml/src/ggml-cuda/mmid.cu
+@@ -1,6 +1,9 @@
+ #include "common.cuh"
+ #include "mmid.cuh"
+ 
++#include <atomic>
++#include <cmath>
++#include <cstdio>
+ #include <cstdlib>
+ #include <cstring>
+ 
+@@ -342,3 +345,284 @@ void ggml_cuda_mmq_make_tail_tiles(const int32_t * expert_bounds, int2 * t64, in
+     GGML_ASSERT(n_experts > 0 && n_experts <= 256);
+     mmq_make_tail_tiles<<<1, 256, 0, stream>>>(expert_bounds, t64, t32, t16, n_experts);
+ }
++
++// ---------------------------------------------------------------------------------------------
++// A4 (from card 28e): opt-in FP32 SGEMM path for Q4_0 MoE expert matmuls at prefill sizes.
++// Weights are dequantized to FP32 in shared memory and multiplied with FP32 activations (no q8_1
++// quantization of src1). Enable with GGML_CUDA_MOE_FP32_PREFILL=1 (2: TN8 variant for non-broadcast
++// full tiles). Default off. Engagement counter on stderr under GGML_CUDA_OCCAMY_DEBUG.
++// ---------------------------------------------------------------------------------------------
++static constexpr int MOE_FP32_BM = 128;
++
++// BN tokens x 128 weight rows per CTA; NT = 16*BN/TN threads, each 8 rows x TN tokens.
++// BK=16: half a Q4_0 block per k-tile, k permuted identically for A and B (sum order only).
++template <int BN, int TN, int BK, int MINB>
++static __global__ void __launch_bounds__(16 * BN / TN, MINB)
++moe_fp32_q40(const uint8_t * __restrict__ W, const float * __restrict__ X,
++             const int32_t * __restrict__ ids_src, const int32_t * __restrict__ ids_dst,
++             const int32_t * __restrict__ bounds, const int2 * __restrict__ tiles,
++             float * __restrict__ Y, const int rows, const int K,
++             const int64_t nb01, const int64_t nb02, const int64_t sx, const int64_t sy) {
++    constexpr int BM  = MOE_FP32_BM;
++    constexpr int NT  = 16 * BN / TN;
++    constexpr int AIT = 256 / NT;
++    constexpr int NUS = BK / 8;
++    constexpr int BIT = BN * BK / 4 / NT;
++    __shared__ __align__(16) float As[2][BK][BM];
++    __shared__ __align__(16) float Bs[2][BK][BN];
++
++    if ((int) blockIdx.y >= tiles[0].x) return;
++    const int2 tl = tiles[1 + blockIdx.y];
++    const int e = tl.x;
++    const int c0 = bounds[e] + tl.y * BN;
++    const int ncols = min(BN, bounds[e + 1] - c0);
++    const int r0 = blockIdx.x * BM;
++    const int tid = threadIdx.x;
++    const int mycol = tid % BN;
++    const int s = mycol < ncols ? ids_src[c0 + mycol] : -1;
++    const float * xs = X + (size_t) (s < 0 ? 0 : s) * sx;
++
++    const int nkt = K / BK;
++    const uint8_t * Wb = W + (size_t) e * nb02 + (size_t) r0 * nb01;
++
++    unsigned short ad[AIT];
++    unsigned short aq[AIT][NUS];
++    float4 bv[BIT];
++
++    auto loadA = [&](int kt) {
++        const int kb = BK == 32 ? kt : kt >> 1, h = BK == 32 ? 0 : kt & 1;
++#pragma unroll
++        for (int i = 0; i < AIT; ++i) {
++            const int it = tid + i * NT, row = it & (BM - 1), part = it >> 7;
++            const unsigned short * p = (const unsigned short *) (Wb + row * nb01 + kb * 18);
++            ad[i] = __ldg(p);
++#pragma unroll
++            for (int j = 0; j < NUS; ++j) aq[i][j] = __ldg(p + 1 + h * 4 + part * NUS + j);
++        }
++    };
++    auto storeA = [&](int buf) {
++#pragma unroll
++        for (int i = 0; i < AIT; ++i) {
++            const int it = tid + i * NT, row = it & (BM - 1), part = it >> 7;
++            const float d = __half2float(__ushort_as_half(ad[i]));
++#pragma unroll
++            for (int j = 0; j < NUS; ++j) {
++#pragma unroll
++                for (int bb = 0; bb < 2; ++bb) {
++                    const unsigned byte = (aq[i][j] >> (8 * bb)) & 0xFF;
++                    const int idx = part * (BK / 4) + 2 * j + bb;
++                    const float lo = __int_as_float(0x4B000000 | (byte & 0xF)) - 8388616.0f;
++                    const float hi = __int_as_float(0x4B000000 | (byte >> 4)) - 8388616.0f;
++                    As[buf][idx][row]          = lo * d;
++                    As[buf][idx + BK / 2][row] = hi * d;
++                }
++            }
++        }
++    };
++    auto loadB = [&](int kt) {
++        const int kb = BK == 32 ? kt : kt >> 1, h = BK == 32 ? 0 : kt & 1;
++#pragma unroll
++        for (int i = 0; i < BIT; ++i) {
++            const int f = tid + i * NT, kq4 = (f / BN) * 4;
++            const int off = BK == 32 ? kq4 : (kq4 < 8 ? h * 8 + kq4 : 16 + h * 8 + kq4 - 8);
++            bv[i] = s >= 0 ? __ldg((const float4 *) (xs + kb * 32 + off)) : make_float4(0.f, 0.f, 0.f, 0.f);
++        }
++    };
++    auto storeB = [&](int buf) {
++#pragma unroll
++        for (int i = 0; i < BIT; ++i) {
++            const int f = tid + i * NT, kq4 = (f / BN) * 4;
++            Bs[buf][kq4 + 0][mycol] = bv[i].x;
++            Bs[buf][kq4 + 1][mycol] = bv[i].y;
++            Bs[buf][kq4 + 2][mycol] = bv[i].z;
++            Bs[buf][kq4 + 3][mycol] = bv[i].w;
++        }
++    };
++
++    const int tx = (tid & 7) | (((tid >> 5) & 1) << 3), ty = ((tid >> 3) & 3) | ((tid >> 6) << 2);
++    float acc[8][TN];
++#pragma unroll
++    for (int i = 0; i < 8; ++i)
++#pragma unroll
++        for (int j = 0; j < TN; ++j) acc[i][j] = 0.f;
++
++    loadA(0); loadB(0); storeA(0); storeB(0);
++    __syncthreads();
++    for (int kt = 0; kt < nkt; ++kt) {
++        const int buf = kt & 1;
++        if (kt + 1 < nkt) { loadA(kt + 1); loadB(kt + 1); }
++#pragma unroll
++        for (int k = 0; k < BK; ++k) {
++            const float4 a0 = *(const float4 *) &As[buf][k][tx * 4];
++            const float4 a1 = *(const float4 *) &As[buf][k][64 + tx * 4];
++            float b[TN];
++            const float4 b0 = *(const float4 *) &Bs[buf][k][ty * 4];
++            b[0] = b0.x; b[1] = b0.y; b[2] = b0.z; b[3] = b0.w;
++            if constexpr (TN == 8) {
++                const float4 b1 = *(const float4 *) &Bs[buf][k][BN / 2 + ty * 4];
++                b[4] = b1.x; b[5] = b1.y; b[6] = b1.z; b[7] = b1.w;
++            }
++            const float a[8] = {a0.x, a0.y, a0.z, a0.w, a1.x, a1.y, a1.z, a1.w};
++#pragma unroll
++            for (int i = 0; i < 8; ++i)
++#pragma unroll
++                for (int j = 0; j < TN; ++j) acc[i][j] = fmaf(a[i], b[j], acc[i][j]);
++        }
++        if (kt + 1 < nkt) { storeA(buf ^ 1); storeB(buf ^ 1); }
++        __syncthreads();
++    }
++#pragma unroll
++    for (int j = 0; j < TN; ++j) {
++        const int col = TN == 4 ? ty * 4 + j : (j < 4 ? ty * 4 + j : BN / 2 + ty * 4 + j - 4);
++        if (col < ncols) {
++            float * y = Y + (size_t) ids_dst[c0 + col] * sy + r0;
++            *(float4 *) (y + tx * 4)      = make_float4(acc[0][j], acc[1][j], acc[2][j], acc[3][j]);
++            *(float4 *) (y + 64 + tx * 4) = make_float4(acc[4][j], acc[5][j], acc[6][j], acc[7][j]);
++        }
++    }
++}
++
++static int moe_fp32_mode() {
++    static const int mode = [] {
++        const char * v = getenv("GGML_CUDA_MOE_FP32_PREFILL");
++        return v ? atoi(v) : 0;
++    }();
++    return mode;
++}
++
++static int64_t moe_fp32_min_tokens() {
++    static const int64_t m = [] {
++        const char * v = getenv("GGML_CUDA_MOE_FP32_PREFILL_MIN");
++        return (int64_t) (v ? atoll(v) : 512);
++    }();
++    return m;
++}
++
++bool ggml_cuda_moe_fp32_prefill_eligible(const ggml_tensor * src0, const ggml_tensor * src1, const ggml_tensor * ids,
++                                         const ggml_tensor * dst, int cc) {
++    if (moe_fp32_mode() <= 0 || cc != 520) {
++        return false;
++    }
++    if (src0->type != GGML_TYPE_Q4_0 || src1->type != GGML_TYPE_F32 || dst->type != GGML_TYPE_F32 || ids->type != GGML_TYPE_I32) {
++        return false;
++    }
++    if (src0->ne[2] > 256 || src0->ne[3] != 1 || src0->ne[1] % MOE_FP32_BM != 0 || src0->ne[0] % 32 != 0) {
++        return false;
++    }
++    if (src0->nb[1] % 2 != 0 || src0->nb[0] != sizeof(block_q4_0)) {
++        return false;
++    }
++    if (src1->ne[3] != 1 || src1->nb[0] != sizeof(float) || src1->nb[1] % 16 != 0 || src1->nb[2] % src1->nb[1] != 0 ||
++            ((uintptr_t) src1->data) % 16 != 0) {
++        return false;
++    }
++    if (!ggml_is_contiguous(dst) || dst->nb[1] % 16 != 0 || ((uintptr_t) dst->data) % 16 != 0) {
++        return false;
++    }
++    if (ids->nb[0] != ggml_element_size(ids) || dst->ne[1] != ids->ne[0]) {
++        return false;
++    }
++    return src1->ne[2] >= moe_fp32_min_tokens();
++}
++
++void ggml_cuda_moe_fp32_prefill(ggml_backend_cuda_context & ctx, const ggml_tensor * src0, const ggml_tensor * src1,
++                                const ggml_tensor * ids, ggml_tensor * dst) {
++    cudaStream_t stream = ctx.stream();
++    const int64_t ne00 = src0->ne[0], ne01 = src0->ne[1], ne02 = src0->ne[2];
++    const int64_t ne11 = src1->ne[1], ne12 = src1->ne[2];
++    const int64_t n_expert_used = ids->ne[0];
++    const int64_t ne_get_rows = ne12 * n_expert_used;
++
++    ggml_cuda_pool_alloc<int32_t> ids_src1(ctx.pool(), ne_get_rows);
++    ggml_cuda_pool_alloc<int32_t> ids_dst(ctx.pool(), ne_get_rows);
++    ggml_cuda_pool_alloc<int32_t> expert_bounds(ctx.pool(), ne02 + 1);
++    const int64_t n64 = ne_get_rows / 64 + ne02;
++    ggml_cuda_pool_alloc<int2> tiles(ctx.pool(), (1 + n64) + 2 * (1 + ne02));
++    int2 * t64 = tiles.get();
++    int2 * t32 = t64 + 1 + n64;
++    int2 * t16 = t32 + 1 + ne02;
++
++    {
++        const int si1  = ids->nb[1] / ggml_element_size(ids);
++        const int sis1 = src1->nb[2] / src1->nb[1];
++        ggml_cuda_launch_mm_ids_helper((const int32_t *) ids->data, ids_src1.get(), ids_dst.get(), expert_bounds.get(),
++            ne02, ne12, n_expert_used, ne11, si1, sis1, /*write_inverse =*/ false, stream, /*allow_route8 =*/ false);
++        CUDA_CHECK(cudaGetLastError());
++    }
++    ggml_cuda_mmq_make_tail_tiles(expert_bounds.get(), t64, t32, t16, (int) ne02, stream);
++    CUDA_CHECK(cudaGetLastError());
++
++    const uint8_t * W = (const uint8_t *) src0->data;
++    const float   * X = (const float *) src1->data;
++    float         * Y = (float *) dst->data;
++    const int rows = (int) ne01, K = (int) ne00;
++    const int64_t sx = src1->nb[1] / sizeof(float), sy = dst->nb[1] / sizeof(float);
++    const int gx = (int) (ne01 / MOE_FP32_BM);
++    const int32_t * is = ids_src1.get();
++    const int32_t * id = ids_dst.get();
++    const int32_t * eb = expert_bounds.get();
++
++    if (moe_fp32_mode() == 2 && ne11 != 1) {
++        moe_fp32_q40<64, 8, 16, 2><<<dim3(gx, (unsigned) n64), 128, 0, stream>>>(W, X, is, id, eb, t64, Y, rows, K, src0->nb[1], src0->nb[2], sx, sy);
++    } else {
++        moe_fp32_q40<64, 4, 16, 3><<<dim3(gx, (unsigned) n64), 256, 0, stream>>>(W, X, is, id, eb, t64, Y, rows, K, src0->nb[1], src0->nb[2], sx, sy);
++    }
++    moe_fp32_q40<32, 4, 16, 3><<<dim3(gx, (unsigned) ne02), 128, 0, stream>>>(W, X, is, id, eb, t32, Y, rows, K, src0->nb[1], src0->nb[2], sx, sy);
++    moe_fp32_q40<16, 4, 16, 3><<<dim3(gx, (unsigned) ne02),  64, 0, stream>>>(W, X, is, id, eb, t16, Y, rows, K, src0->nb[1], src0->nb[2], sx, sy);
++    CUDA_CHECK(cudaGetLastError());
++
++    static std::atomic<int64_t> n_engaged{0};
++    static const bool dbg = getenv("GGML_CUDA_OCCAMY_DEBUG") != nullptr;
++    const int64_t n = ++n_engaged;
++    if (dbg && (n & (n - 1)) == 0) {
++        fprintf(stderr, "moe-fp32: engaged launches %lld (mode %d, rows %lld K %lld experts %lld tokens %lld bcast %d)\n",
++            (long long) n, moe_fp32_mode(), (long long) ne01, (long long) ne00, (long long) ne02, (long long) ne12, ne11 == 1 ? 1 : 0);
++    }
++}
++
++// Numerics probe (GGML_CUDA_MOE_FP32_CHECK=N): compare the FP32 result against a reference (the mmq
++// result) for the first N engaged ops; partial sums per block, reduced on the host in double.
++static __global__ void moe_fp32_cmp(const float * __restrict__ a, const float * __restrict__ r, const int64_t n, float4 * __restrict__ part) {
++    __shared__ float sd[256], sr[256], sm[256], sb[256];
++    float d2 = 0.f, r2 = 0.f, mx = 0.f, bad = 0.f;
++    for (int64_t i = (int64_t) blockIdx.x * blockDim.x + threadIdx.x; i < n; i += (int64_t) gridDim.x * blockDim.x) {
++        const float x = a[i], y = r[i];
++        if (!isfinite(x) || !isfinite(y)) { bad += 1.f; continue; }
++        const float d = x - y;
++        d2 += d * d; r2 += y * y; mx = fmaxf(mx, fabsf(d));
++    }
++    sd[threadIdx.x] = d2; sr[threadIdx.x] = r2; sm[threadIdx.x] = mx; sb[threadIdx.x] = bad;
++    __syncthreads();
++    for (int o = 128; o > 0; o >>= 1) {
++        if ((int) threadIdx.x < o) {
++            sd[threadIdx.x] += sd[threadIdx.x + o]; sr[threadIdx.x] += sr[threadIdx.x + o];
++            sm[threadIdx.x] = fmaxf(sm[threadIdx.x], sm[threadIdx.x + o]); sb[threadIdx.x] += sb[threadIdx.x + o];
++        }
++        __syncthreads();
++    }
++    if (threadIdx.x == 0) part[blockIdx.x] = make_float4(sd[0], sr[0], sm[0], sb[0]);
++}
++
++int ggml_cuda_moe_fp32_check_budget() {
++    static std::atomic<int> left{[] { const char * v = getenv("GGML_CUDA_MOE_FP32_CHECK"); return v ? atoi(v) : 0; }()};
++    if (left.load() <= 0) {
++        return 0;
++    }
++    return left.fetch_sub(1) > 0 ? 1 : 0;
++}
++
++void ggml_cuda_moe_fp32_compare(const float * fp32_out, const float * ref_out, int64_t n, const char * tag, cudaStream_t stream) {
++    constexpr int NB = 120;
++    float4 * part = nullptr;
++    CUDA_CHECK(cudaStreamSynchronize(stream));
++    CUDA_CHECK(cudaMalloc((void **) &part, NB * sizeof(float4)));
++    moe_fp32_cmp<<<NB, 256, 0, stream>>>(fp32_out, ref_out, n, part);
++    float4 h[NB];
++    CUDA_CHECK(cudaMemcpyAsync(h, part, sizeof(h), cudaMemcpyDeviceToHost, stream));
++    CUDA_CHECK(cudaStreamSynchronize(stream));
++    CUDA_CHECK(cudaFree(part));
++    double d2 = 0, r2 = 0, mx = 0, bad = 0;
++    for (int i = 0; i < NB; ++i) { d2 += h[i].x; r2 += h[i].y; mx = std::max(mx, (double) h[i].z); bad += h[i].w; }
++    fprintf(stderr, "moe-fp32-check: %s n %lld relRMSE(fp32 vs mmq) %.3e maxabs %.3e nonfinite %.0f\n",
++        tag, (long long) n, r2 > 0 ? sqrt(d2 / r2) : 0.0, mx, bad);
++}
+diff --git a/ggml/src/ggml-cuda/mmid.cuh b/ggml/src/ggml-cuda/mmid.cuh
+index 09fdf5b..7b4467e 100644
+--- a/ggml/src/ggml-cuda/mmid.cuh
++++ b/ggml/src/ggml-cuda/mmid.cuh
+@@ -1,5 +1,15 @@
+ #pragma once
+ 
++#include "common.cuh"
++
+ void ggml_cuda_launch_mm_ids_helper(
+         const int32_t * ids, int32_t * ids_src1, int32_t * ids_dst, int32_t * expert_bounds,
+         int n_experts, int n_tokens, int n_expert_used, int nchannels_y, int si1, int sis1, bool write_inverse, cudaStream_t stream, bool allow_route8 = false);
++
++// A4: opt-in FP32 SGEMM path for Q4_0 MoE prefill (GGML_CUDA_MOE_FP32_PREFILL=1|2, default off).
++bool ggml_cuda_moe_fp32_prefill_eligible(const ggml_tensor * src0, const ggml_tensor * src1, const ggml_tensor * ids,
++                                         const ggml_tensor * dst, int cc);
++void ggml_cuda_moe_fp32_prefill(ggml_backend_cuda_context & ctx, const ggml_tensor * src0, const ggml_tensor * src1,
++                                const ggml_tensor * ids, ggml_tensor * dst);
++int  ggml_cuda_moe_fp32_check_budget();
++void ggml_cuda_moe_fp32_compare(const float * fp32_out, const float * ref_out, int64_t n, const char * tag, cudaStream_t stream);

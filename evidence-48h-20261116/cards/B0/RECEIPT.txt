@@ -1,0 +1,11 @@
+B0 RECEIPT 15 Nov 2026. No git (plain files, scripts only, no built libs/binaries). Build command: none (python3 -m py_compile).
+6d3bb87cc7c4731c381e7e48b890a3edca6a318c2d1f76091c7eb0e89ca315ad  build_fixture.py
+0ac1cd6be0f4a3e38e7252792ca13e05d468e5ca1035459024131c8e88998b7c  n3r_replay.py
+73e7b8ab528862c6ff05d75af567a24944e6a99e792dc7e4c55f558d17f9fabb  n3r_compare.py
+c879a6f6c5634dd3b8f97aaa15591c4fd7f0dfd1c4aae630877bf6a23e85aab0  run_n3r.sh
+83a4e9a73f5d67da8d010eacd102a0bfad4a421f86d3af7553ba8e7314566ed3  mock_server.py
+1844f530015276c3b74aa38cb7f4a38da2b2e8e83d14b69f500d57bd767008b3  n3r_replay.py
+bb21d111f6e00adb2c5cf60f8d8f198d31feb12725eccfbc6b5bf57e1b802956  n3r_compare.py
+9b92b9aee55ef65ace88c06ad92a4e9a529d11313117d3582b9ef94dbe5bc912  mock_server.py
+B0b edits 16 Nov (ChatML wrapper, void guard, 3-arm compare); no git, files only
+B0c: n3r_replay.py 5564c5cac9b1ce7c08af51d34feac600653b95cee8236cf02baad87c43e97e24

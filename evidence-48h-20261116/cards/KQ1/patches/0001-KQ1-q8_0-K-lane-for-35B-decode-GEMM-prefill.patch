@@ -1,0 +1,328 @@
+From d10f8dbf10b0f494735b1067abdb3549401af21a Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Mon, 16 Nov 2026 15:18:08 +0100
+Subject: [PATCH] KQ1: q8_0 K lane for 35B decode + GEMM prefill
+
+- fattn-maxwell-gemm: dequantise q8_0 K in convert_kv; guard allows K F16 or Q8_0; kq8 counter.
+- fattn-occamy: staged q8 decode kernel (per-warp double-buffered smem K staging),
+  opt-in GGML_CUDA_OCCAMY_KVQ8_STAGE=1 (needs KVQ8=1); occamy_kq1 counters at exit.
+- fattn.cu: count stock fallback with q8 K.
+- test-backend-ops: q8-K eval cases at 35B geometry; decode perf micro F16 vs Q8 K at 24K/48K/96K.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ ggml/src/ggml-cuda/fattn-maxwell-gemm.cuh | 26 +++++--
+ ggml/src/ggml-cuda/fattn-occamy.cu        | 94 ++++++++++++++++++++++-
+ ggml/src/ggml-cuda/fattn-occamy.cuh       |  1 +
+ ggml/src/ggml-cuda/fattn.cu               |  3 +
+ tests/test-backend-ops.cpp                | 24 ++++++
+ 5 files changed, 139 insertions(+), 9 deletions(-)
+
+diff --git a/ggml/src/ggml-cuda/fattn-maxwell-gemm.cuh b/ggml/src/ggml-cuda/fattn-maxwell-gemm.cuh
+index 63a35f9..e31d544 100644
+--- a/ggml/src/ggml-cuda/fattn-maxwell-gemm.cuh
++++ b/ggml/src/ggml-cuda/fattn-maxwell-gemm.cuh
+@@ -23,6 +23,7 @@ static const char * const occamy_fa_gemm_reason_names[OFG_COUNT] = {
+ };
+ static std::atomic<uint64_t> occamy_fa_gemm_engaged{0};
+ static std::atomic<uint64_t> occamy_fa_gemm_q_tiled{0}; // engaged ops that were split into >1 Q chunks
++static std::atomic<uint64_t> occamy_fa_gemm_kq8{0};     // KQ1: engaged ops with q8_0 keys (dequantised in staging)
+ static constexpr int maxwell_gemm_max_chunk_queries = 1024; // scratch is sized for this many Q rows
+ static std::atomic<uint64_t> occamy_fa_gemm_fallbacks[OFG_COUNT];
+ static std::atomic<bool> occamy_fa_gemm_used{false};
+@@ -56,9 +57,10 @@ static void occamy_fa_gemm_print(const char * when) {
+             off += size_t(w);
+         }
+     }
+-    std::fprintf(stderr, "occamy_fa_gemm: engaged=%llu q_tiled=%llu fallback=%llu reasons=%s when=%s\n",
++    std::fprintf(stderr, "occamy_fa_gemm: engaged=%llu q_tiled=%llu kq8=%llu fallback=%llu reasons=%s when=%s\n",
+         (unsigned long long) occamy_fa_gemm_engaged.load(std::memory_order_relaxed),
+-        (unsigned long long) occamy_fa_gemm_q_tiled.load(std::memory_order_relaxed), (unsigned long long) total,
++        (unsigned long long) occamy_fa_gemm_q_tiled.load(std::memory_order_relaxed),
++        (unsigned long long) occamy_fa_gemm_kq8.load(std::memory_order_relaxed), (unsigned long long) total,
+         off ? reasons : "-", when);
+     if (occamy_fa_gemm_fused_enabled()) {
+         std::fprintf(stderr, "occamy_fa_gemm_fused: calls=%llu softmax_launches=%llu when=%s\n",
+@@ -101,6 +103,9 @@ static constexpr int maxwell_gemm_grouped_heads = 8;
+ static constexpr int maxwell_gemm_tile_queries = 64;
+ static constexpr int maxwell_gemm_split_keys = 4096;
+ 
++// KQ1 (16 Nov 2026): KQ8 = keys are q8_0 (8 blocks of {f16 d; int8 qs[32]} per 256-dim row), dequantised d*qs to f32
++// in the same staging pass (values stay F16). Same f32 scratch, same GEMM/softmax order as the F16 path.
++template <bool KQ8>
+ static __global__ void maxwell_gemm_convert_kv(
+         const char * keys, const char * values, float * keys_float, float * values_float,
+         int key_count, size_t key_row_stride, size_t value_row_stride) {
+@@ -109,7 +114,12 @@ static __global__ void maxwell_gemm_convert_kv(
+          index += size_t(blockDim.x) * gridDim.x) {
+         const int dimension = index % maxwell_gemm_dimension;
+         const size_t key = index / maxwell_gemm_dimension;
+-        keys_float[index] = __half2float(reinterpret_cast<const half *>(keys + key * key_row_stride)[dimension]);
++        if (KQ8) {
++            const block_q8_0 * kb = reinterpret_cast<const block_q8_0 *>(keys + key * key_row_stride) + dimension / QK8_0;
++            keys_float[index] = __half2float(kb->d) * float(kb->qs[dimension % QK8_0]);
++        } else {
++            keys_float[index] = __half2float(reinterpret_cast<const half *>(keys + key * key_row_stride)[dimension]);
++        }
+         values_float[index] = __half2float(reinterpret_cast<const half *>(values + key * value_row_stride)[dimension]);
+     }
+ }
+@@ -370,7 +380,8 @@ static bool ggml_cuda_flash_attn_ext_maxwell_gemm(ggml_backend_cuda_context & ct
+     const ggml_tensor * mask = dst->src[3];
+     if (!queries || !keys || !values) OFG_FALLBACK(nullsrc);
+     if (queries->type != GGML_TYPE_F32) OFG_FALLBACK(qtype);
+-    if (keys->type != GGML_TYPE_F16) OFG_FALLBACK(ktype);
++    const bool keys_q8 = keys->type == GGML_TYPE_Q8_0;
++    if (keys->type != GGML_TYPE_F16 && !keys_q8) OFG_FALLBACK(ktype);
+     if (values->type != GGML_TYPE_F16) OFG_FALLBACK(vtype);
+     if (dst->type != GGML_TYPE_F32 || !ggml_is_contiguous(dst)) OFG_FALLBACK(dst);
+     if (dst->src[4]) OFG_FALLBACK(sinks);
+@@ -382,7 +393,7 @@ static bool ggml_cuda_flash_attn_ext_maxwell_gemm(ggml_backend_cuda_context & ct
+     if (keys->ne[1] > 98304) OFG_FALLBACK(keys_gt_98304);
+     if (values->ne[1] != keys->ne[1] || dst->ne[0] != 256 || dst->ne[1] != 16 ||
+         dst->ne[2] != queries->ne[1] || dst->ne[3] != 1) OFG_FALLBACK(shape);
+-    if (queries->nb[0] != sizeof(float) || keys->nb[0] != sizeof(half) || values->nb[0] != sizeof(half) ||
++    if (queries->nb[0] != sizeof(float) || keys->nb[0] != (keys_q8 ? sizeof(block_q8_0) : sizeof(half)) || values->nb[0] != sizeof(half) ||
+         queries->nb[1] % sizeof(float) || queries->nb[2] % sizeof(float) ||
+         keys->nb[1] % sizeof(half) || keys->nb[2] % sizeof(half) ||
+         values->nb[1] % sizeof(half) || values->nb[2] % sizeof(half)) OFG_FALLBACK(stride);
+@@ -401,6 +412,9 @@ static bool ggml_cuda_flash_attn_ext_maxwell_gemm(ggml_backend_cuda_context & ct
+     }
+ #undef OFG_FALLBACK
+     occamy_fa_gemm_engaged.fetch_add(1, std::memory_order_relaxed);
++    if (keys_q8) {
++        occamy_fa_gemm_kq8.fetch_add(1, std::memory_order_relaxed);
++    }
+     const int total_queries = queries->ne[1];
+     if (total_queries > maxwell_gemm_max_chunk_queries) {
+         occamy_fa_gemm_q_tiled.fetch_add(1, std::memory_order_relaxed);
+@@ -458,7 +472,7 @@ static bool ggml_cuda_flash_attn_ext_maxwell_gemm(ggml_backend_cuda_context & ct
+         const float one = 1.0f;
+         const float zero = 0.0f;
+         for (int group = 0; group < maxwell_gemm_kv_heads; ++group) {
+-            maxwell_gemm_convert_kv<<<65535, 256, 0, stream>>>(
++            (keys_q8 ? maxwell_gemm_convert_kv<true> : maxwell_gemm_convert_kv<false>)<<<65535, 256, 0, stream>>>(
+                 static_cast<const char *>(keys->data) + group * keys->nb[2],
+                 static_cast<const char *>(values->data) + group * values->nb[2],
+                 keys_float, values_float, key_count, keys->nb[1], values->nb[1]);
+diff --git a/ggml/src/ggml-cuda/fattn-occamy.cu b/ggml/src/ggml-cuda/fattn-occamy.cu
+index 513bb31..5c9d63a 100644
+--- a/ggml/src/ggml-cuda/fattn-occamy.cu
++++ b/ggml/src/ggml-cuda/fattn-occamy.cu
+@@ -20,6 +20,7 @@
+ #include "fattn-occamy.cuh"
+ #include "fattn-occamy-kvq8.cuh"
+ 
++#include <atomic>
+ #include <cstdio>
+ #include <cstdlib>
+ #include <cfloat>
+@@ -568,8 +569,15 @@ __global__ void __launch_bounds__(2*OFA_NT, 2) ofa_decode_hs_ar_kernel(const ofa
+ // ofa_decode_hs_ar_kernel, untouched). Lane math: fattn-occamy-kvq8.cuh. K: the lane's 8-dim QK partial is computed on the
+ // int8 values and multiplied by its block scale d_k before the xor tree. V: p_j*d_v is formed once per (token, head).
+ // Same split/unit/softmax/combine order as hs_ar; not bitwise vs the generic q8 path (that one quantises Q to q8_1).
+-template <bool KQ8, bool VQ8>
++// KQ1 (16 Nov 2026), KST (GGML_CUDA_OCCAMY_KVQ8_STAGE=1, needs KQ8 and 16-B aligned K rows/strides): the warp pair that
++// shares a unit (same warp index, head groups 0/1) loads the unit's 4 q8 K rows (4 x 272 B = 68 uint4) once with coalesced
++// LDG.128 into a per-pair double buffer in shared memory, prefetching the next unit into registers; one named barrier
++// (id 1+warp, 64 threads) per unit. Lanes then read their Layout-A words/scale from smem. Same lane math, split, softmax
++// and combine order as the unstaged q8 kernel, so results are bitwise equal to it.
++#define OFA_KST_U4  (OFA_T*272/16)
++template <bool KQ8, bool VQ8, bool KST = false>
+ __global__ void __launch_bounds__(2*OFA_NT, 2) ofa_decode_hs_ar_q8_kernel(const ofa_params p) {
++    static_assert(!KST || KQ8, "KST needs q8 K");
+     const int split = blockIdx.x;
+     const int kvh   = blockIdx.y;
+     const int i3    = blockIdx.z;
+@@ -583,6 +591,7 @@ __global__ void __launch_bounds__(2*OFA_NT, 2) ofa_decode_hs_ar_q8_kernel(const
+     __shared__ float  s_o[OFA_NW][OFA_G][OFA_D];
+     __shared__ float  s_m[OFA_NW][OFA_G];
+     __shared__ float  s_l[OFA_NW][OFA_G];
++    __shared__ __align__(16) uint4 s_k[KST ? OFA_NW : 1][2][KST ? OFA_KST_U4 : 1];
+ 
+     float q[OFA_HG][8];
+ #pragma unroll
+@@ -603,6 +612,13 @@ __global__ void __launch_bounds__(2*OFA_NT, 2) ofa_decode_hs_ar_q8_kernel(const
+     float l_run = 0.0f;
+ 
+     const ofq_lane g = ofq_lane_geom(lane);
++    // KST: pair thread pt in [0,64) loads uint4 pt (and pt+64 for pt < 4) of the unit's 68; row r = i/17, column c = i%17
++    const int  pt   = hg*32 + lane;
++    const char * Kr0 = p.K + i3*p.nbk3 + kvh*p.nbk2;
++    const int  ka_r = pt / 17;
++    const size_t ka_off = (size_t) ka_r*p.nbk1 + (size_t)(pt - 17*ka_r)*16;
++    const size_t kb_off = 3*(size_t) p.nbk1 + (size_t)(pt + 64 - 51)*16;
++    uint4 ka = make_uint4(0, 0, 0, 0), kb = make_uint4(0, 0, 0, 0);
+     const char * Kb = p.K + i3*p.nbk3 + kvh*p.nbk2 + (KQ8 ? g.base : lane*16);
+     const char * Vb = p.V + i3*p.nbv3 + kvh*p.nbv2 + (VQ8 ? g.base : lane*16);
+     const half * Mb = (const half *) (p.mask + (i3 % p.mask_ne3)*p.nbm3);
+@@ -617,9 +633,33 @@ __global__ void __launch_bounds__(2*OFA_NT, 2) ofa_decode_hs_ar_q8_kernel(const
+     const half * mp = Mb + (u0 + warp)*OFA_T + jl;
+     const size_t kstep = (size_t) OFA_NW*OFA_T*nbk1;
+     const size_t vstep = (size_t) OFA_NW*OFA_T*nbv1;
+-    for (int u = u0 + warp; u < u1; u += OFA_NW, kp += kstep, vp += vstep, mp += OFA_NW*OFA_T) {
++    if (KST && u0 + warp < u1) {
++        const char * ub = Kr0 + (size_t)(u0 + warp)*OFA_T*nbk1;
++        ka = __ldg((const uint4 *) (ub + ka_off));
++        if (pt < 4) kb = __ldg((const uint4 *) (ub + kb_off));
++    }
++    int kbuf = 0;
++    for (int u = u0 + warp; u < u1; u += OFA_NW, kp += kstep, vp += vstep, mp += OFA_NW*OFA_T, kbuf ^= 1) {
+         uint4 kr[OFA_T], vr[OFA_T];      // f16: 8 halves; q8: x,y,z = words 0..2, w = f16 scale bits
+-        {
++        if (KST) {
++            uint4 * sk = s_k[KST ? warp : 0][kbuf];
++            sk[pt] = ka;
++            if (pt < 4) sk[pt + 64] = kb;
++            asm volatile("bar.sync %0, %1;" :: "r"(1 + warp), "r"(64) : "memory");
++            if (u + OFA_NW < u1) {
++                const char * ub = Kr0 + (size_t)(u + OFA_NW)*OFA_T*nbk1;
++                ka = __ldg((const uint4 *) (ub + ka_off));
++                if (pt < 4) kb = __ldg((const uint4 *) (ub + kb_off));
++            }
++            const char * r = (const char *) sk + g.base;
++#pragma unroll
++            for (int j = 0; j < OFA_T; ++j, r += 272) {
++                kr[j].x = *(const unsigned int *) r;
++                kr[j].y = *(const unsigned int *) (r + 4);
++                kr[j].z = *(const unsigned int *) (r + g.w2off);
++                kr[j].w = *(const unsigned short *) (r + g.doff);
++            }
++        } else {
+             const char * r = kp;
+ #pragma unroll
+             for (int j = 0; j < OFA_T; ++j, r += nbk1) {
+@@ -836,6 +876,38 @@ bool ggml_cuda_occamy_kvq8_enabled() {
+     return v;
+ }
+ 
++// KQ1: GGML_CUDA_OCCAMY_KVQ8_STAGE=1 (exact "1", on top of KVQ8=1) selects the smem-staged q8 K read.
++static bool ofa_kst_enabled() {
++    static const bool v = []() {
++        const char * s = getenv("GGML_CUDA_OCCAMY_KVQ8_STAGE");
++        const bool on = s && strcmp(s, "1") == 0;
++        if (on) fprintf(stderr, "ggml_cuda: occamy FA kvq8 stage %s\n", ggml_cuda_occamy_kvq8_enabled() ? "on" : "requested but inactive (needs KVQ8=1)");
++        return on && ggml_cuda_occamy_kvq8_enabled();
++    }();
++    return v;
++}
++
++// KQ1 engagement counters, printed at exit: decode calls on the staged / unstaged q8 kernels, staged-eligible calls that
++// fell back to unstaged (K row alignment), and stock FA calls that saw a q8_0 K (prefill/mixed fallbacks).
++static std::atomic<unsigned long long> ofa_kq1_n[4];
++static void ofa_kq1_print() {
++    fprintf(stderr, "occamy_kq1: stage=%llu kvq8_plain=%llu stage_misalign=%llu stock_kq8=%llu\n",
++        ofa_kq1_n[0].load(), ofa_kq1_n[1].load(), ofa_kq1_n[2].load(), ofa_kq1_n[3].load());
++    fflush(stderr);
++}
++void ggml_cuda_occamy_kq1_count(const int which) {
++    static std::atomic<bool> reg{false};
++    bool exp = false;
++    if (!reg.load(std::memory_order_relaxed) && reg.compare_exchange_strong(exp, true)) atexit(ofa_kq1_print);
++    ofa_kq1_n[which].fetch_add(1, std::memory_order_relaxed);
++}
++
++static bool ofa_kst_row_ok(const ggml_tensor * K) {
++    if ((uintptr_t) K->data % 16) return false;
++    for (int i = 1; i < 4; ++i) if (K->nb[i] % 16) return false;
++    return K->ne[0] == OFA_D && K->nb[0] == sizeof(block_q8_0);
++}
++
+ static bool ofa_kv_ok(const ggml_tensor * t) {
+     if (t->type == GGML_TYPE_F16) {
+         if (t->nb[0] != 2 || (uintptr_t) t->data % 16) return false;
+@@ -919,6 +991,12 @@ static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst,
+                     int nq = 0;
+                     CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nq, ofa_decode_hs_ar_q8_kernel<true, true>, 2*OFA_NT, 0));
+                     if (ggml_cuda_occamy_kvq8_enabled()) fprintf(stderr, "ggml_cuda: occamy FA kvq8 blocks/SM %d\n", nq);
++                    if (ofa_kst_enabled()) {
++                        int nk = 0, nkv = 0;
++                        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nk,  ofa_decode_hs_ar_q8_kernel<true, false, true>, 2*OFA_NT, 0));
++                        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nkv, ofa_decode_hs_ar_q8_kernel<true, true,  true>, 2*OFA_NT, 0));
++                        fprintf(stderr, "ggml_cuda: occamy FA kvq8 stage blocks/SM K-only %d K+V %d (flag-off %d)\n", nk, nkv, nb);
++                    }
+                 }
+             }
+             fprintf(stderr, "ggml_cuda: occamy FA pipe mode %d (blocks/SM %d, flag-off %d)\n", pipe, nbp, nb);
+@@ -953,6 +1031,16 @@ static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst,
+         case 3:  if (kvq8) {
+                      GGML_ASSERT(addr && "occamy kvq8 needs FA_ADDR=1");
+                      const bool kq = K->type == GGML_TYPE_Q8_0, vq = V->type == GGML_TYPE_Q8_0;
++                     if (kq && ofa_kst_enabled()) {
++                         if (ofa_kst_row_ok(K)) {
++                             ggml_cuda_occamy_kq1_count(0);
++                             if (vq) ofa_decode_hs_ar_q8_kernel<true, true,  true><<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p);
++                             else    ofa_decode_hs_ar_q8_kernel<true, false, true><<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p);
++                             break;
++                         }
++                         ggml_cuda_occamy_kq1_count(2);
++                     }
++                     ggml_cuda_occamy_kq1_count(1);
+                      if (kq && vq) ofa_decode_hs_ar_q8_kernel<true,  true ><<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p);
+                      else if (kq)  ofa_decode_hs_ar_q8_kernel<true,  false><<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p);
+                      else          ofa_decode_hs_ar_q8_kernel<false, true ><<<dim3(nsplit, nkvh, ns), 2*OFA_NT, 0, stream>>>(p);
+diff --git a/ggml/src/ggml-cuda/fattn-occamy.cuh b/ggml/src/ggml-cuda/fattn-occamy.cuh
+index 9cd3f21..dbfc27e 100644
+--- a/ggml/src/ggml-cuda/fattn-occamy.cuh
++++ b/ggml/src/ggml-cuda/fattn-occamy.cuh
+@@ -10,3 +10,4 @@ void ggml_cuda_occamy_fa_compare(ggml_backend_cuda_context & ctx, ggml_tensor *
+ bool ggml_cuda_occamy_kvq8_enabled();
+ bool ggml_cuda_occamy_kvq8_applicable(const ggml_tensor * dst);
+ void ggml_cuda_occamy_fa_kvq8(ggml_backend_cuda_context & ctx, ggml_tensor * dst);
++void ggml_cuda_occamy_kq1_count(int which); // KQ1: 0 stage, 1 kvq8_plain, 2 stage_misalign, 3 stock_kq8
+diff --git a/ggml/src/ggml-cuda/fattn.cu b/ggml/src/ggml-cuda/fattn.cu
+index 1e10e85..d87b69f 100644
+--- a/ggml/src/ggml-cuda/fattn.cu
++++ b/ggml/src/ggml-cuda/fattn.cu
+@@ -809,6 +809,9 @@ void ggml_cuda_flash_attn_ext(ggml_backend_cuda_context & ctx, ggml_tensor * dst
+         ggml_cuda_occamy_fa_compare(ctx, dst, true);
+         return;
+     }
++    if (dst->src[1]->type == GGML_TYPE_Q8_0) {
++        ggml_cuda_occamy_kq1_count(3);
++    }
+     ggml_cuda_flash_attn_ext_stock(ctx, dst);
+ }
+ 
+diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
+index ec504c8..fd7098a 100644
+--- a/tests/test-backend-ops.cpp
++++ b/tests/test-backend-ops.cpp
+@@ -11736,6 +11736,20 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+     test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {16, 1},  1025,  64, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0, {0, 2, 1, 3}));
+     test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {16, 1}, 16384,   1, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0));
+ 
++    // KQ1 (M6000): q8_0 K + f16 V (and q8_0 V), 35B geometry D=256, 2 kv heads, GQA 8. With GGML_CUDA_OCCAMY_FA=1, PIPE=3,
++    // ADDR=1, KVQ8=1, KVQ8_STAGE=1: q=1 -> staged q8 decode (ne3=2 = two-slot); with FA_MAXWELL_GEMM=1: q>=64 -> GEMM q8 K
++    // staging; q=8 -> stock fallback.
++    for (int64_t kv : { 1028, 4096, 24576 }) {
++        test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, kv, 1, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_F16));
++        test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 2}, kv, 1, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_F16));
++    }
++    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 4096, 1, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0));
++    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 2}, 4096, 1, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0));
++    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 4096,    8, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_F16));
++    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 4096,   64, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_F16));
++    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 8448, 1024, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_F16));
++    test_cases.emplace_back(new test_flash_attn_ext_maxwell_causal(256, 256, 2, {8, 1}, 4096, 1025, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_F16));
++
+     // MLA shape: the V cache is a sub-view of the K cache, with quantized KV
+     test_cases.emplace_back(new test_flash_attn_ext(576, 512, 1, {8, 1},  113,   1, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0, {0, 1, 2, 3}, true, true));
+     test_cases.emplace_back(new test_flash_attn_ext(576, 512, 1, {8, 1}, 1024,   1, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0, {0, 1, 2, 3}, true, true));
+@@ -12025,6 +12039,16 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+ static std::vector<std::unique_ptr<test_case>> make_test_cases_perf() {
+     std::vector<std::unique_ptr<test_case>> test_cases;
+ 
++    // KQ1 decode micro (M6000 35B geometry): D=256, 2 kv heads, GQA 8; 1-row ({8,1}) and 2-stream 2-row ({8,2}) decode,
++    // K f16 vs K q8_0 (V f16) at 24K/48K/96K. Select with -o FLASH_ATTN_EXT -p 'hsk=256,hsv=256,nh=2,nr23=\[8,[12]\],kv=(24576|49152|98304),nb=1,'
++    for (int64_t kv : {24576, 49152, 98304}) {
++        for (int nr3 : {1, 2}) {
++            for (ggml_type tk : {GGML_TYPE_F16, GGML_TYPE_Q8_0}) {
++                test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, nr3}, kv, 1, true, false, 0, 0, GGML_PREC_F32, tk, GGML_TYPE_F16));
++            }
++        }
++    }
++
+     // SWIGLU at a 27B-class FFN width, fused [gate|up] vs split operands
+     // note: same bytes either way, so a backend that indexes them differently shows it here
+     for (ggml_type type : {GGML_TYPE_F16, GGML_TYPE_F32, GGML_TYPE_BF16}) {

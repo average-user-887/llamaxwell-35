@@ -1,0 +1,48 @@
+From 5efe290b6d772cc9bfc27db24d2e5d3f9f6555cc Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Sat, 14 Nov 2026 20:46:40 +0100
+Subject: [PATCH 3/7] server: mixed-batch size stats log (when
+ --mixed-batch-size > 0)
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ tools/server/server-context.cpp | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+index 2910072..cb1af5f 100644
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -3121,6 +3121,9 @@ private:
+     int32_t s1_rr = 0;
+     int64_t s1_n_defer = 0;
+     int64_t gap15_n_capped = 0;
++    int32_t gap15_gen = 0;
++    int64_t gap15_mixed_n = 0, gap15_mixed_sum = 0;
++    int32_t gap15_mixed_max = 0;
+ 
+     // @ngxson : for debugging only
+     int64_t t_pre_decode  = 0;
+@@ -3225,6 +3228,14 @@ private:
+             llama_set_embeddings(ctx_tgt, slot_batched->need_embd());
+         }
+ 
++        if (params_base.n_batch_mixed > 0 && gap15_gen > 0 && (int32_t) batch.size() > gap15_gen) {
++            // batch-size stats for mixed (decode + prompt) batches; summary every 64 batches
++            const int32_t bs = (int32_t) batch.size();
++            gap15_mixed_n++; gap15_mixed_sum += bs; gap15_mixed_max = std::max(gap15_mixed_max, bs);
++            if (gap15_mixed_n % 64 == 0) {
++                SRV_INF("mixed-batch stats: n=%" PRId64 " mean=%.1f max=%d\n", gap15_mixed_n, (double) gap15_mixed_sum / gap15_mixed_n, gap15_mixed_max);
++            }
++        }
+         int32_t off_next = 0;
+         int32_t n_batch = llama_n_batch(ctx_tgt);
+         for (int32_t off = 0; off < batch.size(); off = off_next) {
+@@ -3472,6 +3483,7 @@ private:
+         int32_t n_batch  = llama_n_batch(ctx_tgt);
+         int32_t n_ubatch = llama_n_ubatch(ctx_tgt);
+         const int32_t n_generation = batch.size();
++        gap15_gen = n_generation;
+ 
+         auto & alora_scale       = batch.alora_scale;
+         auto & alora_disabled_id = batch.alora_disabled_id;

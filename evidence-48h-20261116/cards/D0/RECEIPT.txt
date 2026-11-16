@@ -1,0 +1,21 @@
+card A5 (N3 slot scheduling) + D0 (N3 determinism)
+branch a5-sched (worktree A5/src), commit 97c4ede88383c3ee20e6799c69a777c50e6878b9, base d4c13eb607188e09d2dc4feba9202ec7b7c31db8 (prod batch8). D0 has no source change (scripts only, no commit; files under D0/).
+change: tools/server/server-context.cpp only (+46 lines). LLAMA_N3_SCHED=0|1|2|3 (default 0 = unchanged), LLAMA_N3_SCHED_CHUNK (512), LLAMA_N3_SCHED_MAXDEFER (64). Exit line "n3_sched: ..." on stderr when policy != 0.
+build: bash A5/build-a5.sh (docker local/m6000-build-tools:20261013, container na5-build, incremental on a copy of L0/build; worktree mtimes set to 2026-11-01 except server-context.cpp so only it was recompiled). CPU only, sm_52. log A5/build.log (0 warnings/errors).
+sha256 (A5/build/bin):
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+220c3175870d2bfe916a81ae5b0d34241bd6b07a11ef258d9f735d278c2bc44c  libllama-server-impl.so
+a7eb566c145e50d879c80b82eb40f8b46627e67cf0e82dfd13cf24ee5b9f58f5  libggml-cuda.so
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  libggml-base.so.0.26.0
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  libggml.so.0.26.0
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  libllama.so.0.6.0
+0c750bc9b6ef4e5b0a559fa0e6075104ca1b71d109ef4369bbd0818b7bb3fe5a  libllama-common.so.0.6.0
+b75d48964ff65e16380cbb731c7ab42bf3894759006070dbc6698c5ac852fb29  test-backend-ops
+llama-server and libggml-cuda.so are byte-identical to prod-libs/batch8-20261115; only libllama-server-impl.so differs.
+D0 uses prod libs directly: 592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+093a17ef49fbaabd4fd7caa08469678800a3c2977921cc3e62c04644e1ad43d9  libllama-server-impl.so
+a7eb566c145e50d879c80b82eb40f8b46627e67cf0e82dfd13cf24ee5b9f58f5  libggml-cuda.so
+scripts (not run): D0/d0_gpu.sh + D0/n3_replay_d0.py + D0/compare.py ; A5/a5_gpu.sh + A5/n3_replay_a5.py + A5/summarize.py
+run: N3_GPU=<gpu> N3_UNLOAD_URL=<lab-endpoint>/api/models/unload/qwen36-35b-moe bash D0/d0_gpu.sh   (output D0/run-*/compare.md; LATEST)
+run: N3_GPU=<gpu> N3_UNLOAD_URL=<lab-endpoint>/api/models/unload/qwen36-35b-moe bash A5/a5_gpu.sh   (output A5/run-*/summary.md; A5_BLOCKS=4 for a shorter run)
+CPU checks done: build ok; bash -n; --plan; synthetic compare/summarize tests.

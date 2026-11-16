@@ -1,0 +1,16 @@
+      1 occamy_fa_gemm_fused: calls=0 softmax_launches=0 when=first_use
+      1 occamy_fa_gemm: engaged=0 q_tiled=0 fallback=0 reasons=- when=first_use
+      1 7.56.138.498 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    6    304    411, #gen drafts =    411, #acc drafts =   311, #gen tokens =    820, #acc tokens =   549, #mean acc len = 2.34, #acc rate/pos = (0.757, 0.579), d
+      1 7.48.347.800 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    4    197    197, #gen drafts =    197, #acc drafts =   140, #gen tokens =    393, #acc tokens =   247, #mean acc len = 2.25, #acc rate/pos = (0.711, 0.543), d
+      1 2.55.429.213 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    3    141    141, #gen drafts =    141, #acc drafts =   102, #gen tokens =    281, #acc tokens =   177, #mean acc len = 2.26, #acc rate/pos = (0.723, 0.532), d
+      1 23.18.942.350 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =   10    541    875, #gen drafts =    876, #acc drafts =   666, #gen tokens =   1749, #acc tokens =  1164, #mean acc len = 2.33, #acc rate/pos = (0.761, 0.569), 
+      1 13.21.104.980 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    8    420    639, #gen drafts =    639, #acc drafts =   478, #gen tokens =   1275, #acc tokens =   830, #mean acc len = 2.30, #acc rate/pos = (0.748, 0.551), 
+      1 0.17.582.208 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    2     81     81, #gen drafts =     81, #acc drafts =    62, #gen tokens =    162, #acc tokens =   110, #mean acc len = 2.36, #acc rate/pos = (0.765, 0.593), d
+      1 0.09.683.346 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    1     81     81, #gen drafts =     81, #acc drafts =    62, #gen tokens =    162, #acc tokens =   110, #mean acc len = 2.36, #acc rate/pos = (0.765, 0.593), d
+      1 0.05.973.697 I srv    load_model: speculative decoding context initialized
+      1 0.05.802.609 I spec common_specu: - gpu_layers=-1, cache_k=q8_0, cache_v=q8_0, ctx_tgt=yes, ctx_dft=yes, devices=[default]
+      1 0.05.802.608 I spec common_specu: - n_max=2, n_min=0, p_min=0.00, n_embd=2048, backend_sampling=1
+      1 0.05.802.606 I spec common_specu: adding speculative implementation 'draft-mtp'
+      1 0.05.693.748 I common_speculative_init_result: creating MTP draft context against the target model '/models/occamy-1.0-Q4_0-headq40b-mtp.gguf'
+      1 0.05.618.908 I ggml_cuda_hg_try_defer: GGML_CUDA_OCCAMY_HOSTGAP engaged on device 0
+      1 0.01.636.727 I load: special tokens cache size = 33

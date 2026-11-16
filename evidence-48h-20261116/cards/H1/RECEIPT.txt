@@ -1,0 +1,12 @@
+branch h1-ckpt  head abf77116cf1f91235a6a01b34cc93789de7d39c6 (base 20ec583 l0-ledger <- 4b0fcfb L0 <- prod d4c13eb)
+build: bash H1/build-h1.sh (incremental, container nh1-build, targets llama-server test-backend-ops ggml-cuda, sm_52, 0 warnings in changed files)
+note: libggml-cuda.so was rebuilt (not byte-identical to prod a7eb566c); both A/B arms use this same build
+sha256:
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+931d8803a3cc0f19d3d115cab31a2f56568b845ab6399486f9c36ab78a5498c1  libggml-cuda.so
+417324cba83c6a51bf8ceb2239038fe83734cc4241ddcef7e11b997495451310  libllama-server-impl.so
+349aaef594f8821527bfc580a48f9b60e3a75375715b7df8bf065edfcd212864  libllama.so.0
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  libggml-base.so.0.26.0
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  libggml.so.0.26.0
+423320bef2ef489f2ae3cb06937d4d1b16b187a57d3b5fc7fd5736b84217e0dd  libmtmd.so.0
+GPU run: NOT run. Launch: N3_GPU=<idx> N3_UNLOAD_URL=<post url> bash H1/h1_gpu.sh (--plan prints order)

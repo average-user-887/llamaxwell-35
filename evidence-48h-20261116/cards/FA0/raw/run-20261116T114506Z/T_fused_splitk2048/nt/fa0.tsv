@@ -1,0 +1,15 @@
+#bucket	ops	keys_sum	phase	ms
+keys_lt_81920	0	0	pack	0.000
+keys_lt_81920	0	0	convert_kv	0.000
+keys_lt_81920	0	0	qk_sgemm	0.000
+keys_lt_81920	0	0	softmax_mask	0.000
+keys_lt_81920	0	0	pv_sgemm	0.000
+keys_lt_81920	0	0	reduce	0.000
+keys_lt_81920	0	0	op_total	0.000
+keys_ge_81920	170	15413760	pack	42.710
+keys_ge_81920	170	15413760	convert_kv	426.949
+keys_ge_81920	170	15413760	qk_sgemm	31530.679
+keys_ge_81920	170	15413760	softmax_mask	9734.105
+keys_ge_81920	170	15413760	pv_sgemm	29485.017
+keys_ge_81920	170	15413760	reduce	956.167
+keys_ge_81920	170	15413760	op_total	72216.332

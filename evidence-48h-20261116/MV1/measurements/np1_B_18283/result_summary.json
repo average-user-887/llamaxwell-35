@@ -1,0 +1,35 @@
+{
+ "tag": "np1_B_18283",
+ "np": 1,
+ "prompt_tokens": 80000,
+ "n_predict": 384,
+ "sampling": "greedy(temp0)",
+ "wall_s": 299.91,
+ "slots_after": [
+  {
+   "id": 0,
+   "n_ctx": 84224,
+   "is_processing": false
+  }
+ ],
+ "done": true,
+ "slots": {
+  "0": {
+   "t_first_s": 289.6258,
+   "latency_s": 299.91,
+   "n_out": 384,
+   "timings": {
+    "prompt_n": 80000,
+    "prompt_ms": 289605.134,
+    "prompt_per_second": 276.23819679937026,
+    "predicted_n": 384,
+    "predicted_ms": 10276.639,
+    "predicted_per_second": 37.26899426942992,
+    "draft_n": 194,
+    "draft_n_accepted": 188
+   },
+   "accept_rate": 0.9691,
+   "occupancy": 0.9544
+  }
+ }
+}

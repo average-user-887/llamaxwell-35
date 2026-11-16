@@ -1,0 +1,27 @@
+From 5b1e570fd4954c1c2a78c2c885d1d0e77faacfb6 Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Sun, 15 Nov 2026 03:54:13 +0100
+Subject: [PATCH 5/8] occamy-gdn: card 18 fix misaligned float4 smem reads in
+ gdn_fused2<1> (__align__(16) on qn1/kn1/vv1/red1)
+
+GPU gate 15 Nov died with 'misaligned address' (LDS.U.128 at +0x564). gdn_fused2<0> SASS still identical to stack.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ ggml/src/ggml-cuda/occamy-gdn.cu | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/ggml/src/ggml-cuda/occamy-gdn.cu b/ggml/src/ggml-cuda/occamy-gdn.cu
+index 2634009..2847126 100644
+--- a/ggml/src/ggml-cuda/occamy-gdn.cu
++++ b/ggml/src/ggml-cuda/occamy-gdn.cu
+@@ -634,7 +634,8 @@ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+         }
+     }
+     if (IL) {   // ---- phase B (RQK + PCS), card 18: both sequences per item ----
+-        __shared__ float qn1[SD], kn1[SD], vv1[CGC], red1[NW];
++        // float4 reads of qn1/kn1: static __shared__ arrays are only 4-byte aligned by default (GPU gate 15 Nov: misaligned address at +0x564)
++        __shared__ __align__(16) float qn1[SD], kn1[SD], vv1[CGC], red1[NW];
+         __shared__ unsigned hc1[NVH], fin1[NVH + 1];
+         float * const QN[2] = { qn, qn1 }, * const KN[2] = { kn, kn1 }, * const VV[2] = { vv, vv1 }, * const RD[2] = { red, red1 };
+         unsigned * const HC[2] = { hc, hc1 }, * const FN[2] = { fin, fin1 };

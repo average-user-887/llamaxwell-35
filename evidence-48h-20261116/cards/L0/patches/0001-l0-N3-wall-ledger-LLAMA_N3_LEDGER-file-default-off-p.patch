@@ -1,0 +1,137 @@
+From 4b0fcfb373ef36a1ab356c8209e06795a206a66e Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Mon, 16 Nov 2026 08:13:47 +0100
+Subject: [PATCH 1/2] l0: N3 wall ledger (LLAMA_N3_LEDGER=<file>, default off):
+ per-decode and per-task CSV
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ tools/server/server-context.cpp | 61 ++++++++++++++++++++++++++++++++-
+ 1 file changed, 60 insertions(+), 1 deletion(-)
+
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+index baacdb4..eefa7d6 100644
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -26,6 +26,9 @@
+ #include <filesystem>
+ #include <random>
+ #include <utility>
++#include <chrono>
++#include <cstdio>
++#include <cstdlib>
+ #include <fstream>
+ 
+ // fix problem with std::min and std::max
+@@ -122,6 +125,31 @@ static std::vector<llama_token> server_sample_and_accept_synth(
+     return result;
+ }
+ 
++// N3 wall ledger (instrumentation only): LLAMA_N3_LEDGER=<file> writes one CSV line per llama_decode, <file>.tasks one per task start.
++// Default off. LLAMA_N3_LEDGER_SYNC=1 additionally synchronises after every decode (changes overlap; off by default).
++struct n3_ledger {
++    FILE * f  = nullptr;
++    FILE * ft = nullptr;
++    bool   sync = false;
++    int64_t t_prev_start_us = -1;
++    int64_t t_prev_end_us   = -1;
++    n3_ledger() {
++        const char * p = getenv("LLAMA_N3_LEDGER");
++        if (!p || !*p) return;
++        f = fopen(p, "w");
++        std::string pt = std::string(p) + ".tasks";
++        ft = fopen(pt.c_str(), "w");
++        sync = getenv("LLAMA_N3_LEDGER_SYNC") && atoi(getenv("LLAMA_N3_LEDGER_SYNC")) != 0;
++        if (f)  fprintf(f,  "t_start,wall_ms,gap_ms,period_ms,n_tokens,slot0,slot1,slot_other,n_prompt,n_gen,n_active,kind,has_output,sync,ret\n");
++        if (ft) fprintf(ft, "t_start,slot,task,n_prompt_tokens,n_cache_before,n_common,n_past,n_prefill,n_appended,ckpt_restore,full_reset\n");
++    }
++    bool on() const { return f != nullptr; }
++    static double now_s() {
++        return std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
++    }
++};
++static n3_ledger g_n3l;
++
+ // state diagram: https://github.com/ggml-org/llama.cpp/pull/9283
+ enum slot_state {
+     SLOT_STATE_IDLE,
+@@ -3567,6 +3595,8 @@ private:
+ 
+                         // keep track how many tokens we can reuse from the previous state
+                         int n_past = 0;
++                        const int64_t n3l_before = slot.prompt.tokens.size();
++                        int n3l_common = -1, n3l_restore = 0, n3l_reset = 0;
+ 
+                         // empty prompt passed -> release the slot and send empty response
+                         if (input_tokens.empty()) {
+@@ -3636,6 +3666,7 @@ private:
+                             if (slot.task->params.cache_prompt && !is_stateless_task) {
+                                 // reuse any previously computed tokens that are common with the new prompt
+                                 n_past = slot.prompt.tokens.get_common_prefix(input_tokens);
++                                n3l_common = n_past;
+ 
+                                 // the children start from the shared prefix, do not go past it
+                                 if (slot.task->n_tokens_shared > 0) {
+@@ -3805,6 +3836,7 @@ private:
+                                         // restore the draft's speculative state
+                                         common_speculative_set_state(spec.get(), slot.id, it->data_spec);
+ 
++                                        n3l_restore = 1;
+                                         pos_next = std::min(pos_next, std::max(it->pos_min + 1, it->pos_max));
+                                         n_past   = std::min(slot.prompt.tokens.size_up_to_pos(pos_next), (size_t) it->n_tokens);
+                                         SLT_TRC(slot, "restored context checkpoint (pos_min = %d, pos_max = %d, n_tokens = %" PRId64 ", n_past = %d, size = %.3f MiB)\n", it->pos_min, it->pos_max, it->n_tokens, n_past, (float) it->size() / 1024 / 1024);
+@@ -3815,6 +3847,7 @@ private:
+                                                 "https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055");
+                                         pos_next = 0;
+                                         n_past = 0;
++                                        n3l_reset = 1;
+                                     }
+                                 }
+                             }
+@@ -3840,6 +3873,12 @@ private:
+                             SLT_WRN(slot, "n_past was set to %d\n", n_past);
+                         }
+ 
++                        if (g_n3l.ft) {
++                            const int64_t np_ = slot.task->n_tokens();
++                            fprintf(g_n3l.ft, "%.6f,%d,%d,%" PRId64 ",%" PRId64 ",%d,%d,%" PRId64 ",%" PRId64 ",%d,%d\n", n3_ledger::now_s(), slot.id, (int) slot.task->id,
++                                    np_, n3l_before, n3l_common, n_past, np_ - n_past, std::max<int64_t>(0, np_ - n3l_before), n3l_restore, n3l_reset);
++                            fflush(g_n3l.ft);
++                        }
+                         slot.stats.n_prompt_cached    = n_past;
+                         slot.stats.n_prompt_processed = 0;
+ 
+@@ -4210,12 +4249,32 @@ private:
+         // yield to the queue, so we can still handle metrics tasks while decoding
+         // note: the sync is done here too, so that the wait is also covered by the yield
+         int ret = 0;
++        const int64_t n3l_t0 = g_n3l.on() ? ggml_time_us() : 0;
++        const double  n3l_ts = g_n3l.on() ? n3_ledger::now_s() : 0.0;
+         queue_tasks.yield_to_queue([&]() {
+             ret = llama_process(ctx_tgt, LLAMA_PROCESS_TYPE_DECODE, batch.view.get());
+-            if (ret == 0 && has_output) {
++            if (ret == 0 && (has_output || g_n3l.sync)) {
+                 llama_synchronize(ctx_tgt);
+             }
+         });
++        if (g_n3l.on()) {
++            const int64_t t1 = ggml_time_us();
++            int s0 = 0, s1 = 0, so = 0, np = 0, ng = 0, na = 0;
++            for (int i = off; i < off + (int) batch.view.size(); ++i) {
++                const auto & t = batch.tokens[i];
++                if (t.id_slot == 0) s0++; else if (t.id_slot == 1) s1++; else so++;
++                if (t.is_prompt) np++; else ng++;
++            }
++            for (auto & sl : slots) { if (sl.is_processing()) na++; }
++            const char * kind = (np > 0 && ng > 0) ? "mixed" : (np > 0 ? "prefill" : "decode");
++            const double gap = g_n3l.t_prev_end_us  < 0 ? -1.0 : (n3l_t0 - g_n3l.t_prev_end_us)   / 1000.0;
++            const double per = g_n3l.t_prev_start_us < 0 ? -1.0 : (n3l_t0 - g_n3l.t_prev_start_us) / 1000.0;
++            fprintf(g_n3l.f, "%.6f,%.3f,%.3f,%.3f,%d,%d,%d,%d,%d,%d,%d,%s,%d,%d,%d\n", n3l_ts, (t1 - n3l_t0) / 1000.0, gap, per,
++                    (int) batch.view.size(), s0, s1, so, np, ng, na, kind, (int) has_output, (int) g_n3l.sync, ret);
++            fflush(g_n3l.f);
++            g_n3l.t_prev_start_us = n3l_t0;
++            g_n3l.t_prev_end_us   = t1;
++        }
+ 
+         if (ret != 0) {
+             {

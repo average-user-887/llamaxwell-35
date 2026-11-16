@@ -1,0 +1,59 @@
+From a37a3c27994957018569a430cde41cf3e2433f18 Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Mon, 16 Nov 2026 14:46:56 +0100
+Subject: [PATCH] d1b: CUDA graph engagement counters (GGML_CUDA_D1B_COUNT,
+ default off, no behaviour change)
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ ggml/src/ggml-cuda/ggml-cuda.cu | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/ggml/src/ggml-cuda/ggml-cuda.cu b/ggml/src/ggml-cuda/ggml-cuda.cu
+index e2a57f2..aca41b4 100644
+--- a/ggml/src/ggml-cuda/ggml-cuda.cu
++++ b/ggml/src/ggml-cuda/ggml-cuda.cu
+@@ -2834,6 +2834,19 @@ static bool ggml_cuda_is_view_or_noop(const ggml_tensor * t) {
+ }
+ 
+ #ifdef USE_CUDA_GRAPH
++// D1b: CUDA graph engagement counters (stderr line only when GGML_CUDA_D1B_COUNT is set; no behaviour change)
++struct ggml_cuda_d1b_counters {
++    std::atomic<uint64_t> calls{0}, arch_off{0}, captures{0}, launches{0};
++    bool on = getenv("GGML_CUDA_D1B_COUNT") != nullptr;
++    void print(const char * tag) const {
++        fprintf(stderr, "d1b_graphs[%s]: compute_calls=%llu arch_off=%llu captures=%llu graph_launches=%llu\n", tag,
++            (unsigned long long) calls.load(), (unsigned long long) arch_off.load(), 
++            (unsigned long long) captures.load(), (unsigned long long) launches.load());
++    }
++    ~ggml_cuda_d1b_counters() { if (on) { print("exit"); } }
++};
++static ggml_cuda_d1b_counters g_d1b;
++
+ static bool ggml_cuda_graph_check_compability(ggml_cgraph * cgraph) {
+ 
+     bool use_cuda_graph = true;
+@@ -5244,6 +5257,7 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
+         }
+         // Launch graph
+         CUDA_CHECK(cudaGraphLaunch(graph->instance, cuda_ctx->stream()));
++        if (g_d1b.on) { const uint64_t n = ++g_d1b.launches; if (n == 1 || n % 5000 == 0) { g_d1b.print("run"); } }
+ #else
+         GGML_UNUSED(graph_key);
+         graph_evaluated_or_captured = true;
+@@ -5285,6 +5299,7 @@ static enum ggml_status ggml_backend_cuda_graph_compute(ggml_backend_t backend,
+     graph_key = ggml_cuda_graph_get_key(cgraph);
+ 
+     ggml_cuda_graph_set_enabled(cuda_ctx, graph_key);
++    if (g_d1b.on) { ++g_d1b.calls; if (!cuda_ctx->cuda_graph(graph_key)->is_enabled()) { ++g_d1b.arch_off; } }
+ 
+     ggml_cuda_graph * graph = cuda_ctx->cuda_graph(graph_key);
+     if (graph->is_enabled()) {
+@@ -5324,6 +5339,7 @@ static enum ggml_status ggml_backend_cuda_graph_compute(ggml_backend_t backend,
+         }
+ 
+         CUDA_CHECK(cudaStreamBeginCapture(cuda_ctx->stream(), cudaStreamCaptureModeRelaxed));
++        if (g_d1b.on) { ++g_d1b.captures; }
+     }
+ 
+     ggml_cuda_graph_evaluate_and_capture(cuda_ctx, cgraph, use_cuda_graph, cuda_graph_update_required, graph_key);

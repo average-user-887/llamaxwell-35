@@ -1,0 +1,162 @@
+From 54efa6df4928e3865a9d48ebf2904c7333e1d845 Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Sun, 15 Nov 2026 18:14:49 +0100
+Subject: [PATCH 6/8] occamy-gdn: GGML_CUDA_GDN2_A2ROW (default off) phase-A
+ row pairs share smem activations
+
+gdn_fused2<1>: phase A dots two weight rows per smem activation load
+(dot2v2x2, same fmaf order per row -> bit-identical). Microbench grid 72:
+200.2 -> 177.0 us/launch (1.13x). Card 28h gate was 1.15x: not met.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ ggml/src/ggml-cuda/occamy-gdn.cu | 92 ++++++++++++++++++++++++++++++--
+ 1 file changed, 89 insertions(+), 3 deletions(-)
+
+diff --git a/ggml/src/ggml-cuda/occamy-gdn.cu b/ggml/src/ggml-cuda/occamy-gdn.cu
+index bd0cc91..3dbb05c 100644
+--- a/ggml/src/ggml-cuda/occamy-gdn.cu
++++ b/ggml/src/ggml-cuda/occamy-gdn.cu
+@@ -471,9 +471,50 @@ __device__ __forceinline__ void dot2v2(unsigned w0, unsigned w1, unsigned w2, un
+ //      computes dot2v(chunk lane) for both sequences from words 0..8 and keeps words 9..11 in registers, pass 2 computes
+ //      dot2v(chunk lane + 32) from words 9..17 and adds: acc = dotA + dotB, then warp_sum, exactly as RP phase C.
+ // Rows per warp in phase C are register-held: needs grid * NW * N2R >= H (host checks).
++// 28h (GGML_CUDA_GDN2_A2ROW=1, default off): dot2v2 for two weight rows (u, v) sharing each smem activation load.
++// Each of the four accumulator chains is the same fmaf sequence in the same order as dot2v2 -> bit-identical per row.
++__device__ __forceinline__ void dot2v2x2(const unsigned (&u)[9], const unsigned (&v)[9], const float * xc, float2 sx,
++                                         const float * yc, float2 sy, float & ux, float & uy, float & vx, float & vy) {
++    const float ud0 = __half2float(__ushort_as_half((unsigned short)(u[0] & 0xFFFF))), ud1 = __half2float(__ushort_as_half((unsigned short)(u[4] >> 16)));
++    const float vd0 = __half2float(__ushort_as_half((unsigned short)(v[0] & 0xFFFF))), vd1 = __half2float(__ushort_as_half((unsigned short)(v[4] >> 16)));
++    float ua0 = 0.f, ua1 = 0.f, ub0 = 0.f, ub1 = 0.f, va0 = 0.f, va1 = 0.f, vb0 = 0.f, vb1 = 0.f;
++#pragma unroll
++    for (int i = 0; i < 4; ++i) {
++        const unsigned uq0 = __byte_perm(u[i], u[i + 1], 0x5432), vq0 = __byte_perm(v[i], v[i + 1], 0x5432);
++        unsigned ulo = (uq0 & 0x0F0F0F0Fu) | 0x80808080u, uhi = ((uq0 >> 4) & 0x0F0F0F0Fu) | 0x80808080u;
++        unsigned vlo = (vq0 & 0x0F0F0F0Fu) | 0x80808080u, vhi = ((vq0 >> 4) & 0x0F0F0F0Fu) | 0x80808080u;
++        float4 xl = *(const float4 *)(xc + 4 * i), xh = *(const float4 *)(xc + 16 + 4 * i);
++        ua0 = fmaf(nib(ulo, 0), xl.x, ua0); ua0 = fmaf(nib(ulo, 1), xl.y, ua0); ua0 = fmaf(nib(ulo, 2), xl.z, ua0); ua0 = fmaf(nib(ulo, 3), xl.w, ua0);
++        ua0 = fmaf(nib(uhi, 0), xh.x, ua0); ua0 = fmaf(nib(uhi, 1), xh.y, ua0); ua0 = fmaf(nib(uhi, 2), xh.z, ua0); ua0 = fmaf(nib(uhi, 3), xh.w, ua0);
++        va0 = fmaf(nib(vlo, 0), xl.x, va0); va0 = fmaf(nib(vlo, 1), xl.y, va0); va0 = fmaf(nib(vlo, 2), xl.z, va0); va0 = fmaf(nib(vlo, 3), xl.w, va0);
++        va0 = fmaf(nib(vhi, 0), xh.x, va0); va0 = fmaf(nib(vhi, 1), xh.y, va0); va0 = fmaf(nib(vhi, 2), xh.z, va0); va0 = fmaf(nib(vhi, 3), xh.w, va0);
++        xl = *(const float4 *)(yc + 4 * i); xh = *(const float4 *)(yc + 16 + 4 * i);
++        ub0 = fmaf(nib(ulo, 0), xl.x, ub0); ub0 = fmaf(nib(ulo, 1), xl.y, ub0); ub0 = fmaf(nib(ulo, 2), xl.z, ub0); ub0 = fmaf(nib(ulo, 3), xl.w, ub0);
++        ub0 = fmaf(nib(uhi, 0), xh.x, ub0); ub0 = fmaf(nib(uhi, 1), xh.y, ub0); ub0 = fmaf(nib(uhi, 2), xh.z, ub0); ub0 = fmaf(nib(uhi, 3), xh.w, ub0);
++        vb0 = fmaf(nib(vlo, 0), xl.x, vb0); vb0 = fmaf(nib(vlo, 1), xl.y, vb0); vb0 = fmaf(nib(vlo, 2), xl.z, vb0); vb0 = fmaf(nib(vlo, 3), xl.w, vb0);
++        vb0 = fmaf(nib(vhi, 0), xh.x, vb0); vb0 = fmaf(nib(vhi, 1), xh.y, vb0); vb0 = fmaf(nib(vhi, 2), xh.z, vb0); vb0 = fmaf(nib(vhi, 3), xh.w, vb0);
++        ulo = (u[5 + i] & 0x0F0F0F0Fu) | 0x80808080u; uhi = ((u[5 + i] >> 4) & 0x0F0F0F0Fu) | 0x80808080u;
++        vlo = (v[5 + i] & 0x0F0F0F0Fu) | 0x80808080u; vhi = ((v[5 + i] >> 4) & 0x0F0F0F0Fu) | 0x80808080u;
++        xl = *(const float4 *)(xc + 32 + 4 * i); xh = *(const float4 *)(xc + 48 + 4 * i);
++        ua1 = fmaf(nib(ulo, 0), xl.x, ua1); ua1 = fmaf(nib(ulo, 1), xl.y, ua1); ua1 = fmaf(nib(ulo, 2), xl.z, ua1); ua1 = fmaf(nib(ulo, 3), xl.w, ua1);
++        ua1 = fmaf(nib(uhi, 0), xh.x, ua1); ua1 = fmaf(nib(uhi, 1), xh.y, ua1); ua1 = fmaf(nib(uhi, 2), xh.z, ua1); ua1 = fmaf(nib(uhi, 3), xh.w, ua1);
++        va1 = fmaf(nib(vlo, 0), xl.x, va1); va1 = fmaf(nib(vlo, 1), xl.y, va1); va1 = fmaf(nib(vlo, 2), xl.z, va1); va1 = fmaf(nib(vlo, 3), xl.w, va1);
++        va1 = fmaf(nib(vhi, 0), xh.x, va1); va1 = fmaf(nib(vhi, 1), xh.y, va1); va1 = fmaf(nib(vhi, 2), xh.z, va1); va1 = fmaf(nib(vhi, 3), xh.w, va1);
++        xl = *(const float4 *)(yc + 32 + 4 * i); xh = *(const float4 *)(yc + 48 + 4 * i);
++        ub1 = fmaf(nib(ulo, 0), xl.x, ub1); ub1 = fmaf(nib(ulo, 1), xl.y, ub1); ub1 = fmaf(nib(ulo, 2), xl.z, ub1); ub1 = fmaf(nib(ulo, 3), xl.w, ub1);
++        ub1 = fmaf(nib(uhi, 0), xh.x, ub1); ub1 = fmaf(nib(uhi, 1), xh.y, ub1); ub1 = fmaf(nib(uhi, 2), xh.z, ub1); ub1 = fmaf(nib(uhi, 3), xh.w, ub1);
++        vb1 = fmaf(nib(vlo, 0), xl.x, vb1); vb1 = fmaf(nib(vlo, 1), xl.y, vb1); vb1 = fmaf(nib(vlo, 2), xl.z, vb1); vb1 = fmaf(nib(vlo, 3), xl.w, vb1);
++        vb1 = fmaf(nib(vhi, 0), xh.x, vb1); vb1 = fmaf(nib(vhi, 1), xh.y, vb1); vb1 = fmaf(nib(vhi, 2), xh.z, vb1); vb1 = fmaf(nib(vhi, 3), xh.w, vb1);
++    }
++    ux = ud0 * (128.f * ua0 - 136.f * sx.x) + ud1 * (128.f * ua1 - 136.f * sx.y);
++    uy = ud0 * (128.f * ub0 - 136.f * sy.x) + ud1 * (128.f * ub1 - 136.f * sy.y);
++    vx = vd0 * (128.f * va0 - 136.f * sx.x) + vd1 * (128.f * va1 - 136.f * sx.y);
++    vy = vd0 * (128.f * vb0 - 136.f * sy.x) + vd1 * (128.f * vb1 - 136.f * sy.y);
++}
+ struct Params2 { Params p[2]; };
+ constexpr int XS_HALF = H / 64 * CH;   // 2176 floats: one K=2048 activation set
+ constexpr int N2R = 4;                 // max ssm_out rows per warp
++template <int A2 = 0>
+ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+     extern __shared__ float smem[];
+     __shared__ float qn[SD], kn[SD], vv[CGC], red[NW];
+@@ -507,6 +548,48 @@ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+         const float2 sx0 = sums[lane], sx1 = sums[32 + lane];
+         uint4 c0, c1, c2;
+         int t = gw;
++        if (A2) {
++        // 28h: the warp's rows gw, gw+W, gw+2W, ... taken in pairs (t, t+W); both rows staged through the same per-warp
++        // stage buffer into registers, then dotted together so every smem activation float4 serves two rows.
++        uint4 e0, e1, e2;
++        if (t < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, t); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
++        if (t + W < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, t + W); e0 = __ldg(p + lane); e1 = __ldg(p + lane + 32); if (lane < 8) e2 = __ldg(p + lane + 64); }
++        for (; t < NROWS_A; t += 2 * W) {
++            const int tv = t + W;
++            unsigned u[9], v[9];
++            stg4[lane] = c0; stg4[lane + 32] = c1; if (lane < 8) stg4[lane + 64] = c2;
++            __syncwarp();
++#pragma unroll
++            for (int j = 0; j < 9; ++j) u[j] = stg[lane * 9 + j];
++            __syncwarp();
++            if (tv < NROWS_A) {
++                stg4[lane] = e0; stg4[lane + 32] = e1; if (lane < 8) stg4[lane + 64] = e2;
++                __syncwarp();
++#pragma unroll
++                for (int j = 0; j < 9; ++j) v[j] = stg[lane * 9 + j];
++                __syncwarp();
++            } else {
++#pragma unroll
++                for (int j = 0; j < 9; ++j) v[j] = 0u;
++            }
++            const int tn = t + 2 * W;
++            if (tn < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, tn); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
++            if (tn + W < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, tn + W); e0 = __ldg(p + lane); e1 = __ldg(p + lane + 32); if (lane < 8) e2 = __ldg(p + lane + 64); }
++            float a0, a1, b0, b1;
++            dot2v2x2(u, v, xc0, sx0, xc1, sx1, a0, a1, b0, b1);
++            a0 = warp_sum(a0); a1 = warp_sum(a1); b0 = warp_sum(b0); b1 = warp_sum(b1);
++            if (lane == 0) {
++                float * d0 = t < NQKV ? &s0->qkv[t] : t < NQKV + DI ? &s0->z[t - NQKV] : &s0->ab[t - NQKV - DI];
++                float * d1 = t < NQKV ? &s1->qkv[t] : t < NQKV + DI ? &s1->z[t - NQKV] : &s1->ab[t - NQKV - DI];
++                *d0 = a0; *d1 = a1;
++                if (tv < NROWS_A) {
++                    float * f0 = tv < NQKV ? &s0->qkv[tv] : tv < NQKV + DI ? &s0->z[tv - NQKV] : &s0->ab[tv - NQKV - DI];
++                    float * f1 = tv < NQKV ? &s1->qkv[tv] : tv < NQKV + DI ? &s1->z[tv - NQKV] : &s1->ab[tv - NQKV - DI];
++                    *f0 = b0; *f1 = b1;
++                }
++            }
++        }
++        } else {
+         if (t < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, t); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
+         for (; t < NROWS_A; t += W) {
+             stg4[lane] = c0; stg4[lane + 32] = c1; if (lane < 8) stg4[lane + 64] = c2;
+@@ -524,6 +607,7 @@ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+             }
+             __syncwarp();
+         }
++        }
+     }
+     grid_barrier(s0);
+ #pragma unroll
+@@ -723,6 +807,7 @@ static bool pref() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_PREF"
+ static bool repack() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_REPACK") && qk_reuse() && pc_share() && !env_flag("GGML_CUDA_OCCAMY_GDN_3L"); return on; }
+ // D1BF, default OFF: one gdn_fused2 launch for the N2SPLIT two-sequence window (REPACK path only)
+ static bool n2gdn() { static const bool on = env_flag("GGML_CUDA_OCCAMY_N2GDN") && repack(); return on; }
++static bool a2row() { static const bool on = env_flag("GGML_CUDA_GDN2_A2ROW"); return on; }   // 28h, default OFF
+ static long g_launch_n2 = 0;    // D1BF dispatch counter
+ static long g_launch_pf = 0;    // GDN1 dispatch counter
+ static long g_launch_rp = 0;    // GDN3 card B dispatch counter
+@@ -786,14 +871,14 @@ static DevState & dev_state(int device) {
+             fprintf(stderr, "occamy-gdn: repack variant %d blocks/SM -> grid %d (smem %zu B dyn)\n", per_sm_rp, d.grid_rp, SMEM3_FLOATS * sizeof(float));
+             if (n2gdn()) {
+                 int per_sm2 = 0;
+-                CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm2, gdn_fused2, NT, SMEM3_FLOATS * sizeof(float)));
++                CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm2, a2row() ? gdn_fused2<1> : gdn_fused2<0>, NT, SMEM3_FLOATS * sizeof(float)));
+                 d.grid2 = std::min(per_sm2 * nsm, d.grid_rp);
+                 if (d.grid2 * NW * N2R < H) { d.grid2 = 0; }   // phase C holds at most N2R rows per warp
+                 if (d.grid2 > 0) {
+                     CUDA_CHECK(cudaMalloc((void **)&d.scratch2, sizeof(Scratch)));
+                     CUDA_CHECK(cudaMemset(d.scratch2, 0, sizeof(Scratch)));
+                 }
+-                fprintf(stderr, "occamy-gdn: n2gdn variant %d blocks/SM -> grid %d (smem %zu B dyn)\n", per_sm2, d.grid2, SMEM3_FLOATS * sizeof(float));
++                fprintf(stderr, "occamy-gdn: n2gdn variant%s %d blocks/SM -> grid %d (smem %zu B dyn)\n", a2row() ? " A2ROW" : "", per_sm2, d.grid2, SMEM3_FLOATS * sizeof(float));
+             }
+         }
+         // GDN3 card A (measurement only): GGML_CUDA_OCCAMY_GDN_GRID=N caps the grid at N (fewer co-resident blocks stay safe)
+@@ -1196,7 +1281,8 @@ bool ggml_cuda_occamy_gdn_split2(ggml_backend_cuda_context & ctx, const ggml_cud
+         else    { gdn_launch_impl(ctx, m, nullptr, &ov); }
+     }
+     if (pk) {
+-        gdn_fused2<<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
++        if (a2row()) { gdn_fused2<1><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP); }
++        else         { gdn_fused2<0><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP); }
+         CUDA_CHECK(cudaGetLastError());
+         if (g_debug && (++g_launch_n2 == 1 || g_launch_n2 % 3000 == 0)) { fprintf(stderr, "occamy-gdn: n2gdn launches %ld\n", g_launch_n2); }
+     }

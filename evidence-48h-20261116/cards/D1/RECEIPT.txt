@@ -1,0 +1,1 @@
+card D1-pre: investigation only, STOPPED after step 2 (banned flag is the only route to graphs). No branch, no commits, no build, no binaries, no GPU. Source read from A5/src (a5-sched 97c4ede, base d4c13eb). Output: D1/RESULT.md.

@@ -1,0 +1,6 @@
+      1 occamy_fa_gemm_fused: calls=0 softmax_launches=0 when=first_use
+      1 occamy_fa_gemm: engaged=0 q_tiled=0 fallback=0 reasons=- when=first_use
+      1 0.49.396.282 I spec common_specu: no implementations specified for speculative decoding
+      1 0.49.396.122 I srv    load_model: speculative decoding will use checkpoints
+      1 0.49.263.293 I ggml_cuda_hg_try_defer: GGML_CUDA_OCCAMY_HOSTGAP engaged on device 0
+      1 0.00.932.504 I load: special tokens cache size = 33

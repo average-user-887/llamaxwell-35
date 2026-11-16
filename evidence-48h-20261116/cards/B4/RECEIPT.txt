@@ -1,0 +1,19 @@
+B4 multirow decode FA receipt (15 Nov 2026)
+branch: b4-multirow (worktree B4/src), base 52c9e84 (bundle9), commit c9e417a5232870dc53f0c07bfb1607184c2fdb39
+build: B4/build-b4.sh (docker local/m6000-build-tools:20261013, gcc-14, sm_52; cmake --build /b --config Release -j5 --target llama-server test-backend-ops ggml-cuda; incremental on a copy of the R0 build tree, sources mounted at the card-9 path)
+ptxas: ofa_decode_mr_kernel<1|2|4> 116/116/117 regs, 0 spill, 33664 B smem (hs_ar 118)
+sha256:
+d0f3282460248dd747be2a0f0682df0dcc93edd8f000c98e0446e0d295d33928  bin/libggml-cuda.so
+6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  bin/libggml-base.so.0.26.0
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  bin/libggml.so.0
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  bin/libggml.so.0.26.0
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  bin/libllama.so.0
+38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  bin/libllama.so.0.6.0
+423320bef2ef489f2ae3cb06937d4d1b16b187a57d3b5fc7fd5736b84217e0dd  bin/libmtmd.so.0
+423320bef2ef489f2ae3cb06937d4d1b16b187a57d3b5fc7fd5736b84217e0dd  bin/libmtmd.so.0.6.0
+b4f6280549da97bbeed78cb97190a94a2cee19375aeb696ba2d5853138893681  bin/libllama-server-impl.so
+592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  bin/llama-server
+c33f6a90c2f1228b395c58ea9e57b89ae37c23085984f3041430c24c5833e4be  bin/test-backend-ops
+8534c912ec462f865e349328e04ad3e5ec37e6ff98204e99485ec0b06d4755a7  b4_gpu.sh
+97ab28f66c52642e6e77f4c3947153c42e4c8d70731da896deeb6c5af01e05f8  build-b4.sh
+GPU: not run (lock held by R0 ABBA + B1 queued; flock -w 900 timed out 22:58)

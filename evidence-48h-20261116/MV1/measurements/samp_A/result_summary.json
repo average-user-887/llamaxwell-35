@@ -1,0 +1,34 @@
+{
+ "tag": "samp_A",
+ "np": 1,
+ "prompt_tokens": 80000,
+ "n_predict": 384,
+ "sampling": "server-default+seed",
+ "wall_s": 267.94,
+ "slots_after": [
+  {
+   "id": 0,
+   "n_ctx": 84224,
+   "is_processing": false
+  }
+ ],
+ "done": true,
+ "slots": {
+  "0": {
+   "t_first_s": 261.3391,
+   "latency_s": 267.94,
+   "n_out": 384,
+   "timings": {
+    "prompt_n": 80000,
+    "prompt_ms": 261320.478,
+    "prompt_per_second": 306.13750828972536,
+    "predicted_n": 384,
+    "predicted_ms": 6590.003,
+    "predicted_per_second": 58.11833469575052,
+    "draft_n": null,
+    "draft_n_accepted": null
+   },
+   "occupancy": 0.9544
+  }
+ }
+}

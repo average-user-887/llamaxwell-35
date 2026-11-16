@@ -1,0 +1,16 @@
+card: KQ1 (q8_0 K lane: staged q8 decode + q8 GEMM prefill)
+branch: kq1   base: d4c13eb   HEAD: d10f8db
+changes: fattn-maxwell-gemm.cuh (q8_0 K convert, kq8 counter), fattn-occamy.cu/.cuh (staged q8 decode kernel, GGML_CUDA_OCCAMY_KVQ8_STAGE=1, occamy_kq1 counters), fattn.cu (stock_kq8 count), tests/test-backend-ops.cpp (q8-K eval + decode perf micro)
+build: build-kq1.sh -> docker local/m6000-build-tools:20261013, gcc-14, sm_52: nice -n 19 cmake --build /b --config Release -j5 --target llama-server test-backend-ops ggml-cuda (incremental)
+kq1_rows: kld/build-kq1-rows.sh (g++-14 -O2, CPU only)
+sha256:
+  592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5  llama-server
+  8edba5173e7a4bf3d32bc0d144b67b954043c070f272a40dce3d2fcf08d53833  libggml-cuda.so
+  093a17ef49fbaabd4fd7caa08469678800a3c2977921cc3e62c04644e1ad43d9  libllama-server-impl.so
+  6d3a2b8b700a71b0c8ee83d902a6b8a7201aaec6c222bb985e37aaf369c01a7a  libggml-base.so.0.26.0
+  1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  libggml.so.0.26.0
+  38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d  libllama.so.0.6.0
+  f8b12d9b4158c3cebd66839d5da558721212c68b3591dbd25550a15f05d37fca  test-backend-ops
+  b63c760330562025fc6df6f6f2a63ac22e5ea34136e55248ebf8b3a53985ee5f  kq1_rows
+resource usage (cuobjdump): staged kernel <true,*,true> REG=128 LOCAL=0 (no spills) SHARED=42368 B static; 2 blocks/SM fits 96 KB
+GPU: no GPU run done by the coder. GPU chain: kq1_gpu.sh (runner launches with N3_GPU/N3_UNLOAD_URL/N3_PORT/N3_HOST env).

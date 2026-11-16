@@ -1,0 +1,164 @@
+From 20ec583680fdacd06250065918c349d2e1373e00 Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Mon, 16 Nov 2026 09:46:32 +0100
+Subject: [PATCH 2/2] l1: ledger stage events (<file>.stages): http_recv,
+ tokenise, post_tasks, task_proc, slot_launch, cache_match_ckpt, ckpt_create,
+ post_decode, sse_result; same flag, default off
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ tools/server/server-context.cpp | 43 +++++++++++++++++++++++++++++++--
+ 1 file changed, 41 insertions(+), 2 deletions(-)
+
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+index eefa7d6..cb8f703 100644
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -27,6 +27,7 @@
+ #include <random>
+ #include <utility>
+ #include <chrono>
++#include <mutex>
+ #include <cstdio>
+ #include <cstdlib>
+ #include <fstream>
+@@ -130,6 +131,8 @@ static std::vector<llama_token> server_sample_and_accept_synth(
+ struct n3_ledger {
+     FILE * f  = nullptr;
+     FILE * ft = nullptr;
++    FILE * fs = nullptr;   // L1: <file>.stages, one line per server-side stage event
++    std::mutex mtx;
+     bool   sync = false;
+     int64_t t_prev_start_us = -1;
+     int64_t t_prev_end_us   = -1;
+@@ -140,6 +143,9 @@ struct n3_ledger {
+         std::string pt = std::string(p) + ".tasks";
+         ft = fopen(pt.c_str(), "w");
+         sync = getenv("LLAMA_N3_LEDGER_SYNC") && atoi(getenv("LLAMA_N3_LEDGER_SYNC")) != 0;
++        std::string ps = std::string(p) + ".stages";
++        fs = fopen(ps.c_str(), "w");
++        if (fs) fprintf(fs, "t_start,stage,dur_ms,slot,task,aux\n");
+         if (f)  fprintf(f,  "t_start,wall_ms,gap_ms,period_ms,n_tokens,slot0,slot1,slot_other,n_prompt,n_gen,n_active,kind,has_output,sync,ret\n");
+         if (ft) fprintf(ft, "t_start,slot,task,n_prompt_tokens,n_cache_before,n_common,n_past,n_prefill,n_appended,ckpt_restore,full_reset\n");
+     }
+@@ -150,6 +156,21 @@ struct n3_ledger {
+ };
+ static n3_ledger g_n3l;
+ 
++// L1 stage events (LLAMA_N3_LEDGER set): t_start = epoch s at stage start, dur_ms = stage duration (0 for point events)
++static void n3l_stage(const char * stage, double t_start_s, double dur_ms, int slot = -1, int task = -1, long long aux = 0) {
++    if (!g_n3l.fs) return;
++    std::lock_guard<std::mutex> lk(g_n3l.mtx);
++    fprintf(g_n3l.fs, "%.6f,%s,%.3f,%d,%d,%lld\n", t_start_s, stage, dur_ms, slot, task, aux);
++    fflush(g_n3l.fs);
++}
++struct n3l_scope {
++    const char * stage; int slot, task; long long aux; double ts = 0.0; int64_t t0 = 0;
++    n3l_scope(const char * st, int sl = -1, int tk = -1, long long ax = 0) : stage(st), slot(sl), task(tk), aux(ax) {
++        if (g_n3l.fs) { ts = n3_ledger::now_s(); t0 = ggml_time_us(); }
++    }
++    ~n3l_scope() { if (g_n3l.fs) n3l_stage(stage, ts, (ggml_time_us() - t0) / 1000.0, slot, task, aux); }
++};
++
+ // state diagram: https://github.com/ggml-org/llama.cpp/pull/9283
+ enum slot_state {
+     SLOT_STATE_IDLE,
+@@ -1871,6 +1892,7 @@ private:
+     }
+ 
+     bool launch_slot_with_task(server_slot & slot, server_task && task) {
++        n3l_scope n3l_s("slot_launch", slot.id, task.id);
+         // process per-request lora adapters
+         if (!task.params.lora.empty()) {
+             auto task_loras = construct_lora_list(task.params.lora);
+@@ -2552,6 +2574,7 @@ private:
+ 
+     // n_tokens_cur: the number of tokens added to the batch for the current slot
+     void create_checkpoint(server_slot & slot, const int64_t n_tokens_cur, llama_pos pos_min, llama_pos pos_max) {
++        n3l_scope n3l_s("ckpt_create", slot.id, -1, slot.prompt.n_tokens());
+         const int id_task = slot.task->id;
+ 
+         // evict checkpoints within min-step of a previous checkpoint, unless they were
+@@ -2748,6 +2771,7 @@ private:
+ 
+     // returns false to decline the task, it is offered again after the decode is done
+     bool process_single_task(server_task && task, bool is_yielding) {
++        n3l_scope n3l_s("task_proc", task.id_slot, task.id, (int) task.type);
+         // while yielding, an encode / decode is running and only reading the server state is safe
+         if (is_yielding && task.type != SERVER_TASK_TYPE_METRICS && task.type != SERVER_TASK_TYPE_SLOT_GET) {
+             SRV_DBG("decoding, decline task, id_task = %d\n", task.id);
+@@ -3180,6 +3204,7 @@ private:
+ #endif
+ 
+     void update_slots() {
++        n3l_stage("update_slots_enter", n3_ledger::now_s(), 0.0);
+ #ifdef DEBUG_TIMINGS
+         static int64_t t_prev = 0;
+         int64_t t_start = ggml_time_us();
+@@ -3284,7 +3309,10 @@ private:
+ 
+             try {
+                 scoped_timer t(t_post_decode, n_post_decode);
+-                post_decode(n_tokens, off);
++                {
++                    n3l_scope n3l_s("post_decode", -1, -1, n_tokens);
++                    post_decode(n_tokens, off);
++                }
+             } catch (const std::exception & e) {
+                 SRV_ERR("post_decode() failed: %s\n", e.what());
+                 abort_all_slots("post_decode() failed: " + std::string(e.what()));
+@@ -3597,6 +3625,8 @@ private:
+                         int n_past = 0;
+                         const int64_t n3l_before = slot.prompt.tokens.size();
+                         int n3l_common = -1, n3l_restore = 0, n3l_reset = 0;
++                        const double n3l_ts_cm = g_n3l.fs ? n3_ledger::now_s() : 0.0;
++                        const int64_t n3l_t0_cm = g_n3l.fs ? ggml_time_us() : 0;
+ 
+                         // empty prompt passed -> release the slot and send empty response
+                         if (input_tokens.empty()) {
+@@ -3873,6 +3903,9 @@ private:
+                             SLT_WRN(slot, "n_past was set to %d\n", n_past);
+                         }
+ 
++                        if (g_n3l.fs) {
++                            n3l_stage("cache_match_ckpt", n3l_ts_cm, (ggml_time_us() - n3l_t0_cm) / 1000.0, slot.id, (int) slot.task->id, n3l_restore * 2 + n3l_reset);
++                        }
+                         if (g_n3l.ft) {
+                             const int64_t np_ = slot.task->n_tokens();
+                             fprintf(g_n3l.ft, "%.6f,%d,%d,%" PRId64 ",%" PRId64 ",%d,%d,%" PRId64 ",%" PRId64 ",%d,%d\n", n3_ledger::now_s(), slot.id, (int) slot.task->id,
+@@ -4876,6 +4909,7 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
+             task_response_type res_type,
+             const common_chat_session & chat_session) {
+     GGML_ASSERT(type == SERVER_TASK_TYPE_COMPLETION || type == SERVER_TASK_TYPE_INFILL);
++    n3l_stage("http_recv", n3_ledger::now_s(), 0.0, g_n3l.fs ? json_value(data, "id_slot", -1) : -1);
+ 
+     auto res = create_response();
+     auto completion_id = gen_chatcmplid();
+@@ -4911,6 +4945,7 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
+             inputs.push_back(process_mtmd_prompt(ctx_server.mctx, prompt.get<std::string>(), files, ctx_server.init_opt));
+         } else {
+             // Everything else, including multimodal completions.
++            n3l_scope n3l_s("tokenise", g_n3l.fs ? json_value(data, "id_slot", -1) : -1);
+             inputs = tokenize_input_prompts(ctx_server.vocab, ctx_server.mctx, prompt, true, true, ctx_server.init_opt);
+         }
+ 
+@@ -4949,7 +4984,10 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
+             tasks.push_back(std::move(task));
+         }
+ 
+-        rd.post_tasks(std::move(tasks), chat_session);
++        {
++            n3l_scope n3l_s("post_tasks");
++            rd.post_tasks(std::move(tasks), chat_session);
++        }
+     } catch (const std::exception & e) {
+         res->error(format_error_response(e.what(), ERROR_TYPE_INVALID_REQUEST));
+         return res;
+@@ -5106,6 +5144,7 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
+                         dynamic_cast<server_task_result_cmpl_partial*>(result.get()) != nullptr
+                         || dynamic_cast<server_task_result_cmpl_final*>(result.get()) != nullptr
+                     );
++                    n3l_stage("sse_result", n3_ledger::now_s(), 0.0, -1, (int) result->id, dynamic_cast<server_task_result_cmpl_final*>(result.get()) != nullptr ? 1 : 0);
+                     json res_json = result->to_json();
+                     if (res_type == TASK_RESPONSE_TYPE_ANTHROPIC) {
+                         output = format_anthropic_sse(res_json);

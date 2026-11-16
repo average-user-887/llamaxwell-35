@@ -1,0 +1,234 @@
+From e40da128e35c1755fdbb35c268e71c055c08132d Mon Sep 17 00:00:00 2001
+From: author <noreply@example.invalid>
+Date: Mon, 16 Nov 2026 02:38:57 +0100
+Subject: [PATCH 8/8] occamy-fused: moe_v3 shexp gate/up rows in the phase-A
+ idle wave (GGML_CUDA_MOE_V3_SHIDLE, A2)
+
+Env-gated (default off, needs GGML_CUDA_MOE_V3): moe_v3<true, true> computes the first nsa
+shared-expert gate/up rows in the idle warp slots of the last router wave (nsa = 508 at grid 48);
+phase B starts at task nsa. Same per-row dot/silu code (moe3_gu_row), base moe_v3<true, false>
+SASS unchanged vs bundle9. Counter: MOE_V3_SHIDLE launches N grid G nsa K (OCCAMY_DEBUG).
+CHECK additionally compares against base moe_v3.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ ggml/src/ggml-cuda/occamy-fused.cu  | 111 ++++++++++++++++++++++++++--
+ ggml/src/ggml-cuda/occamy-fused.cuh |   1 +
+ 2 files changed, 104 insertions(+), 8 deletions(-)
+
+diff --git a/ggml/src/ggml-cuda/occamy-fused.cu b/ggml/src/ggml-cuda/occamy-fused.cu
+index 8f00199..9bb1c95 100644
+--- a/ggml/src/ggml-cuda/occamy-fused.cu
++++ b/ggml/src/ggml-cuda/occamy-fused.cu
+@@ -477,7 +477,35 @@ __device__ __forceinline__ void ldD(const Layer & L, const int * sel, int r, int
+     }
+ }
+ 
+-template <bool L3>
++// A2 (GGML_CUDA_MOE_V3_SHIDLE=1 with MOE_V3, default off): the shared-expert gate/up rows do not depend on routing,
++// only on xs/sums (final after load_norm3), so the warps that are idle in the last phase-A wave (router tasks
++// NTA = 1028 over W warps) take shexp rows 0..nsa-1 there; phase B starts at task nsa and deals its tasks
++// warp-major (t = nsa + warp * grid + block) so the partial last wave is spread over every block.
++// nsa = min(FFS, ceil(NTA / W) * W - NTA); W = 768 (48 x 16 warps) -> nsa = 508.
++// Each shexp row is computed by moe3_gu_row, the same function the SHA phase-B loop uses (same staging, lane mapping,
++// dot2c<L3>, butterfly, silu * up as the base loop), so h_sh is bit-identical; every other row is unchanged.
++__device__ __forceinline__ int moe3_nsa(int W) {
++    const int idle = (NTA + W - 1) / W * W - NTA;
++    return idle < FFS ? idle : FFS;
++}
++// gate chunk already in cv: stage it, load up, return silu(gate) * up. pre() issues the next row's gate loads
++// between the up-chunk staging and the up dot (as the base phase-B loop does).
++template <bool L3, typename Pre>
++__device__ __forceinline__ float moe3_gu_row(unsigned * stg, uint4 * stg4, int lane, uint4 * cv, const uint8_t * u,
++                                             const float * xc, float2 sx, Pre pre) {
++    st72(stg4, lane, cv);
++    __syncwarp();
++    ld72(u, lane, cv);
++    const float gg = wsum(dot2c<L3>(lds9(stg + lane * 9), xc, sx));
++    __syncwarp();
++    st72(stg4, lane, cv);
++    __syncwarp();
++    pre();
++    const float uu = wsum(dot2c<L3>(lds9(stg + lane * 9), xc, sx));
++    return silu(gg) * uu;
++}
++
++template <bool L3, bool SHA = false>
+ __global__ void __launch_bounds__(NT3, 2) moe_v3(Params P) {
+     extern __shared__ float smem[];
+     __shared__ int sel[TOPK];
+@@ -492,11 +520,14 @@ __global__ void __launch_bounds__(NT3, 2) moe_v3(Params P) {
+     Scratch * s = P.s;
+     const Layer & L = P.L;
+ 
++    const int nsa = SHA ? moe3_nsa(W) : 0;
+     // A: rmsnorm + router logits / shexp-gate quarter-row partials (per task identical to moe_v2)
+     {
+         float4 cw[4];
++        uint4 sv[3];   // SHA: gate chunk of this warp's idle-wave shexp row
+         int t = gw;
+         if (t < NTA) ldA(L, t, lane, cw);
++        else if (SHA && t < NTA + nsa) ld72(L.gate_sh + (size_t)(t - NTA) * ROW_GU, lane, sv);
+         load_norm3(xs, sums, P.h, P.norm, red, P.eps);
+         for (; t < NTA; t += W) {
+             const int row = t >> 2, q = t & 3;
+@@ -510,11 +541,37 @@ __global__ void __launch_bounds__(NT3, 2) moe_v3(Params P) {
+             a = wsum(a);
+             if (lane == 0) { if (row < NE) s->lpart[q][row] = a; else s->gpart[q] = a; }
+             if (t + W < NTA) ldA(L, t + W, lane, cw);
++            else if (SHA && t + W < NTA + nsa) ld72(L.gate_sh + (size_t)(t + W - NTA) * ROW_GU, lane, sv);
++        }
++        if (SHA && t < NTA + nsa) {   // idle-wave slot: shared-expert row j (h_sh is read only after barrier 2)
++            const int j = t - NTA;
++            const float hv = moe3_gu_row<L3>(stg, stg4, lane, sv, L.up_sh + (size_t)j * ROW_GU, xs + lane * CH, sums[lane], [] {});
++            if (lane == 0) s->h_sh[j] = hv;
++            __syncwarp();
+         }
+     }
+     grid_barrier(s);
+     // B: route; gate row chunk, then up row chunk, per row
+-    {
++    if (SHA) {
++        uint4 cv[3];
++        const int t0 = nsa + warp * gridDim.x + blockIdx.x;   // warp-major
++        bool have = false;
++        const uint8_t * g, * u;
++        if (t0 < FFS) { rowB(L, sel, t0, g, u); ld72(g, lane, cv); have = true; }
++        if (warp == 0) route(s, lane, sel, selw);
++        __syncthreads();
++        const float * xc = xs + lane * CH; const float2 sx = sums[lane];
++        for (int t = t0; t < NTB; t += W) {
++            if (!have) { rowB(L, sel, t, g, u); ld72(g, lane, cv); }
++            const int tn = t + W;
++            const float hv = moe3_gu_row<L3>(stg, stg4, lane, cv, u, xc, sx, [&] {
++                have = tn < NTB;
++                if (have) { rowB(L, sel, tn, g, u); ld72(g, lane, cv); }
++            });
++            if (lane == 0) { if (t < FFS) s->h_sh[t] = hv; else s->h_exp[t - FFS] = hv; }
++            __syncwarp();
++        }
++    } else {
+         uint4 cv[3];
+         bool have = false;
+         const uint8_t * g, * u;
+@@ -606,6 +663,8 @@ struct DevState {
+     int grid_dh[2] = { 0, 0 };
+     int grid_tb = 0;   // MOE2: co-resident grid of moe_v2<0, 61> (GGML_CUDA_MOE_TAILBAL=1 with LOP3)
+     int grid_v3 = 0;   // WP4: co-resident grid of moe_v3 (512-thread blocks)
++    int grid_v3s = 0;  // A2: co-resident grid of moe_v3<true, true> (GGML_CUDA_MOE_V3_SHIDLE)
++    float * v3_ref3 = nullptr;     // A2 CHECK: base moe_v3 reference output (2 rows)
+     float * v3_ref = nullptr;      // GGML_CUDA_MOE_V3_CHECK: reference output (2 rows)
+     unsigned * v3_res = nullptr;   // [mismatch count, max |diff| bits]
+     int grid_l3 = 0;   // MOE1: co-resident grid of moe_v2<0, 1|4|8|16> (GGML_CUDA_MOE_LOP3=1 with DOWNH=2)   // C07: co-resident grids of moe_v2<0, 1|4> and moe_v2<0, 1|4|8> (GGML_CUDA_MOE_DOWNH=1|2)
+@@ -670,6 +729,10 @@ static DevState & dev_state(int device) {
+         CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_v3, moe_v3<true>, NT3, SMEM3_FLOATS * sizeof(float)));
+         d.grid_v3 = per_sm_v3 < 1 ? -1 : per_sm_v3 * nsm;
+         if (g_debug) { fprintf(stderr, "occamy-fused: device %d: MOE_V3 variant %d blocks/SM x %d thr -> grid %d, smem %zu B\n", device, per_sm_v3, NT3, d.grid_v3, SMEM3_FLOATS * sizeof(float)); }
++        int per_sm_v3s = 0;
++        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm_v3s, moe_v3<true, true>, NT3, SMEM3_FLOATS * sizeof(float)));
++        d.grid_v3s = per_sm_v3s < 1 ? -1 : per_sm_v3s * nsm;
++        if (g_debug) { fprintf(stderr, "occamy-fused: device %d: MOE_V3_SHIDLE variant %d blocks/SM -> grid %d\n", device, per_sm_v3s, d.grid_v3s); }
+         for (int k = 0; k < 2; ++k) {
+             d.grid_dh[k] = per_sm_dh[k] < 1 ? -1 : per_sm_dh[k] * nsm;
+             if (g_debug) {
+@@ -684,6 +747,7 @@ static DevState & dev_state(int device) {
+                 if (d.grid_dx > cap) d.grid_dx = cap;
+                 for (int k = 0; k < 2; ++k) if (d.grid_dh[k] > cap) d.grid_dh[k] = cap;
+                 if (d.grid_v3 > cap) d.grid_v3 = cap;
++                if (d.grid_v3s > cap) d.grid_v3s = cap;
+                 fprintf(stderr, "occamy-fused: grid cap %d -> grid %d dx %d dh %d/%d\n", cap, d.grid, d.grid_dx, d.grid_dh[0], d.grid_dh[1]);
+             }
+         }
+@@ -878,21 +942,27 @@ static void moe_launch_v2(ggml_backend_cuda_context & ctx, const ggml_cuda_occam
+ // WP4: GGML_CUDA_MOE_V3=1 (default off) runs moe_v3 instead of the moe_v2 dispatch below (not with GGML_CUDA_OCCAMY_3L).
+ // GGML_CUDA_MOE_V3_CHECK=N: on the first N launches also run the moe_v2 dispatch (same env) into a scratch row first,
+ // then moe_v3 into the real output, and print the count of bitwise-different floats (expected 0) and max |diff|.
++// A2: GGML_CUDA_MOE_V3_SHIDLE=1 (default off, needs MOE_V3) runs moe_v3<true, true> (shexp gate/up rows in the phase-A
++// idle wave). With CHECK as well, a second reference (base moe_v3<true, false>) is run and compared too, and the
++// line reads "MOE_V3 CHECK ... vs v2 ... vs v3 ...". Counter (OCCAMY_DEBUG): "MOE_V3_SHIDLE launches N grid G nsa K".
+ void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_moe_match & m, float * out_override, int row) {
+     static const bool v3 = env_flag("GGML_CUDA_MOE_V3") && !env_flag("GGML_CUDA_OCCAMY_3L");
+     static int v3_check = getenv("GGML_CUDA_MOE_V3_CHECK") ? atoi(getenv("GGML_CUDA_MOE_V3_CHECK")) : 0;
+     DevState & d = dev_state(ctx.device);
++    static const bool shidle = env_flag("GGML_CUDA_MOE_V3_SHIDLE");
+     if (!v3 || d.grid_v3 <= 0) { moe_launch_v2(ctx, m, out_override, row); return; }
++    const bool sha = shidle && d.grid_v3s > 0;
+     cudaStream_t st = ctx.stream();
+     const bool chk = v3_check > 0;
+     if (chk) {
+         --v3_check;
+         if (d.v3_ref == nullptr) {
+             CUDA_CHECK(cudaMalloc((void **)&d.v3_ref, 2 * H * sizeof(float)));
+-            CUDA_CHECK(cudaMalloc((void **)&d.v3_res, 2 * sizeof(unsigned)));
++            CUDA_CHECK(cudaMalloc((void **)&d.v3_ref3, 2 * H * sizeof(float)));
++            CUDA_CHECK(cudaMalloc((void **)&d.v3_res, 4 * sizeof(unsigned)));
+         }
+         moe_launch_v2(ctx, m, d.v3_ref, row);   // reference first: the real output may alias h
+-        CUDA_CHECK(cudaMemsetAsync(d.v3_res, 0, 2 * sizeof(unsigned), st));
++        CUDA_CHECK(cudaMemsetAsync(d.v3_res, 0, 4 * sizeof(unsigned), st));
+     }
+     Params P;
+     P.L.gate_inp    = (const float *) m.gate_inp->data;
+@@ -908,21 +978,46 @@ void ggml_cuda_occamy_moe_launch(ggml_backend_cuda_context & ctx, const ggml_cud
+     P.out  = (out_override ? out_override : (float *) m.out->data) + (size_t) row * H;
+     P.s    = d.scratch;
+     P.eps  = m.eps;
+-    moe_v3<true><<<d.grid_v3, NT3, SMEM3_FLOATS * sizeof(float), st>>>(P);
+-    CUDA_CHECK(cudaGetLastError());
++    if (sha) {
++        if (chk) {   // base moe_v3 reference into scratch (h is read-only here: out goes to v3_ref3)
++            Params R = P; R.out = d.v3_ref3 + (size_t) row * H;
++            moe_v3<true><<<d.grid_v3, NT3, SMEM3_FLOATS * sizeof(float), st>>>(R);
++            CUDA_CHECK(cudaGetLastError());
++        }
++        moe_v3<true, true><<<d.grid_v3s, NT3, SMEM3_FLOATS * sizeof(float), st>>>(P);
++        CUDA_CHECK(cudaGetLastError());
++        if (g_debug) {
++            static unsigned long long n_s = 0;
++            ++n_s;
++            if ((n_s & (n_s - 1)) == 0) {
++                const int Wv = d.grid_v3s * NW3, nsa = std::min(FFS, (NTA + Wv - 1) / Wv * Wv - NTA);
++                fprintf(stderr, "occamy-fused: MOE_V3_SHIDLE launches %llu grid %d nsa %d\n", n_s, d.grid_v3s, nsa);
++            }
++        }
++    } else {
++        moe_v3<true><<<d.grid_v3, NT3, SMEM3_FLOATS * sizeof(float), st>>>(P);
++        CUDA_CHECK(cudaGetLastError());
++    }
+     if (g_debug) {
+         static unsigned long long n_v3 = 0;
+         ++n_v3;
+         if ((n_v3 & (n_v3 - 1)) == 0) { fprintf(stderr, "occamy-fused: MOE_V3 launches %llu\n", n_v3); }
+     }
+     if (chk) {
+-        unsigned res[2];
++        unsigned res[4];
+         moe_v3_cmp<<<1, 256, 0, st>>>(d.v3_ref + (size_t) row * H, P.out, d.v3_res);
++        if (sha) { moe_v3_cmp<<<1, 256, 0, st>>>(d.v3_ref3 + (size_t) row * H, P.out, d.v3_res + 2); }
+         CUDA_CHECK(cudaGetLastError());
+         CUDA_CHECK(cudaMemcpyAsync(res, d.v3_res, sizeof(res), cudaMemcpyDeviceToHost, st));
+         CUDA_CHECK(cudaStreamSynchronize(st));
+         float mx; memcpy(&mx, &res[1], sizeof(mx));
+-        fprintf(stderr, "occamy-fused MOE_V3 CHECK %s row %d: bitwise-diff %u / %d, max_abs %.3e\n", m.out->name, row, res[0], H, (double) mx);
++        if (sha) {
++            float mx3; memcpy(&mx3, &res[3], sizeof(mx3));
++            fprintf(stderr, "occamy-fused MOE_V3 CHECK %s row %d: shidle vs v2 bitwise-diff %u / %d, max_abs %.3e; vs v3 bitwise-diff %u / %d, max_abs %.3e\n",
++                    m.out->name, row, res[0], H, (double) mx, res[2], H, (double) mx3);
++        } else {
++            fprintf(stderr, "occamy-fused MOE_V3 CHECK %s row %d: bitwise-diff %u / %d, max_abs %.3e\n", m.out->name, row, res[0], H, (double) mx);
++        }
+     }
+ }
+ 
+diff --git a/ggml/src/ggml-cuda/occamy-fused.cuh b/ggml/src/ggml-cuda/occamy-fused.cuh
+index 47a7dbd..6869e33 100644
+--- a/ggml/src/ggml-cuda/occamy-fused.cuh
++++ b/ggml/src/ggml-cuda/occamy-fused.cuh
+@@ -6,6 +6,7 @@
+ //   GGML_CUDA_OCCAMY_CHECK=N  on the first N fused windows also run the unfused path and print max abs/rel diff
+ //   GGML_CUDA_MOE_V3=1        WP4 occupancy rework (512-thr blocks, 32 warps/SM), bit-identical target to moe_v2<0, 61>
+ //   GGML_CUDA_MOE_V3_CHECK=N  with MOE_V3: first N launches also run the moe_v2 dispatch and print the bitwise-diff count
++//   GGML_CUDA_MOE_V3_SHIDLE=1 with MOE_V3 (A2): shexp gate/up rows run in the phase-A idle wave; CHECK also compares vs base v3
+ #include "common.cuh"
+ 
+ struct ggml_cuda_occamy_moe_match {
