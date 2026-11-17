@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "source": {
+    "published_components_revision": "5f560ce2a8336c7e068723392070a03956c104a7",
+    "public_build_start_revision": "e4fdc23555f6a9103ea03b854ee5c70c6812517c",
+    "experiment_base_revision": "da7ba0e49dd43c69f9ee5a219ea3124f7acda0c8",
+    "published_patches": {
+      "sparse_r2": {
+        "path": "sparse-r2-20261117/patch/sparse-r2.patch",
+        "sha256": "3dcce2afa837b51d4163550e496d1b9c75d1f9afca9b12907865fd8507594bfe"
+      },
+      "cache_only": {
+        "path": "cache-only-20261118/cache-only.patch",
+        "sha256": "dd35105438ca3865267a96ec2f40e6a80d09259b6c81800f1ebe18b95555cc12"
+      }
+    },
+    "stacked_build_source_index_sha256": "2e9859ca0afbb29da29ae30c983e308db793edc7e79a4571fef970c1cba2d4c6",
+    "all_modified_files_match_measured_components": true
+  },
+  "measured_build": {
+    "composition": "Existing Sparse R2 CUDA library and cache-only C++ libraries on the FA2 server",
+    "toolchain": {
+      "gcc": "14.2.0",
+      "cuda": "12.8.93",
+      "cmake": "3.28.3",
+      "architecture": "52-real"
+    },
+    "stacked_overlay_manifest_sha256": "3b43003813201ff25fdf06e40d66704ea02d171c7567e8f92b8713ef6145e4c5",
+    "binaries": {
+      "libggml-cuda.so": {
+        "component": "Sparse R2",
+        "stacked_sha256": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba",
+        "sparse_control_sha256": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba"
+      },
+      "libllama.so.0.6.0": {
+        "component": "cache-only catch-up",
+        "stacked_sha256": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+        "sparse_control_sha256": "03d76f7f5952c961e836984a29b57d33c363c9833b1c314e2fc6db171a97432e"
+      },
+      "libllama-common.so.0.6.0": {
+        "component": "cache-only catch-up",
+        "stacked_sha256": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+        "sparse_control_sha256": "607553a0efba275dc50da920177ea480ece735e0ed3a027e23a1a8a959da002c"
+      },
+      "llama-server": {
+        "component": "FA2 baseline",
+        "stacked_sha256": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+        "sparse_control_sha256": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+      },
+      "libllama-server-impl.so": {
+        "component": "FA2 baseline",
+        "stacked_sha256": "1138515898887c6ec6be01a210cfb59bb8e1338ccf6eeef1d032ffd4fdb22b65",
+        "sparse_control_sha256": "1138515898887c6ec6be01a210cfb59bb8e1338ccf6eeef1d032ffd4fdb22b65"
+      }
+    },
+    "component_overlay_manifest_sha256": {
+      "sparse_r2": "4f1c478c445c15902d6777622c71ad994a47c8ae30c1c17b1f0c3069d5e520cb",
+      "cache_only": "e118bddaaee18ad7ddd438a97208d6165b3c1e4a8d48333578adc255e2e3042c"
+    }
+  },
+  "measured_runtime": {
+    "model": "occamy-1.0-Q4_0-headq40b-mtp.gguf",
+    "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+    "runtime_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+    "context_size": 84224,
+    "batch_size": 2048,
+    "ubatch_size": 1024,
+    "mixed_batch_size": 1024,
+    "mtp1_args": [
+      "--spec-type",
+      "draft-mtp",
+      "--spec-draft-n-max",
+      "1",
+      "--spec-draft-type-k",
+      "f16",
+      "--spec-draft-type-v",
+      "f16"
+    ],
+    "common_kernel_env": {
+      "GGML_CUDA_MOE_DOWNX": "1",
+      "GGML_CUDA_MOE_DOWNH": "2",
+      "GGML_CUDA_OCCAMY_GDN_QKREUSE": "1",
+      "GGML_CUDA_OCCAMY_GDN_PCSHARE": "1",
+      "GGML_CUDA_MMVQ_SM52": "1",
+      "GGML_CUDA_RMS_WARP": "0",
+      "GGML_CUDA_HEAD_ROWPACK_SM52": "1",
+      "GGML_CUDA_MMQ_COMPACT_SM52": "1",
+      "GGML_CUDA_Q8_REUSE": "1",
+      "GGML_CUDA_NORM_Q8": "1",
+      "GGML_CUDA_CONCAT_T": "1",
+      "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": "1",
+      "GGML_CUDA_GATE_COPY": "1",
+      "GGML_CUDA_OCCAMY_GDN": "1",
+      "GGML_CUDA_MMQ_XMAD_SM52": "1",
+      "GGML_CUDA_GDN_COLS": "2,4",
+      "GGML_CUDA_OCCAMY_FA": "1",
+      "GGML_CUDA_OCCAMY_FUSED": "1",
+      "GGML_CUDA_OCCAMY_FA_PIPE": "3",
+      "GGML_CUDA_MOE_LOP3": "1",
+      "GGML_CUDA_MOE_TAILBAL": "1",
+      "GGML_CUDA_OCCAMY_GDN_PREF": "1",
+      "GGML_CUDA_OCCAMY_HOSTGAP": "1",
+      "GGML_CUDA_OCCAMY_SMALLFUSE": "2",
+      "GGML_CUDA_MMQ_TAIL_SM52": "1",
+      "GGML_CUDA_OCCAMY_GDN_REPACK": "1",
+      "GGML_CUDA_OCCAMY_N2SPLIT": "1",
+      "GGML_CUDA_OCCAMY_FA_ADDR": "1",
+      "GGML_CUDA_OCCAMY_N2GDN": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": "1",
+      "GGML_CUDA_MOE_V3": "1",
+      "LLAMA_MV1_TRACE": "1",
+      "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+      "GGML_CUDA_OCCAMY_FA_SPARSE_R2": "1"
+    },
+    "mtp_only_kernel_env": {
+      "GGML_CUDA_OCCAMY_GDN_T2": "1",
+      "GGML_CUDA_OCCAMY_FA_MROW": "3",
+      "GGML_CUDA_OCCAMY_FA2_NU": "4",
+      "LLAMA_MTP_MERGE_REEVAL": "1"
+    },
+    "stacked_only_env": {
+      "LLAMA_MTP_CACHE_ONLY": "1"
+    }
+  }
+}
