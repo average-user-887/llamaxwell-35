@@ -1,0 +1,1 @@
+kind=B np=1 pn=80000 npred=256 reps=2 ctx=84224 dkv=f16 xe=[-e LLAMA_MV3_PHASE=/mv1out/phase.tsv -e LLAMA_MV1_TRACE=1] sf=[]

@@ -1,0 +1,1914 @@
+From 7788120e8c98d7cb44ce1fe17e87e3bfb279614b Mon Sep 17 00:00:00 2001
+From: claude <noreply@anthropic.com>
+Date: Tue, 17 Nov 2026 06:58:56 +0100
+Subject: [PATCH 1/9] MV3-A: LLAMA_MV2_DUMP top-8 verify/no-spec dump;
+ GGML_CUDA_OCCAMY_FA_2CALL 2-row split-k as two 1-row launches
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012TpXXDKesx6WqrHo8bCYxx
+---
+ ggml/src/ggml-cuda/fattn-occamy.cu  | 41 ++++++++++++++++++++
+ ggml/src/ggml-cuda/fattn-occamy.cuh |  3 ++
+ ggml/src/ggml-cuda/fattn.cu         |  6 +++
+ tools/server/server-context.cpp     | 60 +++++++++++++++++++++++++++++
+ 4 files changed, 110 insertions(+)
+
+diff --git a/ggml/src/ggml-cuda/fattn-occamy.cu b/ggml/src/ggml-cuda/fattn-occamy.cu
+index 513bb31..6c5bb97 100644
+--- a/ggml/src/ggml-cuda/fattn-occamy.cu
++++ b/ggml/src/ggml-cuda/fattn-occamy.cu
+@@ -969,6 +969,47 @@ static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst,
+     CUDA_CHECK(cudaGetLastError());
+ }
+ 
++// MV3: 2-row verify as two 1-row launches (GGML_CUDA_OCCAMY_FA_2CALL=1, default off).
++// Builds 1-row views of Q/mask/dst per row and reuses the 1-row applicable() checks.
++bool ggml_cuda_occamy_fa_2call_enabled() {
++    static const bool v = []() {
++        const char * s = getenv("GGML_CUDA_OCCAMY_FA_2CALL");
++        return s && strcmp(s, "1") == 0;
++    }();
++    return v;
++}
++
++static bool ofa_2call_views(const ggml_tensor * dst, ggml_tensor * d1, ggml_tensor * q1, ggml_tensor * m1, int r) {
++    *d1 = *dst; *q1 = *dst->src[0]; *m1 = *dst->src[3];
++    q1->ne[1] = 1; m1->ne[1] = 1; d1->ne[1] = 1;
++    q1->data = (char *) dst->src[0]->data + (size_t) r*dst->src[0]->nb[1];
++    m1->data = (char *) dst->src[3]->data + (size_t) r*dst->src[3]->nb[1];
++    d1->data = (char *) dst->data + (size_t) r*dst->nb[1];
++    d1->src[0] = q1; d1->src[3] = m1;
++    return true;
++}
++
++bool ggml_cuda_occamy_fa_2call_applicable(const ggml_tensor * dst) {
++    if (!ggml_cuda_occamy_fa_2call_enabled()) return false;
++    const ggml_tensor * Q = dst->src[0];
++    const ggml_tensor * mask = dst->src[3];
++    if (Q->ne[1] != 2 || !mask || mask->ne[1] < 2) return false;
++    ggml_tensor d1, q1, m1;
++    for (int r = 0; r < 2; ++r) {
++        ofa_2call_views(dst, &d1, &q1, &m1, r);
++        if (!ggml_cuda_occamy_fa_applicable(&d1)) return false;  // checks data%16 (Q), mask%8
++    }
++    return true;
++}
++
++void ggml_cuda_occamy_fa_2call(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
++    ggml_tensor d1, q1, m1;
++    for (int r = 0; r < 2; ++r) {
++        ofa_2call_views(dst, &d1, &q1, &m1, r);
++        ofa_launch(ctx, &d1, (char *) d1.data);
++    }
++}
++
+ void ggml_cuda_occamy_fa(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
+     ofa_launch(ctx, dst, (char *) dst->data);
+ }
+diff --git a/ggml/src/ggml-cuda/fattn-occamy.cuh b/ggml/src/ggml-cuda/fattn-occamy.cuh
+index 9cd3f21..72bd724 100644
+--- a/ggml/src/ggml-cuda/fattn-occamy.cuh
++++ b/ggml/src/ggml-cuda/fattn-occamy.cuh
+@@ -10,3 +10,6 @@ void ggml_cuda_occamy_fa_compare(ggml_backend_cuda_context & ctx, ggml_tensor *
+ bool ggml_cuda_occamy_kvq8_enabled();
+ bool ggml_cuda_occamy_kvq8_applicable(const ggml_tensor * dst);
+ void ggml_cuda_occamy_fa_kvq8(ggml_backend_cuda_context & ctx, ggml_tensor * dst);
++bool ggml_cuda_occamy_fa_2call_enabled();
++bool ggml_cuda_occamy_fa_2call_applicable(const ggml_tensor * dst);
++void ggml_cuda_occamy_fa_2call(ggml_backend_cuda_context & ctx, ggml_tensor * dst);
+diff --git a/ggml/src/ggml-cuda/fattn.cu b/ggml/src/ggml-cuda/fattn.cu
+index 1d04d60..85f4571 100644
+--- a/ggml/src/ggml-cuda/fattn.cu
++++ b/ggml/src/ggml-cuda/fattn.cu
+@@ -836,6 +836,12 @@ static void ggml_cuda_flash_attn_ext_impl(ggml_backend_cuda_context & ctx, ggml_
+         ggml_cuda_occamy_fa_compare(ctx, dst);
+         return;
+     }
++    // MV3: 2-row verify as two 1-row occamy launches (GGML_CUDA_OCCAMY_FA_2CALL=1)
++    if (ofa == 1 && ggml_cuda_occamy_fa_2call_applicable(dst)) {
++        *path_out = "occamy_splitk_2call";
++        ggml_cuda_occamy_fa_2call(ctx, dst);
++        return;
++    }
+     // Q8N: native q8_0 K/V read (GGML_CUDA_OCCAMY_KVQ8=1); FA=2 runs the generic q8 path and logs the diff
+     if (ofa != 0 && ggml_cuda_occamy_kvq8_applicable(dst)) {
+         if (ofa == 1) {
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+index a1e26e9..cde5a23 100644
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -96,6 +96,42 @@ struct mv1_host_t {
+     }
+ };
+ static mv1_host_t g_mv1;
++
++// MV2 top-8 dump (LLAMA_MV2_DUMP=<file>, LLAMA_MV2_DUMP_LO/HI = n_decoded range, default 0..64; off when unset)
++struct mv2_dump_t {
++    FILE * f = nullptr;
++    long lo = 0, hi = 64;
++    mv2_dump_t() {
++        const char * p = getenv("LLAMA_MV2_DUMP");
++        if (!p || !p[0]) return;
++        f = fopen(p, "a");
++        if (const char * e = getenv("LLAMA_MV2_DUMP_LO")) lo = atol(e);
++        if (const char * e = getenv("LLAMA_MV2_DUMP_HI")) hi = atol(e);
++    }
++    ~mv2_dump_t() { if (f) fclose(f); }
++    bool want(long n) const { return f && n >= lo && n <= hi; }
++    // append " idx:id=lp,..." (top-8 log-softmax) for one logits row
++    void row(std::string & out, llama_context * ctx, int32_t idx) const {
++        const float * lg = llama_get_logits_ith(ctx, idx);
++        if (!lg) { out += " [null]"; return; }
++        const int n_vocab = llama_vocab_n_tokens(llama_model_get_vocab(llama_get_model(ctx)));
++        double mx = -1e30;
++        for (int i = 0; i < n_vocab; ++i) mx = std::max<double>(mx, lg[i]);
++        double z = 0.0;
++        for (int i = 0; i < n_vocab; ++i) z += exp((double) lg[i] - mx);
++        const double lz = mx + log(z);
++        std::vector<int> id(n_vocab);
++        for (int i = 0; i < n_vocab; ++i) id[i] = i;
++        const int k = std::min(8, n_vocab);
++        std::partial_sort(id.begin(), id.begin() + k, id.end(), [&](int a, int b) { return lg[a] > lg[b] || (lg[a] == lg[b] && a < b); });
++        char b[64];
++        out += " [";
++        for (int i = 0; i < k; ++i) { snprintf(b, sizeof(b), "%s%d=%.5f", i ? "," : "", id[i], (double) lg[id[i]] - lz); out += b; }
++        out += "]";
++    }
++    void emit(const std::string & s) const { fputs(s.c_str(), f); fputc('\n', f); fflush(f); }
++};
++static mv2_dump_t g_mv2;
+ struct mv1_scope {
+     int id; int64_t t0;
+     explicit mv1_scope(int i) : id(i), t0(g_mv1.on ? ggml_time_us() : 0) {}
+@@ -4422,6 +4458,19 @@ private:
+                 id = common_sampler_sample(slot.smpl.get(), slot.ctx_tgt, tok_idx);
+             }
+ 
++            if (g_mv2.want(slot.stats.n_gen)) {
++                // no-spec: top-8 of every output row of this slot in the batch (1 row, or 2 for forced-prefix requests)
++                std::string ln = "N slot=" + std::to_string(slot.id) + " n_dec=" + std::to_string(slot.stats.n_gen);
++                int nr = 0;
++                std::string rows;
++                for (int i = 0; i < (int) batch.view.size(); ++i) {
++                    if (batch.view.tokens[i].output && batch.view.tokens[i].seq_id == slot.id) { g_mv2.row(rows, slot.ctx_tgt, i); nr++; }
++                }
++                if (nr == 0) g_mv2.row(rows, slot.ctx_tgt, tok_idx), nr = 1;
++                ln += " rows=" + std::to_string(nr) + rows + " ids=" + std::to_string(id);
++                g_mv2.emit(ln);
++            }
++
+             slot.i_batch = -1;
+ 
+             common_sampler_accept(slot.smpl.get(), id, true);
+@@ -4483,6 +4532,8 @@ private:
+                 // drafters that fill no distribution fall back here
+                 const bool use_rejection = slot.use_spec_rejection() && !slot.spec_draft_q.empty();
+ 
++                const bool mv2_on = g_mv2.want(slot.stats.n_gen);
++                const std::vector<int32_t> mv2_idx = mv2_on ? slot.spec_i_batch : std::vector<int32_t>();
+                 std::vector<llama_token> accepted;
+                 mv1_scope _mv1_sa(3);
+                 if (!synth_probs.empty()) {
+@@ -4501,6 +4552,15 @@ private:
+ 
+                 GGML_ASSERT(accepted.size() >= 1);
+ 
++                if (mv2_on) {
++                    std::string ln = "V slot=" + std::to_string(slot.id) + " n_dec=" + std::to_string(slot.stats.n_gen) +
++                        " draft=" + std::to_string(slot.spec_draft[0]) + " replay=" + std::to_string((int) slot.spec_is_replay) + " rows=" + std::to_string(mv2_idx.size());
++                    for (size_t r = 0; r < mv2_idx.size(); ++r) g_mv2.row(ln, slot.ctx_tgt, mv2_idx[r]);
++                    ln += " acc_n=" + std::to_string(accepted.size() - 1) + " ids=";
++                    for (size_t r = 0; r < accepted.size(); ++r) ln += (r ? "," : "") + std::to_string(accepted[r]);
++                    g_mv2.emit(ln);
++                }
++
+                 const uint32_t n_rollback = slot.spec_draft.size() + 1 - accepted.size();
+ 
+                 const bool use_ckpt_tgt =
+-- 
+2.43.0
+
+
+From b2bb5e42147ca4d72943c8f33d63ee957a3b61af Mon Sep 17 00:00:00 2001
+From: claude <noreply@anthropic.com>
+Date: Tue, 17 Nov 2026 13:41:39 +0100
+Subject: [PATCH 2/9] ggml-cuda: occamy native multi-row F16 split-K decode FA
+ (GGML_CUDA_OCCAMY_FA_MROW, default off)
+
+n_q 2..4, one CTA per (split, kv head, stream), K/V tile in smem shared by all
+row x head-group warps; MROW=2 runs stock and logs per-call max diff.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012TpXXDKesx6WqrHo8bCYxx
+---
+ ggml/src/ggml-cuda/fattn-occamy.cu  | 295 ++++++++++++++++++++++++++++
+ ggml/src/ggml-cuda/fattn-occamy.cuh |   5 +
+ ggml/src/ggml-cuda/fattn.cu         |  11 ++
+ 3 files changed, 311 insertions(+)
+
+diff --git a/ggml/src/ggml-cuda/fattn-occamy.cu b/ggml/src/ggml-cuda/fattn-occamy.cu
+index 6c5bb97..5aef66c 100644
+--- a/ggml/src/ggml-cuda/fattn-occamy.cu
++++ b/ggml/src/ggml-cuda/fattn-occamy.cu
+@@ -24,6 +24,7 @@
+ #include <cstdlib>
+ #include <cfloat>
+ #include <cstring>
++#include <atomic>
+ 
+ #define OFA_D   256
+ #define OFA_G   8
+@@ -969,6 +970,300 @@ static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst,
+     CUDA_CHECK(cudaGetLastError());
+ }
+ 
++// MRFA (17 Nov 2026): native multi-row F16 split-K decode, GGML_CUDA_OCCAMY_FA_MROW=1 (default off) for Q->ne[1] in 2..4.
++// GGML_CUDA_OCCAMY_FA_MROW=2: run stock, then this kernel into a temp buffer, log max abs/rel diff, keep stock output.
++// One CTA per (split, kv-head, stream); 2*R warps, warp w owns q-row r = w/2 and q-heads [4*(w&1), +4) of the kv-head
++// (same 4-head x 8-dim lane layout, reduce-scatter and online softmax as ofa_decode_hs_ar_kernel). K/V rows of a tile of
++// OFM_TT tokens are read from global once per CTA into shared memory and every row/head-group warp consumes them, so
++// traffic stays at the 1-row level. Each warp walks all tokens of the split in order (no cross-warp combine): output
++// is fp32-equivalent to the 1-row kernel, not bitwise. Mask row r is read at mask + r*nb[1]; dst row r at dst + r*nb[2]
++// (dst is [D, n_head, n_q, ns]). Knobs: GGML_CUDA_OCCAMY_FA_MROW_PF (1 = register-prefetch the next tile, default 1),
++// GGML_CUDA_OCCAMY_FA_MROW_NSPLIT (override split count; default = the 1-row split count).
++#define OFM_TT 16
++
++template <int R, bool PF>
++__global__ void __launch_bounds__(64*R, (R == 2 ? 4 : 2)) ofa_mrow_kernel(const ofa_params p) {
++    constexpr int NT  = 64*R;
++    constexpr int CPT = (OFM_TT*32 + NT - 1)/NT;   // 16-B chunks of K (and of V) per thread per tile
++    constexpr int S   = OFA_G*R;                   // (row, head) slots per CTA
++    const int split = blockIdx.x;
++    const int kvh   = blockIdx.y;
++    const int i3    = blockIdx.z;
++    const int tid   = threadIdx.x;
++    const int wid   = tid >> 5;
++    const int r     = wid >> 1;          // q row
++    const int hg    = wid & 1;           // head group
++    const int lane  = tid & 31;
++
++    __shared__ uint4 sK[OFM_TT*32];
++    __shared__ uint4 sV[OFM_TT*32];
++    __shared__ __align__(16) float s_p[2*R][OFA_T*OFA_HG];
++    __shared__ __align__(16) float s_a[2*R][OFA_HG];
++
++    float q[OFA_HG][8];
++#pragma unroll
++    for (int h = 0; h < OFA_HG; ++h) {
++        const float4 * qp = (const float4 *) (p.Q + i3*p.nbq3 + (size_t) r*p.nbq1 + (size_t)(kvh*OFA_G + hg*OFA_HG + h)*p.nbq2) + 2*lane;
++        const float4 a = qp[0], b = qp[1];
++        q[h][0] = a.x*p.scale_log2; q[h][1] = a.y*p.scale_log2; q[h][2] = a.z*p.scale_log2; q[h][3] = a.w*p.scale_log2;
++        q[h][4] = b.x*p.scale_log2; q[h][5] = b.y*p.scale_log2; q[h][6] = b.z*p.scale_log2; q[h][7] = b.w*p.scale_log2;
++    }
++    float o[OFA_HG][8];
++#pragma unroll
++    for (int h = 0; h < OFA_HG; ++h) {
++#pragma unroll
++        for (int i = 0; i < 8; ++i) o[h][i] = 0.0f;
++    }
++    const int jl = lane >> 3;
++    float m_run = -FLT_MAX/2.0f;
++    float l_run = 0.0f;
++
++    const char * Kb = p.K + i3*p.nbk3 + kvh*p.nbk2;
++    const char * Vb = p.V + i3*p.nbv3 + kvh*p.nbv2;
++    const half * Mr = (const half *) (p.mask + (i3 % p.mask_ne3)*p.nbm3 + (size_t) r*p.nbm1);
++
++    const int nunits = p.n_kv / OFA_T;
++    const int t_beg = OFA_T*(int) (((long long) split      * nunits) / p.nsplit);
++    const int t_end = OFA_T*(int) (((long long)(split + 1) * nunits) / p.nsplit);
++
++    uint4 kr[CPT], vr[CPT];
++    auto load_tile = [&](const int tb) {
++        const int nc = min(OFM_TT, t_end - tb)*32;
++#pragma unroll
++        for (int i = 0; i < CPT; ++i) {
++            const int c = tid + i*NT;
++            if (c < nc) {
++                const size_t row = (size_t) (tb + (c >> 5));
++                kr[i] = __ldg((const uint4 *) (Kb + row*p.nbk1) + (c & 31));
++                vr[i] = __ldg((const uint4 *) (Vb + row*p.nbv1) + (c & 31));
++            }
++        }
++    };
++    if constexpr (PF) {
++        if (t_beg < t_end) load_tile(t_beg);
++    }
++    for (int tb = t_beg; tb < t_end; tb += OFM_TT) {
++        const int nt = min(OFM_TT, t_end - tb);   // multiple of OFA_T
++        if constexpr (!PF) load_tile(tb);
++        __syncthreads();                           // previous tile consumed
++#pragma unroll
++        for (int i = 0; i < CPT; ++i) {
++            const int c = tid + i*NT;
++            if (c < nt*32 && (CPT*NT == OFM_TT*32 || c < OFM_TT*32)) { sK[c] = kr[i]; sV[c] = vr[i]; }
++        }
++        __syncthreads();
++        if constexpr (PF) {
++            if (tb + OFM_TT < t_end) load_tile(tb + OFM_TT);
++        }
++        for (int g = 0; g < nt; g += OFA_T) {
++            const float mk = __half2float(Mr[tb + g + jl]);
++            float s[OFA_T*OFA_HG];
++#pragma unroll
++            for (int j = 0; j < OFA_T; ++j) {
++                float k[8];
++                ofa_cvt8(sK[(g + j)*32 + lane], k);
++#pragma unroll
++                for (int h = 0; h < OFA_HG; ++h) {
++                    float acc = q[h][0]*k[0];
++#pragma unroll
++                    for (int i = 1; i < 8; ++i) acc = fmaf(q[h][i], k[i], acc);
++                    s[j*OFA_HG + h] = acc;
++                }
++            }
++            ofa_rs_step_x<8, 16>(s, lane);
++            ofa_rs_step_x<4,  8>(s, lane);
++            ofa_rs_step_x<2,  4>(s, lane);
++            ofa_rs_step_x<1,  2>(s, lane);
++            s[0] = s[0] + __shfl_xor_sync(0xFFFFFFFF, s[0], 1, 32);
++            const float sc = s[0] + mk*1.4426950408889634f;
++            float gm = fmaxf(sc, __shfl_xor_sync(0xFFFFFFFF, sc, 8, 32));
++            gm = fmaxf(gm, __shfl_xor_sync(0xFFFFFFFF, gm, 16, 32));
++            const float m_new = fmaxf(m_run, gm);
++            const float alpha = exp2f(m_run - m_new);
++            const float pr    = exp2f(sc - m_new);
++            m_run = m_new;
++            l_run = l_run*alpha + pr;
++            if (!(lane & 1)) s_p[wid][lane >> 1] = pr;
++            if (lane < 2*OFA_HG && !(lane & 1)) s_a[wid][lane >> 1] = alpha;
++            __syncwarp();
++            float a[OFA_HG];
++            {
++                const float4 a0 = *(const float4 *) &s_a[wid][0];
++                a[0] = a0.x; a[1] = a0.y; a[2] = a0.z; a[3] = a0.w;
++            }
++#pragma unroll
++            for (int h = 0; h < OFA_HG; ++h) {
++#pragma unroll
++                for (int i = 0; i < 8; ++i) o[h][i] *= a[h];
++            }
++#pragma unroll
++            for (int j = 0; j < OFA_T; ++j) {
++                float v[8];
++                ofa_cvt8(sV[(g + j)*32 + lane], v);
++                const float4 p0 = *(const float4 *) &s_p[wid][j*OFA_HG];
++                const float pj[4] = {p0.x, p0.y, p0.z, p0.w};
++#pragma unroll
++                for (int h = 0; h < OFA_HG; ++h) {
++#pragma unroll
++                    for (int i = 0; i < 8; ++i) o[h][i] = fmaf(pj[h], v[i], o[h][i]);
++                }
++            }
++            __syncwarp();
++        }
++    }
++
++    l_run += __shfl_xor_sync(0xFFFFFFFF, l_run, 8, 32);
++    l_run += __shfl_xor_sync(0xFFFFFFFF, l_run, 16, 32);
++    const int blk  = (i3*p.nkvh + kvh)*p.nsplit + split;
++    const int slot = r*OFA_G + hg*OFA_HG;
++    if (lane < 2*OFA_HG && !(lane & 1)) p.part_ml[(size_t) blk*S + slot + (lane >> 1)] = make_float2(m_run, l_run);
++#pragma unroll
++    for (int h = 0; h < OFA_HG; ++h) {
++        float4 * dp = (float4 *) (p.part_o + ((size_t) blk*S + slot + h)*OFA_D + 8*lane);
++        dp[0] = make_float4(o[h][0], o[h][1], o[h][2], o[h][3]);
++        dp[1] = make_float4(o[h][4], o[h][5], o[h][6], o[h][7]);
++    }
++}
++
++// grid (nkvh*8 q-heads, n_q, ns), block 256
++__global__ void __launch_bounds__(OFA_D) ofa_mrow_combine_kernel(const float * __restrict__ part_o, const float2 * __restrict__ part_ml,
++        char * __restrict__ dst, const int nsplit, const int nkvh, const int nq, const size_t nbd1, const size_t nbd2, const size_t nbd3) {
++    const int qh = blockIdx.x, r = blockIdx.y, i3 = blockIdx.z, d = threadIdx.x;
++    const int kvh = qh / OFA_G, h = qh % OFA_G;
++    const int S = OFA_G*nq, slot = r*OFA_G + h;
++    const int blk0 = (i3*nkvh + kvh)*nsplit;
++    float M = -FLT_MAX;
++    for (int s = 0; s < nsplit; ++s) M = fmaxf(M, part_ml[(size_t)(blk0 + s)*S + slot].x);
++    float L = 0.0f, acc = 0.0f;
++    for (int s = 0; s < nsplit; ++s) {
++        const float2 ml = part_ml[(size_t)(blk0 + s)*S + slot];
++        const float  w  = exp2f(ml.x - M);
++        L   += ml.y*w;
++        acc += part_o[((size_t)(blk0 + s)*S + slot)*OFA_D + d]*w;
++    }
++    float * out = (float *) (dst + i3*nbd3 + (size_t) r*nbd2 + (size_t) qh*nbd1);
++    out[d] = L > 0.0f ? acc/L : 0.0f;
++}
++
++int ggml_cuda_occamy_fa_mrow_mode() {
++    static const int v = []() {
++        const char * s = getenv("GGML_CUDA_OCCAMY_FA_MROW");
++        const int r = s ? atoi(s) : 0;
++        if (r) fprintf(stderr, "ggml_cuda: occamy FA mrow mode %d\n", r);
++        return r;
++    }();
++    return v;
++}
++
++bool ggml_cuda_occamy_fa_mrow_applicable(const ggml_tensor * dst) {
++    if (ggml_cuda_occamy_fa_mrow_mode() == 0) return false;
++    const ggml_tensor * Q = dst->src[0];
++    const ggml_tensor * mask = dst->src[3];
++    if (Q->ne[1] < 2 || Q->ne[1] > 4) return false;
++    if (!mask || mask->ne[1] < Q->ne[1]) return false;
++    // all other conditions are the 1-row ones, checked on a 1-row view (data/strides unchanged)
++    ggml_tensor d1 = *dst, q1 = *Q;
++    q1.ne[1] = 1;
++    d1.src[0] = &q1;
++    return ggml_cuda_occamy_fa_applicable(&d1);
++}
++
++static std::atomic<long long> ofm_calls[5];
++
++static void ofa_mrow_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst, char * out) {
++    const ggml_tensor * Q = dst->src[0];
++    const ggml_tensor * K = dst->src[1];
++    const ggml_tensor * V = dst->src[2];
++    const ggml_tensor * mask = dst->src[3];
++    cudaStream_t stream = ctx.stream();
++    const int id = ggml_cuda_get_device();
++    const int nq = (int) Q->ne[1];
++
++    static int resident = 0, waves = 1, pf = 1, nsplit_env = 0;
++    if (resident == 0) {
++        int nb = 0;
++        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nb, ofa_decode_kernel<0>, OFA_NT, 0));
++        resident = std::max(1, nb) * ggml_cuda_info().devices[id].nsm;
++        const char * s = getenv("GGML_CUDA_OCCAMY_FA_WAVES");
++        if (s) waves = std::max(1, atoi(s));
++        const char * sp = getenv("GGML_CUDA_OCCAMY_FA_MROW_PF");
++        if (sp) pf = atoi(sp) != 0;
++        const char * sn = getenv("GGML_CUDA_OCCAMY_FA_MROW_NSPLIT");
++        if (sn) nsplit_env = std::max(0, atoi(sn));
++        int o2 = 0, o3 = 0, o4 = 0;
++        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&o2, pf ? ofa_mrow_kernel<2, true> : ofa_mrow_kernel<2, false>, 128, 0));
++        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&o3, pf ? ofa_mrow_kernel<3, true> : ofa_mrow_kernel<3, false>, 192, 0));
++        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&o4, pf ? ofa_mrow_kernel<4, true> : ofa_mrow_kernel<4, false>, 256, 0));
++        fprintf(stderr, "ggml_cuda: occamy FA mrow pf %d nsplit_env %d, 1-row resident %d, mrow blocks/SM R2 %d R3 %d R4 %d (nsm %d)\n",
++            pf, nsplit_env, resident, o2, o3, o4, ggml_cuda_info().devices[id].nsm);
++    }
++    const int nkvh = (int) K->ne[2];
++    const int ns   = (int) Q->ne[3];
++    const int n_kv = (int) K->ne[1];
++    int nsplit = nsplit_env > 0 ? nsplit_env : (resident*waves + nkvh*ns - 1) / (nkvh*ns);   // same as the 1-row path
++    nsplit = std::max(1, std::min(nsplit, n_kv / (OFA_T*OFA_NW*4)));
++
++    const long long nc = ++ofm_calls[nq];
++    if (nc == 1 || nc == 10 || nc == 100 || nc == 1000 || nc % 10000 == 0) {
++        fprintf(stderr, "ggml_cuda: occamy FA mrow dispatch n_q=%d calls=%lld n_kv=%d nkvh=%d ns=%d nsplit=%d\n", nq, nc, n_kv, nkvh, ns, nsplit);
++    }
++
++    const int nblk = nsplit*nkvh*ns;
++    ggml_cuda_pool_alloc<float>  part_o (ctx.pool(), (size_t) nblk*OFA_G*nq*OFA_D);
++    ggml_cuda_pool_alloc<float2> part_ml(ctx.pool(), (size_t) nblk*OFA_G*nq);
++
++    float scale;
++    memcpy(&scale, (const float *) dst->op_params + 0, sizeof(float));
++
++    ofa_params p;
++    p.Q = (const char *) Q->data; p.K = (const char *) K->data; p.V = (const char *) V->data; p.mask = (const char *) mask->data;
++    p.part_o = part_o.get(); p.part_ml = part_ml.get();
++    p.n_kv = n_kv; p.nsplit = nsplit; p.nkvh = nkvh; p.mask_ne1 = (int) mask->ne[1]; p.mask_ne3 = (int) mask->ne[3];
++    p.scale_log2 = scale*1.4426950408889634f;
++    p.nbq1 = Q->nb[1]; p.nbq2 = Q->nb[2]; p.nbq3 = Q->nb[3];
++    p.nbk1 = K->nb[1]; p.nbk2 = K->nb[2]; p.nbk3 = K->nb[3];
++    p.nbv1 = V->nb[1]; p.nbv2 = V->nb[2]; p.nbv3 = V->nb[3];
++    p.nbm1 = mask->nb[1]; p.nbm3 = mask->nb[3];
++
++    const dim3 grid(nsplit, nkvh, ns);
++    switch (nq) {
++        case 2: if (pf) ofa_mrow_kernel<2, true><<<grid, 128, 0, stream>>>(p); else ofa_mrow_kernel<2, false><<<grid, 128, 0, stream>>>(p); break;
++        case 3: if (pf) ofa_mrow_kernel<3, true><<<grid, 192, 0, stream>>>(p); else ofa_mrow_kernel<3, false><<<grid, 192, 0, stream>>>(p); break;
++        case 4: if (pf) ofa_mrow_kernel<4, true><<<grid, 256, 0, stream>>>(p); else ofa_mrow_kernel<4, false><<<grid, 256, 0, stream>>>(p); break;
++        default: GGML_ABORT("occamy FA mrow: n_q must be 2..4");
++    }
++    CUDA_CHECK(cudaGetLastError());
++    ofa_mrow_combine_kernel<<<dim3(nkvh*OFA_G, nq, ns), OFA_D, 0, stream>>>(part_o.get(), part_ml.get(), out, nsplit, nkvh, nq,
++        dst->nb[1], dst->nb[2], dst->nb[3]);
++    CUDA_CHECK(cudaGetLastError());
++}
++
++void ggml_cuda_occamy_fa_mrow(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
++    ofa_mrow_launch(ctx, dst, (char *) dst->data);
++}
++
++// MROW=2: stock result already in dst; run mrow into a temp buffer and log the diff for every call (first 400, then 1/200).
++void ggml_cuda_occamy_fa_mrow_compare(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
++    static int ncalls = 0;
++    ++ncalls;
++    if (!(ncalls <= 400 || ncalls % 200 == 0)) return;
++    GGML_ASSERT(ggml_is_contiguous(dst));
++    const int n = (int) ggml_nelements(dst);
++    ggml_cuda_pool_alloc<float> tmp(ctx.pool(), n);
++    ofa_mrow_launch(ctx, dst, (char *) tmp.get());
++    ggml_cuda_pool_alloc<unsigned int> res(ctx.pool(), 4);
++    cudaStream_t stream = ctx.stream();
++    CUDA_CHECK(cudaMemsetAsync(res.get(), 0, 4*sizeof(unsigned int), stream));
++    ofa_compare_kernel<<<16, 256, 0, stream>>>(tmp.get(), (const float *) dst->data, n, res.get());
++    unsigned int h[4];
++    CUDA_CHECK(cudaMemcpyAsync(h, res.get(), sizeof(h), cudaMemcpyDeviceToHost, stream));
++    CUDA_CHECK(cudaStreamSynchronize(stream));
++    float f[3];
++    memcpy(f, h, sizeof(f));
++    fprintf(stderr, "occamy_fa_mrow_cmp call=%d name=%s n_q=%lld n_kv=%lld ns=%lld max_abs=%.3e max_ref=%.3e max_rel=%.3e nan=%u\n",
++        ncalls, dst->name, (long long) dst->src[0]->ne[1], (long long) dst->src[1]->ne[1], (long long) dst->src[0]->ne[3], f[0], f[1], f[2], h[3]);
++}
++
+ // MV3: 2-row verify as two 1-row launches (GGML_CUDA_OCCAMY_FA_2CALL=1, default off).
+ // Builds 1-row views of Q/mask/dst per row and reuses the 1-row applicable() checks.
+ bool ggml_cuda_occamy_fa_2call_enabled() {
+diff --git a/ggml/src/ggml-cuda/fattn-occamy.cuh b/ggml/src/ggml-cuda/fattn-occamy.cuh
+index 72bd724..64cd821 100644
+--- a/ggml/src/ggml-cuda/fattn-occamy.cuh
++++ b/ggml/src/ggml-cuda/fattn-occamy.cuh
+@@ -13,3 +13,8 @@ void ggml_cuda_occamy_fa_kvq8(ggml_backend_cuda_context & ctx, ggml_tensor * dst
+ bool ggml_cuda_occamy_fa_2call_enabled();
+ bool ggml_cuda_occamy_fa_2call_applicable(const ggml_tensor * dst);
+ void ggml_cuda_occamy_fa_2call(ggml_backend_cuda_context & ctx, ggml_tensor * dst);
++// MRFA: native multi-row F16 split-K decode for Q->ne[1] in 2..4 (GGML_CUDA_OCCAMY_FA_MROW=1; =2 compare vs stock)
++int  ggml_cuda_occamy_fa_mrow_mode();
++bool ggml_cuda_occamy_fa_mrow_applicable(const ggml_tensor * dst);
++void ggml_cuda_occamy_fa_mrow(ggml_backend_cuda_context & ctx, ggml_tensor * dst);
++void ggml_cuda_occamy_fa_mrow_compare(ggml_backend_cuda_context & ctx, ggml_tensor * dst);
+diff --git a/ggml/src/ggml-cuda/fattn.cu b/ggml/src/ggml-cuda/fattn.cu
+index 85f4571..8c7b686 100644
+--- a/ggml/src/ggml-cuda/fattn.cu
++++ b/ggml/src/ggml-cuda/fattn.cu
+@@ -836,6 +836,17 @@ static void ggml_cuda_flash_attn_ext_impl(ggml_backend_cuda_context & ctx, ggml_
+         ggml_cuda_occamy_fa_compare(ctx, dst);
+         return;
+     }
++    // MRFA: native multi-row (n_q 2..4) F16 split-K decode (GGML_CUDA_OCCAMY_FA_MROW=1; =2 runs stock and logs the diff)
++    if (ggml_cuda_occamy_fa_mrow_applicable(dst)) {
++        if (ggml_cuda_occamy_fa_mrow_mode() == 1) {
++            *path_out = "occamy_mrow";
++            ggml_cuda_occamy_fa_mrow(ctx, dst);
++            return;
++        }
++        ggml_cuda_flash_attn_ext_stock(ctx, dst);
++        ggml_cuda_occamy_fa_mrow_compare(ctx, dst);
++        return;
++    }
+     // MV3: 2-row verify as two 1-row occamy launches (GGML_CUDA_OCCAMY_FA_2CALL=1)
+     if (ofa == 1 && ggml_cuda_occamy_fa_2call_applicable(dst)) {
+         *path_out = "occamy_splitk_2call";
+-- 
+2.43.0
+
+
+From 3b191f0aa92e8f0e34806b0c9307e97bbc40ae50 Mon Sep 17 00:00:00 2001
+From: claude <noreply@anthropic.com>
+Date: Tue, 17 Nov 2026 13:41:39 +0100
+Subject: [PATCH 3/9] ggml-cuda: occamy 2CALL: offset dst rows by nb[2], not
+ the head stride nb[1]
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012TpXXDKesx6WqrHo8bCYxx
+---
+ ggml/src/ggml-cuda/fattn-occamy.cu | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/ggml/src/ggml-cuda/fattn-occamy.cu b/ggml/src/ggml-cuda/fattn-occamy.cu
+index 5aef66c..bf2a4c3 100644
+--- a/ggml/src/ggml-cuda/fattn-occamy.cu
++++ b/ggml/src/ggml-cuda/fattn-occamy.cu
+@@ -1276,10 +1276,10 @@ bool ggml_cuda_occamy_fa_2call_enabled() {
+ 
+ static bool ofa_2call_views(const ggml_tensor * dst, ggml_tensor * d1, ggml_tensor * q1, ggml_tensor * m1, int r) {
+     *d1 = *dst; *q1 = *dst->src[0]; *m1 = *dst->src[3];
+-    q1->ne[1] = 1; m1->ne[1] = 1; d1->ne[1] = 1;
++    q1->ne[1] = 1; m1->ne[1] = 1; d1->ne[2] = 1;   // dst is [D, n_head, n_q, ns]: rows are ne[2]/nb[2]
+     q1->data = (char *) dst->src[0]->data + (size_t) r*dst->src[0]->nb[1];
+     m1->data = (char *) dst->src[3]->data + (size_t) r*dst->src[3]->nb[1];
+-    d1->data = (char *) dst->data + (size_t) r*dst->nb[1];
++    d1->data = (char *) dst->data + (size_t) r*dst->nb[2];
+     d1->src[0] = q1; d1->src[3] = m1;
+     return true;
+ }
+-- 
+2.43.0
+
+
+From a35378fda5631101251cf2bb7fd3d7b392cb2d49 Mon Sep 17 00:00:00 2001
+From: claude <noreply@anthropic.com>
+Date: Tue, 17 Nov 2026 13:42:25 +0100
+Subject: [PATCH 4/9] tests: FLASH_ATTN_EXT mrow_causal cases (80K verify
+ shape, n_q 1..5, padded-cache tail mask) + perf rows
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012TpXXDKesx6WqrHo8bCYxx
+---
+ tests/test-backend-ops.cpp | 50 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 50 insertions(+)
+
+diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
+index ec504c8..f506d6c 100644
+--- a/tests/test-backend-ops.cpp
++++ b/tests/test-backend-ops.cpp
+@@ -8492,6 +8492,45 @@ struct test_flash_attn_ext_maxwell_causal : public test_flash_attn_ext {
+     }
+ };
+ 
++// MRFA (occamy multi-row decode, GGML_CUDA_OCCAMY_FA_MROW=1): verify-shaped causal mask. The cache view has kv keys
++// of which only kv - tail are used (keys >= kv - tail masked, as in a padded KV cache view); row r sees keys up to
++// kv - tail - nb + r, so row 0 never sees the draft slot of row 1.
++struct test_flash_attn_ext_mrow_causal : public test_flash_attn_ext {
++    int64_t tail;
++
++    test_flash_attn_ext_mrow_causal(int64_t kv, int64_t nb, int64_t nr3, int64_t tail)
++        : test_flash_attn_ext(256, 256, 2, {8, nr3}, kv, nb, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16, {0, 2, 1, 3}),
++          tail(tail) {}
++
++    std::string vars() override {
++        return test_flash_attn_ext::vars() + ",mask=mrow_causal,tail=" + std::to_string(tail);
++    }
++
++    void initialize_tensors(ggml_context * ctx) override {
++        test_flash_attn_ext::initialize_tensors(ctx);
++        ggml_tensor * m = ggml_get_tensor(ctx, "m");
++        if (!m) {
++            return;
++        }
++        const int64_t ne0 = m->ne[0];
++        const int64_t ne1 = m->ne[1];
++        const int64_t ne3 = m->ne[3];
++        std::vector<float> data_f32(ne0*ne1*ne3);
++        for (int64_t i3 = 0; i3 < ne3; ++i3) {
++            const int64_t used = ne0 - tail - 64*i3;
++            for (int64_t row = 0; row < ne1; ++row) {
++                const int64_t last = used - ne1 + row;
++                for (int64_t key = 0; key < ne0; ++key) {
++                    data_f32[(i3*ne1 + row)*ne0 + key] = key > last ? -INFINITY : -0.0625f * float((key + row) % 5);
++                }
++            }
++        }
++        std::vector<ggml_fp16_t> data_f16(data_f32.size());
++        ggml_fp32_to_fp16_row(data_f32.data(), data_f16.data(), data_f16.size());
++        ggml_backend_tensor_set(m, data_f16.data(), 0, data_f16.size()*sizeof(ggml_fp16_t));
++    }
++};
++
+ // large Q values, so the online softmax has to rescale the partial results
+ struct test_flash_attn_ext_large_logits : public test_flash_attn_ext {
+     static constexpr int q_range = 20;
+@@ -12024,6 +12063,10 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+ // Test cases for performance evaluation: should be representative of real-world use cases
+ static std::vector<std::unique_ptr<test_case>> make_test_cases_perf() {
+     std::vector<std::unique_ptr<test_case>> test_cases;
++    // MRFA microbench: 80K verify-shaped decode attention, n_q 1/2/4
++    for (int64_t nb : {1, 2, 4}) {
++        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal(81920, nb, 1, 260));
++    }
+ 
+     // SWIGLU at a 27B-class FFN width, fused [gate|up] vs split operands
+     // note: same bytes either way, so a backend that indexes them differently shows it here
+@@ -12308,6 +12351,13 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_perf() {
+     test_cases.emplace_back(new test_flash_attn_ext(576, 512, 1, {20, 1}, 8192, 32, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16, {0, 1, 2, 3}, true, true));
+     test_cases.emplace_back(new test_flash_attn_ext(576, 512, 1, {20, 1}, 8192, 512, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16, {0, 1, 2, 3}, true, true));
+ 
++    // occamy multi-row decode FA (GGML_CUDA_OCCAMY_FA_MROW=1): n_q 1..5 (1 and 5 fall back), 80K verify shape, small/odd caches
++    for (int64_t nb : {1, 2, 3, 4, 5}) {
++        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal(81920, nb, 1, 260));
++        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal( 4096, nb, 1, 2048));
++        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal( 1028, nb, 2, 36));
++        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal(  260, nb, 2, 8));
++    }
+     // occamy GEMM FA (GGML_CUDA_FA_MAXWELL_GEMM=1): Q-tiled path, q > 1024 loops over <=1024-row chunks
+     test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 4096, 1024, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+     test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 8448, 1024, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+-- 
+2.43.0
+
+
+From 9e3803ac0ca2e109926c6ca6be80d1f5a168d33b Mon Sep 17 00:00:00 2001
+From: claude <noreply@anthropic.com>
+Date: Tue, 17 Nov 2026 13:57:33 +0100
+Subject: [PATCH 5/9] tests: move mrow_causal eval cases into
+ make_test_cases_eval
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012TpXXDKesx6WqrHo8bCYxx
+---
+ tests/test-backend-ops.cpp | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
+index f506d6c..b9c1560 100644
+--- a/tests/test-backend-ops.cpp
++++ b/tests/test-backend-ops.cpp
+@@ -12054,6 +12054,13 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+         }
+     }
+ 
++    // occamy multi-row decode FA (GGML_CUDA_OCCAMY_FA_MROW=1): n_q 1..5 (1 and 5 fall back), 80K verify shape, small/odd caches
++    for (int64_t nb : {1, 2, 3, 4, 5}) {
++        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal(81920, nb, 1, 260));
++        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal( 4096, nb, 1, 2048));
++        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal( 1028, nb, 2, 36));
++        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal(  260, nb, 2, 8));
++    }
+     return test_cases;
+ }
+ #ifdef _MSC_VER
+@@ -12351,13 +12358,6 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_perf() {
+     test_cases.emplace_back(new test_flash_attn_ext(576, 512, 1, {20, 1}, 8192, 32, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16, {0, 1, 2, 3}, true, true));
+     test_cases.emplace_back(new test_flash_attn_ext(576, 512, 1, {20, 1}, 8192, 512, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16, {0, 1, 2, 3}, true, true));
+ 
+-    // occamy multi-row decode FA (GGML_CUDA_OCCAMY_FA_MROW=1): n_q 1..5 (1 and 5 fall back), 80K verify shape, small/odd caches
+-    for (int64_t nb : {1, 2, 3, 4, 5}) {
+-        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal(81920, nb, 1, 260));
+-        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal( 4096, nb, 1, 2048));
+-        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal( 1028, nb, 2, 36));
+-        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal(  260, nb, 2, 8));
+-    }
+     // occamy GEMM FA (GGML_CUDA_FA_MAXWELL_GEMM=1): Q-tiled path, q > 1024 loops over <=1024-row chunks
+     test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 4096, 1024, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+     test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 8448, 1024, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+-- 
+2.43.0
+
+
+From 592364052cd9d436147ce1cab467f470cc88f00c Mon Sep 17 00:00:00 2001
+From: claude <noreply@anthropic.com>
+Date: Tue, 17 Nov 2026 14:02:54 +0100
+Subject: [PATCH 6/9] MRFA: n_q=2 default nsplit = 4 waves of mrow R2 occupancy
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012TpXXDKesx6WqrHo8bCYxx
+---
+ ggml/src/ggml-cuda/fattn-occamy.cu | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/ggml/src/ggml-cuda/fattn-occamy.cu b/ggml/src/ggml-cuda/fattn-occamy.cu
+index bf2a4c3..0923d40 100644
+--- a/ggml/src/ggml-cuda/fattn-occamy.cu
++++ b/ggml/src/ggml-cuda/fattn-occamy.cu
+@@ -978,7 +978,7 @@ static void ofa_launch(ggml_backend_cuda_context & ctx, const ggml_tensor * dst,
+ // traffic stays at the 1-row level. Each warp walks all tokens of the split in order (no cross-warp combine): output
+ // is fp32-equivalent to the 1-row kernel, not bitwise. Mask row r is read at mask + r*nb[1]; dst row r at dst + r*nb[2]
+ // (dst is [D, n_head, n_q, ns]). Knobs: GGML_CUDA_OCCAMY_FA_MROW_PF (1 = register-prefetch the next tile, default 1),
+-// GGML_CUDA_OCCAMY_FA_MROW_NSPLIT (override split count; default = the 1-row split count).
++// GGML_CUDA_OCCAMY_FA_MROW_NSPLIT (override split count; default see ofa_mrow_launch).
+ #define OFM_TT 16
+ 
+ template <int R, bool PF>
+@@ -1179,7 +1179,7 @@ static void ofa_mrow_launch(ggml_backend_cuda_context & ctx, const ggml_tensor *
+     const int id = ggml_cuda_get_device();
+     const int nq = (int) Q->ne[1];
+ 
+-    static int resident = 0, waves = 1, pf = 1, nsplit_env = 0;
++    static int resident = 0, waves = 1, pf = 1, nsplit_env = 0, res_r2 = 0;
+     if (resident == 0) {
+         int nb = 0;
+         CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&nb, ofa_decode_kernel<0>, OFA_NT, 0));
+@@ -1194,13 +1194,18 @@ static void ofa_mrow_launch(ggml_backend_cuda_context & ctx, const ggml_tensor *
+         CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&o2, pf ? ofa_mrow_kernel<2, true> : ofa_mrow_kernel<2, false>, 128, 0));
+         CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&o3, pf ? ofa_mrow_kernel<3, true> : ofa_mrow_kernel<3, false>, 192, 0));
+         CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&o4, pf ? ofa_mrow_kernel<4, true> : ofa_mrow_kernel<4, false>, 256, 0));
++        res_r2 = std::max(1, o2) * ggml_cuda_info().devices[id].nsm;
+         fprintf(stderr, "ggml_cuda: occamy FA mrow pf %d nsplit_env %d, 1-row resident %d, mrow blocks/SM R2 %d R3 %d R4 %d (nsm %d)\n",
+             pf, nsplit_env, resident, o2, o3, o4, ggml_cuda_info().devices[id].nsm);
+     }
+     const int nkvh = (int) K->ne[2];
+     const int ns   = (int) Q->ne[3];
+     const int n_kv = (int) K->ne[1];
+-    int nsplit = nsplit_env > 0 ? nsplit_env : (resident*waves + nkvh*ns - 1) / (nkvh*ns);   // same as the 1-row path
++    // default: R=2 -> 4 waves of mrow R2 CTAs (80K sweep: 24 splits 1.62 ms, 64 1.54, 192 1.24); R=3/4 -> 1-row split
++    // count (fewer splits measured best there: R4 24 splits 1.79 ms vs 64/192 1.93).
++    int nsplit = nsplit_env > 0 ? nsplit_env
++               : nq == 2 ? (4*res_r2 + nkvh*ns - 1) / (nkvh*ns)
++                         : (resident*waves + nkvh*ns - 1) / (nkvh*ns);
+     nsplit = std::max(1, std::min(nsplit, n_kv / (OFA_T*OFA_NW*4)));
+ 
+     const long long nc = ++ofm_calls[nq];
+-- 
+2.43.0
+
+
+From 33bc3dcc1b5f448dbb7613dc642015dae829a9fc Mon Sep 17 00:00:00 2001
+From: m6k-patcher <noreply@anthropic.com>
+Date: Tue, 17 Nov 2026 14:42:44 +0100
+Subject: [PATCH 7/9] MV3: LLAMA_MV3_PHASE per-call phase timing (host phases,
+ CUDA first/last launch span), default off
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012TpXXDKesx6WqrHo8bCYxx
+---
+ ggml/src/ggml-cuda/ggml-cuda.cu |  60 ++++++++++++++++++
+ src/llama-context.cpp           |  72 +++++++++++++++++++++-
+ src/llama-context.h             |   5 ++
+ src/llama-memory-recurrent.cpp  |   4 ++
+ src/llama-mv3.h                 | 104 ++++++++++++++++++++++++++++++++
+ 5 files changed, 244 insertions(+), 1 deletion(-)
+ create mode 100644 src/llama-mv3.h
+
+diff --git a/ggml/src/ggml-cuda/ggml-cuda.cu b/ggml/src/ggml-cuda/ggml-cuda.cu
+index 2535c93..f01a8a7 100644
+--- a/ggml/src/ggml-cuda/ggml-cuda.cu
++++ b/ggml/src/ggml-cuda/ggml-cuda.cu
+@@ -5368,7 +5368,61 @@ static bool ggml_cuda_graph_set_enabled(ggml_backend_cuda_context * cuda_ctx, co
+ }
+ #endif // USE_CUDA_GRAPH
+ 
++static enum ggml_status ggml_backend_cuda_graph_compute_impl(ggml_backend_t backend, ggml_cgraph * cgraph);
++
++// MV3: LLAMA_MV3_PHASE=<file> (default off). Per llama compute call ("group"): cudaEvent at the first and last host launch,
++// host launch us summed over backend compute calls. Events are read only after llama's existing sync (no extra sync here).
++#include <deque>
++#include <unordered_map>
++struct mv3_group { cudaEvent_t first = nullptr, last = nullptr; double launch_us = 0; int calls = 0; };
++struct mv3_cuda_t {
++    bool on = getenv("LLAMA_MV3_PHASE") != nullptr && getenv("LLAMA_MV3_PHASE")[0] != 0;
++    std::mutex mu; std::unordered_map<void *, std::deque<mv3_group>> q; std::vector<mv3_group> pool;
++    mv3_group make() {
++        if (!pool.empty()) { mv3_group g = pool.back(); pool.pop_back(); g.launch_us = 0; g.calls = 0; return g; }
++        mv3_group g; cudaEventCreate(&g.first); cudaEventCreate(&g.last); return g;
++    }
++};
++static mv3_cuda_t & mv3_cuda() { static mv3_cuda_t t; return t; }
++static void ggml_backend_cuda_mv3_group_begin(ggml_backend_t backend) {
++    auto & m = mv3_cuda(); if (!m.on) return;
++    std::lock_guard<std::mutex> l(m.mu); auto & d = m.q[backend->context];
++    if (!d.empty() && d.back().calls == 0) return;
++    d.push_back(m.make());
++}
++static int ggml_backend_cuda_mv3_group_read(ggml_backend_t backend, float * span_ms, double * launch_us, int max) {
++    auto & m = mv3_cuda(); if (!m.on) return 0;
++    std::lock_guard<std::mutex> l(m.mu); auto & d = m.q[backend->context]; int n = 0;
++    while (!d.empty()) {
++        mv3_group g = d.front(); d.pop_front();
++        if (n < max) {
++            float ms = -1.0f;
++            if (g.calls > 0 && cudaEventElapsedTime(&ms, g.first, g.last) != cudaSuccess) { ms = -1.0f; cudaGetLastError(); }
++            span_ms[n] = ms; launch_us[n] = g.launch_us; n++;
++        }
++        m.pool.push_back(g);
++    }
++    return n;
++}
++
+ static enum ggml_status ggml_backend_cuda_graph_compute(ggml_backend_t backend, ggml_cgraph * cgraph) {
++    auto & m = mv3_cuda();
++    if (!m.on) { return ggml_backend_cuda_graph_compute_impl(backend, cgraph); }
++    ggml_backend_cuda_context * cc = (ggml_backend_cuda_context *) backend->context;
++    mv3_group * g = nullptr;
++    { std::lock_guard<std::mutex> l(m.mu); auto & d = m.q[backend->context]; if (!d.empty()) { g = &d.back(); } }
++    if (!g) { return ggml_backend_cuda_graph_compute_impl(backend, cgraph); }
++    const auto t0 = std::chrono::steady_clock::now();
++    ggml_cuda_set_device(cc->device);
++    if (g->calls == 0) { cudaEventRecord(g->first, cc->stream()); }
++    const enum ggml_status st = ggml_backend_cuda_graph_compute_impl(backend, cgraph);
++    cudaEventRecord(g->last, cc->stream());
++    g->calls++;
++    g->launch_us += std::chrono::duration<double, std::micro>(std::chrono::steady_clock::now() - t0).count();
++    return st;
++}
++
++static enum ggml_status ggml_backend_cuda_graph_compute_impl(ggml_backend_t backend, ggml_cgraph * cgraph) {
+     ggml_backend_cuda_context * cuda_ctx = (ggml_backend_cuda_context *) backend->context;
+ 
+     ggml_cuda_set_device(cuda_ctx->device);
+@@ -6753,6 +6807,12 @@ static void * ggml_backend_cuda_reg_get_proc_address(ggml_backend_reg_t reg, con
+     if (strcmp(name, "ggml_backend_unregister_host_buffer") == 0) {
+         return (void *)ggml_backend_cuda_unregister_host_buffer;
+     }
++    if (strcmp(name, "ggml_backend_cuda_mv3_group_begin") == 0) {
++        return (void *)ggml_backend_cuda_mv3_group_begin;
++    }
++    if (strcmp(name, "ggml_backend_cuda_mv3_group_read") == 0) {
++        return (void *)ggml_backend_cuda_mv3_group_read;
++    }
+     if (strcmp(name, "ggml_backend_get_features") == 0) {
+         return (void *)ggml_backend_cuda_get_features;
+     }
+diff --git a/src/llama-context.cpp b/src/llama-context.cpp
+index 7e69744..2c50f3c 100644
+--- a/src/llama-context.cpp
++++ b/src/llama-context.cpp
+@@ -487,6 +487,25 @@ llama_context::llama_context(
+             sampling.token_ids_full_vocab[i] = i;
+         }
+     }
++
++    if (mv3::on()) {
++        mv3_.init((int) model.hparams.n_layer, (int) model.hparams.n_embd, (int) cparams.ctx_type);
++    }
++}
++
++ggml_backend_t llama_context::mv3_cuda_backend() const {
++    for (auto * b : backend_ptrs) {
++        if (b && strncmp(ggml_backend_name(b), "CUDA", 4) == 0) {
++            return b;
++        }
++    }
++    return nullptr;
++}
++
++template <typename F>
++static F mv3_proc(ggml_backend_t b, const char * name) {
++    auto * reg = ggml_backend_dev_backend_reg(ggml_backend_get_device(b));
++    return reg ? (F) ggml_backend_reg_get_proc_address(reg, name) : nullptr;
+ }
+ 
+ llama_context::~llama_context() {
+@@ -782,7 +801,21 @@ void llama_context::synchronize() {
+         return;
+     }
+ 
+-    ggml_backend_sched_synchronize(sched.get());
++    if (mv3::on() && !mv3_.pending.empty()) {
++        const int64_t t0 = ggml_time_us();
++        ggml_backend_sched_synchronize(sched.get());
++        const double waited = (double) (ggml_time_us() - t0);
++        float spans[64]; double launch[64]; int n = 0;
++        if (ggml_backend_t b = mv3_cuda_backend()) {
++            // events are complete: the sync above returned. no extra sync here.
++            if (auto rd = mv3_proc<mv3::group_read_t>(b, "ggml_backend_cuda_mv3_group_read")) {
++                n = rd(b, spans, launch, 64);
++            }
++        }
++        mv3_.synced(waited, spans, launch, n);
++    } else {
++        ggml_backend_sched_synchronize(sched.get());
++    }
+ 
+     // FIXME: if multiple single tokens are evaluated without a synchronization,
+     // the stats will be added to the prompt evaluation stats
+@@ -1412,12 +1445,19 @@ bool llama_context::set_adapter_cvec(
+ }
+ 
+ llm_graph_result * llama_context::process_ubatch(const llama_ubatch & ubatch, llm_graph_type gtype, llama_memory_context_i * mctx, ggml_status & ret) {
++    const bool mv3_on = mv3::on();
++    int64_t mv3_t = mv3_on ? ggml_time_us() : 0;
++    const auto mv3_lap = [&](double & acc) { if (mv3_on) { const int64_t n = ggml_time_us(); acc += (double) (n - mv3_t); mv3_t = n; } };
++    if (mv3_on) { mv3_rec.reused = 0; }
++
+     if (mctx && !mctx->apply()) {
+         LLAMA_LOG_ERROR("%s: failed to apply memory context\n", __func__);
+         ret = GGML_STATUS_FAILED;
+         return nullptr;
+     }
+ 
++    mv3_lap(mv3_rec.apply);
++
+     auto * res = get_gf_res_prev();
+     auto * gf  = res->get_gf();
+ 
+@@ -1436,6 +1476,7 @@ llm_graph_result * llama_context::process_ubatch(const llama_ubatch & ubatch, ll
+         }
+ 
+         n_reused++;
++        mv3_rec.reused = 1;
+     } else {
+         gf_res_prev_active = nullptr;
+         res->reset();
+@@ -1464,17 +1505,29 @@ llm_graph_result * llama_context::process_ubatch(const llama_ubatch & ubatch, ll
+         gf_res_prev_active = res;
+     }
+ 
++    mv3_lap(mv3_rec.graph);
++
+     // set the input data for the input tensors
+     {
+         //const auto t_start_us = ggml_time_us();
+ 
+         // FIXME this call causes a crash if any model inputs were not used in the graph and were therefore not allocated
+         res->set_inputs(&ubatch);
++        mv3_lap(mv3_rec.setin);
+ 
+         //LLAMA_LOG_INFO("graph set inputs time: %.3f ms\n", (ggml_time_us() - t_start_us)/1000.0);
+     }
+ 
++    if (mv3_on) {
++        if (ggml_backend_t b = mv3_cuda_backend()) {
++            if (auto bg = mv3_proc<mv3::group_begin_t>(b, "ggml_backend_cuda_mv3_group_begin")) {
++                bg(b);
++            }
++        }
++        mv3_t = ggml_time_us();
++    }
+     const auto status = graph_compute(res->get_gf(), ubatch.n_tokens > 1);
++    mv3_lap(mv3_rec.compute);
+     if (status != GGML_STATUS_SUCCESS) {
+         LLAMA_LOG_ERROR("%s: failed to compute graph, compute status: %d\n", __func__, status);
+         ret = status;
+@@ -1553,7 +1606,9 @@ int llama_context::encode(const llama_batch_ext & batch_inp) {
+     cparams.causal_attn = false;
+ 
+     ggml_status status;
++    if (mv3::on()) { mv3_rec = mv3::Rec(); }
+     const auto * res = process_ubatch(ubatch, LLM_GRAPH_TYPE_ENCODER, nullptr, status);
++    if (mv3::on() && res) { mv3_rec.rs = mv3::rs_acc(); mv3::rs_acc() = 0; mv3_.commit((int) ubatch.n_tokens, mv3_rec); }
+ 
+     cparams.causal_attn = causal_attn_org;
+ 
+@@ -1742,6 +1797,8 @@ int llama_context::decode(const llama_batch_ext & batch_inp) {
+         return -1;
+     }
+ 
++    const int64_t mv3_t_start = mv3::on() ? ggml_time_us() : 0;
++
+     const auto & vocab   = model.vocab;
+     const auto & hparams = model.hparams;
+ 
+@@ -1883,6 +1940,9 @@ int llama_context::decode(const llama_batch_ext & batch_inp) {
+     int64_t n_outputs_prev = 0;
+     int64_t n_tokens_prev  = 0;
+ 
++    bool mv3_first = true;
++    double mv3_prep = mv3::on() ? (double) (ggml_time_us() - mv3_t_start) : 0.0;
++
+     do {
+         const auto & ubatch = mctx->get_ubatch();
+ 
+@@ -1904,8 +1964,12 @@ int llama_context::decode(const llama_batch_ext & batch_inp) {
+ 
+         ggml_status status;
+ 
++        if (mv3::on()) { mv3_rec = mv3::Rec(); mv3_rec.prep = mv3_first ? mv3_prep : 0.0; mv3_first = false; }
++
+         const auto * res = process_ubatch(ubatch, ctx_type_to_graph_type(cparams.ctx_type), mctx.get(), status);
+ 
++        const int64_t mv3_t_fetch = mv3::on() ? ggml_time_us() : 0;
++
+         if (!res) {
+             // the last ubatch failed or was aborted -> remove all positions of that ubatch from the memory module
+             llama_pos pos_min[LLAMA_MAX_SEQ];
+@@ -2067,6 +2131,12 @@ int llama_context::decode(const llama_batch_ext & batch_inp) {
+ 
+         n_outputs_prev += n_outputs;
+         n_tokens_prev  += ubatch.n_tokens;
++
++        if (mv3::on()) {
++            mv3_rec.fetch = (double) (ggml_time_us() - mv3_t_fetch);
++            mv3_rec.rs    = mv3::rs_acc(); mv3::rs_acc() = 0;
++            mv3_.commit((int) ubatch.n_tokens, mv3_rec);
++        }
+     } while (mctx->next());
+ 
+     // set to total number of outputs in the batch, for use in llama_get_logits_ith
+diff --git a/src/llama-context.h b/src/llama-context.h
+index 69bc01c..fe10b7b 100644
+--- a/src/llama-context.h
++++ b/src/llama-context.h
+@@ -8,6 +8,7 @@
+ #include "llama-impl.h"
+ #include "llama-memory.h"
+ #include "llama-moe-cache.h"
++#include "llama-mv3.h"
+ 
+ #include "ggml-cpp.h"
+ #include "ggml-opt.h"
+@@ -422,6 +423,10 @@ private:
+     mutable int64_t t_compute_start_us = 0;
+     mutable int64_t n_queued_tokens    = 0;
+ 
++    mv3::Ctx mv3_;   // LLAMA_MV3_PHASE
++    mv3::Rec mv3_rec;
++    ggml_backend_t mv3_cuda_backend() const;
++
+     mutable int32_t n_p_eval = 0; // number of tokens in eval calls for the prompt (with batch size > 1)
+     mutable int32_t n_eval   = 0; // number of eval calls
+ 
+diff --git a/src/llama-memory-recurrent.cpp b/src/llama-memory-recurrent.cpp
+index 2893d81..ea8e818 100644
+--- a/src/llama-memory-recurrent.cpp
++++ b/src/llama-memory-recurrent.cpp
+@@ -5,6 +5,7 @@
+ #include "llama-io.h"
+ #include "llama-batch.h"
+ #include "llama-model.h"
++#include "llama-mv3.h"
+ 
+ #include <algorithm>
+ #include <cassert>
+@@ -166,6 +167,7 @@ void llama_memory_recurrent::clear(bool data) {
+ }
+ 
+ bool llama_memory_recurrent::seq_rm(llama_seq_id seq_id, llama_pos p0, llama_pos p1) {
++    mv3::RsScope mv3_rs;
+     uint32_t new_head = size;
+ 
+     if (p0 < 0) {
+@@ -263,6 +265,7 @@ bool llama_memory_recurrent::seq_rm(llama_seq_id seq_id, llama_pos p0, llama_pos
+ }
+ 
+ void llama_memory_recurrent::seq_cp(llama_seq_id seq_id_src, llama_seq_id seq_id_dst, llama_pos p0, llama_pos p1) {
++    mv3::RsScope mv3_rs;
+     if (seq_id_src == seq_id_dst) {
+         return;
+     }
+@@ -519,6 +522,7 @@ bool llama_memory_recurrent::prepare(const std::vector<llama_ubatch> & ubatches)
+ }
+ 
+ bool llama_memory_recurrent::find_slot(const llama_ubatch & ubatch) {
++    mv3::RsScope mv3_rs;
+     const uint32_t n_seq_tokens = ubatch.n_seq_tokens;
+     const uint32_t n_seqs       = ubatch.n_seqs;
+ 
+diff --git a/src/llama-mv3.h b/src/llama-mv3.h
+new file mode 100644
+index 0000000..197b80e
+--- /dev/null
++++ b/src/llama-mv3.h
+@@ -0,0 +1,104 @@
++#pragma once
++// MV3: LLAMA_MV3_PHASE=<file> (default off). Per-call host phase timing around llama decode, keyed by (ctx role, n_tokens).
++// Zero cost when off: every hook is guarded by mv3::on() (a cached bool).
++#include "ggml.h"
++#include <cstdint>
++#include <cstdio>
++#include <cstdlib>
++#include <deque>
++#include <map>
++#include <mutex>
++#include <string>
++#include <utility>
++
++namespace mv3 {
++
++struct Rec { // per-ubatch phase accumulator (us)
++    double prep = 0, apply = 0, graph = 0, setin = 0, compute = 0, fetch = 0, rs = 0;
++    int reused = 0;
++};
++
++struct Row {
++    long calls = 0, reused = 0, synced = 0;
++    double prep = 0, apply = 0, graph = 0, setin = 0, compute = 0, launch = 0, sync = 0, fetch = 0, rs = 0, gpu_ms = 0;
++    int n_layer = 0, n_embd = 0, type = 0;
++};
++
++typedef std::pair<int, int> Key; // (ctx order, n_tokens)
++
++struct State {
++    const char * path = getenv("LLAMA_MV3_PHASE");
++    bool on = path != nullptr && path[0] != 0;
++    std::mutex mu;
++    std::map<Key, Row> rows;
++    long n = 0;
++    int n_ctx = 0;
++    void dump() { // caller holds mu
++        FILE * f = fopen(path, "w"); if (!f) return;
++        fprintf(f, "#role\tn_tokens\tn_layer\tn_embd\tctx_type\tcalls\treused\tsynced"
++                   "\tprep_us\tapply_us\tgraph_us\tsetin_us\tcompute_us\tlaunch_us\tsync_us\tfetch_us\trs_us\tgpu_span_ms"
++                   "\tmean_prep_us\tmean_apply_us\tmean_graph_us\tmean_setin_us\tmean_compute_us\tmean_launch_us\tmean_sync_us\tmean_fetch_us\tmean_rs_us\tmean_gpu_span_ms\n");
++        for (auto & kv : rows) {
++            const Row & r = kv.second; const double c = r.calls ? (double) r.calls : 1, s = r.synced ? (double) r.synced : 1;
++            fprintf(f, "ctx%d\t%d\t%d\t%d\t%d\t%ld\t%ld\t%ld\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\t%.4f"
++                       "\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.4f\n",
++                kv.first.first, kv.first.second, r.n_layer, r.n_embd, r.type, r.calls, r.reused, r.synced,
++                r.prep, r.apply, r.graph, r.setin, r.compute, r.launch, r.sync, r.fetch, r.rs, r.gpu_ms,
++                r.prep/c, r.apply/c, r.graph/c, r.setin/c, r.compute/c, r.launch/c, r.sync/s, r.fetch/c, r.rs/c, r.gpu_ms/s);
++        }
++        fclose(f);
++    }
++    ~State() { if (on) { std::lock_guard<std::mutex> l(mu); if (n) dump(); } }
++};
++
++inline State & S() { static State s; return s; }
++inline bool on() { static const bool v = S().on; return v; }
++
++// recurrent-state work outside the graph (seq_rm/seq_cp/find_slot), consumed by the next committed ubatch
++inline double & rs_acc() { static thread_local double v = 0; return v; }
++struct RsScope {
++    int64_t t0; bool a;
++    RsScope() : t0(0), a(on()) { if (a) t0 = ggml_time_us(); }
++    ~RsScope() { if (a) rs_acc() += (double) (ggml_time_us() - t0); }
++};
++
++// per-context bookkeeping
++struct Ctx {
++    int order = -1;
++    int n_layer = 0, n_embd = 0, type = 0;
++    std::deque<Key> pending; // ubatches launched, not yet synchronized
++    double prep_decode = 0;  // decode-level prep, charged to the first ubatch
++    bool first = true;
++    void init(int nl, int ne, int ty) {
++        if (!on() || order >= 0) return;
++        std::lock_guard<std::mutex> l(S().mu); order = S().n_ctx++; n_layer = nl; n_embd = ne; type = ty;
++    }
++    void commit(int n_tokens, const Rec & r) {
++        std::lock_guard<std::mutex> l(S().mu);
++        Key k(order, n_tokens); Row & w = S().rows[k];
++        w.n_layer = n_layer; w.n_embd = n_embd; w.type = type;
++        w.calls++; w.reused += r.reused;
++        w.prep += r.prep; w.apply += r.apply; w.graph += r.graph; w.setin += r.setin; w.compute += r.compute;
++        w.fetch += r.fetch; w.rs += r.rs;
++        pending.push_back(k);
++        if (++S().n % 50 == 0) S().dump();
++    }
++    // called after the existing sync returned: waited_us over all pending ubatches, spans[i] = GPU ms for pending i (or <0)
++    void synced(double waited_us, const float * spans, const double * launch, int n_spans) {
++        if (pending.empty()) return;
++        std::lock_guard<std::mutex> l(S().mu);
++        const double share = waited_us / (double) pending.size();
++        for (size_t i = 0; i < pending.size(); i++) {
++            Row & w = S().rows[pending[i]];
++            w.sync += share; w.synced++;
++            if ((int) i < n_spans) { if (spans[i] >= 0) w.gpu_ms += spans[i]; w.launch += launch[i]; }
++        }
++        pending.clear();
++    }
++};
++
++// CUDA backend hooks (resolved through the backend reg proc address)
++typedef void (*group_begin_t)(ggml_backend_t);
++typedef int  (*group_read_t)(ggml_backend_t, float * span_ms, double * launch_us, int max);
++
++} // namespace mv3
+-- 
+2.43.0
+
+
+From 181ac5fa4a7e7c6e1eecd8faae3799beb9f7f871 Mon Sep 17 00:00:00 2001
+From: claude <noreply@anthropic.com>
+Date: Tue, 17 Nov 2026 14:51:25 +0100
+Subject: [PATCH 8/9] MV3: fix n_layer() call
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012TpXXDKesx6WqrHo8bCYxx
+---
+ src/llama-context.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/llama-context.cpp b/src/llama-context.cpp
+index 2c50f3c..6c39da2 100644
+--- a/src/llama-context.cpp
++++ b/src/llama-context.cpp
+@@ -489,7 +489,7 @@ llama_context::llama_context(
+     }
+ 
+     if (mv3::on()) {
+-        mv3_.init((int) model.hparams.n_layer, (int) model.hparams.n_embd, (int) cparams.ctx_type);
++        mv3_.init((int) model.hparams.n_layer(), (int) model.hparams.n_embd, (int) cparams.ctx_type);
+     }
+ }
+ 
+-- 
+2.43.0
+
+
+From fe984c58065201786900776181b83b089aa3d57c Mon Sep 17 00:00:00 2001
+From: claude <noreply@anthropic.com>
+Date: Tue, 17 Nov 2026 16:27:24 +0100
+Subject: [PATCH 9/9] occamy-gdn: fused two-token MTP1 verify segment
+ (GGML_CUDA_OCCAMY_GDN_T2)
+
+Extend the Track-G fused qwen35moe GDN layer segment to a 2-token,
+single-sequence verify batch. Token 2 consumes the conv/recurrent state
+produced by token 1; rollback planes get state after t1 (plane 1) and
+after t2 (plane 0), matching the unfused graph. Default off.
+
+Adds test-backend-ops case OCCAMY_GDN_T2 (whole-graph, fused vs CPU).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012TpXXDKesx6WqrHo8bCYxx
+---
+ ggml/src/ggml-cuda/ggml-cuda.cu   |   6 +
+ ggml/src/ggml-cuda/occamy-gdn.cu  | 255 ++++++++++++++++++++++++++++--
+ ggml/src/ggml-cuda/occamy-gdn.cuh |   7 +
+ tests/test-backend-ops.cpp        | 135 ++++++++++++++++
+ 4 files changed, 387 insertions(+), 16 deletions(-)
+
+diff --git a/ggml/src/ggml-cuda/ggml-cuda.cu b/ggml/src/ggml-cuda/ggml-cuda.cu
+index f01a8a7..b03793d 100644
+--- a/ggml/src/ggml-cuda/ggml-cuda.cu
++++ b/ggml/src/ggml-cuda/ggml-cuda.cu
+@@ -3813,6 +3813,12 @@ static int ggml_cuda_try_fuse(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph
+         ggml_cuda_occamy_gdn_match m;
+         if (ggml_cuda_occamy_gdn_match_window(*cuda_ctx, cgraph, i, m)) {
+             if (mv1::mode()) { mv1::R().add("WINDOW " + mv1::tag() + " gdn_matched n_seqs=" + std::to_string(m.n_seqs) + " n_nodes=" + std::to_string(m.n_nodes)); }
++            if (m.nt == 2) {   // GDN2 (GGML_CUDA_OCCAMY_GDN_T2=1): MTP1 verify, one launch for both tokens; else stock nodes
++                if (!ggml_cuda_occamy_gdn_t2(*cuda_ctx, m)) { return 0; }
++                cuda_ctx->q8r_valid = false;
++                cuda_ctx->q8r_pend  = false;
++                return m.n_nodes - 1;
++            }
+             if(m.n_seqs==2 && ggml_cuda_occamy_n2split() && ggml_cuda_occamy_gdn_split2(*cuda_ctx, m)) {
+                 cuda_ctx->q8r_valid = false;
+                 cuda_ctx->q8r_pend  = false;
+diff --git a/ggml/src/ggml-cuda/occamy-gdn.cu b/ggml/src/ggml-cuda/occamy-gdn.cu
+index bd0cc91..17660ac 100644
+--- a/ggml/src/ggml-cuda/occamy-gdn.cu
++++ b/ggml/src/ggml-cuda/occamy-gdn.cu
+@@ -474,9 +474,18 @@ __device__ __forceinline__ void dot2v2(unsigned w0, unsigned w1, unsigned w2, un
+ struct Params2 { Params p[2]; };
+ constexpr int XS_HALF = H / 64 * CH;   // 2176 floats: one K=2048 activation set
+ constexpr int N2R = 4;                 // max ssm_out rows per warp
++// GDN2 (T2 = 1, GGML_CUDA_OCCAMY_GDN_T2=1): the same launch for ONE sequence and TWO tokens (MTP1 verify, n_rs_seq = 1).
++// p[0] = token 1 (h/out row 0, scratch, snapshot plane 1 = state after token 1), p[1] = token 2 (h/out row 1, scratch2,
++// plane 0 = state after token 2); both read the p[0] source row. Phase A is unchanged (two activation sets). Phase B runs
++// one RQK+PCS item loop: per channel conv1d over [c0,c1,c2,x1] and [c1,c2,x1,x2] (as the unfused concat/ssm_conv),
++// per state tile one read, token 1 delta rule -> plane-1 store, token 2 continues from the registers -> plane-0 store.
++// Conv state rows written: plane 1 = [c1,c2,x1], plane 0 = [c2,x1,x2] (v channels in B by their owner, q/k in C).
++// PCS publish counts on scratch's hcnt only; the finishing block builds xg/sg for both tokens. Phase C is unchanged.
++template <int T2>
+ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+     extern __shared__ float smem[];
+     __shared__ float qn[SD], kn[SD], vv[CGC], red[NW];
++    __shared__ float qn2[T2 ? SD : 1], kn2[T2 ? SD : 1], vv2[T2 ? CGC : 1], red2[T2 ? NW : 1];
+     __shared__ unsigned hc[NVH], fin[NVH + 1];
+     float * xs = smem;
+     float2 * sums = (float2 *)(smem + DI / 64 * CH);
+@@ -526,6 +535,144 @@ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+         }
+     }
+     grid_barrier(s0);
++    if constexpr (T2) {   // ---- phase B (RQK + PCS), GDN2: both tokens per item ----
++        const Params & P = PP.p[0];
++        const int row = __ldg(P.s_copy);
++        const float * conv_in = P.conv_base + (size_t)row * P.conv_stride;
++        const float * S_in    = P.ssm_base  + (size_t)row * P.ssm_stride;
++        float * const co_1 = PP.p[0].conv_out, * const co_2 = PP.p[1].conv_out;
++        float * const so_1 = PP.p[0].S_out,    * const so_2 = PP.p[1].S_out;
++        if (threadIdx.x < NVH) { hc[threadIdx.x] = 0; if (threadIdx.x == 0) fin[NVH] = 0; }
++        const int it_lo = (int)(((long long)blockIdx.x * (NVH * NCG)) / gridDim.x);
++        const int it_hi = (int)(((long long)(blockIdx.x + 1) * (NVH * NCG)) / gridDim.x);
++        int kh_c = -1, hv_c = -1;
++        float qs = 0.f, ks = 0.f, qs2 = 0.f, ks2 = 0.f, gexp = 0.f, beta = 0.f, gexp2 = 0.f, beta2 = 0.f;
++        for (int it = it_lo; it < it_hi; ++it) {
++            const int hv = it / (2 * NCG) + NKH * ((it / NCG) & 1);
++            const int cg = it % NCG, kh = hv % NKH;
++            const bool need_qk = kh != kh_c;
++            {
++                const int t = threadIdx.x;
++                if (need_qk) {
++                const int c = t < SD ? kh * SD + t : H + kh * SD + (t - SD);
++                const float * ci = conv_in + c * 3; const float * w = L.conv_w + c * 4;
++                const float x1 = __ldcg(&s0->qkv[c]), x2 = __ldcg(&s1->qkv[c]);
++                const float i0 = ci[0], i1 = ci[1], i2 = ci[2];
++                float y  = i0 * w[0] + i1 * w[1] + i2 * w[2] + x1 * w[3];
++                float y2 = i1 * w[0] + i2 * w[1] + x1 * w[2] + x2 * w[3];
++                y = silu(y); y2 = silu(y2);
++                const float sq = warp_sum(y * y), sq2 = warp_sum(y2 * y2);
++                if (lane == 0) { red[warp] = sq; red2[warp] = sq2; }
++                if (t < SD) { qn[t] = y; qn2[t] = y2; } else { kn[t - SD] = y; kn2[t - SD] = y2; }
++                }
++                if (t < CGC) {
++                    const int cv = 2 * H + hv * SD + cg * CGC + t;   // unique owner: read all, then write both planes
++                    const float * cvi = conv_in + cv * 3; const float * wv = L.conv_w + cv * 4;
++                    const float xv1 = __ldcg(&s0->qkv[cv]), xv2 = __ldcg(&s1->qkv[cv]);
++                    const float i0 = cvi[0], i1 = cvi[1], i2 = cvi[2];
++                    const float yv  = i0 * wv[0] + i1 * wv[1] + i2 * wv[2] + xv1 * wv[3];
++                    const float yv2 = i1 * wv[0] + i2 * wv[1] + xv1 * wv[2] + xv2 * wv[3];
++                    vv[t] = silu(yv); vv2[t] = silu(yv2);
++                    float * o1 = co_1 + cv * 3; o1[0] = i1; o1[1] = i2;  o1[2] = xv1;
++                    float * o2 = co_2 + cv * 3; o2[0] = i2; o2[1] = xv1; o2[2] = xv2;
++                }
++            }
++            __syncthreads();
++            if (need_qk) {
++            qs  = rsqrtf((red[0] + red[1] + red[2] + red[3]) / SD + P.eps_l2) * P.scale_l2;
++            ks  = rsqrtf((red[4] + red[5] + red[6] + red[7]) / SD + P.eps_l2) * P.scale_l2;
++            qs2 = rsqrtf((red2[0] + red2[1] + red2[2] + red2[3]) / SD + P.eps_l2) * P.scale_l2;
++            ks2 = rsqrtf((red2[4] + red2[5] + red2[6] + red2[7]) / SD + P.eps_l2) * P.scale_l2;
++            kh_c = kh;
++            }
++            if (hv != hv_c) {
++            const float dtb = __ldg(L.dt_bias + hv), sa = __ldg(L.ssm_a + hv);
++            const float al = __ldcg(&s0->ab[hv]) + dtb;
++            const float sp = al > 20.f ? al : logf(1.f + expf(al));
++            gexp = expf(sp * sa);
++            beta = 1.f / (1.f + expf(-__ldcg(&s0->ab[NVH + hv])));
++            const float al2 = __ldcg(&s1->ab[hv]) + dtb;
++            const float sp2 = al2 > 20.f ? al2 : logf(1.f + expf(al2));
++            gexp2 = expf(sp2 * sa);
++            beta2 = 1.f / (1.f + expf(-__ldcg(&s1->ab[NVH + hv])));
++            hv_c = hv;
++            }
++            const int col0 = cg * CGC + warp * 2;
++            const size_t toff = ((size_t)hv * SD + col0) * SD;
++            const float4 * si = (const float4 *)(S_in + toff) + lane;
++            float4 * so1 = (float4 *)(so_1 + toff) + lane;
++            float4 * so2 = (float4 *)(so_2 + toff) + lane;
++            float4 st[2];
++            st[0] = si[0]; st[1] = si[SD / 4];   // read the whole tile before any store (so2 may alias si)
++            float ssq = 0.f, ssq2 = 0.f;
++#pragma unroll
++            for (int j = 0; j < 2; ++j) {
++                float4 a = st[j];
++                {   // token 1
++                const float4 q4 = *(const float4 *)(qn + 4 * lane), k4r = *(const float4 *)(kn + 4 * lane);
++                const float4 qv = make_float4(q4.x * qs, q4.y * qs, q4.z * qs, q4.w * qs);
++                const float4 kv4 = make_float4(k4r.x * ks, k4r.y * ks, k4r.z * ks, k4r.w * ks);
++                float kvd = warp_sum(a.x * kv4.x + a.y * kv4.y + a.z * kv4.z + a.w * kv4.w);
++                float delta = (vv[warp * 2 + j] - gexp * kvd) * beta;
++                a.x = gexp * a.x + kv4.x * delta; a.y = gexp * a.y + kv4.y * delta;
++                a.z = gexp * a.z + kv4.z * delta; a.w = gexp * a.w + kv4.w * delta;
++                float att = warp_sum(a.x * qv.x + a.y * qv.y + a.z * qv.z + a.w * qv.w) * rsqrtf((float)SD);
++                so1[j * SD / 4] = a;
++                if (lane == 0) s0->attn[hv * SD + col0 + j] = att;
++                ssq += att * att;
++                }
++                {   // token 2, from token 1's state
++                const float4 q4 = *(const float4 *)(qn2 + 4 * lane), k4r = *(const float4 *)(kn2 + 4 * lane);
++                const float4 qv = make_float4(q4.x * qs2, q4.y * qs2, q4.z * qs2, q4.w * qs2);
++                const float4 kv4 = make_float4(k4r.x * ks2, k4r.y * ks2, k4r.z * ks2, k4r.w * ks2);
++                float kvd = warp_sum(a.x * kv4.x + a.y * kv4.y + a.z * kv4.z + a.w * kv4.w);
++                float delta = (vv2[warp * 2 + j] - gexp2 * kvd) * beta2;
++                a.x = gexp2 * a.x + kv4.x * delta; a.y = gexp2 * a.y + kv4.y * delta;
++                a.z = gexp2 * a.z + kv4.z * delta; a.w = gexp2 * a.w + kv4.w * delta;
++                float att = warp_sum(a.x * qv.x + a.y * qv.y + a.z * qv.z + a.w * qv.w) * rsqrtf((float)SD);
++                so2[j * SD / 4] = a;
++                if (lane == 0) s1->attn[hv * SD + col0 + j] = att;
++                ssq2 += att * att;
++                }
++            }
++            __syncthreads();
++            if (lane == 0) { red[warp] = ssq; red2[warp] = ssq2; }
++            __syncthreads();
++            if (threadIdx.x == 0) {
++                float t = 0.f, t2 = 0.f;
++                for (int i = 0; i < NW; ++i) { t += red[i]; t2 += red2[i]; }
++                s0->ssq[hv * NCG + cg] = t; s1->ssq[hv * NCG + cg] = t2; hc[hv]++;
++            }
++            __syncthreads();
++        }
++        __threadfence();
++        __syncthreads();
++        if (threadIdx.x < NVH && hc[threadIdx.x] != 0) {
++            const unsigned c = hc[threadIdx.x];
++            const unsigned old = atomicAdd(&s0->hcnt[threadIdx.x], c);
++            if ((old % NCG) + c == NCG) { fin[atomicAdd(&fin[NVH], 1u)] = threadIdx.x; }
++        }
++        __syncthreads();
++        const unsigned nf = fin[NVH];
++        if (nf) {
++            __threadfence();
++            for (unsigned f = threadIdx.x >> 7; f < nf; f += NT / SD) {
++                const int hv = fin[f], t = threadIdx.x & (SD - 1), i = hv * SD + t;
++#pragma unroll
++                for (int k = 0; k < 2; ++k) {
++                    Scratch * s = k ? s1 : s0;
++                    float tt = 0.f;
++#pragma unroll
++                    for (int q = 0; q < NCG; ++q) tt += __ldcg(&s->ssq[hv * NCG + q]);
++                    const float fh = rsqrtf(tt / SD + P.eps_gated);
++                    const float v = __ldcg(&s->attn[i]) * fh * __ldg(L.ssm_norm + t) * silu(__ldcg(&s->z[i]));
++                    s->xg[i] = v;
++                    const float bs = warp_sum(v);
++                    if (lane == 0) s->sg[i >> 5] = bs;
++                }
++            }
++        }
++    } else
+ #pragma unroll
+     for (int k = 0; k < 2; ++k) {   // ---- phase B (RQK + PCS), one sequence at a time ----
+         const Params & P = PP.p[k];
+@@ -631,6 +778,19 @@ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+     }
+     grid_barrier(s0);
+     {   // ---- phase C ----
++        if constexpr (T2) {   // q/k conv state of both snapshot planes from the one source row
++            const Params & P = PP.p[0];
++            const int row = __ldg(P.s_copy);
++            const float * conv_in = P.conv_base + (size_t)row * P.conv_stride;
++            float * const co_1 = PP.p[0].conv_out, * const co_2 = PP.p[1].conv_out;
++            for (int c = blockIdx.x * NT + threadIdx.x; c < 2 * H; c += gridDim.x * NT) {
++                const float * ci = conv_in + c * 3;
++                const float a = ci[1], b = ci[2];   // read before the plane-0 store (may alias ci)
++                const float x1 = __ldcg(&s0->qkv[c]), x2 = __ldcg(&s1->qkv[c]);
++                float * o1 = co_1 + c * 3; o1[0] = a; o1[1] = b;  o1[2] = x1;
++                float * o2 = co_2 + c * 3; o2[0] = b; o2[1] = x1; o2[2] = x2;
++            }
++        } else
+ #pragma unroll
+         for (int k = 0; k < 2; ++k) {
+             const Params & P = PP.p[k];
+@@ -702,6 +862,7 @@ struct DevState {
+     int grid_rp = 0;   // GDN3 card B: grid of the REPACK variant (co-resident blocks only)
+     Scratch * scratch2 = nullptr;   // D1BF: second sequence's scratch
+     int grid2 = 0;                  // D1BF: grid of gdn_fused2 (co-resident, <= grid_rp)
++    int gridT2 = 0;                 // GDN2: grid of gdn_fused2<1> (co-resident, <= grid_rp)
+ };
+ __global__ void rp_pack(const unsigned * __restrict__ src, unsigned * __restrict__ dst) {
+     const int i = blockIdx.x * blockDim.x + threadIdx.x;   // H * 576 words
+@@ -723,6 +884,9 @@ static bool pref() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_PREF"
+ static bool repack() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_REPACK") && qk_reuse() && pc_share() && !env_flag("GGML_CUDA_OCCAMY_GDN_3L"); return on; }
+ // D1BF, default OFF: one gdn_fused2 launch for the N2SPLIT two-sequence window (REPACK path only)
+ static bool n2gdn() { static const bool on = env_flag("GGML_CUDA_OCCAMY_N2GDN") && repack(); return on; }
++// GDN2, default OFF: one gdn_fused2<1> launch for the two-token single-sequence MTP1 verify window (REPACK path only)
++static bool t2gdn() { static const bool on = env_flag("GGML_CUDA_OCCAMY_GDN_T2") && repack(); return on; }
++static long g_launch_t2 = 0;    // GDN2 dispatch counter
+ static long g_launch_n2 = 0;    // D1BF dispatch counter
+ static long g_launch_pf = 0;    // GDN1 dispatch counter
+ static long g_launch_rp = 0;    // GDN3 card B dispatch counter
+@@ -786,7 +950,7 @@ static DevState & dev_state(int device) {
+             fprintf(stderr, "occamy-gdn: repack variant %d blocks/SM -> grid %d (smem %zu B dyn)\n", per_sm_rp, d.grid_rp, SMEM3_FLOATS * sizeof(float));
+             if (n2gdn()) {
+                 int per_sm2 = 0;
+-                CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm2, gdn_fused2, NT, SMEM3_FLOATS * sizeof(float)));
++                CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_sm2, gdn_fused2<0>, NT, SMEM3_FLOATS * sizeof(float)));
+                 d.grid2 = std::min(per_sm2 * nsm, d.grid_rp);
+                 if (d.grid2 * NW * N2R < H) { d.grid2 = 0; }   // phase C holds at most N2R rows per warp
+                 if (d.grid2 > 0) {
+@@ -795,6 +959,17 @@ static DevState & dev_state(int device) {
+                 }
+                 fprintf(stderr, "occamy-gdn: n2gdn variant %d blocks/SM -> grid %d (smem %zu B dyn)\n", per_sm2, d.grid2, SMEM3_FLOATS * sizeof(float));
+             }
++            if (t2gdn()) {
++                int per_smt = 0;
++                CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_smt, gdn_fused2<1>, NT, SMEM3_FLOATS * sizeof(float)));
++                d.gridT2 = std::min(per_smt * nsm, d.grid_rp);
++                if (d.gridT2 * NW * N2R < H) { d.gridT2 = 0; }   // phase C holds at most N2R rows per warp
++                if (d.gridT2 > 0 && d.scratch2 == nullptr) {
++                    CUDA_CHECK(cudaMalloc((void **)&d.scratch2, sizeof(Scratch)));
++                    CUDA_CHECK(cudaMemset(d.scratch2, 0, sizeof(Scratch)));
++                }
++                fprintf(stderr, "occamy-gdn: t2 variant %d blocks/SM -> grid %d (smem %zu B dyn)\n", per_smt, d.gridT2, SMEM3_FLOATS * sizeof(float));
++            }
+         }
+         // GDN3 card A (measurement only): GGML_CUDA_OCCAMY_GDN_GRID=N caps the grid at N (fewer co-resident blocks stay safe)
+         if (const char * e = getenv("GGML_CUDA_OCCAMY_GDN_GRID")) {
+@@ -838,22 +1013,28 @@ bool ggml_cuda_occamy_gdn_match_window(ggml_backend_cuda_context & ctx, const gg
+     const ggml_tensor * norm = cgraph->nodes[i];
+     if (norm->op != GGML_OP_RMS_NORM) { return false; }
+     const ggml_tensor * h = norm->src[0];
+-    const int ns=(int)ggml_nrows(h);
++    const int rows=(int)ggml_nrows(h);
+     if (h->type != GGML_TYPE_F32 || h->ne[0] != H || !ggml_is_contiguous(h)) { return false; }
+-    if (ns!=1 && !(ns==2 && env_flag("GGML_CUDA_OCCAMY_GDN_STATE_DIRECT") && ggml_cuda_info().devices[ctx.device].cc==520 && ggml_cuda_gdn_direct_pair_supported())) { return false; }
+-    m.n_seqs=ns;
++    if (rows != 1 && rows != 2) { return false; }
+ 
+     // window end: first ADD after i that takes h directly (the attention residual add)
+     constexpr int MAXW = 192;
+     int end = -1;
+     bool has_gdn = false;
++    const ggml_tensor * gdn_node = nullptr;
+     const int lim = std::min(cgraph->n_nodes, i + MAXW);
+     for (int j = i + 1; j < lim; ++j) {
+         const ggml_tensor * t = cgraph->nodes[j];
+-        if (t->op == GGML_OP_GATED_DELTA_NET) { has_gdn = true; }
++        if (t->op == GGML_OP_GATED_DELTA_NET) { has_gdn = true; if (!gdn_node) { gdn_node = t; } }
+         if (t->op == GGML_OP_ADD && (t->src[0] == h || t->src[1] == h)) { end = j; break; }
+     }
+     if (!has_gdn) { return false; }   // not a GDN layer: stay silent, the MoE matcher owns those windows
++    // GDN2: two rows of one sequence (MTP1 verify, gdn K = 2) when GGML_CUDA_OCCAMY_GDN_T2=1; else two rows = two sequences
++    int nt = 1;
++    if (rows == 2 && t2gdn() && ggml_get_op_params_i32(gdn_node, 0) == 2 && gdn_node->src[2]->ne[2] == 2 && gdn_node->src[2]->ne[3] == 1) { nt = 2; }
++    const int ns = rows / nt;
++    if (ns!=1 && !(ns==2 && env_flag("GGML_CUDA_OCCAMY_GDN_STATE_DIRECT") && ggml_cuda_info().devices[ctx.device].cc==520 && ggml_cuda_gdn_direct_pair_supported())) { return false; }
++    m.n_seqs=ns; m.nt=nt;
+     static std::set<std::string> dumped;
+     int cur = i;
+     auto rej = [&](const char * why) {
+@@ -927,7 +1108,7 @@ bool ggml_cuda_occamy_gdn_match_window(ggml_backend_cuda_context & ctx, const gg
+     const ggml_tensor * concat = nullptr;   // conv_input = concat(conv_state[3,8192], qkv^T[1,8192]) along dim 0
+     const ggml_tensor * add_dt = nullptr, * softplus = nullptr, * mul_a = nullptr, * sigm = nullptr, * silu_z = nullptr;
+     const ggml_tensor * rms_q = nullptr, * rms_k = nullptr, * rms_g = nullptr, * sc_q = nullptr, * sc_k = nullptr;
+-    const ggml_tensor * mul_norm = nullptr, * mul_z = nullptr, * cpy_conv = nullptr, * cpy_ssm = nullptr;
++    const ggml_tensor * mul_norm = nullptr, * mul_z = nullptr, * cpy_conv = nullptr, * cpy_ssm = nullptr, * cpy_conv1 = nullptr;
+     int n_ab = 0;
+     for (int j = 1; j < n; ++j) {
+         const ggml_tensor * t = cgraph->nodes[i + j];
+@@ -935,12 +1116,12 @@ bool ggml_cuda_occamy_gdn_match_window(ggml_backend_cuda_context & ctx, const gg
+         switch (t->op) {
+             case GGML_OP_MUL_MAT: {
+                 const ggml_tensor * w = t->src[0];
+-                if (vroot(t->src[1]) == xn && t->ne[1] == ns && t->ne[2] == 1) {
++                if (vroot(t->src[1]) == xn && t->ne[1] == rows && t->ne[2] == 1) {
+                     if (is_q4_mat(w, H, NQKV)) { mm_qkv = t; }
+                     else if (is_q4_mat(w, H, DI)) { mm_gate = t; }
+                     else if (is_q4_mat(w, H, NVH) && n_ab < 2) { mm_ab[n_ab++] = t; }
+                     else { return rej("unexpected mul_mat on xn"); }
+-                } else if (is_q4_mat(w, DI, H) && t->ne[1] == 1 && t->ne[2] == ns) { mm_out = t; }
++                } else if (is_q4_mat(w, DI, H) && t->ne[1] == nt && t->ne[2] == ns) { mm_out = t; }
+                 else { return rej("unexpected mul_mat"); }
+             } break;
+             case GGML_OP_GET_ROWS: {
+@@ -954,7 +1135,7 @@ bool ggml_cuda_occamy_gdn_match_window(ggml_backend_cuda_context & ctx, const gg
+                 else { return rej("get_rows shape"); }
+             } break;
+             case GGML_OP_CONCAT: {
+-                if (concat || !gr_conv || vroot(t->src[0]) != gr_conv || !mm_qkv || vroot(t->src[1]) != mm_qkv || t->ne[0] != 4 || t->ne[1] != NQKV ||
++                if (concat || !gr_conv || vroot(t->src[0]) != gr_conv || !mm_qkv || vroot(t->src[1]) != mm_qkv || t->ne[0] != 3 + nt || t->ne[1] != NQKV ||
+                     t->ne[2] != ns || t->ne[3] != 1 || t->type != GGML_TYPE_F32 || !ggml_is_contiguous(t)) {
+                     return rej("concat not concat(conv_state, qkv^T)");
+                 }
+@@ -962,7 +1143,7 @@ bool ggml_cuda_occamy_gdn_match_window(ggml_backend_cuda_context & ctx, const gg
+             } break;
+             case GGML_OP_SSM_CONV: {
+                 if (t->src[2] != nullptr || !is_f32_leaf(t->src[1], 4, NQKV) || !concat || t->src[0] != concat) { return rej("ssm_conv shape"); }
+-                if (t->ne[0] != NQKV || t->ne[1] != 1 || t->ne[2] != ns) { return rej("ssm_conv output shape"); }
++                if (t->ne[0] != NQKV || t->ne[1] != nt || t->ne[2] != ns) { return rej("ssm_conv output shape"); }
+                 conv = t; m.conv_w = t->src[1];
+             } break;
+             case GGML_OP_UNARY: {
+@@ -991,11 +1172,11 @@ bool ggml_cuda_occamy_gdn_match_window(ggml_backend_cuda_context & ctx, const gg
+             case GGML_OP_RMS_NORM: {
+                 float eps = 0.f; memcpy(&eps, t->op_params, sizeof(float));
+                 const ggml_tensor * src = t->src[0];
+-                if (silu_conv && vroot(src) == silu_conv && src->ne[0] == SD && src->ne[1] == NKH && src->ne[2] == 1 && src->ne[3] == ns) {
++                if (silu_conv && vroot(src) == silu_conv && src->ne[0] == SD && src->ne[1] == NKH && src->ne[2] == nt && src->ne[3] == ns) {
+                     if (src->view_offs == 0) { rms_q = t; m.eps_l2 = eps; }
+                     else if (src->view_offs == (size_t) H * 4) { rms_k = t; if (eps != m.eps_l2) { return rej("q/k l2 eps differ"); } }
+                     else { return rej("l2 rms_norm view offset"); }
+-                } else if (gdn && vroot(src) == gdn && src->view_offs == 0 && src->ne[0] == SD && src->ne[1] == NVH && src->ne[2] == 1 && src->ne[3] == ns) {
++                } else if (gdn && vroot(src) == gdn && src->view_offs == 0 && src->ne[0] == SD && src->ne[1] == NVH && src->ne[2] == nt && src->ne[3] == ns) {
+                     rms_g = t; m.eps_gated = eps;
+                 } else { return rej("unexpected rms_norm"); }
+             } break;
+@@ -1015,18 +1196,30 @@ bool ggml_cuda_occamy_gdn_match_window(ggml_backend_cuda_context & ctx, const gg
+                 else { return rej("unexpected scale"); }
+             } break;
+             case GGML_OP_GATED_DELTA_NET: {
+-                if (ggml_get_op_params_i32(t, 0) != 1) { return rej("gdn K != 1"); }
++                if (ggml_get_op_params_i32(t, 0) != nt) { return rej("gdn K != tokens per sequence"); }
+                 const ggml_tensor * q = t->src[0], * k = t->src[1], * v = t->src[2], * g = t->src[3], * b = t->src[4], * st = t->src[5];
+                 if (!sc_q || !sc_k || !silu_conv || !mul_a || !sigm || !gr_ssm) { return rej("gdn inputs appear before their producers"); }
+                 if (vroot(q) != sc_q || vroot(k) != sc_k || vroot(v) != silu_conv || v->view_offs != (size_t) 2 * H * 4 ||
+                     vroot(g) != mul_a || vroot(b) != sigm || vroot(st) != gr_ssm) { return rej("gdn wiring"); }
+-                if (v->ne[0] != SD || v->ne[1] != NVH || v->ne[2] != 1 || v->ne[3] != ns || q->ne[1] != NKH || g->ne[0] != 1 ||
++                if (v->ne[0] != SD || v->ne[1] != NVH || v->ne[2] != nt || v->ne[3] != ns || q->ne[1] != NKH || g->ne[0] != 1 ||
+                     st->ne[0] != SD || st->ne[1] != SD || st->ne[2] != NVH || st->ne[3] != ns) { return rej("gdn shapes"); }
+                 gdn = t;
+             } break;
+             case GGML_OP_CPY: {
+                 if (ggml_nelements(t) == 0) { break; }   // build_rs states_extra (n_rs == n_seqs)
+                 const ggml_tensor * src = t->src[0];
++                if (nt == 2) {   // GDN2: conv rows after token 1 (offset 1) / after token 2 (offset 2); one 2-plane state copy
++                    const bool conv_dst = gr_conv && vroot(t) == vroot(gr_conv->src[0]) && ggml_nelements(t) == CONV_N && ggml_is_contiguous(t) && t->type == GGML_TYPE_F32;
++                    if (concat && conv_dst && vroot(src) == concat && src->ne[0] == 3 && src->ne[1] == NQKV && src->ne[2] == 1 && src->view_offs == 4 && !cpy_conv1) {
++                        cpy_conv1 = t; m.conv_out1 = (float *) t->data;
++                    } else if (concat && conv_dst && vroot(src) == concat && src->ne[0] == 3 && src->ne[1] == NQKV && src->ne[2] == 1 && src->view_offs == 8 && !cpy_conv) {
++                        cpy_conv = t; m.conv_out = (float *) t->data;
++                    } else if (gdn && vroot(src) == gdn && src->view_offs == (size_t) SD * NVH * 2 * 4 && ggml_nelements(src) == SSM_N * 2 && ggml_is_contiguous(src) &&
++                               gr_ssm && vroot(t) == vroot(gr_ssm->src[0]) && t->type == GGML_TYPE_F32 && t->ne[0] == SSM_N && t->ne[1] == 1 && t->ne[2] == 2 &&
++                               t->ne[3] == 1 && t->nb[0] == 4 && !cpy_ssm) {
++                        cpy_ssm = t; m.state_out = (float *) t->data; m.state_out1 = (float *) ((char *) t->data + t->nb[2]);
++                    } else { return rej("unexpected cpy (t2)"); }
++                } else
+                 if (concat && vroot(src) == concat && src->view_offs == 4 && src->ne[0] == 3 && src->ne[1] == NQKV && src->ne[2] == ns &&
+                     gr_conv && vroot(t) == vroot(gr_conv->src[0]) && ggml_nelements(t) == CONV_N*ns && ggml_is_contiguous(t) && t->type == GGML_TYPE_F32) {
+                     cpy_conv = t; m.conv_out = (float *) t->data;
+@@ -1049,7 +1242,13 @@ bool ggml_cuda_occamy_gdn_match_window(ggml_backend_cuda_context & ctx, const gg
+     if (vroot(mm_out->src[1]) != mul_z) { return rej("ssm_out input is not the gated norm output"); }
+     ggml_tensor * out = cgraph->nodes[end];
+     if (!((vroot(out->src[0]) == mm_out && out->src[1] == h) || (vroot(out->src[1]) == mm_out && out->src[0] == h))) { return rej("residual add wiring"); }
+-    if (out->type != GGML_TYPE_F32 || out->ne[0] != H || ggml_nrows(out) != ns || !ggml_is_contiguous(out)) { return rej("output shape"); }
++    if (out->type != GGML_TYPE_F32 || out->ne[0] != H || ggml_nrows(out) != rows || !ggml_is_contiguous(out)) { return rej("output shape"); }
++    if (nt == 2) {   // GDN2: every output plane is a whole row of its state buffer (no partial overlap with the source row)
++        if (!cpy_conv1 || ((uintptr_t) m.conv_out1 & 15) || ((uintptr_t) m.state_out1 & 15)) { return rej("t2 snapshot outputs"); }
++        const ptrdiff_t c0 = m.conv_out - m.conv_base, c1 = m.conv_out1 - m.conv_base, s0 = m.state_out - m.ssm_base, s1 = m.state_out1 - m.ssm_base;
++        if (c0 < 0 || c1 < 0 || s0 < 0 || s1 < 0 || c0 % (ptrdiff_t) m.conv_stride || c1 % (ptrdiff_t) m.conv_stride ||
++            s0 % (ptrdiff_t) m.ssm_stride || s1 % (ptrdiff_t) m.ssm_stride || c0 == c1 || s0 == s1) { return rej("t2 snapshot rows not row-aligned"); }
++    }
+     if (m.conv_stride < CONV_N || m.ssm_stride < SSM_N || ((uintptr_t) m.conv_base & 15) || ((uintptr_t) m.ssm_base & 15) ||
+         ((uintptr_t) m.conv_out & 15) || ((uintptr_t) m.state_out & 15)) { return rej("state layout/alignment"); }
+ 
+@@ -1079,6 +1278,7 @@ bool ggml_cuda_occamy_gdn_match_window(ggml_backend_cuda_context & ctx, const gg
+     }
+     DevState & d = dev_state(ctx.device);
+     if (d.grid <= 0) { return rej("occupancy 0"); }
++    if(nt==2 && g_debug) { static bool once=false;if(!once){fprintf(stderr,"occamy-gdn: matched GDN2 (MTP1 verify, 2 tokens) window\n");once=true;} }
+     if(ns==2 && g_debug) { static bool once=false;if(!once){fprintf(stderr,"occamy-state-direct: matched two-sequence window, n_rs=2\n");once=true;} }
+     g_engaged++;
+     if (g_debug && ns==1 && (g_engaged == 1 || g_engaged % 3000 == 0)) {
+@@ -1196,7 +1396,7 @@ bool ggml_cuda_occamy_gdn_split2(ggml_backend_cuda_context & ctx, const ggml_cud
+         else    { gdn_launch_impl(ctx, m, nullptr, &ov); }
+     }
+     if (pk) {
+-        gdn_fused2<<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
++        gdn_fused2<0><<<d.grid2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
+         CUDA_CHECK(cudaGetLastError());
+         if (g_debug && (++g_launch_n2 == 1 || g_launch_n2 % 3000 == 0)) { fprintf(stderr, "occamy-gdn: n2gdn launches %ld\n", g_launch_n2); }
+     }
+@@ -1204,6 +1404,29 @@ bool ggml_cuda_occamy_gdn_split2(ggml_backend_cuda_context & ctx, const ggml_cud
+     return true;
+ }
+ 
++// GDN2: MTP1 verify window (one sequence, two tokens) as one gdn_fused2<1> launch. p[0] = token 1 -> snapshot plane 1
++// (conv_out1/state_out1), p[1] = token 2 -> plane 0 (conv_out/state_out); both read the s_copy source row.
++bool ggml_cuda_occamy_gdn_t2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m) {
++    if (m.nt != 2 || m.n_seqs != 1 || !m.conv_out1 || !m.state_out1) { return false; }
++    DevState & d = dev_state(ctx.device);
++    if (d.gridT2 <= 0 || d.scratch2 == nullptr) { return false; }
++    cudaStream_t st = ctx.stream();
++    const uint8_t * pk = rp_lookup(ctx.device, m.wout, st);
++    if (!pk) { return false; }
++    if (m.zero_conv) { CUDA_CHECK(cudaMemsetAsync(m.zero_conv, 0, CONV_N * sizeof(float), st)); }
++    if (m.zero_ssm)  { CUDA_CHECK(cudaMemsetAsync(m.zero_ssm,  0, SSM_N  * sizeof(float), st)); }
++    const int32_t * sc = (const int32_t *) m.s_copy->data;
++    const gdn_row_ov ov0 = { 0, sc, m.conv_base, m.ssm_base, m.conv_out1, m.state_out1 };
++    const gdn_row_ov ov1 = { 1, sc, m.conv_base, m.ssm_base, m.conv_out,  m.state_out  };
++    Params2 PP;
++    PP.p[0] = fill_params(m, nullptr, &ov0, d.scratch);  PP.p[0].L.out = pk;
++    PP.p[1] = fill_params(m, nullptr, &ov1, d.scratch2); PP.p[1].L.out = pk;
++    gdn_fused2<1><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
++    CUDA_CHECK(cudaGetLastError());
++    if (g_debug && (++g_launch_t2 == 1 || g_launch_t2 % 3000 == 0)) { fprintf(stderr, "occamy-gdn: t2 launches %ld\n", g_launch_t2); }
++    return true;
++}
++
+ static Params fill_params(const ggml_cuda_occamy_gdn_match & m, float * out_override, const gdn_row_ov * ov, Scratch * scratch) {
+     Params P;
+     P.L.attn_norm = (const float *) m.norm_w->data;
+diff --git a/ggml/src/ggml-cuda/occamy-gdn.cuh b/ggml/src/ggml-cuda/occamy-gdn.cuh
+index 7786e4e..689b8b2 100644
+--- a/ggml/src/ggml-cuda/occamy-gdn.cuh
++++ b/ggml/src/ggml-cuda/occamy-gdn.cuh
+@@ -12,6 +12,7 @@
+ struct ggml_cuda_occamy_gdn_match {
+     int n_nodes = 0;
+     int n_seqs = 1;
++    int nt = 1;                              // GDN2 (GGML_CUDA_OCCAMY_GDN_T2=1): 2 = two-token single-sequence MTP1 verify window
+     const ggml_tensor *gr_ssm=nullptr,*gdn=nullptr,*cpy_ssm=nullptr;
+     const ggml_tensor * h = nullptr;         // residual stream in [2048]
+     const ggml_tensor * norm_w = nullptr;    // attn_norm [2048]
+@@ -26,6 +27,8 @@ struct ggml_cuda_occamy_gdn_match {
+     const float * ssm_base  = nullptr; size_t ssm_stride  = 0;
+     float * conv_out = nullptr;              // cpy destination of the new conv state [3, 8192]
+     float * state_out = nullptr;             // cpy destination of the new SSM state [128,128,32]
++    float * conv_out1 = nullptr;             // GDN2: rollback snapshot plane 1 (state after token 1); conv_out/state_out = after token 2
++    float * state_out1 = nullptr;
+     float * zero_conv = nullptr;             // build_rs state_zero rows (rs_zero >= 0): zeroed before the kernel reads the states
+     float * zero_ssm = nullptr;
+     ggml_tensor * out = nullptr;             // residual ADD output [2048]
+@@ -41,3 +44,7 @@ void ggml_cuda_occamy_gdn_launch(ggml_backend_cuda_context & ctx, const ggml_cud
+ // (weights read once, per-sequence arithmetic unchanged); falls back to two launches when its occupancy grid is too small.
+ bool ggml_cuda_occamy_gdn_split2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m);
+ void ggml_cuda_occamy_gdn_graph_begin();
++// GDN2 (GGML_CUDA_OCCAMY_GDN_T2=1, REPACK path): two-token single-sequence verify window (m.nt == 2) as one
++// gdn_fused2<1> launch; token 2 continues from token 1's conv/recurrent state, both snapshot planes written.
++// Returns false when the kernel is unavailable (caller runs the window's nodes unfused).
++bool ggml_cuda_occamy_gdn_t2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m);
+diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
+index b9c1560..e01f137 100644
+--- a/tests/test-backend-ops.cpp
++++ b/tests/test-backend-ops.cpp
+@@ -1292,6 +1292,8 @@ struct test_case {
+     virtual bool run_whole_graph() { return false; }
+     virtual std::vector<ggml_tensor *> fusion_test_nodes() { return {}; }
+     virtual bool use_weight_context() { return false; }
++    // nodes expanded into the graph before `out`, in order (side-effect nodes such as state cpys with no consumer)
++    virtual std::vector<ggml_tensor *> graph_pre_outputs() { return {}; }
+ 
+     ggml_cgraph * gf = nullptr;
+     ggml_cgraph * gb = nullptr;
+@@ -1462,6 +1464,9 @@ struct test_case {
+         }
+ 
+         // build graph
++        for (ggml_tensor * t : graph_pre_outputs()) {
++            ggml_build_forward_expand(gf, t);
++        }
+         ggml_build_forward_expand(gf, out);
+ 
+         // add sentinels as graph nodes so that they are checked in the callback
+@@ -1629,6 +1634,9 @@ struct test_case {
+ 
+         // build graph
+         ggml_cgraph * gf = ggml_new_graph_custom(ctx.get(), graph_nodes, false);
++        for (ggml_tensor * t : graph_pre_outputs()) {
++            ggml_build_forward_expand(gf, t);
++        }
+         ggml_build_forward_expand(gf, out);
+ 
+         // warmup run
+@@ -4967,6 +4975,130 @@ struct test_gated_delta_net : public test_case {
+ };
+ 
+ // GGML_OP_GATED_DELTA_NET + GGML_OP_CPY (recurrent cache fusion)
++// OCCAMY_GDN_T2: one qwen35moe linear-attention layer segment (attn_norm .. residual add) for a two-token,
++// one-sequence MTP1 verify batch with rollback snapshots (n_rs_seq = 1, K = 2), built like build_layer_attn_linear,
++// build_conv_state and build_recurrent_attn. On CUDA with GGML_CUDA_OCCAMY_GDN{,_QKREUSE,_PCSHARE,_REPACK,_T2}=1 the
++// whole window runs as the fused GDN2 kernel; the output and all four snapshot planes are compared with the CPU.
++// Fixed qwen35moe-A3B dims (the fused matcher only accepts them). mem_size = 2, kv_head = 1, s_copy = {1}: the plane-0
++// rows alias the source rows, as in steady-state decode.
++struct test_occamy_gdn_t2 : public test_case {
++    static constexpr int64_t H = 2048, NQKV = 8192, DI = 4096, NVH = 32, NKH = 16, SD = 128, NT = 2, KS = 4;
++    static constexpr int64_t MEM = 2, HEAD = 1;
++
++    ggml_tensor * cpy_conv1 = nullptr, * cpy_conv0 = nullptr, * cpy_ssm = nullptr, * out_node = nullptr;
++    ggml_tensor * xn = nullptr, * gr_conv = nullptr, * gr_ssm = nullptr, * ssm_a = nullptr;
++    std::vector<ggml_tensor *> pre;
++
++    std::string vars() override { return "type=q4_0,n_tokens=2,K=2"; }
++    std::string op_desc(ggml_tensor * t) override { GGML_UNUSED(t); return "OCCAMY_GDN_T2"; }
++    bool run_whole_graph() override { return true; }
++    bool use_weight_context() override { return true; }
++    std::vector<ggml_tensor *> fusion_test_nodes() override { return { cpy_conv1, cpy_conv0, cpy_ssm, out_node }; }
++    std::vector<ggml_tensor *> graph_pre_outputs() override { return pre; }
++    double max_nmse_err() override { return 5e-4; }
++
++    ggml_tensor * build_graph(ggml_context * ctx) override { GGML_UNUSED(ctx); GGML_ABORT("needs a weight context"); }
++
++    ggml_tensor * build_graph(ggml_context * ctx, ggml_context * cw) override {
++        const int64_t CONV_N = (KS - 1) * NQKV, SSM_N = SD * SD * NVH;
++        const float eps = 1e-6f;
++
++        ggml_tensor * wqkv  = ggml_new_tensor_2d(cw, GGML_TYPE_Q4_0, H, NQKV);
++        ggml_tensor * wgate = ggml_new_tensor_2d(cw, GGML_TYPE_Q4_0, H, DI);
++        ggml_tensor * wbeta = ggml_new_tensor_2d(cw, GGML_TYPE_Q4_0, H, NVH);
++        ggml_tensor * walph = ggml_new_tensor_2d(cw, GGML_TYPE_Q4_0, H, NVH);
++        ggml_tensor * wout  = ggml_new_tensor_2d(cw, GGML_TYPE_Q4_0, DI, H);
++        ggml_tensor * norm_w   = ggml_new_tensor_1d(cw, GGML_TYPE_F32, H);
++        ggml_tensor * conv_w   = ggml_new_tensor_2d(cw, GGML_TYPE_F32, KS, NQKV);
++        ggml_tensor * dt_bias  = ggml_new_tensor_1d(cw, GGML_TYPE_F32, NVH);
++        ssm_a                  = ggml_new_tensor_1d(cw, GGML_TYPE_F32, NVH);
++        ggml_tensor * ssm_norm = ggml_new_tensor_1d(cw, GGML_TYPE_F32, SD);
++        ggml_set_name(ssm_a, "ssm_a");
++
++        ggml_tensor * h        = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, H, NT);
++        ggml_tensor * conv_all = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, CONV_N, MEM * 2);
++        ggml_tensor * ssm_all  = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, SSM_N, MEM * 2);
++        ggml_tensor * s_copy   = ggml_new_tensor_1d(ctx, GGML_TYPE_I32, 1);
++        ggml_set_name(h, "h"); ggml_set_name(conv_all, "conv_all"); ggml_set_name(ssm_all, "ssm_all"); ggml_set_name(s_copy, "s_copy");
++
++        ggml_tensor * norm = ggml_rms_norm(ctx, h, eps);
++        xn = ggml_mul(ctx, norm, norm_w);
++        pre.push_back(xn);
++
++        ggml_tensor * qkv = ggml_reshape_3d(ctx, ggml_mul_mat(ctx, wqkv, xn), NQKV, NT, 1);
++        ggml_tensor * z   = ggml_mul_mat(ctx, wgate, xn);
++        ggml_tensor * beta = ggml_sigmoid(ctx, ggml_reshape_4d(ctx, ggml_mul_mat(ctx, wbeta, xn), 1, NVH, NT, 1));
++        ggml_tensor * alpha = ggml_reshape_3d(ctx, ggml_mul_mat(ctx, walph, xn), NVH, NT, 1);
++        ggml_tensor * gate  = ggml_reshape_4d(ctx, ggml_mul(ctx, ggml_softplus(ctx, ggml_add(ctx, alpha, dt_bias)), ssm_a), 1, NVH, NT, 1);
++
++        // build_conv_state (n_rs_seq = 1): one gather, concat, two snapshot cpys
++        ggml_tensor * conv_states = ggml_reshape_2d(ctx, conv_all, CONV_N, conv_all->ne[1]);
++        gr_conv = ggml_get_rows(ctx, conv_states, s_copy);
++        pre.push_back(gr_conv);
++        ggml_tensor * cs = ggml_reshape_3d(ctx, ggml_view_2d(ctx, gr_conv, CONV_N, 1, gr_conv->nb[1], 0), KS - 1, NQKV, 1);
++        ggml_tensor * conv_in = ggml_concat(ctx, cs, ggml_transpose(ctx, qkv), 0);
++        const size_t crow = ggml_row_size(GGML_TYPE_F32, CONV_N);
++        for (int64_t t = 1; t <= 2; ++t) {
++            const int64_t s_idx = conv_in->ne[0] - cs->ne[0] - 2 + t, s_slot = 2 - t;
++            ggml_tensor * src = ggml_view_3d(ctx, conv_in, KS - 1, NQKV, 1, conv_in->nb[1], conv_in->nb[2], ggml_row_size(conv_in->type, s_idx));
++            ggml_tensor * dst = ggml_view_2d(ctx, conv_all, CONV_N, 1, conv_all->nb[1], (s_slot * MEM + HEAD) * crow);
++            ggml_tensor * c = ggml_cpy(ctx, src, dst);
++            (t == 1 ? cpy_conv1 : cpy_conv0) = c;
++            pre.push_back(c);
++        }
++
++        // build_rs for the ssm state
++        ggml_tensor * ssm_states = ggml_reshape_2d(ctx, ssm_all, SSM_N, ssm_all->ne[1]);
++        gr_ssm = ggml_get_rows(ctx, ssm_states, s_copy);
++        pre.push_back(gr_ssm);
++        ggml_tensor * state = ggml_reshape_4d(ctx, ggml_view_2d(ctx, gr_ssm, SSM_N, 1, gr_ssm->nb[1], 0), SD, SD, NVH, 1);
++
++        ggml_tensor * conv = ggml_silu(ctx, ggml_ssm_conv(ctx, conv_in, conv_w));
++        const size_t nb1 = ggml_row_size(GGML_TYPE_F32, NQKV);
++        ggml_tensor * qc = ggml_view_4d(ctx, conv, SD, NKH, NT, 1, SD * 4, nb1, nb1 * NT, 0);
++        ggml_tensor * kc = ggml_view_4d(ctx, conv, SD, NKH, NT, 1, SD * 4, nb1, nb1 * NT, SD * NKH * 4);
++        ggml_tensor * vc = ggml_view_4d(ctx, conv, SD, NVH, NT, 1, SD * 4, nb1, nb1 * NT, 2 * SD * NKH * 4);
++        qc = ggml_scale(ctx, ggml_rms_norm(ctx, qc, eps / SD), 1.0f / sqrtf((float) SD));
++        kc = ggml_scale(ctx, ggml_rms_norm(ctx, kc, eps / SD), 1.0f / sqrtf((float) SD));
++
++        // build_recurrent_attn (K = 2)
++        ggml_tensor * gdn = ggml_gated_delta_net(ctx, qc, kc, vc, gate, beta, state, 2);
++        ggml_tensor * attn = ggml_view_4d(ctx, gdn, SD, NVH, NT, 1, SD * 4, SD * NVH * 4, SD * NVH * NT * 4, 0);
++        const size_t srow = ggml_row_size(GGML_TYPE_F32, SSM_N);
++        ggml_tensor * ssrc = ggml_view_3d(ctx, gdn, SSM_N, 1, 2, srow, srow, SD * NVH * NT * 4);
++        ggml_tensor * sdst = ggml_view_3d(ctx, ssm_all, SSM_N, 1, 2, ssm_all->nb[1], MEM * srow, HEAD * srow);
++        cpy_ssm = ggml_cpy(ctx, ssrc, sdst);
++        pre.push_back(cpy_ssm);
++
++        // build_norm_gated, ssm_out, residual
++        ggml_tensor * gn = ggml_mul(ctx, ggml_rms_norm(ctx, attn, eps), ssm_norm);
++        ggml_tensor * zs = ggml_silu(ctx, ggml_reshape_4d(ctx, z, SD, NVH, NT, 1));
++        ggml_tensor * fo = ggml_reshape_3d(ctx, ggml_mul(ctx, gn, zs), DI, NT, 1);
++        ggml_tensor * o  = ggml_reshape_2d(ctx, ggml_mul_mat(ctx, wout, fo), H, NT);
++        out_node = ggml_add(ctx, o, h);
++        ggml_set_name(out_node, "occamy_gdn_t2_out");
++        return out_node;
++    }
++
++    void initialize_tensors(ggml_context * ctx) override {
++        for (ggml_tensor * t = ggml_get_first_tensor(ctx); t != NULL; t = ggml_get_next_tensor(ctx, t)) {
++            if (ggml_is_view_op(t->op) || t->op != GGML_OP_NONE) {
++                continue;
++            }
++            if (t->type == GGML_TYPE_I32) {
++                const int32_t row = HEAD;   // source row = plane-0 row of kv_head
++                ggml_backend_tensor_set(t, &row, 0, sizeof(row));
++            } else if (t == ssm_a) {
++                std::vector<float> a(ggml_nelements(t));
++                for (size_t i = 0; i < a.size(); ++i) { a[i] = -0.1f - 0.9f * (float) rand() / (float) RAND_MAX; }
++                ggml_backend_tensor_set(t, a.data(), 0, a.size() * sizeof(float));
++            } else {
++                init_tensor_uniform(t);
++            }
++        }
++    }
++};
++
+ struct test_gated_delta_net_cache_fusion : public test_case {
+     const ggml_type type;
+ 
+@@ -12019,6 +12151,9 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+     test_cases.emplace_back(new test_gated_delta_net(GGML_TYPE_F32, 4, 32,   8, 1, 1, false, false, /*K=*/3));
+     test_cases.emplace_back(new test_gated_delta_net(GGML_TYPE_F32, 4, 64,  16, 2, 1, false, false, /*K=*/4));
+ 
++    // occamy fused GDN layer, MTP1 verify (2 tokens, K = 2): GGML_CUDA_OCCAMY_GDN_T2=1
++    test_cases.emplace_back(new test_occamy_gdn_t2());
++
+     // gdn + cache cpy fusion (K > 1)
+     test_cases.emplace_back(new test_gated_delta_net_cache_fusion(GGML_TYPE_F32, 4, 32,   2, 1, 2));
+     test_cases.emplace_back(new test_gated_delta_net_cache_fusion(GGML_TYPE_F32, 4, 64,   4, 1, 2));
+-- 
+2.43.0
+

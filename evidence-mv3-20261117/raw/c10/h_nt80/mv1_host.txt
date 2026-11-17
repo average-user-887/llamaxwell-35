@@ -1,0 +1,8 @@
+mv1_host: rounds=25 restores=0 draft_ms=97.747(n=25) tgt_decode_ms=265577.241(n=66) spec_process_ms=17702.519(n=66) sample_accept_ms=9.715(n=25) acc_hist=[2,23,0,0]
+mv1_host: rounds=50 restores=0 draft_ms=195.940(n=50) tgt_decode_ms=266317.944(n=91) spec_process_ms=17702.713(n=91) sample_accept_ms=18.789(n=50) acc_hist=[2,48,0,0]
+mv1_host: rounds=75 restores=0 draft_ms=294.657(n=75) tgt_decode_ms=267116.861(n=117) spec_process_ms=17706.157(n=117) sample_accept_ms=28.063(n=75) acc_hist=[5,70,0,0]
+mv1_host: rounds=100 restores=0 draft_ms=392.619(n=100) tgt_decode_ms=267859.679(n=142) spec_process_ms=17706.355(n=142) sample_accept_ms=37.208(n=100) acc_hist=[7,93,0,0]
+mv1_host: rounds=125 restores=0 draft_ms=490.481(n=125) tgt_decode_ms=268601.452(n=167) spec_process_ms=17706.545(n=167) sample_accept_ms=47.252(n=125) acc_hist=[9,116,0,0]
+mv1_host: rounds=150 restores=0 draft_ms=587.608(n=150) tgt_decode_ms=269397.522(n=193) spec_process_ms=17709.857(n=193) sample_accept_ms=55.894(n=150) acc_hist=[11,139,0,0]
+mv1_host: rounds=175 restores=0 draft_ms=684.999(n=175) tgt_decode_ms=270137.104(n=218) spec_process_ms=17710.012(n=218) sample_accept_ms=64.413(n=175) acc_hist=[12,163,0,0]
+mv1_host: rounds=180 restores=0 draft_ms=704.475(n=180) tgt_decode_ms=270311.177(n=224) spec_process_ms=17710.049(n=224) sample_accept_ms=66.158(n=180) acc_hist=[12,168,0,0]
