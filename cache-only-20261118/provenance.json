@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "source": {
+    "published_reconstruction_revision": "a23f943208ccdb5c2eb6ae5e4e9cd0f0009aff7f",
+    "public_build_start_revision": "e4fdc23555f6a9103ea03b854ee5c70c6812517c",
+    "original_experiment_base_revision": "da7ba0e49dd43c69f9ee5a219ea3124f7acda0c8",
+    "original_patch_sha256": "dd35105438ca3865267a96ec2f40e6a80d09259b6c81800f1ebe18b95555cc12",
+    "reconstructed_build_source_index_sha256": "9a7cee5d1ac87b50c29d33305975911d49360342d94dd792444e22f447ba073f",
+    "reconstruction_matches_all_six_modified_source_files": true
+  },
+  "measured_build": {
+    "configuration": "Release",
+    "generator": "Unix Makefiles",
+    "cmake_version": "3.28.3",
+    "gcc_version": "14.2.0",
+    "recorded_cuda_toolchain_version": "12.8.93",
+    "cuda_architectures": "52-real",
+    "rebuilt_libraries": [
+      "llama",
+      "llama-common"
+    ],
+    "incremental_build_exit_code": 0,
+    "incremental_build_elapsed_s": 50,
+    "initial_cmake_refresh_failed_cuda_host_compiler_check": true,
+    "runtime_link_check_passed": true,
+    "overlay_manifest_sha256": "e118bddaaee18ad7ddd438a97208d6165b3c1e4a8d48333578adc255e2e3042c",
+    "binary_hashes": [
+      {
+        "file": "libllama.so.0.6.0",
+        "baseline_sha256": "03d76f7f5952c961e836984a29b57d33c363c9833b1c314e2fc6db171a97432e",
+        "candidate_sha256": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117"
+      },
+      {
+        "file": "libllama-common.so.0.6.0",
+        "baseline_sha256": "607553a0efba275dc50da920177ea480ece735e0ed3a027e23a1a8a959da002c",
+        "candidate_sha256": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf"
+      },
+      {
+        "file": "libggml-cuda.so",
+        "baseline_sha256": "6f37baad23c4ffbe2bcb8d5363d76b71df0af3b0ae7b2b65917104728379e058",
+        "candidate_sha256": "6f37baad23c4ffbe2bcb8d5363d76b71df0af3b0ae7b2b65917104728379e058"
+      },
+      {
+        "file": "llama-server",
+        "baseline_sha256": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+        "candidate_sha256": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+      },
+      {
+        "file": "libllama-server-impl.so",
+        "baseline_sha256": "1138515898887c6ec6be01a210cfb59bb8e1338ccf6eeef1d032ffd4fdb22b65",
+        "candidate_sha256": "1138515898887c6ec6be01a210cfb59bb8e1338ccf6eeef1d032ffd4fdb22b65"
+      }
+    ]
+  },
+  "measured_runtime": {
+    "model": "occamy-1.0-Q4_0-headq40b-mtp.gguf",
+    "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+    "runtime_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+    "attention": "full-f16",
+    "context_size": 84224,
+    "batch_size": 2048,
+    "ubatch_size": 1024,
+    "mixed_batch_size": 1024,
+    "sequence_slots": 1,
+    "flash_attention": true,
+    "prefill_single_stream": true,
+    "mtp_args": [
+      "--spec-type",
+      "draft-mtp",
+      "--spec-draft-n-max",
+      "1",
+      "--spec-draft-type-k",
+      "f16",
+      "--spec-draft-type-v",
+      "f16"
+    ],
+    "fixed_env": {
+      "GGML_CUDA_CONCAT_T": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": "1",
+      "GGML_CUDA_GATE_COPY": "1",
+      "GGML_CUDA_GDN_COLS": "2,4",
+      "GGML_CUDA_HEAD_ROWPACK_SM52": "1",
+      "GGML_CUDA_MMQ_COMPACT_SM52": "1",
+      "GGML_CUDA_MMQ_TAIL_SM52": "1",
+      "GGML_CUDA_MMQ_XMAD_SM52": "1",
+      "GGML_CUDA_MMVQ_SM52": "1",
+      "GGML_CUDA_MOE_DOWNH": "2",
+      "GGML_CUDA_MOE_DOWNX": "1",
+      "GGML_CUDA_MOE_LOP3": "1",
+      "GGML_CUDA_MOE_TAILBAL": "1",
+      "GGML_CUDA_MOE_V3": "1",
+      "GGML_CUDA_NORM_Q8": "1",
+      "GGML_CUDA_OCCAMY_FA": "1",
+      "GGML_CUDA_OCCAMY_FA2_NU": "4",
+      "GGML_CUDA_OCCAMY_FA_ADDR": "1",
+      "GGML_CUDA_OCCAMY_FA_MROW": "3",
+      "GGML_CUDA_OCCAMY_FA_PIPE": "3",
+      "GGML_CUDA_OCCAMY_FUSED": "1",
+      "GGML_CUDA_OCCAMY_GDN": "1",
+      "GGML_CUDA_OCCAMY_GDN_PCSHARE": "1",
+      "GGML_CUDA_OCCAMY_GDN_PREF": "1",
+      "GGML_CUDA_OCCAMY_GDN_QKREUSE": "1",
+      "GGML_CUDA_OCCAMY_GDN_REPACK": "1",
+      "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": "1",
+      "GGML_CUDA_OCCAMY_GDN_T2": "1",
+      "GGML_CUDA_OCCAMY_HOSTGAP": "1",
+      "GGML_CUDA_OCCAMY_N2GDN": "1",
+      "GGML_CUDA_OCCAMY_N2SPLIT": "1",
+      "GGML_CUDA_OCCAMY_SMALLFUSE": "2",
+      "GGML_CUDA_Q8_REUSE": "1",
+      "GGML_CUDA_RMS_WARP": "0",
+      "LLAMA_MTP_MERGE_REEVAL": "1",
+      "LLAMA_MV1_TRACE": "1"
+    }
+  }
+}

@@ -1,0 +1,208 @@
+diff --git a/common/speculative.cpp b/common/speculative.cpp
+index 9a3fbeb..7cd4bd8 100644
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -1728,6 +1728,12 @@ struct common_speculative_impl_draft_mtp : public common_speculative_impl {
+ 
+             auto * mem_dft = llama_get_memory(ctx_dft);
+ 
++            static const bool cache_only_enabled = [] {
++                const char * value = std::getenv("LLAMA_MTP_CACHE_ONLY");
++                return value && std::strcmp(value, "1") == 0;
++            }();
++            const bool cache_only = cache_only_enabled && n_mtp_layers == 1 && !is_mem_shared;
++
+             bool ok = true;
+             for (int head = 0; head < n_mtp_layers; ++head) {
+                 if (chain_heads) {
+@@ -1741,7 +1747,9 @@ struct common_speculative_impl_draft_mtp : public common_speculative_impl {
+                     llama_set_nextn_layer_offset(ctx_dft, head);
+                 }
+ 
+-                const int32_t rc = llama_process(ctx_dft, LLAMA_PROCESS_TYPE_DECODE, batch.get());
++                const int32_t rc = cache_only
++                    ? llama_mtp_cache_catch_up(ctx_dft, batch.get())
++                    : llama_process(ctx_dft, LLAMA_PROCESS_TYPE_DECODE, batch.get());
+                 if (rc != 0) {
+                     SPC_ERR("llama_process(ctx_dft) head=%d failed rc=%d (pos=%d)\n",
+                             head, (int) rc, (int) batch_in.tokens[0].pos[0]);
+diff --git a/src/llama-context.cpp b/src/llama-context.cpp
+index 6c39da2..21a98a6 100644
+--- a/src/llama-context.cpp
++++ b/src/llama-context.cpp
+@@ -1780,7 +1780,7 @@ static bool needs_raw_logits(const llama_ubatch & ubatch, const std::map<llama_s
+     return false; // all sequences use backend sampling
+ }
+ 
+-int llama_context::decode(const llama_batch_ext & batch_inp) {
++int llama_context::decode(const llama_batch_ext & batch_inp, bool mtp_cache_catch_up) {
+     if (!memory) {
+         LLAMA_LOG_DEBUG("%s: cannot decode batches with this context (calling encode() instead)\n", __func__);
+         return encode(batch_inp);
+@@ -1943,6 +1943,13 @@ int llama_context::decode(const llama_batch_ext & batch_inp) {
+     bool mv3_first = true;
+     double mv3_prep = mv3::on() ? (double) (ggml_time_us() - mv3_t_start) : 0.0;
+ 
++    const auto decode_graph_type = ctx_type_to_graph_type(cparams.ctx_type);
++    const bool qwen_mtp = decode_graph_type == LLM_GRAPH_TYPE_DECODER_MTP && model.arch == LLM_ARCH_QWEN35MOE;
++    const bool mtp_cache_only_batch = mtp_cache_catch_up && qwen_mtp && hparams.n_layer_nextn == 1 &&
++        n_outputs_all == 0 && batch_inp.embd.empty() && cparams.nextn_layer_offset == 0 &&
++        cparams.embeddings_nextn && cparams.embeddings_nextn_masked && !cparams.embeddings &&
++        cparams.causal_attn && !cparams.training && !cparams.pipeline_parallel && !cparams.warmup;
++
+     do {
+         const auto & ubatch = mctx->get_ubatch();
+ 
+@@ -1966,7 +1973,9 @@ int llama_context::decode(const llama_batch_ext & batch_inp) {
+ 
+         if (mv3::on()) { mv3_rec = mv3::Rec(); mv3_rec.prep = mv3_first ? mv3_prep : 0.0; mv3_first = false; }
+ 
+-        const auto * res = process_ubatch(ubatch, ctx_type_to_graph_type(cparams.ctx_type), mctx.get(), status);
++        const bool cache_only = mtp_cache_only_batch && ubatch.n_seqs_unq == 1 && ubatch.token && ubatch.embd_state;
++        const auto graph_type = cache_only ? LLM_GRAPH_TYPE_DECODER_MTP_CACHE_ONLY : decode_graph_type;
++        const auto * res = process_ubatch(ubatch, graph_type, mctx.get(), status);
+ 
+         const int64_t mv3_t_fetch = mv3::on() ? ggml_time_us() : 0;
+ 
+@@ -2001,6 +2010,14 @@ int llama_context::decode(const llama_batch_ext & batch_inp) {
+             }
+         }
+ 
++        if (cache_only && !mtp_cache_only_logged) {
++            LLAMA_LOG_INFO("mtp_cache_only: path=cache rows=%u outputs=0\n", ubatch.n_tokens);
++            mtp_cache_only_logged = true;
++        } else if (qwen_mtp && n_outputs > 0 && !cparams.warmup && !mtp_full_logged) {
++            LLAMA_LOG_INFO("mtp_cache_only: path=full rows=%u outputs=%u\n", ubatch.n_tokens, n_outputs);
++            mtp_full_logged = true;
++        }
++
+         // plot the computation graph in dot format (for debugging purposes)
+         //if (n_past%100 == 0) {
+         //    ggml_graph_dump_dot(gf, NULL, "llama.dot");
+@@ -4653,6 +4670,10 @@ int32_t llama_process(llama_context * ctx, llama_process_type type, llama_batch_
+ // ext
+ //
+ 
++int32_t llama_mtp_cache_catch_up(llama_context * ctx, llama_batch_ext * batch) {
++    return ctx->decode(*batch, true);
++}
++
+ llama_memory_breakdown llama_get_memory_breakdown(const struct llama_context * ctx) {
+     return ctx->memory_breakdown();
+ }
+diff --git a/src/llama-context.h b/src/llama-context.h
+index fe10b7b..af49658 100644
+--- a/src/llama-context.h
++++ b/src/llama-context.h
+@@ -147,7 +147,7 @@ struct llama_context {
+                        ggml_status & ret);
+ 
+     int encode(const llama_batch_ext & batch_inp);
+-    int decode(const llama_batch_ext & batch_inp);
++    int decode(const llama_batch_ext & batch_inp, bool mtp_cache_catch_up = false);
+ 
+     // compat version
+     int encode(const llama_batch & batch_inp);
+@@ -431,4 +431,6 @@ private:
+     mutable int32_t n_eval   = 0; // number of eval calls
+ 
+     mutable int32_t n_reused = 0; // number of times the previous graph was reused
++    bool mtp_cache_only_logged = false;
++    bool mtp_full_logged = false;
+ };
+diff --git a/src/llama-ext.h b/src/llama-ext.h
+index fcc78f4..148c311 100644
+--- a/src/llama-ext.h
++++ b/src/llama-ext.h
+@@ -95,6 +95,9 @@ LLAMA_API llama_memory_breakdown llama_get_memory_breakdown(const struct llama_c
+ // If masked == false, output the embeddings for all tokens in the batch regardless of batch.logits
+ LLAMA_API void llama_set_embeddings_nextn(struct llama_context * ctx, bool value, bool masked);
+ 
++// Append outputless draft state during MTP catch-up. Unsupported batches use ordinary decode.
++LLAMA_API int32_t llama_mtp_cache_catch_up(struct llama_context * ctx, struct llama_batch_ext * batch);
++
+ // Select which appended NextN block the DECODER_MTP graph runs (offset past
+ // the trunk: il = n_layer() + offset). Used by the speculative NextN driver to
+ // chain multiple trained NextN heads. Default 0 (first head).
+diff --git a/src/llama-graph.h b/src/llama-graph.h
+index 2ff75d9..b5a6800 100644
+--- a/src/llama-graph.h
++++ b/src/llama-graph.h
+@@ -42,6 +42,7 @@ enum llm_graph_type {
+     LLM_GRAPH_TYPE_ENCODER,
+     LLM_GRAPH_TYPE_DECODER,
+     LLM_GRAPH_TYPE_DECODER_MTP,
++    LLM_GRAPH_TYPE_DECODER_MTP_CACHE_ONLY,
+ };
+ 
+ enum llm_fused_op {
+diff --git a/src/models/qwen35moe.cpp b/src/models/qwen35moe.cpp
+index 118deeb..39c7db0 100644
+--- a/src/models/qwen35moe.cpp
++++ b/src/models/qwen35moe.cpp
+@@ -1,4 +1,7 @@
+ #include "models.h"
++
++#include "llama-impl.h"
++#include "llama-kv-cache.h"
+ #include "llama-memory-recurrent.h"
+ 
+ void llama_model_qwen35moe::load_arch_hparams(llama_model_loader & ml) {
+@@ -147,7 +150,8 @@ void llama_model_qwen35moe::load_arch_tensors(llama_model_loader & ml) {
+ }
+ 
+ std::unique_ptr<llm_graph_context> llama_model_qwen35moe::build_arch_graph(const llm_graph_params & params) const {
+-    if (params.gtype == LLM_GRAPH_TYPE_DECODER_MTP) {
++    if (params.gtype == LLM_GRAPH_TYPE_DECODER_MTP ||
++        params.gtype == LLM_GRAPH_TYPE_DECODER_MTP_CACHE_ONLY) {
+         return std::make_unique<graph_mtp>(*this, params);
+     }
+     return std::make_unique<graph>(*this, params);
+@@ -558,6 +562,7 @@ llama_model_qwen35moe::graph_mtp::graph_mtp(const llama_model & model, const llm
+ 
+     const int il = hparams.n_layer();
+     const auto & layer = model.layers[il];
++    const bool cache_only = params.gtype == LLM_GRAPH_TYPE_DECODER_MTP_CACHE_ONLY;
+ 
+     GGML_ASSERT(layer.nextn.eh_proj    && "MTP block missing nextn.eh_proj");
+     GGML_ASSERT(layer.nextn.enorm      && "MTP block missing nextn.enorm");
+@@ -598,7 +603,7 @@ llama_model_qwen35moe::graph_mtp::graph_mtp(const llama_model & model, const llm
+     res->add_input(std::move(inp));
+ 
+     ggml_tensor * inp_pos     = build_inp_pos();
+-    ggml_tensor * inp_out_ids = build_inp_out_ids();
++    ggml_tensor * inp_out_ids = cache_only ? nullptr : build_inp_out_ids();
+ 
+     auto * inp_attn = build_attn_inp_kv();
+ 
+@@ -624,6 +629,30 @@ llama_model_qwen35moe::graph_mtp::graph_mtp(const llama_model & model, const llm
+             n_embd_head,     n_head_kv,
+             n_embd_head,     n_head_kv,
+             il, false);
++
++    if (cache_only) {
++        // In a single MTP block, later rows only read this row's K/V.
++        Kcur = ggml_reshape_3d(ctx0, Kcur, n_embd_head, n_head_kv, n_tokens);
++        Kcur = build_norm(Kcur, layer.attn_k_norm, nullptr, LLM_NORM_RMS, il);
++        Vcur = ggml_reshape_3d(ctx0, Vcur, n_embd_head, n_head_kv, n_tokens);
++        Kcur = ggml_rope_multi(ctx0, Kcur, inp_pos, nullptr,
++                n_rot, sections, rope_type, n_ctx_orig, freq_base, freq_scale,
++                ext_factor, attn_factor, beta_fast, beta_slow);
++
++        if (inp_attn->self_k_rot) {
++            Kcur = llama_mul_mat_hadamard(ctx0, Kcur, inp_attn->self_k_rot);
++        }
++        if (inp_attn->self_v_rot) {
++            Vcur = llama_mul_mat_hadamard(ctx0, Vcur, inp_attn->self_v_rot);
++        }
++
++        ggml_build_forward_expand(gf, Vcur);
++        ggml_build_forward_expand(gf, Kcur);
++        ggml_build_forward_expand(gf, inp_attn->mctx->cpy_k(ctx0, Kcur, inp_attn->get_k_idxs(), il));
++        ggml_build_forward_expand(gf, inp_attn->mctx->cpy_v(ctx0, Vcur, inp_attn->get_v_idxs(), il));
++        return;
++    }
++
+     cb(Qcur_full, "mtp_Qcur_full", il);
+ 
+     ggml_tensor * Qcur = ggml_view_3d(ctx0, Qcur_full,

@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "measurement_date_utc": "2026-11-17",
+  "hardware": {
+    "gpu": "NVIDIA Quadro M6000",
+    "vram_gb": 24,
+    "cuda_arch": "sm_52"
+  },
+  "request": {
+    "n_predict": 192,
+    "seed": 7,
+    "temperature": 0,
+    "cache_prompt": true
+  },
+  "pairs": [
+    {
+      "prompt_tokens": 2000,
+      "prompt_token_sha256": "e02db5f90b75c866fc5a31d26fa13242dd8319a068cda565c7495e33e681aa49",
+      "output_token_sha256": "baad4961f311d0badf6787c9b080ddaa83a3be5bb996e360df7e00bed70f2e8c",
+      "all_four_output_token_sequences_match": true,
+      "same_slot_warm_replay": true,
+      "arm_environment_difference": "LLAMA_MTP_CACHE_ONLY",
+      "pair_receipt_sha256": "37193a8855c373171a1aab9fe34152ddd748787f6f2788df65e3ef429696aafe",
+      "arms": {
+        "off": {
+          "cache_only_enabled": false,
+          "runner_exit_code": 0,
+          "cleanup_exit_code": 0,
+          "gpu_layers_offloaded": 42,
+          "gpu_layers_total": 42,
+          "path_markers": [
+            {
+              "path": "full",
+              "rows": 2,
+              "outputs": 1
+            }
+          ],
+          "cold": {
+            "ttft_s": 4.130659776972607,
+            "wall_s": 6.20280789595563,
+            "n_out": 192,
+            "cache_n": 0,
+            "prompt_n": 2000,
+            "prompt_ms": 4128.315,
+            "predicted_ms": 2069.71,
+            "predicted_per_second": 92.28346000164274,
+            "draft_n": 102,
+            "draft_n_accepted": 88
+          },
+          "warm": {
+            "ttft_s": 0.08363008603919297,
+            "wall_s": 2.129442693083547,
+            "n_out": 192,
+            "cache_n": 1996,
+            "prompt_n": 4,
+            "prompt_ms": 82.57,
+            "predicted_ms": 2045.552,
+            "predicted_per_second": 93.37332905738891,
+            "draft_n": 102,
+            "draft_n_accepted": 88
+          }
+        },
+        "on": {
+          "cache_only_enabled": true,
+          "runner_exit_code": 0,
+          "cleanup_exit_code": 0,
+          "gpu_layers_offloaded": 42,
+          "gpu_layers_total": 42,
+          "path_markers": [
+            {
+              "path": "full",
+              "rows": 2,
+              "outputs": 1
+            },
+            {
+              "path": "cache",
+              "rows": 972,
+              "outputs": 0
+            }
+          ],
+          "cold": {
+            "ttft_s": 3.9700561710633337,
+            "wall_s": 6.030983339995146,
+            "n_out": 192,
+            "cache_n": 0,
+            "prompt_n": 2000,
+            "prompt_ms": 3967.649,
+            "predicted_ms": 2060.77,
+            "predicted_per_second": 92.68380265628868,
+            "draft_n": 102,
+            "draft_n_accepted": 88
+          },
+          "warm": {
+            "ttft_s": 0.08392992708832026,
+            "wall_s": 2.137162948027253,
+            "n_out": 192,
+            "cache_n": 1996,
+            "prompt_n": 4,
+            "prompt_ms": 82.824,
+            "predicted_ms": 2053.039,
+            "predicted_per_second": 93.0328162299888,
+            "draft_n": 102,
+            "draft_n_accepted": 88
+          }
+        }
+      }
+    },
+    {
+      "prompt_tokens": 80000,
+      "prompt_token_sha256": "7c1dcdc2f609928922953fc626d8b90e5b5288092036f21b57f6ffda0a128dcc",
+      "output_token_sha256": "5c65549b2b66bd9fdbe9c66fcdd96db9b4d12c8e5556db5f54521adf0fb72c0d",
+      "all_four_output_token_sequences_match": true,
+      "same_slot_warm_replay": true,
+      "arm_environment_difference": "LLAMA_MTP_CACHE_ONLY",
+      "pair_receipt_sha256": "76ac56745262c802afd9d71d75cd6b86a3701d935fd7232955bce92ece00546c",
+      "arms": {
+        "off": {
+          "cache_only_enabled": false,
+          "runner_exit_code": 0,
+          "cleanup_exit_code": 0,
+          "gpu_layers_offloaded": 42,
+          "gpu_layers_total": 42,
+          "path_markers": [
+            {
+              "path": "full",
+              "rows": 2,
+              "outputs": 1
+            }
+          ],
+          "cold": {
+            "ttft_s": 281.5787023190642,
+            "wall_s": 284.54714384209365,
+            "n_out": 192,
+            "cache_n": 0,
+            "prompt_n": 80000,
+            "prompt_ms": 281561.722,
+            "predicted_ms": 2963.777,
+            "predicted_per_second": 64.44479459824406,
+            "draft_n": 100,
+            "draft_n_accepted": 91
+          },
+          "warm": {
+            "ttft_s": 0.2559348091017455,
+            "wall_s": 3.1787114810431376,
+            "n_out": 192,
+            "cache_n": 79996,
+            "prompt_n": 4,
+            "prompt_ms": 238.512,
+            "predicted_ms": 2917.696,
+            "predicted_per_second": 65.46261159490228,
+            "draft_n": 99,
+            "draft_n_accepted": 92
+          }
+        },
+        "on": {
+          "cache_only_enabled": true,
+          "runner_exit_code": 0,
+          "cleanup_exit_code": 0,
+          "gpu_layers_offloaded": 42,
+          "gpu_layers_total": 42,
+          "path_markers": [
+            {
+              "path": "full",
+              "rows": 2,
+              "outputs": 1
+            },
+            {
+              "path": "cache",
+              "rows": 1024,
+              "outputs": 0
+            }
+          ],
+          "cold": {
+            "ttft_s": 266.9011376139242,
+            "wall_s": 269.87166481802706,
+            "n_out": 192,
+            "cache_n": 0,
+            "prompt_n": 80000,
+            "prompt_ms": 266881.106,
+            "predicted_ms": 2957.192,
+            "predicted_per_second": 64.58829862924017,
+            "draft_n": 100,
+            "draft_n_accepted": 91
+          },
+          "warm": {
+            "ttft_s": 0.26485340495128185,
+            "wall_s": 3.182431860943325,
+            "n_out": 192,
+            "cache_n": 79996,
+            "prompt_n": 4,
+            "prompt_ms": 249.209,
+            "predicted_ms": 2913.125,
+            "predicted_per_second": 65.56532932847028,
+            "draft_n": 99,
+            "draft_n_accepted": 92
+          }
+        }
+      }
+    }
+  ]
+}
