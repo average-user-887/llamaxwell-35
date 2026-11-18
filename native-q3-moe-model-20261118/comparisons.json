@@ -1,0 +1,90 @@
+{
+  "operator": {
+    "cold": {
+      "base_arm": "depth2-off",
+      "candidate_arm": "depth2-on",
+      "candidate_ratio": 1.1058987185892666,
+      "base_minus_candidate_request_wall_s": -0.25498471804894507,
+      "first_output_difference_1based": 61,
+      "identical_output_positions": 62,
+      "compared_output_positions": 192,
+      "base_minus_candidate_ms_per_native_cycle": 2.0743130947849195
+    },
+    "warm": {
+      "base_arm": "depth2-off",
+      "candidate_arm": "depth2-on",
+      "candidate_ratio": 1.0955174596244,
+      "base_minus_candidate_request_wall_s": 3.724500257987529,
+      "first_output_difference_1based": 61,
+      "identical_output_positions": 111,
+      "compared_output_positions": 3072,
+      "base_minus_candidate_ms_per_native_cycle": 2.6210460972695344
+    }
+  },
+  "strict_native_vs_serial": {
+    "cold": {
+      "base_arm": "serial-on",
+      "candidate_arm": "depth2-on",
+      "candidate_ratio": 1.042686463816369,
+      "base_minus_candidate_request_wall_s": -3.878242703038268,
+      "first_output_difference_1based": 74,
+      "identical_output_positions": 74,
+      "compared_output_positions": 192,
+      "base_minus_candidate_ms_per_native_cycle": null
+    },
+    "warm": {
+      "base_arm": "serial-on",
+      "candidate_arm": "depth2-on",
+      "candidate_ratio": 1.0284748030499031,
+      "base_minus_candidate_request_wall_s": 0.9789479561150074,
+      "first_output_difference_1based": 74,
+      "identical_output_positions": 138,
+      "compared_output_positions": 3072,
+      "base_minus_candidate_ms_per_native_cycle": null
+    }
+  },
+  "serial_on_vs_off": {
+    "cold": {
+      "base_arm": "serial-off",
+      "candidate_arm": "serial-on",
+      "candidate_ratio": 0.9944348256245363,
+      "base_minus_candidate_request_wall_s": -1.6637211729539558,
+      "first_output_difference_1based": null,
+      "identical_output_positions": 192,
+      "compared_output_positions": 192,
+      "base_minus_candidate_ms_per_native_cycle": null
+    },
+    "warm": {
+      "base_arm": "serial-off",
+      "candidate_arm": "serial-on",
+      "candidate_ratio": 0.9984391740602594,
+      "base_minus_candidate_request_wall_s": -0.06678808713331819,
+      "first_output_difference_1based": null,
+      "identical_output_positions": 3072,
+      "compared_output_positions": 3072,
+      "base_minus_candidate_ms_per_native_cycle": null
+    }
+  },
+  "smoke": {
+    "cold": {
+      "base_arm": "smoke-off",
+      "candidate_arm": "smoke-on",
+      "candidate_ratio": 1.0890313371166196,
+      "base_minus_candidate_request_wall_s": 0.21659715508576483,
+      "first_output_difference_1based": 89,
+      "identical_output_positions": 92,
+      "compared_output_positions": 192,
+      "base_minus_candidate_ms_per_native_cycle": 2.6146184210526293
+    },
+    "warm": {
+      "base_arm": "smoke-off",
+      "candidate_arm": "smoke-on",
+      "candidate_ratio": 1.0812458327242127,
+      "base_minus_candidate_request_wall_s": 0.18413163104560226,
+      "first_output_difference_1based": 89,
+      "identical_output_positions": 92,
+      "compared_output_positions": 192,
+      "base_minus_candidate_ms_per_native_cycle": 2.7819420710868066
+    }
+  }
+}

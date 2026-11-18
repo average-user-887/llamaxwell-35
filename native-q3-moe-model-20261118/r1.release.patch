@@ -1,0 +1,52 @@
+--- a/release.sh
++++ b/release.sh
+@@ -93,7 +93,7 @@
+   chmod 0666 "$out/counter-live.bin"
+   printf '%s\n' "${environment[@]}" > "$out/environment.args"
+   printf '%s\n' "${args[@]}" > "$out/server.args"
+-  bounded_docker run -d --pull never --name "$name" --label "resume.q3moe.owner=$owner" \
++  bounded_docker run -d --pull never --name "$name" --label "resume.q3moer1.owner=$owner" \
+     --device "nvidia.com/gpu=$N3_GPU" -p 127.0.0.1::8080 \
+     --log-driver json-file --log-opt max-size=32m --log-opt max-file=1 \
+     -v "$model_dir:/models:ro" -v "$card/libs:/candidate:ro" -v "$card/audit.so:/audit.so:ro" -v "$out/counter-live.bin:/native-moe-counters" -v "$n1:$n1:ro" -v "$r2:$r2:ro" \
+@@ -136,7 +136,7 @@
+   if (( left > 10 )); then left=10; fi
+   # shellcheck disable=SC2016
+   timeout -k 1s "${left}s" bash -euc '
+-    owned=$(docker ps -aq --filter "name=^/$1$" --filter "label=resume.q3moe.owner=$2")
++    owned=$(docker ps -aq --filter "name=^/$1$" --filter "label=resume.q3moer1.owner=$2")
+     if [[ -n $owned ]]; then
+       [[ $owned =~ ^[0-9a-f]+$ ]]
+       docker rm -f "$owned"
+@@ -146,11 +146,11 @@
+ }
+ 
+ usage() {
+-  echo 'usage: release.sh --check | --run no-mtp|depth2-off|depth2-on|smoke-off|smoke-on | --compare SERIAL_RECEIPT NATIVE_RECEIPT [...]' >&2
++  echo 'usage: release.sh --check | --run no-mtp|no-mtp-on|depth2-off|depth2-on|smoke-off|smoke-on | --compare SERIAL_RECEIPT NATIVE_RECEIPT [...]' >&2
+   exit 2
+ }
+ 
+-valid() { [[ $1 == no-mtp || $1 == depth2-off || $1 == depth2-on || $1 == smoke-off || $1 == smoke-on ]]; }
++valid() { [[ $1 == no-mtp || $1 == no-mtp-on || $1 == depth2-off || $1 == depth2-on || $1 == smoke-off || $1 == smoke-on ]]; }
+ 
+ case ${1:-} in
+   __arm)
+@@ -159,7 +159,7 @@
+     valid "$2" || usage
+     [[ $3 == 0 || $3 == 1 ]] || usage
+     [[ $4 =~ ^[0-9]{8}T[0-9]{6}Z-[0-9]+-[0-9]+$ ]] || usage
+-    arm "$2" "$3" "nmmoon-q3moe-native-$2-$4" "$card/receipts/$2-$4/private" "$4"
++    arm "$2" "$3" "nmmoon-q3moe-r1-$2-$4" "$card/receipts/$2-$4/private" "$4"
+     exit ;;
+   --check) [[ $# == 1 ]] || usage; check; exit ;;
+   --compare) [[ $# -ge 3 ]] || usage; shift; check >&2; exec python3 -B "$probe" compare "$@" ;;
+@@ -174,7 +174,7 @@
+ profile=0
+ if [[ ${3:-} == --profile-phase ]]; then profile=1; fi
+ id=$(date -u +%Y%m%dT%H%M%SZ)-$$-$RANDOM
+-name=nmmoon-q3moe-native-$stage-$id
++name=nmmoon-q3moe-r1-$stage-$id
+ out=$card/receipts/$stage-$id
+ mkdir -p "$out/private"
+ printf 'NATIVE_Q3_MOE_RECEIPT=%s\n' "$out"

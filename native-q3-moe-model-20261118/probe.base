@@ -1,0 +1,332 @@
+#!/usr/bin/env python3
+"""Verify same-build 80K native depth arms and preserve cycle evidence."""
+import argparse
+import csv
+import json
+import math
+import re
+import sys
+from collections import Counter
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+C = HERE.parent
+sys.path.insert(0, str(C / "night-native-depth2-q3-80k-r1"))
+import long_probe as original
+
+n18 = original.n18
+n9 = n18.n9
+MODES = {"no-mtp": 0, "depth1": 1, "depth2": 2, "depth3": 3}
+PHASE = "LLAMA_MV3_PHASE=/native-phase.tsv"
+REF = original.HERE / "@PRIVATE_ARCHIVED_REFERENCE_DIR@"
+SHA = {
+    "result.json": "@PRIVATE_ARCHIVED_RESULT_FILE_SHA256@",
+    "cold.json": "@PRIVATE_ARCHIVED_COLD_FILE_SHA256@",
+    "warm.json": "@PRIVATE_ARCHIVED_WARM_FILE_SHA256@",
+}
+KIND = re.compile(r"(?i)restor(?:ed|ing) context checkpoint|restoring speculative checkpoint|slot context shift")
+HOST = re.compile(r"mv1_host: rounds=(\d+) restores=(\d+)")
+STAGES = ("cold", "warm")
+FIXTURE = "@PRIVATE_PRIVATE_FIXTURE_SHA256@"
+
+
+def settings(mode, profile):
+    env, args = original.settings("on")
+    depth = MODES[mode]
+    if depth:
+        args[args.index("--spec-draft-n-max") + 1] = str(depth)
+    else:
+        args = args[:args.index("--spec-type")]
+    if profile:
+        env += ["-e", PHASE]
+    return env, args
+
+
+def qualify():
+    for name, digest in SHA.items():
+        if n9.hash_file(REF / name) != digest:
+            raise ValueError("archived measured N100 r1 input changed")
+    if not {"runner_exit=0", "cleanup_exit=0"} <= set((REF / "status.txt").read_text().splitlines()):
+        raise ValueError("archived measured N100 r1 cleanup failed")
+    if n9.read_json(REF / "result.json") != json.loads(json.dumps(original.collect("on", REF))):
+        raise ValueError("archived measured N100 r1 failed receipt replay")
+    if n9.fixture("80k")["prompt_sha256"] != FIXTURE:
+        raise ValueError("80K fixture changed")
+
+
+def ready(mode, profile, out):
+    env, args = settings(mode, profile)
+    for name, expected in (("environment.args", env), ("server.args", args),
+                           ("pid1-server.args", ["/candidate/llama-server", *args])):
+        if (out / name).read_text().splitlines() != expected:
+            raise ValueError(f"actual {name} differs from typed launch")
+    expected = {"GGML_CUDA_OCCAMY_FA_Q3_R2=1", "LLAMA_TRACE=1", "LLAMA_MV1_TRACE=1",
+                "LLAMA_MTP_MERGE_REEVAL=0", "LLAMA_MTP_CACHE_ONLY=1",
+                "GGML_CUDA_OCCAMY_FA_SPARSE=1", "GGML_CUDA_OCCAMY_FA_SPARSE_R2=1"}
+    if profile:
+        expected.add(PHASE)
+    if sorted((out / "pid1-flags.txt").read_text().splitlines()) != sorted(expected):
+        raise ValueError("actual native/phase flags differ or unexpected timer is enabled")
+    maps = original.mapped(out)
+    start = (out / "server-start.log").read_text(errors="replace")
+    depth = MODES[mode]
+    for name, expected in (("n_ctx", [84224]), ("n_seq_max", [1]), ("n_batch", [2048]), ("n_ubatch", [1024])):
+        observed = list(map(int, re.findall(rf"llama_context: {name}\s+=\s*(\d+)", start)))
+        if observed != expected * (2 if depth else 1):
+            raise ValueError(f"actual {name} differs")
+    markers = (*n9.START_MARKERS, "LLAMA_TRACE = 1")
+    if any(s not in start for s in markers) or original.BAD.search(start):
+        raise ValueError("42/42 GPU offload or one-slot trace missing")
+    creation = "creating MTP draft context" in start
+    snapshots = re.findall(r"llama_context: n_rs_seq\s+=\s*(\d+)", start)
+    expected = [str(depth), "0"] if depth else ["0"]
+    if creation != bool(depth) or snapshots != expected:
+        raise ValueError("actual native draft context or recurrent plane count differs")
+    if depth and (f"n_max={depth}, n_min=0, p_min=0.00, n_embd=2048" not in start or
+                  not re.search(r"nextn_predict_layers\s+u32\s+= 1\b", start)):
+        raise ValueError("actual draft depth or single learned head differs")
+    n9.require_admission(out / "admission.txt")
+    return maps
+
+
+def text_shape(text):
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    counts = Counter(lines)
+    return {"characters": len(text), "nonempty_lines": len(lines), "distinct_nonempty_lines": len(counts),
+            "repeated_line_occurrences": len(lines) - len(counts),
+            "largest_identical_line_count": max(counts.values(), default=0),
+            "markdown_fence_lines": sum(line.startswith("```") or line.startswith("~~~") for line in lines)}
+
+
+def cycles(mode, phase, log, emitted, complete):
+    depth = MODES[mode]
+    counts = original.n92.ACCEPT.findall(log)
+    rows = []
+    for i, (accepted, offered, restore) in enumerate(counts, 1):
+        accepted, offered = int(accepted), int(offered)
+        action = "checkpoint_restore_marker" if restore else ("native_trim_path" if accepted < offered else "all_accepted")
+        rows.append({"arm": mode, "phase": phase, "cycle": i, "offered": offered, "accepted": accepted,
+                     "emitted": None, "emission_provenance": "not_reconciled",
+                     "rejected": offered - accepted, "state_action": action,
+                     "target_ms": None, "draft_ms": None, "accept_ms": None, "cycle_ms": None,
+                     "cost_provenance": "no_per_cycle_clock"})
+    serial_estimate = emitted - sum(row["accepted"] + 1 for row in rows)
+    if not depth:
+        rows = [{"arm": mode, "phase": phase, "cycle": i, "offered": 0, "accepted": 0, "emitted": 1,
+                 "rejected": 0, "state_action": "serial_output", "emission_provenance": "observed_stream_ID",
+                 "target_ms": None, "draft_ms": None, "accept_ms": None, "cycle_ms": None,
+                 "cost_provenance": "no_per_cycle_clock"} for i in range(1, emitted + 1)]
+        return rows, 0
+    if complete and not any(restore for _, _, restore in counts) and serial_estimate in (1, 2):
+        for row in rows:
+            row["emitted"] = row["accepted"] + 1
+            row["emission_provenance"] = "native_accept_plus_one_reconciled_with_SSE_total"
+        return rows, serial_estimate
+    return rows, None
+
+
+def log_phases(out):
+    start, before, final = [(out / name).read_text(errors="replace") if (out / name).is_file() else ""
+                            for name in ("server-start.log", "server-pre-warm.log", "server.log")]
+    if before and before.startswith(start) and final.startswith(before):
+        return start, before[len(start):], final[len(before):], final
+    if not before and final.startswith(start):
+        return start, final[len(start):], "", final
+    raise ValueError("discontinuous or rotated server logs")
+
+
+def phase_summary(path):
+    with path.open() as f:
+        output = []
+        for row in csv.DictReader(f, delimiter="\t"):
+            output.append({key: (int(row[key]) if key != "gpu_span_ms" else float(row[key])) for key in
+                           ("ctx_type", "n_tokens", "calls", "synced", "gpu_span_ms")})
+    if not output or not any(row["gpu_span_ms"] > 0 for row in output):
+        raise ValueError("phase diagnostic has no measured GPU spans")
+    return {"scope": "cumulative by context and batch width; includes startup/cold/warm, not matched to individual cycles",
+            "rows": output}
+
+
+def request(mode, phase, out, log):
+    record = n9.read_json(out / f"{phase}.json")
+    depth, count = MODES[mode], (192 if phase == "cold" else 3072)
+    timings = record["timings"]
+    old = n9.read_json(REF / f"{phase}.json")
+    arm = n9.CANDIDATE if depth else n9.CONTROL
+    base = n9.fixture("80k")
+    result, errors = (n9.check_record(arm, phase, record, old, base) if phase == "cold"
+                      else n18.warm_summary(arm, record, old, base))
+    if errors:
+        raise ValueError("; ".join(errors))
+    if (record["n_out"] != count or not n9.elapsed(timings["prompt_ms"]) or
+            len(re.findall(r"stop processing: n_tokens = \d+, truncated = 0\b", log)) != 1):
+        raise ValueError("request finish or prompt evaluation not proven")
+    if phase == "warm" and "n_past = 79996" not in log:
+        raise ValueError("warm prompt-cache restore was not logged")
+    cycle_rows, residual = cycles(mode, phase, log, count, True)
+    if depth:
+        histogram = original.n92.histogram(log, depth, timings["draft_n_accepted"], timings["draft_n"])
+        if "statistics        draft-mtp:" not in log:
+            raise ValueError("native draft-mtp runtime statistics missing")
+        # Checkpoint replay changes the trace accounting; retain the raw attempt if it diverges.
+        result.update(histogram)
+        result["decode_ms_per_native_cycle"] = timings["predicted_ms"] / histogram["rounds"]
+    elif original.n92.ACCEPT.search(log):
+        raise ValueError("no-MTP arm emitted draft acceptance markers")
+    result.update({"prompt_eval_s": timings["prompt_ms"] / 1000,
+                   "unassigned_serial_outputs": residual, "structure": text_shape(record["text"]),
+                   "draft_n_rejected": (timings["draft_n"] - timings["draft_n_accepted"]) if depth else 0,
+                   "prompt_checkpoint_marker_count": len(re.findall(r"restored context checkpoint", log)),
+                   "speculative_checkpoint_marker_count": len(re.findall(r"restore checkpoint\)|restoring speculative checkpoint", log))})
+    return result, cycle_rows
+
+
+def collect(mode, profile, out):
+    maps = ready(mode, profile, out)
+    start, cold, warm, full = log_phases(out)
+    if not cold or not warm or original.BAD.search(full) or n18.SHIFT.search(full):
+        raise ValueError("complete non-shifting GPU requests not proven")
+    depth = MODES[mode]
+    if (bool(n9.CACHE_MARKER.search(cold)) != bool(depth) or bool(n9.FULL_MARKER.search(full)) != bool(depth) or
+            n9.CACHE_MARKER.search(start) or "MTP merge re-eval enabled" in full or "LLAMA_MTP_MERGE_REEVAL ignored" in full):
+        raise ValueError("live split/cache-only mode differs")
+    samples = original.sampled(warm)
+    required = {("sparse-r2", 1)} if not depth else {(("mrow" if depth == 3 else "sparse-r2"), depth + 1)}
+    if not required <= {(r["kind"], r["q"]) for r in samples}:
+        raise ValueError("expected long warm native dispatch sample missing")
+    phases = {}
+    for phase, log in zip(STAGES, (cold, warm)):
+        phases[phase], _ = request(mode, phase, out, log)
+    counters = [list(map(int, row)) for row in HOST.findall(full)]
+    if depth and (not counters or counters[-1][0] != sum(row["rounds"] for row in phases.values())):
+        raise ValueError("cumulative rounds did not reconcile with requests")
+    if depth and counters[-1][1] != sum(row["checkpoint_restore_events"] for row in phases.values()):
+        raise ValueError("cumulative speculative restores did not reconcile")
+    if not depth and any(rounds or restores for rounds, restores in counters):
+        raise ValueError("no-MTP arm reported speculative cycles")
+    return {"mode": mode, "depth": depth, "technical_pass": True, "profile": profile,
+            "fixture_sha256": FIXTURE, "metrics": phases, "host_rounds_restores": counters[-1] if counters else None,
+            "warm_dispatch_samples": samples, "semantic_score": None,
+            "instrumented_phase_summary": phase_summary(out / "phase.tsv") if profile else None,
+            "mapped_objects": {Path(path).name: digest for path, digest in maps.items()}}
+
+
+def finalize(mode, profile, out, runner, cleanup, started, finished):
+    raw = out / "private"
+    public = out / "sanitized"
+    public.mkdir(exist_ok=True)
+    try:
+        _, cold, warm, full = log_phases(raw)
+    except ValueError:
+        cold = warm = full = ""
+    cycle_rows = []
+    observed = {}
+    for phase, log in zip(STAGES, (cold, warm)):
+        path = raw / f"{phase}.json"
+        record = n9.read_json(path) if path.is_file() else {}
+        complete = record.get("n_out") == (192 if phase == "cold" else 3072) and record.get("error") is None
+        emitted = record.get("n_out", 0)
+        phase_rows, residual = cycles(mode, phase, log, emitted, complete)
+        for i, row in enumerate(phase_rows, 1 + len(cycle_rows)):
+            row["arm_cycle"] = i
+        cycle_rows.extend(phase_rows)
+        if record:
+            observed[phase] = {"n_out": emitted, "completed_request": complete,
+                               **{key: record.get(key) for key in ("output_sha256", "ttft_s", "wall_s", "timings")},
+                               "unassigned_serial_outputs": residual}
+    with (private_cycles := raw / "cycles.jsonl").open("x") as file, (public / "cycles.jsonl").open("x") as safe:
+        for row in cycle_rows:
+            line = json.dumps(row, separators=(",", ":")) + "\n"
+            file.write(line)
+            safe.write(line)
+    status = {"runner_exit": runner, "cleanup_exit": cleanup, "bounded_wall_s": finished - started}
+    status["technical_pass"] = runner == cleanup == 0 and (raw / "result.json").is_file()
+    # Allowlist only, including on failures. Paths, raw logs, token IDs and text never enter the export.
+    report = n9.read_json(raw / "result.json") if status["technical_pass"] else None
+    env, args = settings(mode, profile)
+    runtime_maps = None
+    if (raw / "runtime-library-hashes.txt").is_file():
+        try:
+            runtime_maps = {Path(path).name: digest for path, digest in original.mapped(raw).items()}
+        except ValueError:
+            pass
+    n9.write_json(public / "receipt.json", {
+        "format_version": 1, "mode": mode, "cap_seconds": 430, "model_sha256": n9.MODEL_SHA,
+        "image_sha256": n9.IMAGE.removeprefix("sha256:"), "fixture_sha256": FIXTURE,
+        "gpu_requested": "Quadro M6000 24GB", "fleet_admitted_cap_w": 250 if (raw / "admission.txt").is_file()
+        and n9.IDLE_MARKER.search((raw / "admission.txt").read_text()) else None,
+        "native_q3_cuda_sha256": original.N98_SHA, "runtime_maps": runtime_maps,
+        "configured_argv": args, "configured_environment": env[1::2],
+        "provenance_sha256": n9.hash_file(HERE / "FROZEN.sha256"),
+        "archived_measured_n100_receipt_sha256": SHA["result.json"],
+        "profile_instrumented": profile, "status": status, "observed_requests": observed,
+        "speculative_trace_marker_count": len(original.n92.ACCEPT.findall(full)),
+        "cycle_rows_sha256": n9.hash_file(private_cycles),
+        "validated_report": report,
+    })
+
+
+def compare(paths):
+    rows = []
+    base_ids = None
+    for index, path in enumerate(paths):
+        raw = path / "private"
+        run = n9.read_json(path / "sanitized/receipt.json")
+        if not run["status"]["technical_pass"] or run["profile_instrumented"]:
+            raise ValueError("supply successful non-phase-profile receipts only")
+        if (index == 0) != (run["mode"] == "no-mtp"):
+            raise ValueError("first comparison receipt must be the no-MTP baseline")
+        result = collect(run["mode"], False, raw)
+        if json.loads(json.dumps(result)) != n9.read_json(raw / "result.json"):
+            raise ValueError("saved receipt failed recomputation")
+        ids = {phase: n9.read_json(raw / f"{phase}.json")["token_ids"] for phase in STAGES}
+        if base_ids is None:
+            base_ids, baseline = ids, result
+        differences = {}
+        for phase in STAGES:
+            ref, cur = baseline["metrics"][phase], result["metrics"][phase]
+            differences[phase] = {
+                "candidate_decode_over_serial": cur["decode_toks_s"] / ref["decode_toks_s"],
+                "serial_minus_candidate_wall_s": ref["request_wall_s"] - cur["request_wall_s"],
+                "first_id_difference_1_based": n9.first_mismatch(base_ids[phase], ids[phase]),
+            }
+        rows.append({"measurement": result, "versus_serial": differences})
+    return {"arms": rows, "semantic_score": None}
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    sub = parser.add_subparsers(dest="action", required=True)
+    sub.add_parser("check")
+    for name in ("env", "args", "ready", "verify", "finalize"):
+        cmd = sub.add_parser(name)
+        cmd.add_argument("mode", choices=MODES)
+        cmd.add_argument("profile", type=int, choices=(0, 1))
+        if name in ("ready", "verify", "finalize"):
+            cmd.add_argument("out", type=Path)
+        if name == "finalize":
+            for key in ("runner", "cleanup", "started", "finished"):
+                cmd.add_argument(key, type=int)
+    cmd = sub.add_parser("compare")
+    cmd.add_argument("paths", nargs="+", type=Path)
+    args = parser.parse_args()
+    if args.action == "check":
+        qualify()
+        print("Pinned 80K and measured N100 r1 receipt revalidated")
+    elif args.action in ("env", "args"):
+        print("\n".join(settings(args.mode, args.profile)[args.action == "args"]))
+    elif args.action == "ready":
+        ready(args.mode, args.profile, args.out)
+    elif args.action == "verify":
+        n9.write_json(args.out / "result.json", collect(args.mode, bool(args.profile), args.out))
+    elif args.action == "finalize":
+        finalize(args.mode, bool(args.profile), args.out, args.runner, args.cleanup, args.started, args.finished)
+    else:
+        print(json.dumps(compare(args.paths), indent=2))
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, KeyError, ValueError, TypeError) as exc:
+        sys.exit(f"Native width: {exc}")

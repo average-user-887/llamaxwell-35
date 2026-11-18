@@ -1,0 +1,42 @@
+--- a/native_probe.py
++++ b/native_probe.py
+@@ -17,7 +17,7 @@
+ 
+ n18 = original.n18
+ n9 = n18.n9
+-MODES = {"no-mtp": 0, "depth2-off": 2, "depth2-on": 2, "smoke-off": 2, "smoke-on": 2}
++MODES = {"no-mtp": 0, "no-mtp-on": 0, "depth2-off": 2, "depth2-on": 2, "smoke-off": 2, "smoke-on": 2}
+ GREEN = "30ec9a72d6f938656f331b91eb75266e73268bf2015a0d3dd2867eeb427dd58b"
+ PHASE = "LLAMA_MV3_PHASE=/native-phase.tsv"
+ REF = original.HERE / "@PRIVATE_ARCHIVED_REFERENCE_DIR@"
+@@ -334,7 +334,7 @@
+         run = n9.read_json(path / "sanitized/receipt.json")
+         if not run["status"]["technical_pass"] or run["profile_instrumented"]:
+             raise ValueError("supply successful non-phase-profile receipts only")
+-        if index==0 and run["mode"] not in ("no-mtp","depth2-off","smoke-off"):
++        if index==0 and run["mode"] not in ("no-mtp","no-mtp-on","depth2-off","smoke-off"):
+             raise ValueError("first comparison receipt must be the no-MTP baseline")
+         result = collect(run["mode"], False, raw)
+         if json.loads(json.dumps(result)) != n9.read_json(raw / "result.json"):
+@@ -352,7 +352,20 @@
+                 "first_arm_minus_candidate_wall_s": ref["request_wall_s"] - cur["request_wall_s"],
+                 "first_id_difference_1_based": n9.first_mismatch(base_ids[phase], ids[phase]),
+             }
+-        rows.append({"measurement": result, "versus_first_arm": differences})
++        prior=baseline["mode"]
++        match=settings(prior,False)[0]==settings(run["mode"],False)[0]
++        left_args=settings(prior,False)[1]
++        right_args=settings(run["mode"],False)[1]
++        target_args=lambda args: args[:args.index("--spec-type")] if "--spec-type" in args else args
++        target_same=target_args(left_args)==target_args(right_args)
++        mapped_same=baseline["mapped_objects"]==result["mapped_objects"]
++        strict=baseline["depth"]==0 and result["depth"]>0 and match and target_same and mapped_same
++        kind=("self" if index==0 else "strict matched target and backend settings" if strict else
++              "operational comparison with different Q3 flag" if baseline["depth"]==0 and not match else
++              "native depth2 operator toggle")
++        rows.append({"measurement":result,"versus_first_arm":differences,"comparison_kind":kind,
++                     "strict_native_over_serial_same_target_settings":strict,"matched_backend_environment":match,
++                     "matched_target_argv_excluding_speculation":target_same,"matched_mapped_digests":mapped_same})
+     return {"arms":rows,"independent_arithmetic_by_arm":{
+             row["measurement"]["mode"]:row["measurement"]["semantic_score"] for row in rows},
+             "quality_scope":"2K smoke includes one independent grammar-constrained arithmetic witness; long-context text is unscored."}

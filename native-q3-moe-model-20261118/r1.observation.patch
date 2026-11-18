@@ -1,0 +1,22 @@
+--- a/add_observation.py
++++ b/add_observation.py
+@@ -23,7 +23,10 @@
+     on = stage.endswith("-on")
+     if not on and (after[5] or "Q3_COHORT residency" in log):
+         raise ValueError("OFF control observed Q3 candidate")
+-    if on and (not d[5] or not any(int(n)>=2 for n in RESIDENCY.findall(log))):
++    # A true serial target can legitimately have zero eligible Q3 windows.
++    # If one does occur (e.g., a prefill tail), require the same physical residency.
++    need_q3=on and stage!="no-mtp-on"
++    if (need_q3 and not d[5]) or (on and after[5] and not any(int(n)>=2 for n in RESIDENCY.findall(log))):
+         raise ValueError("real Q3 candidate launch or full-grid residency missing")
+     if d[3]+d[4]<=0:
+         raise ValueError("observer did not see existing Q1/Q2 dispatches")
+@@ -34,5 +37,5 @@
+             "per_target_layer_0_to_39":by_layer,
+             "full40_coverage_matches_width3_rounds":bool(on and full_rounds and by_layer==[full_rounds]*40),
+             "launches_per_width3_round":d[5]/full_rounds if full_rounds else None,
+-            "operator_launch_geometry":[48,512] if on else None,
+-            "actual_q3_routed_experts_per_row":8 if on else None}
++            "operator_launch_geometry":[48,512] if on and d[5] else None,
++            "actual_q3_routed_experts_per_row":8 if on and d[5] else None}

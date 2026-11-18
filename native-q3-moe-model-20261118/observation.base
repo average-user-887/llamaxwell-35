@@ -1,0 +1,38 @@
+"""Offline proof of a complete 40-layer Q3 dispatch, using phase-local shared counters."""
+import re
+import struct
+from pathlib import Path
+
+MAGIC = 0x4d4f45335101
+RESIDENCY = re.compile(r"Q3_COHORT residency device=0 sm=24 active_per_sm=(\d+) regs=63 static_smem=96 dynamic_smem=39424 local=0 admitted=1")
+
+def snapshot(path):
+    raw = path.read_bytes()
+    if len(raw) != 4096:
+        raise ValueError("incomplete host-observer snapshot")
+    words = list(struct.unpack("<512Q", raw))
+    if words[:2] != [MAGIC, 1] or any(words[56:]) or any(words[10:16]):
+        raise ValueError("PID1 host observer or counter layout missing")
+    return words
+
+def attribution(stage, begin, end, log, periods):
+    before, after = snapshot(begin), snapshot(end)
+    d = [b-a for a,b in zip(before, after)]
+    if any(n<0 for n in d) or after[2]!=1 or any(after[7:9]) or after[5]!=after[6] or after[5]!=sum(after[16:56]):
+        raise ValueError("unresolved original backend, unknown layer, counter discontinuity, or failed physical Q3 dispatch")
+    on = stage.endswith("-on")
+    if not on and (after[5] or "Q3_COHORT residency" in log):
+        raise ValueError("OFF control observed Q3 candidate")
+    if on and (not d[5] or not any(int(n)>=2 for n in RESIDENCY.findall(log))):
+        raise ValueError("real Q3 candidate launch or full-grid residency missing")
+    if d[3]+d[4]<=0:
+        raise ValueError("observer did not see existing Q1/Q2 dispatches")
+    full_rounds = periods.get("proposal_width_counts",{}).get(2,0)
+    by_layer = d[16:56]
+    return {"kernel_confirmed_launches":d[5],"non_target_q3_matches_sent_to_original_graph":d[9],"legacy_q1_calls":d[3],"legacy_q2_row_calls":d[4],
+            "expected_width3_rounds_from_native_acceptance":full_rounds,
+            "per_target_layer_0_to_39":by_layer,
+            "full40_coverage_matches_width3_rounds":bool(on and full_rounds and by_layer==[full_rounds]*40),
+            "launches_per_width3_round":d[5]/full_rounds if full_rounds else None,
+            "operator_launch_geometry":[48,512] if on else None,
+            "actual_q3_routed_experts_per_row":8 if on else None}

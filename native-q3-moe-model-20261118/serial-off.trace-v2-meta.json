@@ -1,0 +1,21 @@
+{
+  "format": 2,
+  "arm": "no-mtp",
+  "depth": 0,
+  "runner_exit": 0,
+  "cleanup_exit": 0,
+  "technical_pass": true,
+  "failure_class": null,
+  "bounded_wall_s": 314,
+  "trace_sha256": "0192f208813b9b6769913b3df13123815cbde0d0d11a8c3b9523f9475b11aa15",
+  "converter_sha256": "e1d505130006c8f4071ed3304b8a43206ebbe511d32989799f1976084c0e5a01",
+  "events": {
+    "cycle": 3264,
+    "output_boundary": 2,
+    "request_begin": 2,
+    "runtime_state_marker": 1,
+    "slot_release": 2,
+    "sse_clock_checkpoint": 7,
+    "trace_metadata": 1
+  }
+}

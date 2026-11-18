@@ -1,0 +1,46 @@
+{
+  "base.probe": {
+    "actual_source_sha256": "4443b5f9632ca6cc16d019a1f4e0ec283d0197ccdcd6a2da547c18bc6750ff46",
+    "portable_source_sha256": "5c67a321528afae62f826b10794057063a0765d55d1428dcc940b9786331d7be"
+  },
+  "initial.probe": {
+    "actual_source_sha256": "87d09238bb95f09c5cb9f828f9029a2dbb94cc35f1a86922b6c1587e792c1b59",
+    "portable_source_sha256": "0138165cf9f146e9ed145ede6c4564447fd90c8c10839a3d00695864d9290fb1"
+  },
+  "r1.probe": {
+    "actual_source_sha256": "3249c9978ed7367b55e8c42781fb9211f53a15df34741939d47401135f5b814a",
+    "portable_source_sha256": "903efdf4f5b888beaa70423bc76b193ae3e5f90473c269406e231fcd44e3cccf"
+  },
+  "r2.probe": {
+    "actual_source_sha256": "c5e4f8458050c34d18292fa2964c2b2bebe04e6ad89990e37492b80be1ea9649",
+    "portable_source_sha256": "7e6b4a2c7ed8509e229a18adc99307b8eb180c7e6ed2620c586db9086a91d143"
+  },
+  "base.release": {
+    "actual_source_sha256": "7fb96b5eef112e05197c7e5350e0e51ce08a7adfec8ff82bf7fb59588497c900",
+    "portable_source_sha256": "7fb96b5eef112e05197c7e5350e0e51ce08a7adfec8ff82bf7fb59588497c900"
+  },
+  "initial.release": {
+    "actual_source_sha256": "483ec50d7262892c41f280fc93d5177f6190f0bc80e90e547a25283e267d3400",
+    "portable_source_sha256": "483ec50d7262892c41f280fc93d5177f6190f0bc80e90e547a25283e267d3400"
+  },
+  "r1.release": {
+    "actual_source_sha256": "022f13bae156f8c25a0f8820704001796b51a154f4ed9f4c730a590f62416765",
+    "portable_source_sha256": "022f13bae156f8c25a0f8820704001796b51a154f4ed9f4c730a590f62416765"
+  },
+  "r2.release": {
+    "actual_source_sha256": "29d92be9e34bcaa6c08cfee458e14330993b1820f47208dca91489af9a654c87",
+    "portable_source_sha256": "29d92be9e34bcaa6c08cfee458e14330993b1820f47208dca91489af9a654c87"
+  },
+  "initial.observation": {
+    "actual_source_sha256": "1495687411829a2b4b5e62993aa08a50b815be52cb42dc2ae01bcac1f7ff51dc",
+    "portable_source_sha256": "1495687411829a2b4b5e62993aa08a50b815be52cb42dc2ae01bcac1f7ff51dc"
+  },
+  "r1.observation": {
+    "actual_source_sha256": "4e24735fa13959ac1684629f117c9d61f895c4353f313fc730be4f5b89dc75bc",
+    "portable_source_sha256": "4e24735fa13959ac1684629f117c9d61f895c4353f313fc730be4f5b89dc75bc"
+  },
+  "r2.observation": {
+    "actual_source_sha256": "4e9f5b014b0b5a8cfdcb78312a2dc0a0d309235ac4fb2f6f1ddf14291d1d15c1",
+    "portable_source_sha256": "4e9f5b014b0b5a8cfdcb78312a2dc0a0d309235ac4fb2f6f1ddf14291d1d15c1"
+  }
+}

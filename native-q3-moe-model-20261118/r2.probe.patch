@@ -1,0 +1,64 @@
+--- a/native_probe.py
++++ b/native_probe.py
+@@ -246,7 +246,13 @@
+     for phase, log in zip(STAGES, (cold, warm)):
+         phases[phase] = short_request(phase,out,log) if short else request(mode,phase,out,log)[0]
+         begin,end=("start","cold") if phase=="cold" else ("cold","warm")
+-        phases[phase]["moe_dispatch"] = attribution(mode,out/f"counter-{begin}.bin",out/f"counter-{end}.bin",full,phases[phase])
++        hist=phases[phase].get("proposal_width_counts",{})
++        first=original.n92.ACCEPT.search(log)
++        observed_q3=original.sampled(log[first.end():]) if first else []
++        width3_only=(mode in ("depth2-off","depth2-on") and bool(first) and
++                     hist=={2:phases[phase]["rounds"]} and
++                     any(sample["kind"]=="sparse-r2" and sample["q"]==3 and sample["calls"]>=100 for sample in observed_q3))
++        phases[phase]["moe_dispatch"] = attribution(mode,out/f"counter-{begin}.bin",out/f"counter-{end}.bin",full,phases[phase],width3_only)
+     counters = [list(map(int,row)) for row in HOST.findall(full)]
+     quality_events = original.n92.ACCEPT.findall(full[len(after_warm):]) if short else []
+     quality_rounds = len(quality_events)
+@@ -326,18 +332,34 @@
+     })
+ 
+ 
++RECOVERED=C/"@PRIVATE_ORIGINAL_FAILED_ARM_PATH@"
++def recovered(path):
++    return path.resolve()==RECOVERED.resolve()
++def recover_original():
++    raw=RECOVERED/"private"
++    status=n9.key_values(raw/"status.txt")
++    run=(raw/"run.log").read_text().splitlines()
++    if (status["runner_exit"],status["cleanup_exit"])!=("1","0") or run[-1]!="Native width: observer did not see existing Q1/Q2 dispatches":
++        raise ValueError("unexpected original refusal/cleanup")
++    for line in (raw/"observations.sha256").read_text().splitlines():
++        digest,name=line.split("  ",1)
++        if n9.hash_file(raw/name)!=digest: raise ValueError("original raw archive changed")
++    return collect("depth2-off",False,raw)
++
+ def compare(paths):
+     rows = []
+     base_ids = None
+     for index, path in enumerate(paths):
+         raw = path / "private"
+         run = n9.read_json(path / "sanitized/receipt.json")
+-        if not run["status"]["technical_pass"] or run["profile_instrumented"]:
++        replay=recovered(path)
++        if (not replay and not run["status"]["technical_pass"]) or run["profile_instrumented"]:
+             raise ValueError("supply successful non-phase-profile receipts only")
+         if index==0 and run["mode"] not in ("no-mtp","no-mtp-on","depth2-off","smoke-off"):
+             raise ValueError("first comparison receipt must be the no-MTP baseline")
+-        result = collect(run["mode"], False, raw)
+-        if json.loads(json.dumps(result)) != n9.read_json(raw / "result.json"):
++        result = recover_original() if replay else collect(run["mode"],False,raw)
++        reference=HERE/"recovered-report.json" if replay else raw/"result.json"
++        if json.loads(json.dumps(result)) != n9.read_json(reference):
+             raise ValueError("saved receipt failed recomputation")
+         ids = {phase: n9.read_json(raw / f"{phase}.json")["token_ids"] for phase in STAGES}
+         if base_ids is None:
+@@ -363,7 +385,7 @@
+         kind=("self" if index==0 else "strict matched target and backend settings" if strict else
+               "operational comparison with different Q3 flag" if baseline["depth"]==0 and not match else
+               "native depth2 operator toggle")
+-        rows.append({"measurement":result,"versus_first_arm":differences,"comparison_kind":kind,
++        rows.append({"measurement":result,"reconstructed_original_runner_refusal":replay,"original_runner_status":run["status"],"versus_first_arm":differences,"comparison_kind":kind,
+                      "strict_native_over_serial_same_target_settings":strict,"matched_backend_environment":match,
+                      "matched_target_argv_excluding_speculation":target_same,"matched_mapped_digests":mapped_same})
+     return {"arms":rows,"independent_arithmetic_by_arm":{

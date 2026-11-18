@@ -1,0 +1,22 @@
+{
+  "format": 2,
+  "arm": "smoke-on",
+  "depth": 2,
+  "runner_exit": 0,
+  "cleanup_exit": 0,
+  "technical_pass": true,
+  "failure_class": null,
+  "bounded_wall_s": 21,
+  "trace_sha256": "0c9293fac8ee92550e42951f863a7395e4c0a942b4cf9290c96428e111ad775c",
+  "converter_sha256": "e1d505130006c8f4071ed3304b8a43206ebbe511d32989799f1976084c0e5a01",
+  "events": {
+    "arithmetic_score": 1,
+    "cycle": 159,
+    "host_counter_snapshot": 7,
+    "output_boundary": 3,
+    "request_begin": 3,
+    "runtime_state_marker": 1,
+    "slot_release": 3,
+    "trace_metadata": 1
+  }
+}
