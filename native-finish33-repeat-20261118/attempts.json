@@ -1,0 +1,108 @@
+{
+  "failed-serial-1": {
+    "file": "failed-serial-1.trace-v2.jsonl",
+    "trace_sha256": "7cd12a36a6ff4a8c25f33ecbc5067e70381499bbad7e115447a36b48e41141ba",
+    "events": {
+      "offload_observed": 1,
+      "owned_run_begin": 1,
+      "owned_run_outcome": 1,
+      "startup_log_only_no_healthy_boundary": 1,
+      "trace_metadata": 1
+    },
+    "log_boundary_issue": "startup_log_only_no_healthy_boundary",
+    "response_phases_observed": [],
+    "start_epoch": 1795026410,
+    "completed_epoch": 1795026490,
+    "terminal": {
+      "runner_exit": 2,
+      "cleanup_exit": 0,
+      "runner_failure_class": "owned_worker_health_timeout",
+      "cleanup_outcome": "passed",
+      "validation_disposition": "terminal_failure",
+      "owned_worker_ready_s": null,
+      "health_check_limit_s": 75
+    }
+  },
+  "repeat-serial": {
+    "file": "repeat-serial.trace-v2.jsonl",
+    "trace_sha256": "835e6c528fa482310cf1d55f864a309dfccf53fdeb09f89b3b93ae462f1062ff",
+    "events": {
+      "cycle": 3264,
+      "observed_response_metrics": 2,
+      "offload_observed": 1,
+      "output_boundary": 2,
+      "owned_health_observed": 1,
+      "owned_run_begin": 1,
+      "owned_run_outcome": 1,
+      "physical_counter_boundary": 3,
+      "q2_moe_residency": 1,
+      "recurrent_rollback_rows": 1,
+      "request_begin": 2,
+      "runtime_state_marker": 1,
+      "sampler_snapshot_completion": 2,
+      "slot_release": 2,
+      "sparse_attention_dispatch_sample": 35,
+      "sse_clock_checkpoint": 7,
+      "trace_metadata": 1
+    },
+    "log_boundary_issue": null,
+    "response_phases_observed": [
+      "cold",
+      "warm"
+    ],
+    "start_epoch": 1795026519,
+    "completed_epoch": 1795026864,
+    "terminal": {
+      "runner_exit": 0,
+      "cleanup_exit": 0,
+      "runner_failure_class": null,
+      "cleanup_outcome": "passed",
+      "validation_disposition": "passed_original_terminal_validator",
+      "owned_worker_ready_s": 36,
+      "health_check_limit_s": null
+    }
+  },
+  "repeat-native": {
+    "file": "repeat-native.trace-v2.jsonl",
+    "trace_sha256": "c107b54c0a9cd246f1605e30def70f3242184d01aa25a1dbdca1a9c5c50a0697",
+    "events": {
+      "fast_selector_first_dispatch": 1,
+      "fixed_stride_first_dispatch": 1,
+      "host_counter_snapshot": 70,
+      "observed_response_metrics": 2,
+      "observed_stream_output_ordinal": 3264,
+      "offload_observed": 1,
+      "output_boundary": 2,
+      "owned_health_observed": 1,
+      "owned_run_begin": 1,
+      "owned_run_outcome": 1,
+      "physical_counter_boundary": 3,
+      "q2_moe_residency": 1,
+      "recurrent_rollback_rows": 2,
+      "request_begin": 2,
+      "runtime_state_marker": 1,
+      "sampler_snapshot_completion": 2,
+      "slot_release": 2,
+      "sparse_attention_dispatch_sample": 24,
+      "sse_clock_checkpoint": 7,
+      "tiled_probe_first_dispatch": 1,
+      "trace_metadata": 1
+    },
+    "log_boundary_issue": null,
+    "response_phases_observed": [
+      "cold",
+      "warm"
+    ],
+    "start_epoch": 1795026880,
+    "completed_epoch": 1795027201,
+    "terminal": {
+      "runner_exit": 0,
+      "cleanup_exit": 0,
+      "runner_failure_class": null,
+      "cleanup_outcome": "passed",
+      "validation_disposition": "passed_original_terminal_validator",
+      "owned_worker_ready_s": 16,
+      "health_check_limit_s": null
+    }
+  }
+}

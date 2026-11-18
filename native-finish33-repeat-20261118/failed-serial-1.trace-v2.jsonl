@@ -1,0 +1,5 @@
+{"event":"owned_run_begin","arm":"serial","start_epoch":1795026410}
+{"event":"trace_metadata","arm":"serial","format":2,"scope":"literal typed events plus labeled stream-emission reconciliation"}
+{"event":"startup_log_only_no_healthy_boundary","arm":"serial"}
+{"event":"offload_observed","arm":"serial","phase":"unattributed","relative_log_line":177,"offloaded_layers":42,"configured_layers":42,"process_log_clock":"1.08.771.913"}
+{"event":"owned_run_outcome","arm":"serial","runner_exit":2,"cleanup_exit":0,"runner_failure_class":"owned_worker_health_timeout","cleanup_outcome":"passed","validation_disposition":"terminal_failure","owned_worker_ready_s":null,"health_check_limit_s":75,"status":{"start_epoch":1795026410,"deadline_epoch":1795026840,"cap_seconds":430,"arm_deadline_epoch":1795026840,"runner_exit":2,"cleanup_exit":0,"completed_epoch":1795026490}}
