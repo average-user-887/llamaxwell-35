@@ -1,0 +1,12 @@
+ptxas info    : Function properties for _Z20ofa_sparse_attentionILi2ELi4EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 117 registers, used 1 barriers, 34560 bytes smem, 488 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 35.733 ms
+ptxas info    : Function properties for _Z30ofa_sparse_attention_q2_strideILj2048EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 118 registers, used 1 barriers, 34560 bytes smem, 488 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 24.284 ms
+ptxas info    : Function properties for _Z30ofa_sparse_attention_q2_strideILj1024EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 118 registers, used 1 barriers, 34560 bytes smem, 488 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 24.868 ms
