@@ -1,0 +1,35 @@
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  /runtime/libggml.so.0.26.0
+678cf75e5ef5b1f92460eb0f816d3bbe755ee9710fd04606c31ec24dcd41fa06  /runtime/libggml-base.so.0.26.0
+00f9a42eee223fe558544125b289fb7b0803c4d2820cf0a57b8309c8ed5cf091  /runtime/libggml-cuda.so
+01a3c69bdbd5290497aaf5635da4908426bcbc92ff232eb2887b5bfc32e96245  /operator
+Q2_COHORT FIXTURE_IDS independent row=0 ids=128,215,73,136,110,167,197,112
+Q2_COHORT FIXTURE_IDS independent row=1 ids=85,222,184,46,216,151,64,219
+Q2_COHORT FIXTURE independent overlap=0 min_margin=0.00021109628
+Q2_COHORT FIXTURE_IDS partial row=0 ids=128,215,73,136,110,167,197,112
+Q2_COHORT FIXTURE_IDS partial row=1 ids=110,73,64,128,215,96,197,82
+Q2_COHORT FIXTURE partial overlap=5 min_margin=0.0011513497
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 24463 MiB):
+  Device 0: Quadro M6000 24GB, compute capability 5.2, VMM: yes, VRAM: 24463 MiB
+load_backend: loaded CUDA backend from /runtime/libggml-cuda.so
+N104 MAP /runtime/libggml.so.0.26.0
+N104 MAP /runtime/libggml-base.so.0.26.0
+N104 MAP /runtime/libggml-cuda.so
+Q2_COHORT MAP /operator /runtime/libggml-cuda.so
+ggml_cuda_hg_try_defer: GGML_CUDA_OCCAMY_HOSTGAP engaged on device 0
+ggml_cuda_graph_set_enabled: disabling CUDA graphs due to GPU architecture
+Q2_COHORT residency device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1
+Q2_PAIR TIME independent mode=cohorts reps=8 row0=0 row1=0 pair=8 skip=8 offsets=0 us=379.430375
+Q2_OFFSETS residency device=0 sm=24 active=2 regs=63 static=128 dynamic=39424 local=0 ready=1
+Q2_PAIR TIME independent mode=offsets reps=8 row0=0 row1=0 pair=8 skip=8 offsets=8 us=170.383375
+Q2_PAIR TIME independent mode=cohorts reps=96 row0=0 row1=0 pair=96 skip=96 offsets=0 us=163.072896
+Q2_PAIR TIME independent mode=offsets reps=96 row0=0 row1=0 pair=96 skip=96 offsets=96 us=164.783656
+Q2_PAIR TIME independent mode=offsets reps=96 row0=0 row1=0 pair=96 skip=96 offsets=96 us=165.637677
+Q2_PAIR TIME independent mode=cohorts reps=96 row0=0 row1=0 pair=96 skip=96 offsets=0 us=172.347969
+Q2_PAIR TIME partial mode=cohorts reps=8 row0=0 row1=0 pair=8 skip=8 offsets=0 us=161.659375
+Q2_PAIR TIME partial mode=offsets reps=8 row0=0 row1=0 pair=8 skip=8 offsets=8 us=166.770250
+Q2_PAIR TIME partial mode=offsets reps=96 row0=0 row1=0 pair=96 skip=96 offsets=96 us=163.414698
+Q2_PAIR TIME partial mode=cohorts reps=96 row0=0 row1=0 pair=96 skip=96 offsets=0 us=161.558031
+Q2_PAIR TIME partial mode=cohorts reps=96 row0=0 row1=0 pair=96 skip=96 offsets=0 us=160.396552
+Q2_PAIR TIME partial mode=offsets reps=96 row0=0 row1=0 pair=96 skip=96 offsets=96 us=163.634177
+Q2_PAIR FINISH row0=0 row1=0 pair=800 skip=800 offsets=400
+ggml_cuda_hostgap: deferred=12 flushes=12

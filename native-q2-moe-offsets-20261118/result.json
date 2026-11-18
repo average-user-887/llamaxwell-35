@@ -1,0 +1,295 @@
+{
+  "technical_pass": true,
+  "materiality_pass": false,
+  "threshold_us_per_layer": 18,
+  "conditional_draft_stack": {
+    "threshold_us_per_layer_strict_gt": 13.7,
+    "operator_threshold_only": false,
+    "requires_independent_exact_current_model_draft_saving_ms": 0.16,
+    "current_model_draft_result": null
+  },
+  "numeric": {
+    "residency": {
+      "sms": 24,
+      "active_per_sm": 2,
+      "grid_ctas": 48,
+      "ctas_per_cohort": 24,
+      "threads_per_cta": 512,
+      "registers": 63,
+      "control_static_shared_bytes": 96,
+      "candidate_static_shared_bytes": 128,
+      "dynamic_shared_bytes": 39424,
+      "local_bytes": 0
+    },
+    "results": {
+      "independent": {
+        "ordered_experts": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            85,
+            222,
+            184,
+            46,
+            216,
+            151,
+            64,
+            219
+          ]
+        ],
+        "expert_overlap": 0,
+        "candidate_router_repeats": 2,
+        "output_rows": [
+          {
+            "row": 0,
+            "finite": 2048,
+            "different_words": 0,
+            "repeat_different_words": 0,
+            "max_abs": 0.0
+          },
+          {
+            "row": 1,
+            "finite": 2048,
+            "different_words": 0,
+            "repeat_different_words": 0,
+            "max_abs": 0.0
+          }
+        ],
+        "stock_reference": "unchanged 369c6b05 two-row cohort instructions on the same native Q2 graph"
+      },
+      "partial": {
+        "ordered_experts": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            110,
+            73,
+            64,
+            128,
+            215,
+            96,
+            197,
+            82
+          ]
+        ],
+        "expert_overlap": 5,
+        "candidate_router_repeats": 2,
+        "output_rows": [
+          {
+            "row": 0,
+            "finite": 2048,
+            "different_words": 0,
+            "repeat_different_words": 0,
+            "max_abs": 0.0
+          },
+          {
+            "row": 1,
+            "finite": 2048,
+            "different_words": 0,
+            "repeat_different_words": 0,
+            "max_abs": 0.0
+          }
+        ],
+        "stock_reference": "unchanged 369c6b05 two-row cohort instructions on the same native Q2 graph"
+      }
+    }
+  },
+  "timing": {
+    "residency": {
+      "sms": 24,
+      "active_per_sm": 2,
+      "grid_ctas": 48,
+      "ctas_per_cohort": 24,
+      "threads_per_cta": 512,
+      "registers": 63,
+      "control_static_shared_bytes": 96,
+      "candidate_static_shared_bytes": 128,
+      "dynamic_shared_bytes": 39424,
+      "local_bytes": 0
+    },
+    "results": {
+      "independent": {
+        "interval_columns": [
+          "mode",
+          "reps",
+          "old_row0",
+          "old_row1",
+          "combined_launches",
+          "second_callbacks_skipped",
+          "offsets_launches",
+          "mean_us"
+        ],
+        "all_intervals": [
+          [
+            "cohorts",
+            8,
+            0,
+            0,
+            8,
+            8,
+            0,
+            379.430375
+          ],
+          [
+            "offsets",
+            8,
+            0,
+            0,
+            8,
+            8,
+            8,
+            170.383375
+          ],
+          [
+            "cohorts",
+            96,
+            0,
+            0,
+            96,
+            96,
+            0,
+            163.072896
+          ],
+          [
+            "offsets",
+            96,
+            0,
+            0,
+            96,
+            96,
+            96,
+            164.783656
+          ],
+          [
+            "offsets",
+            96,
+            0,
+            0,
+            96,
+            96,
+            96,
+            165.637677
+          ],
+          [
+            "cohorts",
+            96,
+            0,
+            0,
+            96,
+            96,
+            0,
+            172.347969
+          ]
+        ],
+        "cohorts_minus_offsets_us": [
+          -1.7107600000000218,
+          6.71029200000001
+        ],
+        "projected_ms_across_40_layers": [
+          -0.06843040000000088,
+          0.2684116800000004
+        ],
+        "materiality_pass": false
+      },
+      "partial": {
+        "interval_columns": [
+          "mode",
+          "reps",
+          "old_row0",
+          "old_row1",
+          "combined_launches",
+          "second_callbacks_skipped",
+          "offsets_launches",
+          "mean_us"
+        ],
+        "all_intervals": [
+          [
+            "cohorts",
+            8,
+            0,
+            0,
+            8,
+            8,
+            0,
+            161.659375
+          ],
+          [
+            "offsets",
+            8,
+            0,
+            0,
+            8,
+            8,
+            8,
+            166.77025
+          ],
+          [
+            "offsets",
+            96,
+            0,
+            0,
+            96,
+            96,
+            96,
+            163.414698
+          ],
+          [
+            "cohorts",
+            96,
+            0,
+            0,
+            96,
+            96,
+            0,
+            161.558031
+          ],
+          [
+            "cohorts",
+            96,
+            0,
+            0,
+            96,
+            96,
+            0,
+            160.396552
+          ],
+          [
+            "offsets",
+            96,
+            0,
+            0,
+            96,
+            96,
+            96,
+            163.634177
+          ]
+        ],
+        "cohorts_minus_offsets_us": [
+          -1.8566669999999874,
+          -3.23762499999998
+        ],
+        "projected_ms_across_40_layers": [
+          -0.0742666799999995,
+          -0.1295049999999992
+        ],
+        "materiality_pass": false
+      }
+    }
+  }
+}
