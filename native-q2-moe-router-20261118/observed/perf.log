@@ -1,0 +1,31 @@
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  /runtime/libggml.so.0.26.0
+678cf75e5ef5b1f92460eb0f816d3bbe755ee9710fd04606c31ec24dcd41fa06  /runtime/libggml-base.so.0.26.0
+8a8719c1624a1bba0737ebed30abd35dfd2556f322d55bcf93a5fd48839793ae  /runtime/libggml-cuda.so
+1b92ba2f530d7f4afa94f8b1e211f93467af3932a7cfa0218418643619ff9c1b  /operator
+Q2_ROUTER FIXTURE_IDS independent row=0 ids=128,215,73,136,110,167,197,112
+Q2_ROUTER FIXTURE_IDS independent row=1 ids=85,222,184,46,216,151,64,219
+Q2_ROUTER FIXTURE independent overlap=0 min_margin=0.00021109628
+Q2_ROUTER FIXTURE_IDS partial row=0 ids=128,215,73,136,110,167,197,112
+Q2_ROUTER FIXTURE_IDS partial row=1 ids=110,73,64,128,215,96,197,82
+Q2_ROUTER FIXTURE partial overlap=5 min_margin=0.0011513497
+  Device 0: Quadro M6000 24GB, compute capability 5.2, VMM: yes, VRAM: 24463 MiB
+load_backend: loaded CUDA backend from /runtime/libggml-cuda.so
+N104 MAP /runtime/libggml.so.0.26.0
+N104 MAP /runtime/libggml-base.so.0.26.0
+N104 MAP /runtime/libggml-cuda.so
+Q2_ROUTER MAP /operator /runtime/libggml-cuda.so
+Q2_COHORT residency device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1
+Q2_ROUTER TIME independent mode=cohorts reps=8 row0=0 row1=0 pair=8 skip=8 router=0 us=386.172875
+Q2_ROUTER residency device=0 sm=24 active=2 regs=64 static=96 dynamic=39424 local=0 ready=1
+Q2_ROUTER TIME independent mode=router reps=8 row0=0 row1=0 pair=8 skip=8 router=8 us=175.002875
+Q2_ROUTER TIME independent mode=cohorts reps=96 row0=0 row1=0 pair=96 skip=96 router=0 us=162.732073
+Q2_ROUTER TIME independent mode=router reps=96 row0=0 row1=0 pair=96 skip=96 router=96 us=166.516323
+Q2_ROUTER TIME independent mode=router reps=96 row0=0 row1=0 pair=96 skip=96 router=96 us=166.082073
+Q2_ROUTER TIME independent mode=cohorts reps=96 row0=0 row1=0 pair=96 skip=96 router=0 us=163.364833
+Q2_ROUTER TIME partial mode=cohorts reps=8 row0=0 row1=0 pair=8 skip=8 router=0 us=160.501625
+Q2_ROUTER TIME partial mode=router reps=8 row0=0 row1=0 pair=8 skip=8 router=8 us=163.989500
+Q2_ROUTER TIME partial mode=router reps=96 row0=0 row1=0 pair=96 skip=96 router=96 us=170.475708
+Q2_ROUTER TIME partial mode=cohorts reps=96 row0=0 row1=0 pair=96 skip=96 router=0 us=160.651885
+Q2_ROUTER TIME partial mode=cohorts reps=96 row0=0 row1=0 pair=96 skip=96 router=0 us=160.661385
+Q2_ROUTER TIME partial mode=router reps=96 row0=0 row1=0 pair=96 skip=96 router=96 us=165.634656
+Q2_ROUTER FINISH row0=0 row1=0 pair=800 skip=800 router=400

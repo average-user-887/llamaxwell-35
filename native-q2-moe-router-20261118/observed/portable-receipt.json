@@ -1,0 +1,349 @@
+{
+  "build": {
+    "native_control_library_sha256": "9e999bcaf04397f267548abdfa3e326b65bee122fb1e24f92be55529f40a335e",
+    "candidate_library_sha256": "8a8719c1624a1bba0737ebed30abd35dfd2556f322d55bcf93a5fd48839793ae",
+    "operator_sha256": "1b92ba2f530d7f4afa94f8b1e211f93467af3932a7cfa0218418643619ff9c1b",
+    "candidate_object_sha256": "4ff38f970931547f4d61af2b8dca77908d090bf068c0079f97c28324a3f61528",
+    "control_object_sha256": "bbea6f5c611282090050592a6e49f2c15238c104eb1b1420cb23e562220176eb",
+    "original_q8_gdn_object_sha256": "bcd063306ea65f5e8143a8d6501960dbfeda359f5b3a261d5d91d612c786eac0",
+    "linked_objects": 147,
+    "builder_image": "sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed",
+    "runner_image": "sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+    "preserved_device_functions": 17,
+    "preserved_instruction_words": 46032,
+    "added_device_function": "_ZN6occamy13moe_q2_routerENS_6ParamsEb",
+    "added_instruction_words": 3800,
+    "registers": 64,
+    "static_shared_bytes": 96,
+    "dynamic_shared_bytes": 39424,
+    "stack_bytes": 0,
+    "spill_load_bytes": 0,
+    "spill_store_bytes": 0,
+    "cc": "sm_52",
+    "threads_per_block": 512,
+    "blocks_per_grid": 48,
+    "required_blocks_per_sm": 2
+  },
+  "status": {
+    "runner_exit": 0,
+    "cleanup_exit": 0,
+    "started_epoch": 1795016553,
+    "finished_epoch": 1795016555,
+    "cap_seconds": 180
+  },
+  "required_savings_us_per_layer": {
+    "independent": 9.0,
+    "partial": 9.0
+  },
+  "manifest_sha256": "5699012af7eb0a2812eb0dbe706c39b32cd97d4760f6fdf517f210880537a899",
+  "check": {
+    "executed": true,
+    "validated": {
+      "independent": {
+        "ordered_expert_ids": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            85,
+            222,
+            184,
+            46,
+            216,
+            151,
+            64,
+            219
+          ]
+        ],
+        "overlap": 0,
+        "finite_output_words": 4096,
+        "different_output_words": 0,
+        "repeat_different_output_words": 0,
+        "physical_route_checks": 3
+      },
+      "partial": {
+        "ordered_expert_ids": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            110,
+            73,
+            64,
+            128,
+            215,
+            96,
+            197,
+            82
+          ]
+        ],
+        "overlap": 5,
+        "finite_output_words": 4096,
+        "different_output_words": 0,
+        "repeat_different_output_words": 0,
+        "physical_route_checks": 3
+      }
+    }
+  },
+  "perf": {
+    "executed": true,
+    "validated": {
+      "independent": {
+        "intervals": [
+          {
+            "mode": "cohorts",
+            "reps": 8,
+            "mean_us": 386.172875
+          },
+          {
+            "mode": "router",
+            "reps": 8,
+            "mean_us": 175.002875
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 162.732073
+          },
+          {
+            "mode": "router",
+            "reps": 96,
+            "mean_us": 166.516323
+          },
+          {
+            "mode": "router",
+            "reps": 96,
+            "mean_us": 166.082073
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 163.364833
+          }
+        ],
+        "cohorts_minus_router_us": [
+          -3.784249999999986,
+          -2.717240000000004
+        ],
+        "min_required_saving_us": 9.0,
+        "projected_ms_40_layers": [
+          -0.15136999999999945,
+          -0.10868960000000016
+        ],
+        "passed": false
+      },
+      "partial": {
+        "intervals": [
+          {
+            "mode": "cohorts",
+            "reps": 8,
+            "mean_us": 160.501625
+          },
+          {
+            "mode": "router",
+            "reps": 8,
+            "mean_us": 163.9895
+          },
+          {
+            "mode": "router",
+            "reps": 96,
+            "mean_us": 170.475708
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 160.651885
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 160.661385
+          },
+          {
+            "mode": "router",
+            "reps": 96,
+            "mean_us": 165.634656
+          }
+        ],
+        "cohorts_minus_router_us": [
+          -9.823823000000004,
+          -4.973271000000011
+        ],
+        "min_required_saving_us": 9.0,
+        "projected_ms_40_layers": [
+          -0.3929529200000002,
+          -0.19893084000000044
+        ],
+        "passed": false
+      }
+    }
+  },
+  "complete_measurement": {
+    "technical_pass": true,
+    "materiality_pass": false,
+    "numeric": {
+      "independent": {
+        "ordered_expert_ids": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            85,
+            222,
+            184,
+            46,
+            216,
+            151,
+            64,
+            219
+          ]
+        ],
+        "overlap": 0,
+        "finite_output_words": 4096,
+        "different_output_words": 0,
+        "repeat_different_output_words": 0,
+        "physical_route_checks": 3
+      },
+      "partial": {
+        "ordered_expert_ids": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            110,
+            73,
+            64,
+            128,
+            215,
+            96,
+            197,
+            82
+          ]
+        ],
+        "overlap": 5,
+        "finite_output_words": 4096,
+        "different_output_words": 0,
+        "repeat_different_output_words": 0,
+        "physical_route_checks": 3
+      }
+    },
+    "timing": {
+      "independent": {
+        "intervals": [
+          {
+            "mode": "cohorts",
+            "reps": 8,
+            "mean_us": 386.172875
+          },
+          {
+            "mode": "router",
+            "reps": 8,
+            "mean_us": 175.002875
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 162.732073
+          },
+          {
+            "mode": "router",
+            "reps": 96,
+            "mean_us": 166.516323
+          },
+          {
+            "mode": "router",
+            "reps": 96,
+            "mean_us": 166.082073
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 163.364833
+          }
+        ],
+        "cohorts_minus_router_us": [
+          -3.784249999999986,
+          -2.717240000000004
+        ],
+        "min_required_saving_us": 9.0,
+        "projected_ms_40_layers": [
+          -0.15136999999999945,
+          -0.10868960000000016
+        ],
+        "passed": false
+      },
+      "partial": {
+        "intervals": [
+          {
+            "mode": "cohorts",
+            "reps": 8,
+            "mean_us": 160.501625
+          },
+          {
+            "mode": "router",
+            "reps": 8,
+            "mean_us": 163.9895
+          },
+          {
+            "mode": "router",
+            "reps": 96,
+            "mean_us": 170.475708
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 160.651885
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 160.661385
+          },
+          {
+            "mode": "router",
+            "reps": 96,
+            "mean_us": 165.634656
+          }
+        ],
+        "cohorts_minus_router_us": [
+          -9.823823000000004,
+          -4.973271000000011
+        ],
+        "min_required_saving_us": 9.0,
+        "projected_ms_40_layers": [
+          -0.3929529200000002,
+          -0.19893084000000044
+        ],
+        "passed": false
+      }
+    }
+  }
+}

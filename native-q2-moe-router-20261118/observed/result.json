@@ -1,0 +1,154 @@
+{
+  "technical_pass": true,
+  "materiality_pass": false,
+  "numeric": {
+    "independent": {
+      "ordered_expert_ids": [
+        [
+          128,
+          215,
+          73,
+          136,
+          110,
+          167,
+          197,
+          112
+        ],
+        [
+          85,
+          222,
+          184,
+          46,
+          216,
+          151,
+          64,
+          219
+        ]
+      ],
+      "overlap": 0,
+      "finite_output_words": 4096,
+      "different_output_words": 0,
+      "repeat_different_output_words": 0,
+      "physical_route_checks": 3
+    },
+    "partial": {
+      "ordered_expert_ids": [
+        [
+          128,
+          215,
+          73,
+          136,
+          110,
+          167,
+          197,
+          112
+        ],
+        [
+          110,
+          73,
+          64,
+          128,
+          215,
+          96,
+          197,
+          82
+        ]
+      ],
+      "overlap": 5,
+      "finite_output_words": 4096,
+      "different_output_words": 0,
+      "repeat_different_output_words": 0,
+      "physical_route_checks": 3
+    }
+  },
+  "timing": {
+    "independent": {
+      "intervals": [
+        {
+          "mode": "cohorts",
+          "reps": 8,
+          "mean_us": 386.172875
+        },
+        {
+          "mode": "router",
+          "reps": 8,
+          "mean_us": 175.002875
+        },
+        {
+          "mode": "cohorts",
+          "reps": 96,
+          "mean_us": 162.732073
+        },
+        {
+          "mode": "router",
+          "reps": 96,
+          "mean_us": 166.516323
+        },
+        {
+          "mode": "router",
+          "reps": 96,
+          "mean_us": 166.082073
+        },
+        {
+          "mode": "cohorts",
+          "reps": 96,
+          "mean_us": 163.364833
+        }
+      ],
+      "cohorts_minus_router_us": [
+        -3.784249999999986,
+        -2.717240000000004
+      ],
+      "min_required_saving_us": 9.0,
+      "projected_ms_40_layers": [
+        -0.15136999999999945,
+        -0.10868960000000016
+      ],
+      "passed": false
+    },
+    "partial": {
+      "intervals": [
+        {
+          "mode": "cohorts",
+          "reps": 8,
+          "mean_us": 160.501625
+        },
+        {
+          "mode": "router",
+          "reps": 8,
+          "mean_us": 163.9895
+        },
+        {
+          "mode": "router",
+          "reps": 96,
+          "mean_us": 170.475708
+        },
+        {
+          "mode": "cohorts",
+          "reps": 96,
+          "mean_us": 160.651885
+        },
+        {
+          "mode": "cohorts",
+          "reps": 96,
+          "mean_us": 160.661385
+        },
+        {
+          "mode": "router",
+          "reps": 96,
+          "mean_us": 165.634656
+        }
+      ],
+      "cohorts_minus_router_us": [
+        -9.823823000000004,
+        -4.973271000000011
+      ],
+      "min_required_saving_us": 9.0,
+      "projected_ms_40_layers": [
+        -0.3929529200000002,
+        -0.19893084000000044
+      ],
+      "passed": false
+    }
+  }
+}

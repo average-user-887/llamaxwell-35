@@ -1,0 +1,14 @@
+348038adec471d26d19c2ec74eddbfeb0b2a06f670ba9f5e56393b4fef4d55fd  ../resume-q2-moe-cohorts/occamy-fused.cu
+bbea6f5c611282090050592a6e49f2c15238c104eb1b1420cb23e562220176eb  ../resume-q2-moe-cohorts/occamy-fused.cu.o
+19607daf02bc6dcd722a0695787046db9b4c6b8e010545598d3ad60649d68d00  ../resume-q2-moe-cohorts/libggml-cuda.so
+9035932873622bce8b141d9928fa4b5390d536e8cd4484f50d148c26e54687c5  ../resume-q2-moe-cohorts/operator.cpp
+bcd063306ea65f5e8143a8d6501960dbfeda359f5b3a261d5d91d612c786eac0  ../night-gdn-t2-q8-fast/occamy-gdn.cu.o
+6c0171cf760490920d66de2cc0f7c43a170f3095a396808c9ce033186d644a52  ../runner/night_trial_runtime.sh
+51f7c09180fade3addd04537957e0c1b67267237246415be4f3fea2b53530181  ../runner/sparse_admission.py
+9a1e17bb2ff6089e597a9bb487f004863e2ac486c1289a444058783a070e10ac  ../sparse/r2/src/ggml/src/ggml-backend.cpp
+33a7a5e403af831c200b445467942201f090b4af5cb1235906174ec32aa562f4  ../sparse/r2/src/ggml/src/ggml-cuda/occamy-fused.cuh
+9eb84d3cdd695babd7d01bb055dc3e7d6708ec565499619019ba5f330107a2ac  ../sparse/r2/src/ggml/src/ggml-cuda/ggml-cuda.cu
+c210591d286949d6e5bbdfd701d2fc6b657eabba378226ddce0c07a344fa3a0f  ../last-ms-r2-selector/fattn-occamy.cu.o
+9e999bcaf04397f267548abdfa3e326b65bee122fb1e24f92be55529f40a335e  ../last-ms-r2-selector/libggml-cuda.so
+5faaddb456def0d678b7d3fc9a632ef3c1d834d38f93a94321b7e4a725cf7a9a  ../fresh-q2-phaseb-weights/occamy-fused.cu
+2ee8e2d4de3c158b840705c1553b36144c180004ddea5e212a095305e3b7a208  ../fresh-q2-phaseb-weights/operator.cpp

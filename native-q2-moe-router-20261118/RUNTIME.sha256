@@ -1,0 +1,4 @@
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  ../sparse/r2/libs/libggml.so.0.26.0
+678cf75e5ef5b1f92460eb0f816d3bbe755ee9710fd04606c31ec24dcd41fa06  ../sparse/r2/libs/libggml-base.so.0.26.0
+8a8719c1624a1bba0737ebed30abd35dfd2556f322d55bcf93a5fd48839793ae  ./libggml-cuda.so
+e173d49d9d9e42b33f0a642f0d74c865d50cffc4d1f30a6cdb6fe197c44805ef  ../night-gdn-q8-long/receipts/on-20261118T041311Z-2977561-30828/environment.args
