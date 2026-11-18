@@ -1,0 +1,248 @@
+{
+  "schema_version": 1,
+  "published_branch_parent": "58e05650146c75b1ff5ff27f09f70e52b1c5a27b",
+  "previous_split_setting_release": "ee5e368dd9b181f3ffbccbea8883dfca33e10972",
+  "source": {
+    "stack_recipe_commit": "3eea327fb4c289a54a8796899080bbbd1a3cdcfd",
+    "combined_source_index_sha256": "2e9859ca0afbb29da29ae30c983e308db793edc7e79a4571fef970c1cba2d4c6",
+    "native_code_change_required": false
+  },
+  "hardware": {
+    "gpu": "NVIDIA Quadro M6000",
+    "architecture": "sm_52",
+    "vram_gb": 24
+  },
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+  "runtime_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "workload": {
+    "prompt_tokens": 80000,
+    "prompt_token_sha256": "7c1dcdc2f609928922953fc626d8b90e5b5288092036f21b57f6ffda0a128dcc",
+    "warm_output_tokens": 3072,
+    "cold_seed_output_tokens": 192,
+    "cached_prompt_tokens": 79996,
+    "evaluated_warm_prompt_tokens": 4,
+    "seed": 7,
+    "temperature": 0,
+    "stream": true,
+    "ignore_eos": true,
+    "cache_prompt": true,
+    "context_shift": false,
+    "phase_profile": false,
+    "semantic_score_available": false,
+    "requests_per_arm": {
+      "cold_seed": 1,
+      "same_slot_warm": 1
+    }
+  },
+  "configuration": {
+    "common_environment": {
+      "GGML_CUDA_MOE_DOWNX": "1",
+      "GGML_CUDA_MOE_DOWNH": "2",
+      "GGML_CUDA_OCCAMY_GDN_QKREUSE": "1",
+      "GGML_CUDA_OCCAMY_GDN_PCSHARE": "1",
+      "GGML_CUDA_MMVQ_SM52": "1",
+      "GGML_CUDA_RMS_WARP": "0",
+      "GGML_CUDA_HEAD_ROWPACK_SM52": "1",
+      "GGML_CUDA_MMQ_COMPACT_SM52": "1",
+      "GGML_CUDA_Q8_REUSE": "1",
+      "GGML_CUDA_NORM_Q8": "1",
+      "GGML_CUDA_CONCAT_T": "1",
+      "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": "1",
+      "GGML_CUDA_GATE_COPY": "1",
+      "GGML_CUDA_OCCAMY_GDN": "1",
+      "GGML_CUDA_MMQ_XMAD_SM52": "1",
+      "GGML_CUDA_GDN_COLS": "2,4",
+      "GGML_CUDA_OCCAMY_FA": "1",
+      "GGML_CUDA_OCCAMY_FUSED": "1",
+      "GGML_CUDA_OCCAMY_FA_PIPE": "3",
+      "GGML_CUDA_MOE_LOP3": "1",
+      "GGML_CUDA_MOE_TAILBAL": "1",
+      "GGML_CUDA_OCCAMY_GDN_PREF": "1",
+      "GGML_CUDA_OCCAMY_HOSTGAP": "1",
+      "GGML_CUDA_OCCAMY_SMALLFUSE": "2",
+      "GGML_CUDA_MMQ_TAIL_SM52": "1",
+      "GGML_CUDA_OCCAMY_GDN_REPACK": "1",
+      "GGML_CUDA_OCCAMY_N2SPLIT": "1",
+      "GGML_CUDA_OCCAMY_FA_ADDR": "1",
+      "GGML_CUDA_OCCAMY_N2GDN": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": "1",
+      "GGML_CUDA_MOE_V3": "1",
+      "LLAMA_MV1_TRACE": "1",
+      "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+      "GGML_CUDA_OCCAMY_FA_SPARSE_R2": "1"
+    },
+    "mtp_environment_delta": {
+      "GGML_CUDA_OCCAMY_GDN_T2": "1",
+      "GGML_CUDA_OCCAMY_FA_MROW": "3",
+      "GGML_CUDA_OCCAMY_FA2_NU": "4",
+      "LLAMA_MTP_CACHE_ONLY": "1",
+      "LLAMA_MTP_MERGE_REEVAL": "1"
+    },
+    "split_override": {
+      "LLAMA_MTP_MERGE_REEVAL": "0"
+    },
+    "context_size": 84224,
+    "batch_size": 2048,
+    "microbatch_size": 1024,
+    "mixed_batch_size": 1024,
+    "slots": 1,
+    "prefill_single_stream": true,
+    "spec_argv": [
+      "--spec-type",
+      "draft-mtp",
+      "--spec-draft-n-max",
+      "1",
+      "--spec-draft-type-k",
+      "f16",
+      "--spec-draft-type-v",
+      "f16"
+    ],
+    "observed_arm_deadline_budget_seconds": 420,
+    "outer_wrapper_cap_seconds": 600
+  },
+  "rate_definition": "all emitted tokens divided by server decode duration",
+  "fresh_arms": {
+    "split": {
+      "n_out": 3072,
+      "cache_n": 79996,
+      "evaluated_prompt_n": 4,
+      "decode_s": 37.247292,
+      "decode_toks_s": 82.47579448191831,
+      "request_wall_s": 37.518097745021805,
+      "ttft_s": 0.26586551999207586,
+      "draft_n": 1621,
+      "draft_n_accepted": 1449,
+      "warm_slot_release_n_tokens": 83071,
+      "observed_warm_r2_query_widths": [
+        1,
+        2
+      ],
+      "exactly_matches_archived_n18_reference": true,
+      "archived_n18_reference_mode": "merged",
+      "gpu_layers_offloaded": 42,
+      "runner_exit_code": 0,
+      "cleanup_exit_code": 0,
+      "receipt_sha256": "80e1adb2f52570d790e8fb07e98cc4384a0b14cf22ee2cfecf4f13ef08504b85",
+      "executable_sha256": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+      "mapped_dso_sha256": {
+        "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+        "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+        "libggml-cuda.so": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba"
+      }
+    },
+    "merged": {
+      "n_out": 3072,
+      "cache_n": 79996,
+      "evaluated_prompt_n": 4,
+      "decode_s": 38.659168,
+      "decode_toks_s": 79.46368633696412,
+      "request_wall_s": 38.92993783892598,
+      "ttft_s": 0.26564569503534585,
+      "draft_n": 1623,
+      "draft_n_accepted": 1447,
+      "warm_slot_release_n_tokens": 83071,
+      "observed_warm_r2_query_widths": [
+        2
+      ],
+      "exactly_matches_archived_n18_reference": true,
+      "archived_n18_reference_mode": "merged",
+      "gpu_layers_offloaded": 42,
+      "runner_exit_code": 0,
+      "cleanup_exit_code": 0,
+      "receipt_sha256": "9dbf999594764a0e1ab0b372b91d56e3950da3d224e07eb71c0637a1d60b916b",
+      "executable_sha256": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+      "mapped_dso_sha256": {
+        "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+        "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+        "libggml-cuda.so": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba"
+      }
+    },
+    "no-mtp": {
+      "n_out": 3072,
+      "cache_n": 79996,
+      "evaluated_prompt_n": 4,
+      "decode_s": 40.200844,
+      "decode_toks_s": 76.41630608551404,
+      "request_wall_s": 40.337418282055296,
+      "ttft_s": 0.13171366602182388,
+      "draft_n": null,
+      "draft_n_accepted": null,
+      "warm_slot_release_n_tokens": 83071,
+      "observed_warm_r2_query_widths": [
+        1
+      ],
+      "exactly_matches_archived_n18_reference": true,
+      "archived_n18_reference_mode": "no-mtp",
+      "gpu_layers_offloaded": 42,
+      "runner_exit_code": 0,
+      "cleanup_exit_code": 0,
+      "receipt_sha256": "2e793ab15148b5dc1174d4ffd13e75d4d14f2e153e2723a3f37f881cdc64ae4d",
+      "executable_sha256": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+      "mapped_dso_sha256": {
+        "libggml-cuda.so": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba",
+        "libllama-common.so.0.6.0": "607553a0efba275dc50da920177ea480ece735e0ed3a027e23a1a8a959da002c",
+        "libllama.so.0.6.0": "03d76f7f5952c961e836984a29b57d33c363c9833b1c314e2fc6db171a97432e"
+      }
+    }
+  },
+  "archived_n18_arms": {
+    "merged": {
+      "n_out": 3072,
+      "cache_n": 79996,
+      "evaluated_prompt_n": 4,
+      "decode_s": 38.679480000000005,
+      "decode_toks_s": 79.42195706870929,
+      "request_wall_s": 38.94577607198153,
+      "draft_n": 1623,
+      "draft_n_accepted": 1447,
+      "receipt_sha256": "31ab438f4656c81bb590cde45733c01b290f0672d557f017a896429f771f1171"
+    },
+    "no-mtp": {
+      "n_out": 3072,
+      "cache_n": 79996,
+      "evaluated_prompt_n": 4,
+      "decode_s": 40.073192000000006,
+      "decode_toks_s": 76.65972802965133,
+      "request_wall_s": 40.20658496906981,
+      "draft_n": null,
+      "draft_n_accepted": null,
+      "receipt_sha256": "e6857facced5b3ed5f4fa3455aab3e3344a84ebb687f602bc108c963e379a775"
+    }
+  },
+  "split_vs_controls": {
+    "fresh": {
+      "no-mtp": {
+        "wall_seconds_saved": 2.819320537033491,
+        "wall_fraction_saved": 0.06989343039556173,
+        "decode_uplift_fraction": 0.07929575121863874,
+        "exact_all_3072_output_ids": false,
+        "first_differing_token_1_based": 27
+      },
+      "merged": {
+        "wall_seconds_saved": 1.4118400939041749,
+        "wall_fraction_saved": 0.03626617899431828,
+        "decode_uplift_fraction": 0.03790546706053144,
+        "exact_all_3072_output_ids": true,
+        "first_differing_token_1_based": null
+      }
+    },
+    "archived": {
+      "no-mtp": {
+        "wall_seconds_saved": 2.6884872240480036,
+        "wall_fraction_saved": 0.06686683850708053,
+        "decode_uplift_fraction": 0.07586860274298624,
+        "exact_all_3072_output_ids": false,
+        "first_differing_token_1_based": 27
+      },
+      "merged": {
+        "wall_seconds_saved": 1.4276783269597217,
+        "wall_fraction_saved": 0.03665810444555051,
+        "decode_uplift_fraction": 0.03845079529540052,
+        "exact_all_3072_output_ids": true,
+        "first_differing_token_1_based": null
+      }
+    }
+  },
+  "fresh_comparison_receipt_sha256": "60aa19807acc66d8fab1af17b8e481ed9d91cb6cea73258865cb1358105cfac3"
+}
