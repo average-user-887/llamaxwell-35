@@ -1,0 +1,297 @@
+{
+  "schema_version": 1,
+  "published_branch_parent": "a1d698c73440de0fe27defffaeda63f54be01df2",
+  "hardware": "NVIDIA Quadro M6000",
+  "compute_capability": "5.2",
+  "source": {
+    "patch_sha256": "e5d80418b3013100a877b3517fb250ff809285087673b87623e5a04c21edd1c9",
+    "files": {
+      "ggml/src/ggml-cuda/fattn-occamy-sparse.cuh": {
+        "r2_base_sha256": "897f8296a1c6473574babd7e92e5120144ba9285ef055b5dc2f7412499ef7235",
+        "measured_source_sha256": "e322103aa1e6dce8d12815779d8ad622bd9f5fa42dfe703be5ef99d10b293141"
+      },
+      "tests/test-backend-ops.cpp": {
+        "r2_base_sha256": "00372fe5d9f755471c9c01b27adcd277da390e3df6065270e5483b71a84ab845",
+        "measured_source_sha256": "62eab4650291c60e6187d14f697ec29814a1406ddc144815bbbe9d325bf43714"
+      }
+    },
+    "applied_and_reverse_checked_without_fuzz": true,
+    "matches_compiled_sources_byte_for_byte": true
+  },
+  "compiled": {
+    "unchanged_original_device_functions": 33,
+    "added_q3_device_functions": 4,
+    "measured_cuda_library_sha256": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+    "measured_benchmark_binary_sha256": "db73dd9beaead6cc78cdba4c33cdb1ac36c284c5490fe766079acbbcf73c6e37",
+    "stock_r2_library_and_original_relink_sha256": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba",
+    "q3_attention": {
+      "cta_threads": 384,
+      "registers": 121,
+      "static_shared_bytes": 17728,
+      "local_spill_bytes": 0
+    }
+  },
+  "geometry": {
+    "keys": 81920,
+    "query_rows": 3,
+    "query_heads": 16,
+    "kv_heads": 2,
+    "head_width": 256,
+    "kv_type": "f16",
+    "causal_visible_ends": [
+      81658,
+      81659,
+      81660
+    ],
+    "old_blocks_retained_per_plan": 16
+  },
+  "configuration": {
+    "shared_numeric_environment": {
+      "GGML_CUDA_MOE_DOWNX": "1",
+      "GGML_CUDA_MOE_DOWNH": "2",
+      "GGML_CUDA_OCCAMY_GDN_QKREUSE": "1",
+      "GGML_CUDA_OCCAMY_GDN_PCSHARE": "1",
+      "GGML_CUDA_MMVQ_SM52": "1",
+      "GGML_CUDA_RMS_WARP": "0",
+      "GGML_CUDA_HEAD_ROWPACK_SM52": "1",
+      "GGML_CUDA_MMQ_COMPACT_SM52": "1",
+      "GGML_CUDA_Q8_REUSE": "1",
+      "GGML_CUDA_NORM_Q8": "1",
+      "GGML_CUDA_CONCAT_T": "1",
+      "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": "1",
+      "GGML_CUDA_GATE_COPY": "1",
+      "GGML_CUDA_OCCAMY_GDN": "1",
+      "GGML_CUDA_MMQ_XMAD_SM52": "1",
+      "GGML_CUDA_GDN_COLS": "2,4",
+      "GGML_CUDA_OCCAMY_FA": "1",
+      "GGML_CUDA_OCCAMY_FUSED": "1",
+      "GGML_CUDA_OCCAMY_FA_PIPE": "3",
+      "GGML_CUDA_MOE_LOP3": "1",
+      "GGML_CUDA_MOE_TAILBAL": "1",
+      "GGML_CUDA_OCCAMY_GDN_PREF": "1",
+      "GGML_CUDA_OCCAMY_HOSTGAP": "1",
+      "GGML_CUDA_OCCAMY_SMALLFUSE": "2",
+      "GGML_CUDA_MMQ_TAIL_SM52": "1",
+      "GGML_CUDA_OCCAMY_GDN_REPACK": "1",
+      "GGML_CUDA_OCCAMY_N2SPLIT": "1",
+      "GGML_CUDA_OCCAMY_FA_ADDR": "1",
+      "GGML_CUDA_OCCAMY_N2GDN": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": "1",
+      "GGML_CUDA_MOE_V3": "1",
+      "GGML_CUDA_OCCAMY_FA_MROW": "3",
+      "GGML_CUDA_OCCAMY_FA2_NU": "4",
+      "GGML_CUDA_OCCAMY_FA_SPARSE_R2": "1"
+    },
+    "overrides_by_case": {
+      "o1": {
+        "GGML_CUDA_OCCAMY_FA_Q3_R2": "0",
+        "GGML_CUDA_OCCAMY_FA_Q3_R2_CHECK": "0",
+        "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+        "GGML_CUDA_OCCAMY_FA_SPARSE_R2_CHECK": "0",
+        "GGML_CUDA_MV1": "0"
+      },
+      "n1": {
+        "GGML_CUDA_OCCAMY_FA_Q3_R2": "1",
+        "GGML_CUDA_OCCAMY_FA_Q3_R2_CHECK": "0",
+        "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+        "GGML_CUDA_OCCAMY_FA_SPARSE_R2_CHECK": "0",
+        "GGML_CUDA_MV1": "0"
+      },
+      "n2": {
+        "GGML_CUDA_OCCAMY_FA_Q3_R2": "1",
+        "GGML_CUDA_OCCAMY_FA_Q3_R2_CHECK": "0",
+        "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+        "GGML_CUDA_OCCAMY_FA_SPARSE_R2_CHECK": "0",
+        "GGML_CUDA_MV1": "0"
+      },
+      "o2": {
+        "GGML_CUDA_OCCAMY_FA_Q3_R2": "0",
+        "GGML_CUDA_OCCAMY_FA_Q3_R2_CHECK": "0",
+        "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+        "GGML_CUDA_OCCAMY_FA_SPARSE_R2_CHECK": "0",
+        "GGML_CUDA_MV1": "0"
+      },
+      "event-off": {
+        "GGML_CUDA_OCCAMY_FA_Q3_R2": "0",
+        "GGML_CUDA_OCCAMY_FA_Q3_R2_CHECK": "0",
+        "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+        "GGML_CUDA_OCCAMY_FA_SPARSE_R2_CHECK": "0",
+        "GGML_CUDA_MV1": "2"
+      },
+      "event-on": {
+        "GGML_CUDA_OCCAMY_FA_Q3_R2": "1",
+        "GGML_CUDA_OCCAMY_FA_Q3_R2_CHECK": "0",
+        "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+        "GGML_CUDA_OCCAMY_FA_SPARSE_R2_CHECK": "0",
+        "GGML_CUDA_MV1": "2"
+      },
+      "causal": {
+        "GGML_CUDA_OCCAMY_FA_Q3_R2": "1",
+        "GGML_CUDA_OCCAMY_FA_Q3_R2_CHECK": "1",
+        "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+        "GGML_CUDA_OCCAMY_FA_SPARSE_R2_CHECK": "0",
+        "GGML_CUDA_MV1": "0"
+      },
+      "needles": {
+        "GGML_CUDA_OCCAMY_FA_Q3_R2": "1",
+        "GGML_CUDA_OCCAMY_FA_Q3_R2_CHECK": "1",
+        "GGML_CUDA_OCCAMY_FA_SPARSE": "2",
+        "GGML_CUDA_OCCAMY_FA_SPARSE_R2_CHECK": "1",
+        "GGML_CUDA_MV1": "0"
+      }
+    },
+    "cuda_backend_filter": "CUDA0",
+    "operator_filter": "FLASH_ATTN_EXT",
+    "perf_case_regex": "kv=81920,nb=3,.*mask=mrow_causal",
+    "needle_case_regex": "kv=81920,nb=3,.*mask=sparse_needle",
+    "cpu_test_threads": 1
+  },
+  "arithmetic": {
+    "fixtures": {
+      "causal": {
+        "reference": "published R2 q2 plus q1",
+        "values_compared": 12288,
+        "nonfinite_values": 0,
+        "tolerance_failures": 0,
+        "max_abs_difference": 1.11758709e-08,
+        "rows": [
+          {
+            "row": 0,
+            "max_abs_difference": 1.11758709e-08,
+            "reference_peak": 0.026199935,
+            "q_stride": 16384,
+            "mask_stride": 163840,
+            "output_stride": 16384,
+            "values": 4096
+          },
+          {
+            "row": 1,
+            "max_abs_difference": 1.07102096e-08,
+            "reference_peak": 0.0240437537,
+            "q_stride": 16384,
+            "mask_stride": 163840,
+            "output_stride": 16384,
+            "values": 4096
+          },
+          {
+            "row": 2,
+            "max_abs_difference": 1.02445483e-08,
+            "reference_peak": 0.0252824854,
+            "q_stride": 16384,
+            "mask_stride": 163840,
+            "output_stride": 16384,
+            "values": 4096
+          }
+        ]
+      },
+      "probed_needle": {
+        "reference": "published R2 q2 plus q1",
+        "values_compared": 12288,
+        "nonfinite_values": 0,
+        "tolerance_failures": 0,
+        "max_abs_difference": 9.53674316e-07,
+        "rows": [
+          {
+            "row": 0,
+            "max_abs_difference": 1.1920929e-07,
+            "reference_peak": 0.999050558,
+            "q_stride": 16384,
+            "mask_stride": 163840,
+            "output_stride": 16384,
+            "values": 4096
+          },
+          {
+            "row": 1,
+            "max_abs_difference": 1.1920929e-07,
+            "reference_peak": 0.999050438,
+            "q_stride": 16384,
+            "mask_stride": 163840,
+            "output_stride": 16384,
+            "values": 4096
+          },
+          {
+            "row": 2,
+            "max_abs_difference": 9.53674316e-07,
+            "reference_peak": 0.999051154,
+            "q_stride": 16384,
+            "mask_stride": 163840,
+            "output_stride": 16384,
+            "values": 4096
+          }
+        ]
+      }
+    },
+    "plan_matches_vs_q2_plus_q1_per_fixture": 6,
+    "single_element_tolerance": "2e-5 * (1 + abs(reference))",
+    "selector_reference_checks": 2,
+    "selector_reference_differences": 0,
+    "old_score_bit_differences": 0,
+    "full_attention_max_abs_by_needle_visibility": {
+      "probed": 0.008128762,
+      "unprobed": 0.9909217
+    }
+  },
+  "performance": {
+    "synchronized_run_sequence": [
+      "o1",
+      "n1",
+      "n2",
+      "o2"
+    ],
+    "synchronized_backend_abba": {
+      "o1": {
+        "runs": 675,
+        "us_per_run": 1501.33
+      },
+      "n1": {
+        "runs": 2725,
+        "us_per_run": 368.95
+      },
+      "n2": {
+        "runs": 2750,
+        "us_per_run": 365.47
+      },
+      "o2": {
+        "runs": 675,
+        "us_per_run": 1501.95
+      }
+    },
+    "separate_cuda_attention_event_measurements": {
+      "event-off": {
+        "calls": 676,
+        "whole_attention_event_mean_us": 1503.276627218935,
+        "dispatch": "occamy_mrow"
+      },
+      "event-on": {
+        "calls": 2701,
+        "whole_attention_event_mean_us": 366.11736393928174,
+        "dispatch": "occamy_sparse_probe"
+      }
+    },
+    "paired_us_saved": [
+      1132.3799999999999,
+      1136.48
+    ],
+    "predeclared_minimum_us_each_pair": 530.4,
+    "speed_gate_passed": true,
+    "projected_ms_saved_per_ten_target_attention_layers": 11.344299999999999,
+    "actual_model_timing": null
+  },
+  "verification": {
+    "original": {
+      "runner_exit": 1,
+      "cleanup_exit": 0,
+      "arithmetic_recomputed_from_gpu_diagnostics": true,
+      "timing_arms_completed": 0,
+      "parser_rejected_legitimate_zero_failure_counter": true
+    },
+    "timing_continuation": {
+      "runner_exit": 0,
+      "cleanup_exit": 0,
+      "technical_pass": true,
+      "arithmetic_receipt_sha256": "852ae1693fccbeb1ec645536bcb9c1c1638edfed5e5df4ee96fd387249aee050",
+      "private_result_summary_sha256": "7c9cb5a6de4c219c7c7831515f81e0274283ff954a2f7435eea49fd4db362a35"
+    }
+  }
+}

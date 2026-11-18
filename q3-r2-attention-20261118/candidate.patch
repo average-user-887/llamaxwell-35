@@ -1,0 +1,120 @@
+--- a/ggml/src/ggml-cuda/fattn-occamy-sparse.cuh
++++ b/ggml/src/ggml-cuda/fattn-occamy-sparse.cuh
+@@ -306,7 +306,15 @@
+     const ggml_tensor * q = dst->src[0];
+     const ggml_tensor * k = dst->src[1];
+     const ggml_tensor * mask = dst->src[3];
+-    if ((q->ne[1] != 1 && q->ne[1] != 2) || q->ne[3] != 1) return false;
++    if (q->ne[1] == 3) {
++        static const bool q3 = [] {
++            const char * enable = getenv("GGML_CUDA_OCCAMY_FA_Q3_R2");
++            const char * revision = getenv("GGML_CUDA_OCCAMY_FA_SPARSE_R2");
++            return enable && strcmp(enable, "1") == 0 && revision && strcmp(revision, "1") == 0;
++        }();
++        if (!q3 || !ggml_is_contiguous(dst)) return false;
++    } else if (q->ne[1] != 1 && q->ne[1] != 2) return false;
++    if (q->ne[3] != 1) return false;
+     if (!mask || mask->ne[1] < q->ne[1] || mask->ne[3] != 1 || mask->nb[0] != sizeof(half)) return false;
+     if (k->ne[1] < 8192 || k->ne[1] > OFS_MAX_BLOCKS*OFS_BLOCK || k->ne[2] <= 0 || k->ne[2] > 256) return false;
+     if (dst->ne[0] != OFA_D || dst->ne[1] != q->ne[2] || dst->ne[2] != q->ne[1] || dst->ne[3] != 1 || (uintptr_t) dst->data % sizeof(float)) return false;
+@@ -487,7 +495,7 @@
+     }
+ }
+ 
+-static std::atomic<long long> ofa_sparse_calls[3];
++static std::atomic<long long> ofa_sparse_calls[4];
+ 
+ template <int NQ>
+ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
+@@ -496,7 +504,7 @@
+     const int nplans = NQ*nkvh;
+     static const bool revision2 = []() { const char * s = getenv("GGML_CUDA_OCCAMY_FA_SPARSE_R2"); return s && strcmp(s, "1") == 0; }();
+     static const bool selector_check = []() { const char * s = getenv("GGML_CUDA_OCCAMY_FA_SPARSE_R2_CHECK"); return s && strcmp(s, "1") == 0; }();
+-    constexpr int NU = 4, NG = 2*NQ, NT = 32*NU*NG;
++    constexpr int NU = NQ == 3 ? 2 : 4, NG = 2*NQ, NT = 32*NU*NG;
+     const int id = ggml_cuda_get_device();
+     static const int blocks_per_sm = []() {
+         int n = 0;
+@@ -616,7 +624,60 @@
+     }
+ }
+ 
++// Diagnostic only. Use the existing q2 and q1 launchers as row-wise references.
++// The input is head-permuted and the target writes [D,head,row,1].
++static void ofa_sparse_check_three_rows(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
++    GGML_ASSERT(ggml_is_contiguous(dst));
++    const size_t count = (size_t) ggml_nelements(dst);
++    ggml_cuda_pool_alloc<float> scratch(ctx.pool(), count);
++    const size_t row_values = count / 3;
++    for (int first : {0, 2}) {
++        const int width = first == 0 ? 2 : 1;
++        ggml_tensor view = *dst, query = *dst->src[0], mask = *dst->src[3];
++        query.data = (char *)query.data + first * query.nb[1];
++        mask.data = (char *)mask.data + first * mask.nb[1];
++        view.data = scratch.get() + first * row_values;
++        query.ne[1] = mask.ne[1] = view.ne[2] = width;
++        view.src[0] = &query;
++        view.src[3] = &mask;
++        if (width == 2) ofa_sparse_launch<2>(ctx, &view);
++        else ofa_sparse_launch<1>(ctx, &view);
++    }
++    std::vector<float> actual(count), reference(count);
++    cudaStream_t stream = ctx.stream();
++    CUDA_CHECK(cudaMemcpyAsync(actual.data(), dst->data, count*sizeof(float), cudaMemcpyDeviceToHost, stream));
++    CUDA_CHECK(cudaMemcpyAsync(reference.data(), scratch.get(), count*sizeof(float), cudaMemcpyDeviceToHost, stream));
++    CUDA_CHECK(cudaStreamSynchronize(stream));
++    for (int row = 0; row < 3; ++row) {
++        float max_abs = 0.0f, max_ref = 0.0f;
++        size_t nonfinite = 0, failed = 0;
++        for (size_t col = 0; col < row_values; ++col) {
++            const size_t i = row*row_values + col;
++            const float a = actual[i], b = reference[i], delta = fabsf(a-b);
++            if (!std::isfinite(a) || !std::isfinite(b)) { ++nonfinite; continue; }
++            if (delta > 2e-5f*(1.0f + fabsf(b))) ++failed;
++            max_abs = std::max(max_abs, delta);
++            max_ref = std::max(max_ref, fabsf(b));
++        }
++        fprintf(stderr, "n98_q3_check row=%d count=%zu nonfinite=%zu failed=%zu max_abs=%.9g max_ref=%.9g q_stride=%zu mask_stride=%zu out_stride=%zu\n",
++                row, row_values, nonfinite, failed, max_abs, max_ref, dst->src[0]->nb[1], dst->src[3]->nb[1], dst->nb[2]);
++        GGML_ASSERT(nonfinite == 0 && failed == 0);
++    }
++}
++
+ void ggml_cuda_occamy_fa_sparse(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
++    if (dst->src[0]->ne[1] == 3) {
++        ofa_sparse_launch<3>(ctx, dst);
++        static const bool check = [] {
++            const char * value = getenv("GGML_CUDA_OCCAMY_FA_Q3_R2_CHECK");
++            return value && strcmp(value, "1") == 0;
++        }();
++        if (check) {
++            static std::atomic<unsigned> checked{0};
++            if (checked.fetch_add(1) == 0) ofa_sparse_check_three_rows(ctx, dst);
++        }
++        return;
++    }
+     if (dst->src[0]->ne[1] == 1) ofa_sparse_launch<1>(ctx, dst);
+     else ofa_sparse_launch<2>(ctx, dst);
+ }
+--- a/tests/test-backend-ops.cpp
++++ b/tests/test-backend-ops.cpp
+@@ -12238,7 +12238,7 @@
+     }
+ 
+     // The unprobed distant key deliberately exposes block selection's recall loss.
+-    for (int64_t nq : {1, 2}) {
++    for (int64_t nq : {1, 2, 3}) {
+         test_cases.emplace_back(new test_flash_attn_ext_sparse(81920, nq, true));
+         test_cases.emplace_back(new test_flash_attn_ext_sparse(81920, nq, false));
+         test_cases.emplace_back(new test_flash_attn_ext_sparse( 8196, nq, true));
+@@ -12261,8 +12261,8 @@
+ // Test cases for performance evaluation: should be representative of real-world use cases
+ static std::vector<std::unique_ptr<test_case>> make_test_cases_perf() {
+     std::vector<std::unique_ptr<test_case>> test_cases;
+-    // MRFA microbench: 80K verify-shaped decode attention, n_q 1/2/4
+-    for (int64_t nb : {1, 2, 4}) {
++    // MRFA microbench: 80K verify-shaped decode attention, n_q 1/2/3/4
++    for (int64_t nb : {1, 2, 3, 4}) {
+         test_cases.emplace_back(new test_flash_attn_ext_mrow_causal(81920, nb, 1, 260));
+     }
+ 
