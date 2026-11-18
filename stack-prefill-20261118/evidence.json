@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "published_branch_baseline": "49f5db19e9ec0b06c255b2113bdcb60c6d98c13d",
+  "code_provenance": {
+    "published_stack_recipe_commit": "3eea327fb4c289a54a8796899080bbbd1a3cdcfd",
+    "combined_source_index_sha256": "2e9859ca0afbb29da29ae30c983e308db793edc7e79a4571fef970c1cba2d4c6",
+    "source_changed_for_ub2048": false,
+    "stack_runtime_library_sha256": {
+      "libggml-cuda.so": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba",
+      "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+      "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf"
+    }
+  },
+  "hardware": {
+    "gpu": "NVIDIA Quadro M6000",
+    "vram_gb": 24,
+    "architecture": "sm_52"
+  },
+  "batch_2048": {
+    "prompt_tokens": 80000,
+    "output_tokens": 192,
+    "seed": 7,
+    "temperature": 0,
+    "cli_delta": {
+      "before": [
+        "-ub",
+        "1024"
+      ],
+      "after": [
+        "-ub",
+        "2048"
+      ]
+    },
+    "fixed_geometry": {
+      "context_size": 84224,
+      "slots": 1,
+      "batch_size": 2048,
+      "mixed_batch_size": 1024,
+      "prefill_single_stream": true
+    },
+    "microbatch_inheritance": "The single -ub setting applies to target and internal draft contexts in this configuration.",
+    "server_decode_metric": "server timings predicted_per_second",
+    "arms": {
+      "sparse-no-mtp": {
+        "effective_n_ubatch": [
+          2048
+        ],
+        "n1_cache_only_rows_reported": [],
+        "r2_query_widths_observed": [
+          1
+        ],
+        "gpu_layers_offloaded": 42,
+        "same_environment_as_ub1024": true,
+        "prior_library_mapping_reused": true,
+        "runner_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "prompt_token_sha256": "7c1dcdc2f609928922953fc626d8b90e5b5288092036f21b57f6ffda0a128dcc",
+        "receipt_sha256": "e514357cf6e6d1baedf76f389ff61bba9bc25a8c29678f6df70fd63fe6488f62",
+        "conditions": {
+          "cold": {
+            "first_output_id_mismatch_1_based": 52,
+            "ub1024": {
+              "wall_s": 264.1713791650254,
+              "ttft_s": 261.65557451196946,
+              "n_out": 192,
+              "prompt_ms": 261636.274,
+              "predicted_per_second": 76.09343476999862,
+              "cache_n": 0,
+              "draft_n": null,
+              "draft_n_accepted": null
+            },
+            "ub2048": {
+              "wall_s": 253.01491257501766,
+              "ttft_s": 250.51414617907722,
+              "n_out": 192,
+              "prompt_ms": 250497.912,
+              "predicted_per_second": 76.51989136579192,
+              "cache_n": 0,
+              "draft_n": null,
+              "draft_n_accepted": null
+            }
+          },
+          "warm": {
+            "first_output_id_mismatch_1_based": 52,
+            "ub1024": {
+              "wall_s": 2.626978436950594,
+              "ttft_s": 0.1308052579406649,
+              "n_out": 192,
+              "prompt_ms": 114.459,
+              "predicted_per_second": 76.64649512833272,
+              "cache_n": 79996,
+              "draft_n": null,
+              "draft_n_accepted": null
+            },
+            "ub2048": {
+              "wall_s": 2.6227301220642403,
+              "ttft_s": 0.1293303220300004,
+              "n_out": 192,
+              "prompt_ms": 112.799,
+              "predicted_per_second": 76.75624106603568,
+              "cache_n": 79996,
+              "draft_n": null,
+              "draft_n_accepted": null
+            }
+          }
+        }
+      },
+      "sparse-n1-mtp": {
+        "effective_n_ubatch": [
+          2048,
+          2048
+        ],
+        "n1_cache_only_rows_reported": [
+          2048
+        ],
+        "r2_query_widths_observed": [
+          1,
+          2
+        ],
+        "gpu_layers_offloaded": 42,
+        "same_environment_as_ub1024": true,
+        "prior_library_mapping_reused": true,
+        "runner_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "prompt_token_sha256": "7c1dcdc2f609928922953fc626d8b90e5b5288092036f21b57f6ffda0a128dcc",
+        "receipt_sha256": "b2f629f810b44ca4c168d583c8abb2d08768be15045008a5ae935df5167de469",
+        "conditions": {
+          "cold": {
+            "first_output_id_mismatch_1_based": 27,
+            "ub1024": {
+              "wall_s": 268.634537364007,
+              "ttft_s": 266.22128819301724,
+              "n_out": 192,
+              "prompt_ms": 266203.156,
+              "predicted_per_second": 79.2944701863171,
+              "cache_n": 0,
+              "draft_n": 100,
+              "draft_n_accepted": 90
+            },
+            "ub2048": {
+              "wall_s": 257.0010081999935,
+              "ttft_s": 254.5550174730597,
+              "n_out": 192,
+              "prompt_ms": 254536.027,
+              "predicted_per_second": 78.24678051368397,
+              "cache_n": 0,
+              "draft_n": 101,
+              "draft_n_accepted": 89
+            }
+          },
+          "warm": {
+            "first_output_id_mismatch_1_based": 27,
+            "ub1024": {
+              "wall_s": 2.7287193189840764,
+              "ttft_s": 0.25921714294236153,
+              "n_out": 192,
+              "prompt_ms": 243.249,
+              "predicted_per_second": 77.47472944688721,
+              "cache_n": 79996,
+              "draft_n": 103,
+              "draft_n_accepted": 87
+            },
+            "ub2048": {
+              "wall_s": 2.6874271830311045,
+              "ttft_s": 0.2583435720298439,
+              "n_out": 192,
+              "prompt_ms": 241.904,
+              "predicted_per_second": 78.76782379761535,
+              "cache_n": 79996,
+              "draft_n": 101,
+              "draft_n_accepted": 89
+            }
+          }
+        }
+      }
+    }
+  },
+  "midpoint_recall": {
+    "prompt_tokens": 80000,
+    "fact_start_index": 40000,
+    "prompt_token_sha256": "2b227219205b9a53417d5a881ef97300991c19f57024bcadd09175073ab0185f",
+    "rendered_template_sha256": "f8b689676386a92d85a42af0ebd1a239f4143050410f9516e52e9dafa76dfe88",
+    "technical_pass": true,
+    "generated_count_including_eos": 7,
+    "planted_fact_exact_match": true,
+    "eos_terminated": true,
+    "token_sequence_and_output_digest_match_both_ub1024_reference_arms": true,
+    "effective_target_ubatch": 2048,
+    "effective_draft_ubatch": 2048,
+    "cache_only_rows_observed": 2048,
+    "r2_long_query_widths_observed": [
+      1,
+      2
+    ]
+  },
+  "separate_warm_3072": {
+    "prompt_tokens": 80000,
+    "microbatch": 1024,
+    "no_context_shift": true,
+    "rate_definition": "emitted output count divided by server predicted_ms in seconds",
+    "first_cross_mode_mismatch_1_based": 27,
+    "semantic_score_available": false,
+    "comparison_receipt_sha256": "246c7a81899765ecf769a256485b1662fe7abeda691d8ab871e2d554f1783972",
+    "arms": {
+      "sparse-no-mtp": {
+        "n_out": 3072,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "decode_s": 40.073192000000006,
+        "decode_toks_s": 76.65972802965133,
+        "request_wall_s": 40.20658496906981,
+        "ttft_s": 0.12838774907868356,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "same_mode_first_1024_match": true,
+        "semantic_score": null,
+        "runner_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "receipt_sha256": "e6857facced5b3ed5f4fa3455aab3e3344a84ebb687f602bc108c963e379a775"
+      },
+      "sparse-n1-mtp": {
+        "n_out": 3072,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "decode_s": 38.679480000000005,
+        "decode_toks_s": 79.42195706870929,
+        "request_wall_s": 38.94577607198153,
+        "ttft_s": 0.26133642601780593,
+        "draft_n": 1623,
+        "draft_n_accepted": 1447,
+        "same_mode_first_1024_match": true,
+        "semantic_score": null,
+        "runner_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "receipt_sha256": "31ab438f4656c81bb590cde45733c01b290f0672d557f017a896429f771f1171"
+      }
+    }
+  },
+  "model": {
+    "model": "occamy-1.0-Q4_0-headq40b-mtp.gguf",
+    "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+    "runtime_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d"
+  }
+}
