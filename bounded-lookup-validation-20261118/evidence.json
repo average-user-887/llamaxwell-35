@@ -1,0 +1,507 @@
+{
+  "schema_version": 1,
+  "published_branch_parent": "6793f3607f3c877f5c9cf26c24febe488a178dd3",
+  "published_bounded_code_commit": "31f46e620ed3648a3af1b9cdd519b7174e720334",
+  "applicability": {
+    "base_source_revision": "da7ba0e49dd43c69f9ee5a219ea3124f7acda0c8",
+    "apply_order": [
+      "published FA2 reconstruction base",
+      "published N1 cache-only patch",
+      "bounded-lookup-r1.patch"
+    ],
+    "n1_source_index_sha256": "9a7cee5d1ac87b50c29d33305975911d49360342d94dd792444e22f447ba073f",
+    "bounded_r1_source_index_sha256": "d1d1e9ac1378ca432c835cdfe6b8957d6fd9216204037b59c53540911909f42c",
+    "patch_sha256": "bf09a6cf31f873aa7bf1ad86dcf985193b7149032c64928bfde000c462e6689a",
+    "forward_and_reverse_application_verified": true,
+    "all_six_modified_files_match_tested_r1_checkout": true
+  },
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+  "runtime_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "hardware": {
+    "gpu": "NVIDIA Quadro M6000",
+    "vram_gb": 24,
+    "architecture": "sm_52"
+  },
+  "primary_fixture": {
+    "prompt_tokens": 80000,
+    "output_tokens_including_eos": 1722,
+    "input_token_sha256": "ecaf44e84a706416e24f9892fc436724041b453eadc56b16d4f085d5f4a97d90",
+    "rendered_template_sha256": "87d092e24cad4905a309e561eeffe217c69163fb12c30a7ad2d948b0ede66749",
+    "same_exact_input_and_output_across_all_arms": true
+  },
+  "runtime": {
+    "binaries_sha256_by_basename": {
+      "libllama-common.so.0.6.0": "b877a44e28681026613a88d8dac36b20b49e74eb6d9da906307d742d16f43814",
+      "libllama-server-impl.so": "ad7e9dd423a5bbd769fb564f4e67cc36cccec3ac566a55f7c8210be5e1eb9c7a",
+      "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+      "libggml-cuda.so": "6f37baad23c4ffbe2bcb8d5363d76b71df0af3b0ae7b2b65917104728379e058",
+      "llama-server": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+    },
+    "build_identical_across_arms": true,
+    "configuration": {
+      "server_argv": [
+        "--alias",
+        "qwen36-moe",
+        "--override-kv",
+        "tokenizer.ggml.pre=str:qwen35",
+        "-ngl",
+        "999",
+        "--fit",
+        "off",
+        "-np",
+        "1",
+        "-c",
+        "84224",
+        "-b",
+        "2048",
+        "--mixed-batch-size",
+        "1024",
+        "--prefill-single-stream",
+        "--checkpoint-min-step",
+        "2048",
+        "--no-context-shift",
+        "-fa",
+        "on",
+        "--cache-type-k",
+        "f16",
+        "--cache-type-v",
+        "f16",
+        "--jinja",
+        "--metrics",
+        "-lv",
+        "4",
+        "-ub",
+        "1024",
+        "--cache-ram",
+        "12288",
+        "--ctx-checkpoints",
+        "2"
+      ],
+      "lookup_argv": [
+        "--spec-type",
+        "ngram-simple",
+        "--spec-ngram-simple-size-n",
+        "16",
+        "--spec-ngram-simple-size-m",
+        "255",
+        "--spec-ngram-simple-min-hits",
+        "1"
+      ],
+      "environment": {
+        "GGML_CUDA_MOE_DOWNX": "1",
+        "GGML_CUDA_MOE_DOWNH": "2",
+        "GGML_CUDA_OCCAMY_GDN_QKREUSE": "1",
+        "GGML_CUDA_OCCAMY_GDN_PCSHARE": "1",
+        "GGML_CUDA_MMVQ_SM52": "1",
+        "GGML_CUDA_RMS_WARP": "0",
+        "GGML_CUDA_HEAD_ROWPACK_SM52": "1",
+        "GGML_CUDA_MMQ_COMPACT_SM52": "1",
+        "GGML_CUDA_Q8_REUSE": "1",
+        "GGML_CUDA_NORM_Q8": "1",
+        "GGML_CUDA_CONCAT_T": "1",
+        "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": "1",
+        "GGML_CUDA_GATE_COPY": "1",
+        "GGML_CUDA_OCCAMY_GDN": "1",
+        "GGML_CUDA_MMQ_XMAD_SM52": "1",
+        "GGML_CUDA_GDN_COLS": "2,4",
+        "GGML_CUDA_OCCAMY_FA": "1",
+        "GGML_CUDA_OCCAMY_FUSED": "1",
+        "GGML_CUDA_OCCAMY_FA_PIPE": "3",
+        "GGML_CUDA_MOE_LOP3": "1",
+        "GGML_CUDA_MOE_TAILBAL": "1",
+        "GGML_CUDA_OCCAMY_GDN_PREF": "1",
+        "GGML_CUDA_OCCAMY_HOSTGAP": "1",
+        "GGML_CUDA_OCCAMY_SMALLFUSE": "2",
+        "GGML_CUDA_MMQ_TAIL_SM52": "1",
+        "GGML_CUDA_OCCAMY_GDN_REPACK": "1",
+        "GGML_CUDA_OCCAMY_N2SPLIT": "1",
+        "GGML_CUDA_OCCAMY_FA_ADDR": "1",
+        "GGML_CUDA_OCCAMY_N2GDN": "1",
+        "GGML_CUDA_FA_MAXWELL_GEMM": "1",
+        "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": "1",
+        "GGML_CUDA_MOE_V3": "1",
+        "GGML_CUDA_OCCAMY_GDN_T2": "1",
+        "GGML_CUDA_OCCAMY_FA_MROW": "3",
+        "GGML_CUDA_OCCAMY_FA2_NU": "4",
+        "LLAMA_TRACE": "1"
+      },
+      "request_fields_32k": {
+        "id_slot": 0,
+        "n_predict": 3072,
+        "temperature": 0,
+        "seed": 7,
+        "cache_prompt": false,
+        "ignore_eos": false,
+        "return_tokens": true,
+        "stream": false
+      },
+      "request_fields_80k": {
+        "id_slot": 0,
+        "n_predict": 3072,
+        "temperature": 0,
+        "seed": 7,
+        "cache_prompt": true,
+        "ignore_eos": false,
+        "return_tokens": true,
+        "stream": false
+      },
+      "owned_stage_cap_seconds": 480,
+      "completion_timeout_seconds": {
+        "cold": 390,
+        "warm": 90
+      },
+      "span_policy": "benchmark caller excludes one separately verified standalone terminal LF from the independent input donor only"
+    },
+    "sample_counts": {
+      "serial": 1,
+      "unbounded": 1,
+      "bounded": 2
+    },
+    "requests_per_sample": {
+      "cold": 1,
+      "same_slot_warm": 1
+    },
+    "serial_spec_argv": [
+      "--spec-type",
+      "none"
+    ],
+    "bounded_and_unbounded_share_lookup_argv": true
+  },
+  "rate_definition": "emitted count including EOS divided by server decode duration",
+  "wall_definition": "nonstreaming completion round trip",
+  "same_build_comparison_sha256": "fdd98a06155f575cc2e915b2fe7c35f42bbc4421774b5a3913afc6372b12b139",
+  "arms": {
+    "serial": {
+      "gpu_layers_offloaded": 42,
+      "runner_exit_code": 0,
+      "cleanup_exit_code": 0,
+      "actual_mapped_binary_sha256_by_basename": {
+        "libggml-cuda.so": "6f37baad23c4ffbe2bcb8d5363d76b71df0af3b0ae7b2b65917104728379e058",
+        "libllama-common.so.0.6.0": "b877a44e28681026613a88d8dac36b20b49e74eb6d9da906307d742d16f43814",
+        "libllama-server-impl.so": "ad7e9dd423a5bbd769fb564f4e67cc36cccec3ac566a55f7c8210be5e1eb9c7a",
+        "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117"
+      },
+      "receipt_sha256": "1aad171c027ade21321ae51e788b09770a04d3489e572f9490c5ad3b291f21af",
+      "conditions": {
+        "cold": {
+          "decode_s": 29.687198,
+          "decode_toks_s": 58.00480058778198,
+          "request_wall_s": 290.9242971080821,
+          "server_first_token_s": 261.215139,
+          "cache_tokens": 0,
+          "evaluated_prompt_tokens": 80000,
+          "output_tokens_including_eos": 1722,
+          "exact_ids": true,
+          "exact_edit_text_and_ast": true,
+          "span_field_present": false,
+          "full_q256_calls": 0,
+          "draft_proposals": null,
+          "drafts_accepted": null,
+          "checkpoint_restores": 0,
+          "confirmed_replay_widths": [],
+          "terminal_q53": false
+        },
+        "warm": {
+          "decode_s": 29.666901999999997,
+          "decode_toks_s": 58.04448337746894,
+          "request_wall_s": 29.793248740024865,
+          "server_first_token_s": 0.103515,
+          "cache_tokens": 79996,
+          "evaluated_prompt_tokens": 4,
+          "output_tokens_including_eos": 1722,
+          "exact_ids": true,
+          "exact_edit_text_and_ast": true,
+          "span_field_present": false,
+          "full_q256_calls": 0,
+          "draft_proposals": null,
+          "drafts_accepted": null,
+          "checkpoint_restores": 0,
+          "confirmed_replay_widths": [],
+          "terminal_q53": false
+        }
+      }
+    },
+    "stock_unbounded": {
+      "gpu_layers_offloaded": 42,
+      "runner_exit_code": 0,
+      "cleanup_exit_code": 0,
+      "actual_mapped_binary_sha256_by_basename": {
+        "libggml-cuda.so": "6f37baad23c4ffbe2bcb8d5363d76b71df0af3b0ae7b2b65917104728379e058",
+        "libllama-common.so.0.6.0": "b877a44e28681026613a88d8dac36b20b49e74eb6d9da906307d742d16f43814",
+        "libllama-server-impl.so": "ad7e9dd423a5bbd769fb564f4e67cc36cccec3ac566a55f7c8210be5e1eb9c7a",
+        "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117"
+      },
+      "receipt_sha256": "686e91ddf348983f8c4c33898ee2dc74bade20a3985e0509c7375bbd1a26bce1",
+      "conditions": {
+        "cold": {
+          "decode_s": 16.752187999999997,
+          "decode_toks_s": 102.79254268158883,
+          "request_wall_s": 278.622903913958,
+          "server_first_token_s": 261.847789,
+          "cache_tokens": 0,
+          "evaluated_prompt_tokens": 80000,
+          "output_tokens_including_eos": 1722,
+          "exact_ids": true,
+          "exact_edit_text_and_ast": true,
+          "span_field_present": false,
+          "full_q256_calls": 8,
+          "draft_proposals": 2040,
+          "drafts_accepted": 1681,
+          "checkpoint_restores": 2,
+          "confirmed_replay_widths": [
+            101,
+            54
+          ],
+          "terminal_q53": false
+        },
+        "warm": {
+          "decode_s": 16.18608,
+          "decode_toks_s": 106.3877109219774,
+          "request_wall_s": 16.31540820002556,
+          "server_first_token_s": 0.106643,
+          "cache_tokens": 79996,
+          "evaluated_prompt_tokens": 4,
+          "output_tokens_including_eos": 1722,
+          "exact_ids": true,
+          "exact_edit_text_and_ast": true,
+          "span_field_present": false,
+          "full_q256_calls": 8,
+          "draft_proposals": 2040,
+          "drafts_accepted": 1681,
+          "checkpoint_restores": 2,
+          "confirmed_replay_widths": [
+            101,
+            54
+          ],
+          "terminal_q53": false
+        }
+      }
+    },
+    "bounded_first": {
+      "gpu_layers_offloaded": 42,
+      "runner_exit_code": 0,
+      "cleanup_exit_code": 0,
+      "actual_mapped_binary_sha256_by_basename": {
+        "libggml-cuda.so": "6f37baad23c4ffbe2bcb8d5363d76b71df0af3b0ae7b2b65917104728379e058",
+        "libllama-common.so.0.6.0": "b877a44e28681026613a88d8dac36b20b49e74eb6d9da906307d742d16f43814",
+        "libllama-server-impl.so": "ad7e9dd423a5bbd769fb564f4e67cc36cccec3ac566a55f7c8210be5e1eb9c7a",
+        "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117"
+      },
+      "receipt_sha256": "e76607dfbd9c54cb1e495d376cc00de39d7e6d2c5c1fda4775d272a2e15af64c",
+      "conditions": {
+        "cold": {
+          "decode_s": 14.740157,
+          "decode_toks_s": 116.82372175547384,
+          "request_wall_s": 277.29157324298285,
+          "server_first_token_s": 262.526454,
+          "cache_tokens": 0,
+          "evaluated_prompt_tokens": 80000,
+          "output_tokens_including_eos": 1722,
+          "exact_ids": true,
+          "exact_edit_text_and_ast": true,
+          "span_field_present": true,
+          "full_q256_calls": 7,
+          "draft_proposals": 1837,
+          "drafts_accepted": 1681,
+          "checkpoint_restores": 1,
+          "confirmed_replay_widths": [
+            101
+          ],
+          "terminal_q53": true
+        },
+        "warm": {
+          "decode_s": 14.544913000000001,
+          "decode_toks_s": 118.3919078787202,
+          "request_wall_s": 14.675343022099696,
+          "server_first_token_s": 0.10506,
+          "cache_tokens": 79996,
+          "evaluated_prompt_tokens": 4,
+          "output_tokens_including_eos": 1722,
+          "exact_ids": true,
+          "exact_edit_text_and_ast": true,
+          "span_field_present": true,
+          "full_q256_calls": 7,
+          "draft_proposals": 1837,
+          "drafts_accepted": 1681,
+          "checkpoint_restores": 1,
+          "confirmed_replay_widths": [
+            101
+          ],
+          "terminal_q53": true
+        }
+      }
+    },
+    "bounded_repeat": {
+      "gpu_layers_offloaded": 42,
+      "runner_exit_code": 0,
+      "cleanup_exit_code": 0,
+      "actual_mapped_binary_sha256_by_basename": {
+        "libggml-cuda.so": "6f37baad23c4ffbe2bcb8d5363d76b71df0af3b0ae7b2b65917104728379e058",
+        "libllama-common.so.0.6.0": "b877a44e28681026613a88d8dac36b20b49e74eb6d9da906307d742d16f43814",
+        "libllama-server-impl.so": "ad7e9dd423a5bbd769fb564f4e67cc36cccec3ac566a55f7c8210be5e1eb9c7a",
+        "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117"
+      },
+      "receipt_sha256": "8e977484105f3dc3921ec7c81c1bd51adc092fd110d31c25252241cfdf05b736",
+      "conditions": {
+        "cold": {
+          "decode_s": 14.72523,
+          "decode_toks_s": 116.94214623472774,
+          "request_wall_s": 277.14951387699693,
+          "server_first_token_s": 262.39921999999996,
+          "cache_tokens": 0,
+          "evaluated_prompt_tokens": 80000,
+          "output_tokens_including_eos": 1722,
+          "exact_ids": true,
+          "exact_edit_text_and_ast": true,
+          "span_field_present": true,
+          "full_q256_calls": 7,
+          "draft_proposals": 1837,
+          "drafts_accepted": 1681,
+          "checkpoint_restores": 1,
+          "confirmed_replay_widths": [
+            101
+          ],
+          "terminal_q53": true
+        },
+        "warm": {
+          "decode_s": 14.519508,
+          "decode_toks_s": 118.59905996814769,
+          "request_wall_s": 14.655281953047961,
+          "server_first_token_s": 0.11090000000000001,
+          "cache_tokens": 79996,
+          "evaluated_prompt_tokens": 4,
+          "output_tokens_including_eos": 1722,
+          "exact_ids": true,
+          "exact_edit_text_and_ast": true,
+          "span_field_present": true,
+          "full_q256_calls": 7,
+          "draft_proposals": 1837,
+          "drafts_accepted": 1681,
+          "checkpoint_restores": 1,
+          "confirmed_replay_widths": [
+            101
+          ],
+          "terminal_q53": true
+        }
+      }
+    }
+  },
+  "aggregates": {
+    "cold": {
+      "median_of_two_bounded_runs": {
+        "decode_s": 14.7326935,
+        "decode_toks_s": 116.88293399510079,
+        "request_wall_s": 277.2205435599899,
+        "server_first_token_s": 262.462837
+      },
+      "versus_same_build_controls": {
+        "serial": {
+          "decode_rate_ratio": 2.015055699081773,
+          "whole_request_speed_ratio": 1.0494326768576108,
+          "wall_seconds_saved": 13.703753548092209
+        },
+        "unbounded": {
+          "decode_rate_ratio": 1.137075715313021,
+          "whole_request_speed_ratio": 1.0050586451348784,
+          "wall_seconds_saved": 1.4023603539681062
+        }
+      }
+    },
+    "warm": {
+      "median_of_two_bounded_runs": {
+        "decode_s": 14.532210500000001,
+        "decode_toks_s": 118.49548392343394,
+        "request_wall_s": 14.665312487573829,
+        "server_first_token_s": 0.10798
+      },
+      "versus_same_build_controls": {
+        "serial": {
+          "decode_rate_ratio": 2.0414583177142935,
+          "whole_request_speed_ratio": 2.031545442026496,
+          "wall_seconds_saved": 15.127936252451036
+        },
+        "unbounded": {
+          "decode_rate_ratio": 1.1138071527383944,
+          "whole_request_speed_ratio": 1.1125169145798894,
+          "wall_seconds_saved": 1.65009571245173
+        }
+      }
+    }
+  },
+  "same_slot_32k_validation": {
+    "technical_pass": true,
+    "same_slot_distinct_tasks": 3,
+    "ordered_steps": [
+      "stock-cold",
+      "bounded-warm",
+      "stock-warm"
+    ],
+    "stock_minus_bounded_warm_wall_s": 1.1312753410311416,
+    "request_local_span_restored_stock_work": true,
+    "steps": {
+      "stock-cold": {
+        "cache_n": 0,
+        "evaluated_prompt_n": 32768,
+        "span_sent": false,
+        "terminal_q53": false,
+        "draft_n": 2040,
+        "draft_n_accepted": 1681,
+        "outputs_match_serial_through_eos": true,
+        "exact_edit_text_and_ast": true,
+        "q256_calls": 8,
+        "confirmed_replay_widths": [
+          101,
+          54
+        ],
+        "metrics": {
+          "decode_s": 11.902601,
+          "decode_toks_s": 144.67426069310397,
+          "request_wall_s": 89.06072154303547,
+          "server_first_token_s": 77.148519
+        }
+      },
+      "bounded-warm": {
+        "cache_n": 32764,
+        "evaluated_prompt_n": 4,
+        "span_sent": true,
+        "terminal_q53": true,
+        "draft_n": 1837,
+        "draft_n_accepted": 1681,
+        "outputs_match_serial_through_eos": true,
+        "exact_edit_text_and_ast": true,
+        "q256_calls": 7,
+        "confirmed_replay_widths": [
+          101
+        ],
+        "metrics": {
+          "decode_s": 10.585294,
+          "decode_toks_s": 162.67852361965572,
+          "request_wall_s": 10.686899601016194,
+          "server_first_token_s": 0.090072
+        }
+      },
+      "stock-warm": {
+        "cache_n": 32764,
+        "evaluated_prompt_n": 4,
+        "span_sent": false,
+        "terminal_q53": false,
+        "draft_n": 2040,
+        "draft_n_accepted": 1681,
+        "outputs_match_serial_through_eos": true,
+        "exact_edit_text_and_ast": true,
+        "q256_calls": 8,
+        "confirmed_replay_widths": [
+          101,
+          54
+        ],
+        "metrics": {
+          "decode_s": 11.715816,
+          "decode_toks_s": 146.98079928875632,
+          "request_wall_s": 11.818174942047335,
+          "server_first_token_s": 0.091518
+        }
+      }
+    },
+    "receipt_sha256": "1e0e2e069cf9640f75c074d627f9838a1864e9621d58fd76f693c47627ff60b7"
+  }
+}
