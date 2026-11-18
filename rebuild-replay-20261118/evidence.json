@@ -1,0 +1,274 @@
+{
+  "schema_version": 1,
+  "hardware": {
+    "gpu": "NVIDIA Quadro M6000",
+    "vram_gb": 24,
+    "architecture": "sm_52"
+  },
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+  "runtime_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "source": {
+    "published_recipe_commit": "3eea327fb4c289a54a8796899080bbbd1a3cdcfd",
+    "preceding_validation_commit": "b102b95377b6b1870fdd29436f63014baf192acb",
+    "combined_source_index_sha256": "2e9859ca0afbb29da29ae30c983e308db793edc7e79a4571fef970c1cba2d4c6",
+    "cmake_preset_sha256": "67e76750dcb63f024a300840c10a2d820ed2124c197502b16edb3e1afd290d3d"
+  },
+  "fresh_build": {
+    "image_id": "sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed",
+    "cmake_version": "3.28.3",
+    "gcc_version": "14.2.0",
+    "nvcc_version": "12.8.93",
+    "generator": "Unix Makefiles",
+    "configuration": "Release",
+    "cuda_architectures": "52-real",
+    "build_targets": [
+      "llama-server",
+      "test-backend-ops",
+      "ggml-cuda"
+    ],
+    "receipt_sha256": "6516b956a2c44b11f8ebd7877b30b1db12bc1fb1d676317be08e5533c63290f9",
+    "sm_52_cubins": 147,
+    "embedded_ui_built": false,
+    "server_version": "version: 0.6.0-dev (build 53, commit e4fdc23)",
+    "offline_link_check_used_toolkit_stub": true,
+    "runtime_replay_used_real_driver": true,
+    "fresh_artifact_hashes_match_previous_measured_overlay": false,
+    "artifacts": [
+      {
+        "file": "llama-server",
+        "fresh_sha256": "7f090e224e4ffd3ee048ed38f71ee03414fe6106b2d52bee9001586990805ade",
+        "measured_overlay_sha256": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+        "matches_measured_overlay": false
+      },
+      {
+        "file": "test-backend-ops",
+        "fresh_sha256": "2f0bfb316b67128e6b29fed56d43a13a6bece4d7f0d170d1d43160676e173ac7",
+        "measured_overlay_sha256": "1af98d120a475f2a65d6666be618af8a35e6375d4072ad24d076107345605335",
+        "matches_measured_overlay": false
+      },
+      {
+        "file": "libggml-cuda.so",
+        "fresh_sha256": "fda878a9856cfb64d5142ec3384a169d9d0933f0fe48caaece55bf6e56db3e12",
+        "measured_overlay_sha256": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba",
+        "matches_measured_overlay": false
+      },
+      {
+        "file": "libllama.so.0.6.0",
+        "fresh_sha256": "70dbba0f55549ba720a64106212e63b7085cd851ed8d7c46eeac51965aadcb94",
+        "measured_overlay_sha256": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+        "matches_measured_overlay": false
+      },
+      {
+        "file": "libllama-common.so.0.6.0",
+        "fresh_sha256": "d65103b655f6ac663b079e50416b9bb831dbff2be747b2cb8710f576fe01e5a0",
+        "measured_overlay_sha256": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+        "matches_measured_overlay": false
+      },
+      {
+        "file": "libllama-server-impl.so",
+        "fresh_sha256": "61784b2e172cfe00a79a34a196130cd46999023fc71db5724b439af77255851f",
+        "measured_overlay_sha256": "1138515898887c6ec6be01a210cfb59bb8e1338ccf6eeef1d032ffd4fdb22b65",
+        "matches_measured_overlay": false
+      }
+    ]
+  },
+  "live_runtime": {
+    "request": {
+      "temperature": 0,
+      "seed": 7,
+      "output_tokens": 192,
+      "slots": 1,
+      "context_tokens": 84224
+    },
+    "mapping_proof": {
+      "verified_objects": 9,
+      "exact_map_sha256_by_object": {
+        "llama-server": "7f090e224e4ffd3ee048ed38f71ee03414fe6106b2d52bee9001586990805ade",
+        "libggml-cpu-haswell.so": "3b7f769552bc3220b7e7a74816387a70eccf13d95ee09f92a1aaa932c54648ba",
+        "libggml-cuda.so": "fda878a9856cfb64d5142ec3384a169d9d0933f0fe48caaece55bf6e56db3e12",
+        "libllama.so.0.6.0": "70dbba0f55549ba720a64106212e63b7085cd851ed8d7c46eeac51965aadcb94",
+        "libmtmd.so.0.6.0": "c21d9434a015c817ddc6d2efc282d7240ba8181e4516d132390ddee34c3e4d70",
+        "libllama-common.so.0.6.0": "d65103b655f6ac663b079e50416b9bb831dbff2be747b2cb8710f576fe01e5a0",
+        "libllama-server-impl.so": "61784b2e172cfe00a79a34a196130cd46999023fc71db5724b439af77255851f",
+        "libggml-base.so.0.26.0": "f36a36f8ccd0b70dd915918ce5655401646ac19044051ab9a75f9146b073a2ab",
+        "libggml.so.0.26.0": "9d1a00dd54f676c53d2ca528d29c75558e9b84eeadae7b466d3b2005982e8f3d"
+      },
+      "driver_mapping_checked_separately": true
+    },
+    "rate_definitions": {
+      "server_reported": "server timings predicted_per_second",
+      "emitted_over_duration": "emitted token count divided by server predicted_ms in seconds"
+    },
+    "runs": {
+      "2k": {
+        "supplied_prompt_tokens": 2000,
+        "old_reference": "Prior full-attention cache-only MTP1 overlay",
+        "wrapper_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "gpu_layers_loaded": 42,
+        "gpu_layers_total": 42,
+        "same_slot_warm_replay": true,
+        "same_device_inode_and_sha256_for_all_mapped_objects": true,
+        "real_cuda_driver_version": "580.178.04",
+        "live_markers": {
+          "cache_only_after_startup": true,
+          "full_mtp": true
+        },
+        "long_r2_query_widths_observed": [],
+        "total_r2_coverage_measured": false,
+        "result_receipt_sha256": "881ac64dc8f661608bbd812301a6319abe27245996172c168a02861d3cc11366",
+        "measurements": {
+          "cold": {
+            "prompt_token_sha256": "e02db5f90b75c866fc5a31d26fa13242dd8319a068cda565c7495e33e681aa49",
+            "same_192_generated_ids": true,
+            "same_draft_counts": true,
+            "fresh": {
+              "ttft_s": 3.9919009970035404,
+              "wall_s": 6.049113497021608,
+              "output_tokens": 192,
+              "cached_prompt_tokens": 0,
+              "evaluated_prompt_tokens": 2000,
+              "prefill_ms": 3989.346,
+              "server_predicted_ms": 2056.904,
+              "server_reported_decode_tok_s": 92.85800406825015,
+              "emitted_tokens_per_server_decode_second": 93.3441716288169,
+              "drafts_accepted": 88,
+              "drafts_proposed": 102
+            },
+            "prior_overlay": {
+              "ttft_s": 3.9700561710633337,
+              "wall_s": 6.030983339995146,
+              "output_tokens": 192,
+              "cached_prompt_tokens": 0,
+              "evaluated_prompt_tokens": 2000,
+              "prefill_ms": 3967.649,
+              "server_predicted_ms": 2060.77,
+              "server_reported_decode_tok_s": 92.68380265628868,
+              "emitted_tokens_per_server_decode_second": 93.16905816757814,
+              "drafts_accepted": 88,
+              "drafts_proposed": 102
+            }
+          },
+          "warm": {
+            "prompt_token_sha256": "e02db5f90b75c866fc5a31d26fa13242dd8319a068cda565c7495e33e681aa49",
+            "same_192_generated_ids": true,
+            "same_draft_counts": true,
+            "fresh": {
+              "ttft_s": 0.08546333003323525,
+              "wall_s": 2.13181342498865,
+              "output_tokens": 192,
+              "cached_prompt_tokens": 1996,
+              "evaluated_prompt_tokens": 4,
+              "prefill_ms": 84.392,
+              "server_predicted_ms": 2046.096,
+              "server_reported_decode_tok_s": 93.34850368702152,
+              "emitted_tokens_per_server_decode_second": 93.83723930841954,
+              "drafts_accepted": 88,
+              "drafts_proposed": 102
+            },
+            "prior_overlay": {
+              "ttft_s": 0.08392992708832026,
+              "wall_s": 2.137162948027253,
+              "output_tokens": 192,
+              "cached_prompt_tokens": 1996,
+              "evaluated_prompt_tokens": 4,
+              "prefill_ms": 82.824,
+              "server_predicted_ms": 2053.039,
+              "server_reported_decode_tok_s": 93.0328162299888,
+              "emitted_tokens_per_server_decode_second": 93.51989903747565,
+              "drafts_accepted": 88,
+              "drafts_proposed": 102
+            }
+          }
+        }
+      },
+      "80k": {
+        "supplied_prompt_tokens": 80000,
+        "old_reference": "Prior Sparse R2 plus cache-only MTP1 overlay",
+        "wrapper_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "gpu_layers_loaded": 42,
+        "gpu_layers_total": 42,
+        "same_slot_warm_replay": true,
+        "same_device_inode_and_sha256_for_all_mapped_objects": true,
+        "real_cuda_driver_version": "580.178.04",
+        "live_markers": {
+          "cache_only_after_startup": true,
+          "full_mtp": true,
+          "cold_long_r2_q2": true,
+          "warm_long_r2_q2": true
+        },
+        "long_r2_query_widths_observed": [
+          1,
+          2
+        ],
+        "total_r2_coverage_measured": false,
+        "result_receipt_sha256": "2397f8da845b9da8d05220dc7d61d5c89a5047fc01939cd2a8a856f09458c237",
+        "measurements": {
+          "cold": {
+            "prompt_token_sha256": "7c1dcdc2f609928922953fc626d8b90e5b5288092036f21b57f6ffda0a128dcc",
+            "same_192_generated_ids": true,
+            "same_draft_counts": true,
+            "fresh": {
+              "ttft_s": 266.0766888150247,
+              "wall_s": 268.4981172250118,
+              "output_tokens": 192,
+              "cached_prompt_tokens": 0,
+              "evaluated_prompt_tokens": 80000,
+              "prefill_ms": 266058.541,
+              "server_predicted_ms": 2416.826,
+              "server_reported_decode_tok_s": 79.02927227694505,
+              "emitted_tokens_per_server_decode_second": 79.44303810038456,
+              "drafts_accepted": 90,
+              "drafts_proposed": 100
+            },
+            "prior_overlay": {
+              "ttft_s": 266.22128819301724,
+              "wall_s": 268.634537364007,
+              "output_tokens": 192,
+              "cached_prompt_tokens": 0,
+              "evaluated_prompt_tokens": 80000,
+              "prefill_ms": 266203.156,
+              "server_predicted_ms": 2408.743,
+              "server_reported_decode_tok_s": 79.2944701863171,
+              "emitted_tokens_per_server_decode_second": 79.7096244804863,
+              "drafts_accepted": 90,
+              "drafts_proposed": 100
+            }
+          },
+          "warm": {
+            "prompt_token_sha256": "7c1dcdc2f609928922953fc626d8b90e5b5288092036f21b57f6ffda0a128dcc",
+            "same_192_generated_ids": true,
+            "same_draft_counts": true,
+            "fresh": {
+              "ttft_s": 0.25453907100018114,
+              "wall_s": 2.725902421050705,
+              "output_tokens": 192,
+              "cached_prompt_tokens": 79996,
+              "evaluated_prompt_tokens": 4,
+              "prefill_ms": 238.484,
+              "server_predicted_ms": 2467.141,
+              "server_reported_decode_tok_s": 77.4175452477179,
+              "emitted_tokens_per_server_decode_second": 77.82287270974784,
+              "drafts_accepted": 87,
+              "drafts_proposed": 103
+            },
+            "prior_overlay": {
+              "ttft_s": 0.25921714294236153,
+              "wall_s": 2.7287193189840764,
+              "output_tokens": 192,
+              "cached_prompt_tokens": 79996,
+              "evaluated_prompt_tokens": 4,
+              "prefill_ms": 243.249,
+              "server_predicted_ms": 2465.32,
+              "server_reported_decode_tok_s": 77.47472944688721,
+              "emitted_tokens_per_server_decode_second": 77.88035630263008,
+              "drafts_accepted": 87,
+              "drafts_proposed": 103
+            }
+          }
+        }
+      }
+    }
+  }
+}
