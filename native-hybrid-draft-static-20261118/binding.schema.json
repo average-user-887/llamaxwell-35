@@ -1,0 +1,90 @@
+{
+  "title": "Local one-graph draft binding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "intent",
+    "mode",
+    "native_baseline",
+    "baseline_mapped_software",
+    "original_libraries",
+    "alternate_libraries",
+    "warm_historical_saving_ms_per_offer",
+    "arm_cap_s",
+    "live_qualification",
+    "abi",
+    "unchanged_server_imports_satisfied",
+    "n40_build_products_match_packaged_libraries",
+    "n40_source_parent_hashes_verified"
+  ],
+  "properties": {
+    "intent": {
+      "type": "string"
+    },
+    "mode": {
+      "const": "native"
+    },
+    "native_baseline": {
+      "type": "string",
+      "pattern": "^finish33-sampler-r1/receipts/[^/]+$",
+      "description": "Campaign-relative owner-held terminal native receipt folder."
+    },
+    "baseline_mapped_software": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/sha256"
+      },
+      "required": [
+        "exe",
+        "libggml-cuda.so",
+        "libllama-server-impl.so",
+        "libllama.so.0.6.0",
+        "libllama-common.so.0.6.0"
+      ]
+    },
+    "original_libraries": {
+      "$ref": "#/$defs/draft_libraries"
+    },
+    "alternate_libraries": {
+      "$ref": "#/$defs/draft_libraries"
+    },
+    "warm_historical_saving_ms_per_offer": {
+      "type": "number"
+    },
+    "arm_cap_s": {
+      "const": 430
+    },
+    "live_qualification": {
+      "type": "null"
+    },
+    "abi": {
+      "type": "object"
+    },
+    "unchanged_server_imports_satisfied": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "n40_build_products_match_packaged_libraries": {
+      "const": true
+    },
+    "n40_source_parent_hashes_verified": {
+      "const": true
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "draft_libraries": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/sha256"
+      },
+      "required": [
+        "libllama.so.0.6.0",
+        "libllama-common.so.0.6.0"
+      ]
+    }
+  }
+}
