@@ -1,0 +1,154 @@
+{
+  "technical_pass": true,
+  "materiality_pass": false,
+  "numeric": {
+    "independent": {
+      "ordered_expert_ids": [
+        [
+          128,
+          215,
+          73,
+          136,
+          110,
+          167,
+          197,
+          112
+        ],
+        [
+          85,
+          222,
+          184,
+          46,
+          216,
+          151,
+          64,
+          219
+        ]
+      ],
+      "overlap": 0,
+      "finite_output_words": 4096,
+      "different_output_words": 0,
+      "repeat_different_output_words": 0,
+      "physical_route_checks": 3
+    },
+    "partial": {
+      "ordered_expert_ids": [
+        [
+          128,
+          215,
+          73,
+          136,
+          110,
+          167,
+          197,
+          112
+        ],
+        [
+          110,
+          73,
+          64,
+          128,
+          215,
+          96,
+          197,
+          82
+        ]
+      ],
+      "overlap": 5,
+      "finite_output_words": 4096,
+      "different_output_words": 0,
+      "repeat_different_output_words": 0,
+      "physical_route_checks": 3
+    }
+  },
+  "timing": {
+    "independent": {
+      "intervals": [
+        {
+          "mode": "cohorts",
+          "reps": 8,
+          "mean_us": 386.441
+        },
+        {
+          "mode": "weights",
+          "reps": 8,
+          "mean_us": 190.229125
+        },
+        {
+          "mode": "cohorts",
+          "reps": 96,
+          "mean_us": 162.675448
+        },
+        {
+          "mode": "weights",
+          "reps": 96,
+          "mean_us": 185.484854
+        },
+        {
+          "mode": "weights",
+          "reps": 96,
+          "mean_us": 184.120698
+        },
+        {
+          "mode": "cohorts",
+          "reps": 96,
+          "mean_us": 163.981667
+        }
+      ],
+      "cohorts_minus_weights_us": [
+        -22.809406000000024,
+        -20.139031000000017
+      ],
+      "min_required_saving_us": -5.0,
+      "projected_ms_40_layers": [
+        -0.912376240000001,
+        -0.8055612400000007
+      ],
+      "passed": false
+    },
+    "partial": {
+      "intervals": [
+        {
+          "mode": "cohorts",
+          "reps": 8,
+          "mean_us": 159.708625
+        },
+        {
+          "mode": "weights",
+          "reps": 8,
+          "mean_us": 170.02075
+        },
+        {
+          "mode": "weights",
+          "reps": 96,
+          "mean_us": 169.566354
+        },
+        {
+          "mode": "cohorts",
+          "reps": 96,
+          "mean_us": 159.240375
+        },
+        {
+          "mode": "cohorts",
+          "reps": 96,
+          "mean_us": 158.605094
+        },
+        {
+          "mode": "weights",
+          "reps": 96,
+          "mean_us": 169.657146
+        }
+      ],
+      "cohorts_minus_weights_us": [
+        -10.32597899999999,
+        -11.052052000000003
+      ],
+      "min_required_saving_us": 30.0,
+      "projected_ms_40_layers": [
+        -0.41303915999999957,
+        -0.44208208000000015
+      ],
+      "passed": false
+    }
+  }
+}

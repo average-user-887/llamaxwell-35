@@ -1,0 +1,60 @@
+{
+  "independent": {
+    "ordered_expert_ids": [
+      [
+        128,
+        215,
+        73,
+        136,
+        110,
+        167,
+        197,
+        112
+      ],
+      [
+        85,
+        222,
+        184,
+        46,
+        216,
+        151,
+        64,
+        219
+      ]
+    ],
+    "overlap": 0,
+    "finite_output_words": 4096,
+    "different_output_words": 0,
+    "repeat_different_output_words": 0,
+    "physical_route_checks": 3
+  },
+  "partial": {
+    "ordered_expert_ids": [
+      [
+        128,
+        215,
+        73,
+        136,
+        110,
+        167,
+        197,
+        112
+      ],
+      [
+        110,
+        73,
+        64,
+        128,
+        215,
+        96,
+        197,
+        82
+      ]
+    ],
+    "overlap": 5,
+    "finite_output_words": 4096,
+    "different_output_words": 0,
+    "repeat_different_output_words": 0,
+    "physical_route_checks": 3
+  }
+}

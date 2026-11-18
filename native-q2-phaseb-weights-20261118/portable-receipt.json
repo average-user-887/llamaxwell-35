@@ -1,0 +1,349 @@
+{
+  "build": {
+    "native_control_library_sha256": "19607daf02bc6dcd722a0695787046db9b4c6b8e010545598d3ad60649d68d00",
+    "candidate_library_sha256": "fc74c32fa8affc61cbf12294072b89e556239a89e5cc092315dee53d429fd7e1",
+    "operator_sha256": "b2bbaf0b74e59367e8ccf9ee44bde3c262f09f57933668a1fbc6cc5101e21e21",
+    "candidate_object_sha256": "6323e31f013f321f20470caca14fd783a0fefd4cb6ffb8037089d05d95333a11",
+    "control_object_sha256": "bbea6f5c611282090050592a6e49f2c15238c104eb1b1420cb23e562220176eb",
+    "original_q8_gdn_object_sha256": "bcd063306ea65f5e8143a8d6501960dbfeda359f5b3a261d5d91d612c786eac0",
+    "linked_objects": 147,
+    "builder_image": "sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed",
+    "runner_image": "sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+    "preserved_device_functions": 17,
+    "preserved_instruction_words": 46032,
+    "added_device_function": "_ZN6occamy21moe_q2_shared_weightsENS_6ParamsEb",
+    "added_instruction_words": 4840,
+    "registers": 63,
+    "static_shared_bytes": 272,
+    "dynamic_shared_bytes": 39424,
+    "stack_bytes": 0,
+    "spill_load_bytes": 0,
+    "spill_store_bytes": 0,
+    "cc": "sm_52",
+    "threads_per_block": 512,
+    "blocks_per_grid": 48,
+    "required_blocks_per_sm": 2
+  },
+  "status": {
+    "runner_exit": 0,
+    "cleanup_exit": 0,
+    "started_epoch": 1795014011,
+    "finished_epoch": 1795014013,
+    "cap_seconds": 180
+  },
+  "required_savings_us_per_layer": {
+    "independent": -5.0,
+    "partial": 30.0
+  },
+  "manifest_sha256": "20ae26a713ce3e7ce8c17e7e2847b7aae6212f4744b5f7bcca4ba83aa56f537e",
+  "check": {
+    "executed": true,
+    "validated": {
+      "independent": {
+        "ordered_expert_ids": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            85,
+            222,
+            184,
+            46,
+            216,
+            151,
+            64,
+            219
+          ]
+        ],
+        "overlap": 0,
+        "finite_output_words": 4096,
+        "different_output_words": 0,
+        "repeat_different_output_words": 0,
+        "physical_route_checks": 3
+      },
+      "partial": {
+        "ordered_expert_ids": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            110,
+            73,
+            64,
+            128,
+            215,
+            96,
+            197,
+            82
+          ]
+        ],
+        "overlap": 5,
+        "finite_output_words": 4096,
+        "different_output_words": 0,
+        "repeat_different_output_words": 0,
+        "physical_route_checks": 3
+      }
+    }
+  },
+  "perf": {
+    "executed": true,
+    "validated": {
+      "independent": {
+        "intervals": [
+          {
+            "mode": "cohorts",
+            "reps": 8,
+            "mean_us": 386.441
+          },
+          {
+            "mode": "weights",
+            "reps": 8,
+            "mean_us": 190.229125
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 162.675448
+          },
+          {
+            "mode": "weights",
+            "reps": 96,
+            "mean_us": 185.484854
+          },
+          {
+            "mode": "weights",
+            "reps": 96,
+            "mean_us": 184.120698
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 163.981667
+          }
+        ],
+        "cohorts_minus_weights_us": [
+          -22.809406000000024,
+          -20.139031000000017
+        ],
+        "min_required_saving_us": -5.0,
+        "projected_ms_40_layers": [
+          -0.912376240000001,
+          -0.8055612400000007
+        ],
+        "passed": false
+      },
+      "partial": {
+        "intervals": [
+          {
+            "mode": "cohorts",
+            "reps": 8,
+            "mean_us": 159.708625
+          },
+          {
+            "mode": "weights",
+            "reps": 8,
+            "mean_us": 170.02075
+          },
+          {
+            "mode": "weights",
+            "reps": 96,
+            "mean_us": 169.566354
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 159.240375
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 158.605094
+          },
+          {
+            "mode": "weights",
+            "reps": 96,
+            "mean_us": 169.657146
+          }
+        ],
+        "cohorts_minus_weights_us": [
+          -10.32597899999999,
+          -11.052052000000003
+        ],
+        "min_required_saving_us": 30.0,
+        "projected_ms_40_layers": [
+          -0.41303915999999957,
+          -0.44208208000000015
+        ],
+        "passed": false
+      }
+    }
+  },
+  "complete_measurement": {
+    "technical_pass": true,
+    "materiality_pass": false,
+    "numeric": {
+      "independent": {
+        "ordered_expert_ids": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            85,
+            222,
+            184,
+            46,
+            216,
+            151,
+            64,
+            219
+          ]
+        ],
+        "overlap": 0,
+        "finite_output_words": 4096,
+        "different_output_words": 0,
+        "repeat_different_output_words": 0,
+        "physical_route_checks": 3
+      },
+      "partial": {
+        "ordered_expert_ids": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            110,
+            73,
+            64,
+            128,
+            215,
+            96,
+            197,
+            82
+          ]
+        ],
+        "overlap": 5,
+        "finite_output_words": 4096,
+        "different_output_words": 0,
+        "repeat_different_output_words": 0,
+        "physical_route_checks": 3
+      }
+    },
+    "timing": {
+      "independent": {
+        "intervals": [
+          {
+            "mode": "cohorts",
+            "reps": 8,
+            "mean_us": 386.441
+          },
+          {
+            "mode": "weights",
+            "reps": 8,
+            "mean_us": 190.229125
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 162.675448
+          },
+          {
+            "mode": "weights",
+            "reps": 96,
+            "mean_us": 185.484854
+          },
+          {
+            "mode": "weights",
+            "reps": 96,
+            "mean_us": 184.120698
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 163.981667
+          }
+        ],
+        "cohorts_minus_weights_us": [
+          -22.809406000000024,
+          -20.139031000000017
+        ],
+        "min_required_saving_us": -5.0,
+        "projected_ms_40_layers": [
+          -0.912376240000001,
+          -0.8055612400000007
+        ],
+        "passed": false
+      },
+      "partial": {
+        "intervals": [
+          {
+            "mode": "cohorts",
+            "reps": 8,
+            "mean_us": 159.708625
+          },
+          {
+            "mode": "weights",
+            "reps": 8,
+            "mean_us": 170.02075
+          },
+          {
+            "mode": "weights",
+            "reps": 96,
+            "mean_us": 169.566354
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 159.240375
+          },
+          {
+            "mode": "cohorts",
+            "reps": 96,
+            "mean_us": 158.605094
+          },
+          {
+            "mode": "weights",
+            "reps": 96,
+            "mean_us": 169.657146
+          }
+        ],
+        "cohorts_minus_weights_us": [
+          -10.32597899999999,
+          -11.052052000000003
+        ],
+        "min_required_saving_us": 30.0,
+        "projected_ms_40_layers": [
+          -0.41303915999999957,
+          -0.44208208000000015
+        ],
+        "passed": false
+      }
+    }
+  }
+}
