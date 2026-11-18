@@ -1,0 +1,271 @@
+{
+  "mode": "native",
+  "runner_exit": 0,
+  "cleanup_exit": 0,
+  "bounded_wall_s": 312,
+  "refusal": null,
+  "request": {
+    "cold": {
+      "output_count": 192,
+      "finish_reason": "limit",
+      "request_wall_s": 267.74469870491885,
+      "ttft_s": 265.6940398529405,
+      "server_prompt_ms": 265675.571,
+      "server_decode_ms": 2046.809,
+      "offered_drafts": 101,
+      "accepted_drafts": 89,
+      "repetition": {
+        "nonblank_lines": 16,
+        "duplicate_normalized_lines": 0,
+        "final_quarter_lines": 4,
+        "final_quarter_normalized_duplicates": 0,
+        "word_windows_24": 54,
+        "repeated_24_word_windows": 0,
+        "python_keyword_led_lines": 6,
+        "trailing_comment_only_lines": 0,
+        "malformed_characters": 0
+      }
+    },
+    "warm": {
+      "output_count": 3072,
+      "finish_reason": "limit",
+      "request_wall_s": 32.89173146605026,
+      "ttft_s": 0.2575895170448348,
+      "server_prompt_ms": 240.269,
+      "server_decode_ms": 32629.255,
+      "offered_drafts": 1642,
+      "accepted_drafts": 1429,
+      "repetition": {
+        "nonblank_lines": 304,
+        "duplicate_normalized_lines": 127,
+        "final_quarter_lines": 76,
+        "final_quarter_normalized_duplicates": 39,
+        "word_windows_24": 1336,
+        "repeated_24_word_windows": 63,
+        "python_keyword_led_lines": 203,
+        "trailing_comment_only_lines": 0,
+        "malformed_characters": 0
+      }
+    }
+  },
+  "read_only_counter_snapshots": {
+    "warm": {
+      "row0": 0,
+      "row1": 0,
+      "combined": 69759,
+      "skip": 69759,
+      "q2_sparse": 17430
+    },
+    "cold": {
+      "row0": 0,
+      "row1": 0,
+      "combined": 4079,
+      "skip": 4079,
+      "q2_sparse": 1010
+    },
+    "start": {
+      "row0": 0,
+      "row1": 0,
+      "combined": 39,
+      "skip": 39,
+      "q2_sparse": 0
+    }
+  },
+  "validated": {
+    "mode": "native",
+    "technical_pass": true,
+    "semantic_score": null,
+    "actual_server_software_sha256": {
+      "libggml-cuda.so": "9e999bcaf04397f267548abdfa3e326b65bee122fb1e24f92be55529f40a335e",
+      "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+      "libllama-server-impl.so": "1138515898887c6ec6be01a210cfb59bb8e1338ccf6eeef1d032ffd4fdb22b65",
+      "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+      "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+    },
+    "metrics": {
+      "cold": {
+        "n_out": 192,
+        "decode_toks_s": 93.80455137729021,
+        "request_wall_s": 267.74469870491885,
+        "ttft_s": 265.6940398529405,
+        "decode_s": 2.046809,
+        "cache_n": 0,
+        "evaluated_prompt_n": 80000,
+        "draft_n": 101,
+        "draft_n_accepted": 89,
+        "decode_ms_per_round": 20.265435643564356,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "warm": {
+        "n_out": 3072,
+        "decode_toks_s": 94.14864053745634,
+        "request_wall_s": 32.89173146605026,
+        "ttft_s": 0.2575895170448348,
+        "decode_s": 32.629255,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "draft_n": 1642,
+        "draft_n_accepted": 1429,
+        "decode_ms_per_round": 19.87165347137637,
+        "finish_reason": "limit",
+        "truncated": false
+      }
+    },
+    "phase_counter_evidence": {
+      "at_ready": {
+        "row0": 0,
+        "row1": 0,
+        "combined": 39,
+        "skip": 39,
+        "q2_sparse": 0
+      },
+      "raw_boundaries": [
+        {
+          "row0": 0,
+          "row1": 0,
+          "combined": 39,
+          "skip": 39,
+          "q2_sparse": 0
+        },
+        {
+          "row0": 0,
+          "row1": 0,
+          "combined": 4079,
+          "skip": 4079,
+          "q2_sparse": 1010
+        },
+        {
+          "row0": 0,
+          "row1": 0,
+          "combined": 69759,
+          "skip": 69759,
+          "q2_sparse": 17430
+        }
+      ],
+      "phases": {
+        "cold": {
+          "physical_deltas": {
+            "row0": 0,
+            "row1": 0,
+            "combined": 4040,
+            "skip": 4040
+          },
+          "offered_drafts": 101,
+          "expected_generation_at_40_target_layers": 4040,
+          "extra_unassigned_q2_calls": 0,
+          "coverage_scope": "aggregate count over complete request; no individually named layer timings or counters"
+        },
+        "warm": {
+          "physical_deltas": {
+            "row0": 0,
+            "row1": 0,
+            "combined": 65680,
+            "skip": 65680
+          },
+          "offered_drafts": 1642,
+          "expected_generation_at_40_target_layers": 65680,
+          "extra_unassigned_q2_calls": 0,
+          "coverage_scope": "aggregate count over complete request; no individually named layer timings or counters"
+        }
+      }
+    },
+    "accepted_experts": 8,
+    "outputs_vs_archived_q8_native": {
+      "cold": {
+        "all_ids_equal": true,
+        "full_text_equal": true,
+        "compared_ids": 192,
+        "first_id_difference_1_based": null
+      },
+      "warm": {
+        "all_ids_equal": true,
+        "full_text_equal": true,
+        "compared_ids": 3072,
+        "first_id_difference_1_based": null
+      }
+    },
+    "native_routes": {
+      "q8a": true,
+      "matched_original_and_candidate_grid": 72,
+      "events": false,
+      "t2_last_sample_entire_arm": 51000,
+      "phase_t2_samples": [
+        6000,
+        9000,
+        12000,
+        15000,
+        18000,
+        21000,
+        24000,
+        27000,
+        30000,
+        33000,
+        36000,
+        39000,
+        42000,
+        45000,
+        48000,
+        51000
+      ],
+      "long_r2_widths": [
+        1,
+        2
+      ],
+      "per_request_t2_sample_observed": true
+    },
+    "observed_q2_residency": [
+      2
+    ],
+    "serial_sparse_widths": null,
+    "outputs_vs_previous_same_mode_19607daf": {
+      "cold": {
+        "ids_compared": 192,
+        "all_token_ids_equal": true,
+        "full_text_equal": true,
+        "same_draft_and_acceptance_totals": true
+      },
+      "warm": {
+        "ids_compared": 3072,
+        "all_token_ids_equal": true,
+        "full_text_equal": true,
+        "same_draft_and_acceptance_totals": true
+      }
+    },
+    "selector_execution_witness": {
+      "effective_opt_in": true,
+      "branch_first_dispatch_width": 80128,
+      "phases": {
+        "cold": {
+          "aggregate_q2_sparse_calls": 1010,
+          "offered_drafts": 101,
+          "sampled_dispatch_count": 4,
+          "sampled_key_widths": [
+            80128,
+            80384
+          ]
+        },
+        "warm": {
+          "aggregate_q2_sparse_calls": 16420,
+          "offered_drafts": 1642,
+          "sampled_dispatch_count": 16,
+          "sampled_key_widths": [
+            80384,
+            80640,
+            80896,
+            81152,
+            81408,
+            81664,
+            81920,
+            82176,
+            82432,
+            82688,
+            82944,
+            83200
+          ]
+        }
+      },
+      "scope": "Existing phase-bounded aggregate counts for sparse Q2 and sampled widths. The first launch marker directly witnesses the new branch. There is no per-call fast-selector counter or phase timer."
+    }
+  }
+}

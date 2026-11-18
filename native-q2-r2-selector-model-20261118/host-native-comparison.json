@@ -1,0 +1,39 @@
+{
+  "matched_snapshots": 66,
+  "window_available": true,
+  "first_round": 125,
+  "last_round": 1743,
+  "matched_rounds": 1618,
+  "matched_cumulative_acceptance_histograms": true,
+  "host_components": {
+    "draft": {
+      "prior_total_ms": 3820.7290000000003,
+      "candidate_total_ms": 3812.1000000000004,
+      "saved_ms_per_offered_round": 0.005333127317676085,
+      "prior_calls": 1618,
+      "candidate_calls": 1618
+    },
+    "tgt_decode": {
+      "prior_total_ms": 27515.163,
+      "candidate_total_ms": 26796.908000000025,
+      "saved_ms_per_offered_round": 0.44391532756487984,
+      "prior_calls": 1618,
+      "candidate_calls": 1618
+    },
+    "spec_process": {
+      "prior_total_ms": 284.7089999999953,
+      "candidate_total_ms": 279.83699999999953,
+      "saved_ms_per_offered_round": 0.0030111248454856307,
+      "prior_calls": 1618,
+      "candidate_calls": 1618
+    },
+    "sample_accept": {
+      "prior_total_ms": 566.4369999999999,
+      "candidate_total_ms": 555.943,
+      "saved_ms_per_offered_round": 0.006485784919653841,
+      "prior_calls": 1618,
+      "candidate_calls": 1618
+    }
+  },
+  "scope": "Cumulative host phase time covers all work in that phase. It has no exclusive CUDA kernel attribution."
+}

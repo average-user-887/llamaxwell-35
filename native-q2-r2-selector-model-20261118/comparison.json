@@ -1,0 +1,128 @@
+{
+  "candidate_cuda_sha256": "9e999bcaf04397f267548abdfa3e326b65bee122fb1e24f92be55529f40a335e",
+  "prior_cuda_sha256": "19607daf02bc6dcd722a0695787046db9b4c6b8e010545598d3ad60649d68d00",
+  "technical_pass": true,
+  "semantic_score": null,
+  "exact_output_ids_same_mode_each": 3264,
+  "warm_same_build_25_percent_gate": false,
+  "measurements": {
+    "cold": {
+      "serial": {
+        "n_out": 192,
+        "decode_toks_s": 74.23109919633237,
+        "request_wall_s": 264.0810188270407,
+        "ttft_s": 261.48956585896667,
+        "decode_s": 2.5865169999999997,
+        "cache_n": 0,
+        "evaluated_prompt_n": 80000,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "decode_ms_per_round": null,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "native": {
+        "n_out": 192,
+        "decode_toks_s": 93.80455137729021,
+        "request_wall_s": 267.74469870491885,
+        "ttft_s": 265.6940398529405,
+        "decode_s": 2.046809,
+        "cache_n": 0,
+        "evaluated_prompt_n": 80000,
+        "draft_n": 101,
+        "draft_n_accepted": 89,
+        "decode_ms_per_round": 20.265435643564356,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "serial_decode_toks_s": 74.23109919633237,
+      "native_decode_toks_s": 93.80455137729021,
+      "same_build_native_over_serial_ratio": 1.2636826396600758,
+      "same_build_native_over_serial_pct": 26.368263966007575,
+      "native_minus_prior_19607daf_decode_toks_s": 1.872146593166164,
+      "serial_minus_prior_19607daf_decode_toks_s": 0.03402171101043905,
+      "native_saved_ms_per_round_vs_19607daf": 0.4126930693069326,
+      "same_build_native_vs_serial_first_id_difference": 170,
+      "same_build_native_vs_serial_full_text_equal": false,
+      "native_selector_witness": {
+        "aggregate_q2_sparse_calls": 1010,
+        "offered_drafts": 101,
+        "sampled_dispatch_count": 4,
+        "sampled_key_widths": [
+          80128,
+          80384
+        ]
+      },
+      "serial_selector_witness": {
+        "aggregate_q2_sparse_calls": 0,
+        "offered_drafts": 0,
+        "sampled_dispatch_count": 0,
+        "sampled_key_widths": []
+      }
+    },
+    "warm": {
+      "serial": {
+        "n_out": 3072,
+        "decode_toks_s": 76.58201694696217,
+        "request_wall_s": 40.254396280040964,
+        "ttft_s": 0.13571724703069776,
+        "decode_s": 40.113856,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "decode_ms_per_round": null,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "native": {
+        "n_out": 3072,
+        "decode_toks_s": 94.14864053745634,
+        "request_wall_s": 32.89173146605026,
+        "ttft_s": 0.2575895170448348,
+        "decode_s": 32.629255,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "draft_n": 1642,
+        "draft_n_accepted": 1429,
+        "decode_ms_per_round": 19.87165347137637,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "serial_decode_toks_s": 76.58201694696217,
+      "native_decode_toks_s": 94.14864053745634,
+      "same_build_native_over_serial_ratio": 1.229383140988049,
+      "same_build_native_over_serial_pct": 22.93831409880489,
+      "native_minus_prior_19607daf_decode_toks_s": 2.141899845696244,
+      "serial_minus_prior_19607daf_decode_toks_s": -0.11287079201935057,
+      "native_saved_ms_per_round_vs_19607daf": 0.46260840438489836,
+      "same_build_native_vs_serial_first_id_difference": 170,
+      "same_build_native_vs_serial_full_text_equal": false,
+      "native_selector_witness": {
+        "aggregate_q2_sparse_calls": 16420,
+        "offered_drafts": 1642,
+        "sampled_dispatch_count": 16,
+        "sampled_key_widths": [
+          80384,
+          80640,
+          80896,
+          81152,
+          81408,
+          81664,
+          81920,
+          82176,
+          82432,
+          82688,
+          82944,
+          83200
+        ]
+      },
+      "serial_selector_witness": {
+        "aggregate_q2_sparse_calls": 0,
+        "offered_drafts": 0,
+        "sampled_dispatch_count": 0,
+        "sampled_key_widths": []
+      }
+    }
+  }
+}
