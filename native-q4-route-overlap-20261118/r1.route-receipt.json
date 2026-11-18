@@ -1,0 +1,11 @@
+{
+  "scope": "anonymous top-eight route distribution of exact attention-only proxy",
+  "applies_to_fused_moe_cohorts": false,
+  "performance_measurement": false,
+  "runner_exit": 1,
+  "cleanup_exit": 0,
+  "route_pass": false,
+  "parity": null,
+  "anonymous_overlap": null,
+  "failure_class": "inherited_warm_draft_count_bound_with_independent_exact_parity_failure"
+}

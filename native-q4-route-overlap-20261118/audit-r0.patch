@@ -1,0 +1,154 @@
+--- a/audit.cpp
++++ b/audit.cpp
+@@ -8,6 +8,7 @@
+ #include <sys/mman.h>
+ #include <unistd.h>
+ #include "ggml.h"
++#include "ggml-backend.h"
+ #include "llama-batch.h"
+ #include <atomic>
+ #include "match.inc"
+@@ -25,6 +26,12 @@
+ static constexpr uint64_t magic = 0x4d4f45345102;
+ static constexpr char match_sym[] = "_Z33ggml_cuda_occamy_moe_match_windowR25ggml_backend_cuda_contextPK11ggml_cgraphiR26ggml_cuda_occamy_moe_match";
+ static constexpr char sym[] = "_Z27ggml_cuda_occamy_moe_launchR25ggml_backend_cuda_contextRK26ggml_cuda_occamy_moe_matchPfi";
++static constexpr uint64_t route_magic = 0x5152344f564c31;
++static constexpr unsigned route_header = 16, layer_words = 29, route_cap = 32, stride_rounds = 16;
++static uint64_t * route_words;
++static llama_context * target_context;
++static thread_local bool route_active;
++static thread_local uint64_t seen_layers;
+ static void fail(const char * msg) {
+     fprintf(stderr, "native_moe_audit fatal=%s\n", msg);
+     _exit(79);
+@@ -43,6 +50,13 @@
+     const char * value=getenv("NATIVE_Q4_PROMPT_N");
+     boundary=value ? atoi(value) : 0;
+     if (boundary!=80000 && boundary!=2000) fail("unexpected_prompt_length");
++    const int route_fd = open("/native-route-counters", O_RDWR | O_CLOEXEC);
++    if (route_fd < 0) fail("route_open");
++    route_words = static_cast<uint64_t *>(mmap(nullptr, 16384, PROT_READ | PROT_WRITE, MAP_SHARED, route_fd, 0));
++    close(route_fd);
++    if (route_words == MAP_FAILED || route_words[0] != 0) fail("route_map");
++    route_words[0] = route_magic;
++    route_words[1] = getpid();
+ 
+ }
+ static void resolve() {
+@@ -63,6 +77,89 @@
+     (void)ready;
+ }
+ static void bump(uint64_t & word) { __atomic_fetch_add(&word, uint64_t{1}, __ATOMIC_RELAXED); }
++
++template<typename Fn>
++static Fn next_symbol(const char * name) {
++    const auto result = reinterpret_cast<Fn>(dlsym(RTLD_NEXT, name));
++    if (!result) fail("route_symbol");
++    return result;
++}
++
++extern "C" llama_context * llama_init_from_model(llama_model * model, llama_context_params params) {
++    static const auto init = next_symbol<decltype(&llama_init_from_model)>("llama_init_from_model");
++    if (route_words && params.ctx_type == LLAMA_CONTEXT_TYPE_DEFAULT) {
++        if (params.cb_eval || target_context || boundary != 80000) fail("route_target_context");
++        target_context = init(model, params);
++        if (target_context) bump(route_words[3]);
++        return target_context;
++    }
++    return init(model, params);
++}
++
++static bool route_eval(ggml_tensor * tensor, bool ask, void *) {
++    static constexpr char prefix[] = "ffn_moe_topk-";
++    if (!tensor || strncmp(tensor->name, prefix, sizeof(prefix)-1) != 0) return !ask;
++    const char * lane = tensor->name + sizeof(prefix)-1;
++    char * end = nullptr;
++    const long layer = strtol(lane, &end, 10);
++    if (end == lane || *end || layer < 0 || layer >= 40) return !ask;
++    if (ask) return true;
++    bump(route_words[7]);
++    const uint64_t bit = uint64_t{1} << layer;
++    if (seen_layers & bit || tensor->type != GGML_TYPE_I32 || tensor->ne[0] != 8 || tensor->ne[1] != 4 ||
++            tensor->ne[2] != 1 || tensor->ne[3] != 1 || tensor->nb[0] != sizeof(int32_t) ||
++            tensor->nb[1] < 8*sizeof(int32_t) || tensor->nb[1] > 256*sizeof(int32_t) ||
++            tensor->nb[1] % sizeof(int32_t) != 0 || !tensor->data || !tensor->buffer) {
++        bump(route_words[8]);
++        return true;
++    }
++    static const auto tensor_get = next_symbol<decltype(&ggml_backend_tensor_get)>("ggml_backend_tensor_get");
++    static const auto buffer_name = next_symbol<decltype(&ggml_backend_buffer_name)>("ggml_backend_buffer_name");
++    if (strncmp(buffer_name(tensor->buffer), "CUDA", 4) != 0) {
++        bump(route_words[8]);
++        return true;
++    }
++    unsigned char experts[256] = {};
++    for (int row = 0; row < 4; ++row) {
++        int32_t ranks[8] = {};
++        tensor_get(tensor, ranks, row*tensor->nb[1], sizeof(ranks));
++        for (int value : ranks) {
++            if (value < 0 || value >= 256 || (experts[value] & (1u << row))) {
++                bump(route_words[8]);
++                return true;
++            }
++            experts[value] |= (1u << row);
++        }
++    }
++    uint64_t multiplicity[4] = {};
++    unsigned expert_union = 0;
++    for (unsigned mask : experts) {
++        if (!mask) continue;
++        ++expert_union;
++        ++multiplicity[__builtin_popcount(mask)-1];
++    }
++    if (expert_union < 8 || expert_union > 32) {
++        bump(route_words[8]);
++        return true;
++    }
++    uint64_t * output = route_words + route_header + layer*layer_words;
++    ++output[expert_union-8];
++    for (unsigned i = 0; i < 4; ++i) output[25+i] += multiplicity[i];
++    seen_layers |= bit;
++    return true;
++}
++
++extern "C" ggml_status ggml_backend_sched_graph_compute_async(ggml_backend_sched_t sched, ggml_cgraph * graph) {
++    static const auto compute = next_symbol<decltype(&ggml_backend_sched_graph_compute_async)>("ggml_backend_sched_graph_compute_async");
++    if (!route_active) return compute(sched, graph);
++    static const auto set = next_symbol<decltype(&ggml_backend_sched_set_eval_callback)>("ggml_backend_sched_set_eval_callback");
++    set(sched, route_eval, nullptr);
++    bump(route_words[9]);
++    const auto result = compute(sched, graph);
++    set(sched, nullptr, nullptr);
++    bump(route_words[10]);
++    return result;
++}
+ static long target_layer(const ggml_cuda_occamy_moe_match & m) {
+     const char * name=m.gate_inp->name;
+     char * end=nullptr;
+@@ -121,7 +218,26 @@
+         if (batch->tokens.size()==4) bump(words[164+scope]);
+     }
+     const int previous=active_scope.exchange(scope,std::memory_order_relaxed);
++    const bool tracking = target && ctx == target_context && scope == 2 && batch->tokens.size() == 4 &&
++                          __atomic_load_n(&route_words[2], __ATOMIC_ACQUIRE) == 1;
++    bool take = false;
++    if (tracking) {
++        const auto first = batch->tokens.front().pos[0];
++        bool contiguous = true;
++        for (size_t i = 0; i < 4; ++i) {
++            contiguous &= batch->tokens[i].pos[0] == first + static_cast<llama_pos>(i);
++        }
++        const auto eligible = __atomic_fetch_add(&route_words[4], uint64_t{1}, __ATOMIC_RELAXED);
++        if (!contiguous) bump(route_words[8]);
++        take = contiguous && eligible % stride_rounds == 0 && route_words[5] < route_cap;
++        if (take) bump(route_words[5]);
++    }
++    const bool old_active = route_active;
++    if (take) seen_layers = 0;
++    route_active = take;
+     const int32_t rc=original(ctx,type,batch);
++    route_active = old_active;
++    if (take && rc == 0 && seen_layers == ((uint64_t{1} << 40)-1)) bump(route_words[6]);
+     active_scope.store(previous,std::memory_order_relaxed);
+     return rc;
+ }

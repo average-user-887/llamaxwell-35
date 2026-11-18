@@ -1,0 +1,55 @@
+{
+  "parity": {
+    "cold": {
+      "all_ids_equal": true,
+      "first_id_difference_1_based": null,
+      "all_text_equal": true,
+      "checked_ids": 192
+    },
+    "warm": {
+      "all_ids_equal": false,
+      "first_id_difference_1_based": 27,
+      "all_text_equal": false,
+      "checked_ids": 3072
+    }
+  },
+  "coverage_counts": {
+    "armed": 1,
+    "target_bindings": 1,
+    "eligible_q4_calls": 1026,
+    "selected": 32,
+    "complete": 32,
+    "layer_hits": 1280,
+    "validation_errors": 0,
+    "scheduler_sets": 32,
+    "scheduler_clears": 32
+  },
+  "runner_exit": 1,
+  "cleanup_exit": 0,
+  "route_result_accepted": false,
+  "mapped_runtime_digests": {
+    "audit.so": "f27b52939e57edc5f0be79ac65c85198fe796df04b1cc4476214fedf3c21dda3",
+    "libggml-cuda.so": "abe7dcfdbf2d7df0b31b5478212f3234ffdd8e2b8f9a077c0a216b2e32865aae",
+    "libggml-base.so.0.26.0": "678cf75e5ef5b1f92460eb0f816d3bbe755ee9710fd04606c31ec24dcd41fa06",
+    "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+    "libllama-server-impl.so": "1138515898887c6ec6be01a210cfb59bb8e1338ccf6eeef1d032ffd4fdb22b65",
+    "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+  },
+  "warm_counts": {
+    "observed": {
+      "draft_n": 3079,
+      "draft_n_accepted": 2044,
+      "predicted_n": 3072,
+      "prompt_n": 4,
+      "cache_n": 79996
+    },
+    "attention_only_reference": {
+      "draft_n": 2906,
+      "draft_n_accepted": 2102,
+      "predicted_n": 3072,
+      "prompt_n": 4,
+      "cache_n": 79996
+    }
+  }
+}

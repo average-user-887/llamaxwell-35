@@ -1,0 +1,25 @@
+{
+  "attention_only_model_package": "../native-q4-combined-model-20261118",
+  "attention_only_control_commit": "7490b62",
+  "combined_cuda_sha256": "abe7dcfdbf2d7df0b31b5478212f3234ffdd8e2b8f9a077c0a216b2e32865aae",
+  "reference_observer_abi_source_sha256": "02286292a5566967bd1d8988d7e04c91f363e69c9ec863e724a1d011e8d0f168",
+  "original_probe_sha256": "ea89cbf88e1a4e2942b0ec2e3c2071e1c355b5d1f39327e15e4663d5896fc6d1",
+  "repaired_probe_sha256": "f27b52939e57edc5f0be79ac65c85198fe796df04b1cc4476214fedf3c21dda3",
+  "original_probe_source_sha256": "dc57271bb60ffc422783fad0567ec19b1be2285a020b589dc24f82fe01aa9b52",
+  "repaired_probe_source_sha256": "5038c806b1ba8de1f56a3c7a76a7f56085fcef7c3815ca2d616c7e356a1550b6",
+  "compile_flags": [
+    "-O2",
+    "-shared",
+    "-fPIC",
+    "-std=c++17",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-ldl"
+  ],
+  "fixture_scope": "Device-free interposition and anonymous counters only",
+  "publication_parent": "7a3fd9ce82a60e10c17f5606ce071337fd8887b5",
+  "actual_typed_guard_sha256": "582a09c49c3250b0f331d8cec36b209f869de5572f27bbe7304478df7a7bfd4c",
+  "public_guard_sha256": "a447cbea462addb724b93eef1f0a0e2c8786d108ea51a4a599246e3c02538cfb",
+  "typed_guard_portability": "The two workspace input paths are supplied via environment variables and os is imported. Verification logic is unchanged."
+}
