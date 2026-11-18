@@ -1,0 +1,254 @@
+{
+  "schema_version": 1,
+  "published_branch_parent": "2fa4f548a787df2ff183f5531fa04580aa61196d",
+  "source": {
+    "stack_recipe_commit": "3eea327fb4c289a54a8796899080bbbd1a3cdcfd",
+    "combined_source_index_sha256": "2e9859ca0afbb29da29ae30c983e308db793edc7e79a4571fef970c1cba2d4c6",
+    "existing_code_and_runtime": true
+  },
+  "hardware": {
+    "gpu": "NVIDIA Quadro M6000",
+    "vram_gb": 24,
+    "architecture": "sm_52"
+  },
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+  "runtime_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "server_sha256": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+  "throughput_fixture": {
+    "prompt_tokens": 80000,
+    "prompt_token_sha256": "7c1dcdc2f609928922953fc626d8b90e5b5288092036f21b57f6ffda0a128dcc",
+    "output_counts": {
+      "cold": 192,
+      "warm": 3072
+    },
+    "seed": 7,
+    "temperature": 0,
+    "context_shift": false,
+    "semantic_score_available": false,
+    "slots": 1
+  },
+  "configuration": {
+    "shared_environment": {
+      "GGML_CUDA_MOE_DOWNX": "1",
+      "GGML_CUDA_MOE_DOWNH": "2",
+      "GGML_CUDA_OCCAMY_GDN_QKREUSE": "1",
+      "GGML_CUDA_OCCAMY_GDN_PCSHARE": "1",
+      "GGML_CUDA_MMVQ_SM52": "1",
+      "GGML_CUDA_RMS_WARP": "0",
+      "GGML_CUDA_HEAD_ROWPACK_SM52": "1",
+      "GGML_CUDA_MMQ_COMPACT_SM52": "1",
+      "GGML_CUDA_Q8_REUSE": "1",
+      "GGML_CUDA_NORM_Q8": "1",
+      "GGML_CUDA_CONCAT_T": "1",
+      "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": "1",
+      "GGML_CUDA_GATE_COPY": "1",
+      "GGML_CUDA_OCCAMY_GDN": "1",
+      "GGML_CUDA_MMQ_XMAD_SM52": "1",
+      "GGML_CUDA_GDN_COLS": "2,4",
+      "GGML_CUDA_OCCAMY_FA": "1",
+      "GGML_CUDA_OCCAMY_FUSED": "1",
+      "GGML_CUDA_OCCAMY_FA_PIPE": "3",
+      "GGML_CUDA_MOE_LOP3": "1",
+      "GGML_CUDA_MOE_TAILBAL": "1",
+      "GGML_CUDA_OCCAMY_GDN_PREF": "1",
+      "GGML_CUDA_OCCAMY_HOSTGAP": "1",
+      "GGML_CUDA_OCCAMY_SMALLFUSE": "2",
+      "GGML_CUDA_MMQ_TAIL_SM52": "1",
+      "GGML_CUDA_OCCAMY_GDN_REPACK": "1",
+      "GGML_CUDA_OCCAMY_N2SPLIT": "1",
+      "GGML_CUDA_OCCAMY_FA_ADDR": "1",
+      "GGML_CUDA_OCCAMY_N2GDN": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": "1",
+      "GGML_CUDA_MOE_V3": "1",
+      "LLAMA_MV1_TRACE": "1",
+      "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+      "GGML_CUDA_OCCAMY_FA_SPARSE_R2": "1",
+      "GGML_CUDA_OCCAMY_GDN_T2": "1",
+      "GGML_CUDA_OCCAMY_FA_MROW": "3",
+      "GGML_CUDA_OCCAMY_FA2_NU": "4",
+      "LLAMA_MTP_MERGE_REEVAL": "0",
+      "LLAMA_MTP_CACHE_ONLY": "1"
+    },
+    "ub2048_server_argv": [
+      "--alias",
+      "qwen36-moe",
+      "--override-kv",
+      "tokenizer.ggml.pre=str:qwen35",
+      "-ngl",
+      "999",
+      "-np",
+      "1",
+      "-c",
+      "84224",
+      "--no-context-shift",
+      "-b",
+      "2048",
+      "--mixed-batch-size",
+      "1024",
+      "--prefill-single-stream",
+      "--checkpoint-min-step",
+      "2048",
+      "-fa",
+      "on",
+      "--jinja",
+      "--metrics",
+      "-lv",
+      "4",
+      "-ub",
+      "2048",
+      "--cache-ram",
+      "12288",
+      "--ctx-checkpoints",
+      "2",
+      "--spec-type",
+      "draft-mtp",
+      "--spec-draft-n-max",
+      "1",
+      "--spec-draft-type-k",
+      "f16",
+      "--spec-draft-type-v",
+      "f16"
+    ],
+    "sole_argv_delta": {
+      "before": [
+        "-ub",
+        "1024"
+      ],
+      "after": [
+        "-ub",
+        "2048"
+      ]
+    },
+    "target_draft_actual_n_ubatch": [
+      2048,
+      2048
+    ]
+  },
+  "rate_definition": "emitted output count divided by server decode duration",
+  "arms": {
+    "ub1024": {
+      "mapped_libraries_sha256": {
+        "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+        "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+        "libggml-cuda.so": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba"
+      },
+      "gpu_layers_offloaded": 42,
+      "runner_exit_code": 0,
+      "cleanup_exit_code": 0,
+      "receipt_sha256": "80e1adb2f52570d790e8fb07e98cc4384a0b14cf22ee2cfecf4f13ef08504b85",
+      "conditions": {
+        "cold": {
+          "n_out": 192,
+          "cache_n": 0,
+          "evaluated_prompt_n": 80000,
+          "decode_s": 2.336379,
+          "decode_toks_s": 82.178447931607,
+          "prompt_eval_s": 265.310157,
+          "request_wall_s": 267.66836170700844,
+          "ttft_s": 265.3273846069351,
+          "draft_n": 101,
+          "draft_n_accepted": 89
+        },
+        "warm": {
+          "n_out": 3072,
+          "cache_n": 79996,
+          "evaluated_prompt_n": 4,
+          "decode_s": 37.247292,
+          "decode_toks_s": 82.47579448191831,
+          "prompt_eval_s": 0.24935300000000002,
+          "request_wall_s": 37.518097745021805,
+          "ttft_s": 0.26586551999207586,
+          "draft_n": 1621,
+          "draft_n_accepted": 1449
+        }
+      }
+    },
+    "ub2048": {
+      "mapped_libraries_sha256": {
+        "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+        "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+        "libggml-cuda.so": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba"
+      },
+      "gpu_layers_offloaded": 42,
+      "runner_exit_code": 0,
+      "cleanup_exit_code": 0,
+      "receipt_sha256": "c2eecd1a83fd0b464a2318b18c4f50f64e098fc14468ce2186251286e02ca957",
+      "conditions": {
+        "cold": {
+          "n_out": 192,
+          "cache_n": 0,
+          "evaluated_prompt_n": 80000,
+          "decode_s": 2.360199,
+          "decode_toks_s": 81.34907268412536,
+          "prompt_eval_s": 254.657541,
+          "request_wall_s": 257.03917584195733,
+          "ttft_s": 254.6742487149313,
+          "draft_n": 102,
+          "draft_n_accepted": 88
+        },
+        "warm": {
+          "n_out": 3072,
+          "cache_n": 79996,
+          "evaluated_prompt_n": 4,
+          "decode_s": 37.422900999999996,
+          "decode_toks_s": 82.08877232687011,
+          "prompt_eval_s": 0.247916,
+          "request_wall_s": 37.69257498194929,
+          "ttft_s": 0.264603488962166,
+          "draft_n": 1643,
+          "draft_n_accepted": 1427
+        }
+      }
+    }
+  },
+  "comparisons": {
+    "cold": {
+      "first_output_difference_1_based": 27,
+      "request_wall_seconds_saved": 10.629185865051113,
+      "candidate_decode_uplift_fraction": -0.010092369329874451
+    },
+    "warm": {
+      "first_output_difference_1_based": 27,
+      "request_wall_seconds_saved": -0.17447723692748696,
+      "candidate_decode_uplift_fraction": -0.0046925544334471825
+    }
+  },
+  "sum_of_two_request_wall_s": {
+    "ub1024": 305.18645945203025,
+    "ub2048": 294.7317508239066,
+    "seconds_saved": 10.454708628123626
+  },
+  "comparison_receipt_sha256": "c2eecd1a83fd0b464a2318b18c4f50f64e098fc14468ce2186251286e02ca957",
+  "midpoint_recall": {
+    "prompt_tokens": 80000,
+    "fact_start_token_index": 40000,
+    "prompt_sha256": "2b227219205b9a53417d5a881ef97300991c19f57024bcadd09175073ab0185f",
+    "template_sha256": "f8b689676386a92d85a42af0ebd1a239f4143050410f9516e52e9dafa76dfe88",
+    "technical_pass": true,
+    "exact_fact_match": true,
+    "eos": true,
+    "generated_count_including_eos": 7,
+    "all_seven_ids_match_each_prior_control": true,
+    "controls": [
+      "N50 split ub1024",
+      "N7 full-attention MTP",
+      "N7 Sparse R2 MTP",
+      "N17 stack ub2048"
+    ],
+    "effective_target_and_draft_ubatch": [
+      2048,
+      2048
+    ],
+    "live_cache_only_rows": [
+      2048
+    ],
+    "observed_long_r2_query_widths": [
+      1,
+      2
+    ],
+    "gpu_layers_offloaded": 42,
+    "runner_exit_code": 0,
+    "cleanup_exit_code": 0
+  }
+}
