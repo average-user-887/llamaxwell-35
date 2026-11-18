@@ -1,0 +1,305 @@
+--- a/ggml/src/ggml-cuda/occamy-fused.cu
++++ b/ggml/src/ggml-cuda/occamy-fused.cu
+@@ -10,6 +10,7 @@
+ #include "ggml-backend-impl.h"
+ 
+ #include <algorithm>
++#include <atomic>
+ #include <cstdio>
+ #include <cstdlib>
+ #include <cstring>
+@@ -154,6 +155,7 @@
+     v[0] = __ldg(g4 + lane); v[1] = __ldg(g4 + lane + 32); v[3] = __ldg(u4 + lane); v[4] = __ldg(u4 + lane + 32);
+     if (lane < 8) { v[2] = __ldg(g4 + lane + 64); v[5] = __ldg(u4 + lane + 64); }
+ }
++template <int SELECT = TOPK, int ACTIVE = SELECT>
+ __device__ __forceinline__ void route(const Scratch * s, int lane, int * sel, float * selw) {
+     float v[NE / 32];
+     float m = -INFINITY;
+@@ -174,7 +176,7 @@
+ #pragma unroll
+     for (int i = 0; i < NE / 32; ++i) v[i] *= inv;
+     float ws = 0.f;
+-    for (int k = 0; k < TOPK; ++k) {
++    for (int k = 0; k < SELECT; ++k) {
+         float bv = -1.f; int bi = 0x7fffffff;
+ #pragma unroll
+         for (int i = 0; i < NE / 32; ++i) if (v[i] > bv) { bv = v[i]; bi = lane + 32 * i; }
+@@ -186,11 +188,18 @@
+ #pragma unroll
+         for (int i = 0; i < NE / 32; ++i) if (bi == lane + 32 * i) v[i] = -2.f;
+         if (lane == 0) { sel[k] = bi; selw[k] = bv; }
+-        ws += bv;
++        if (k < ACTIVE) ws += bv;
+     }
+     ws = fmaxf(ws, 6.103515625e-5f);
+     __syncwarp();
+-    if (lane < TOPK) selw[lane] /= ws;
++    if (lane < ACTIVE) selw[lane] /= ws;
++    if constexpr (ACTIVE < TOPK) {
++        if (lane >= ACTIVE && lane < TOPK) {
++            // A skipped rank must never become a valid weight address.
++            if constexpr (SELECT < TOPK) sel[lane] = 0x7fffffff;
++            selw[lane] = 0.f;
++        }
++    }
+ }
+ 
+ // DX (GGML_CUDA_MOE_DOWNX=1): down prologue reordered so the L2-resident activations (h_exp/h_sh/gpart) are
+@@ -462,12 +471,18 @@
+ }
+ // down chunk c of row r: c < 2 -> selected experts 4c..4c+3 (72 uint4, = moe_v2 units 32c..32c+31),
+ // c == 2 -> shared-expert row (18 uint4 in lanes < 18, = moe_v2 units 64..71)
++constexpr int RANK6 = 6;
++constexpr int CHUNK1_RANK6_U4 = (RANK6 - 4) * ROW_D / sizeof(uint4);
++constexpr int CHUNK1_RANK6_LANES = (RANK6 - 4) * 8;
++static_assert(CHUNK1_RANK6_U4 == 36 && CHUNK1_RANK6_LANES == 16);
++
++template <bool TRIM = false>
+ __device__ __forceinline__ void ldD(const Layer & L, const int * sel, int r, int c, int lane, uint4 * v) {
+     if (c < 2) {
+ #pragma unroll
+         for (int i = 0; i < 3; ++i) {
+             const int k = lane + 32 * i;
+-            if (i < 2 || lane < 8) {
++            if (TRIM ? k < CHUNK1_RANK6_U4 : (i < 2 || lane < 8)) {
+                 const int m = 4 * c + k / 18, w = k % 18;
+                 v[i] = __ldg((const uint4 *)(L.down_exps + ((size_t)sel[m] * H + r) * ROW_D) + w);
+             }
+@@ -477,8 +492,14 @@
+     }
+ }
+ 
+-template <bool L3>
+-__global__ void __launch_bounds__(NT3, 2) moe_v3(Params P) {
++// Dense checks retain all eight projections and weight loads, with the top-six denominator and a zero tail.
++enum class MoeV3Mode { stock, rank6, dense_rank6 };
++
++template <bool L3, MoeV3Mode MODE>
++__device__ __forceinline__ void moe_v3_body(Params P) {
++    constexpr bool trim = MODE == MoeV3Mode::rank6;
++    constexpr int active = MODE == MoeV3Mode::stock ? TOPK : RANK6;
++    constexpr int end_b = FFS + (trim ? RANK6 : TOPK) * FF;
+     extern __shared__ float smem[];
+     __shared__ int sel[TOPK];
+     __shared__ float selw[TOPK];
+@@ -519,10 +540,10 @@
+         bool have = false;
+         const uint8_t * g, * u;
+         if (gw < FFS) { rowB(L, sel, gw, g, u); ld72(g, lane, cv); have = true; }
+-        if (warp == 0) route(s, lane, sel, selw);
++        if (warp == 0) route<trim ? RANK6 : TOPK, active>(s, lane, sel, selw);
+         __syncthreads();
+         const float * xc = xs + lane * CH; const float2 sx = sums[lane];
+-        for (int t = gw; t < NTB; t += W) {
++        for (int t = gw; t < end_b; t += W) {
+             if (!have) { rowB(L, sel, t, g, u); ld72(g, lane, cv); }
+             st72(stg4, lane, cv);
+             __syncwarp();
+@@ -531,7 +552,7 @@
+             __syncwarp();
+             st72(stg4, lane, cv);
+             __syncwarp();
+-            const int tn = t + W; have = tn < NTB;
++            const int tn = t + W; have = tn < end_b;
+             if (have) { rowB(L, sel, tn, g, u); ld72(g, lane, cv); }
+             const float uu = wsum(dot2c<L3>(lds9(stg + lane * 9), xc, sx));
+             if (lane == 0) { if (t < FFS) s->h_sh[t] = silu(gg) * uu; else s->h_exp[t - FFS] = silu(gg) * uu; }
+@@ -553,19 +574,24 @@
+     grid_barrier(s);
+     {
+         constexpr int NX = (TOPK * FF + FFS) / NT3, NXE = TOPK * FF / NT3;
++        constexpr int NX_ACTIVE = (trim ? RANK6 : TOPK) * FF / NT3;
++        static_assert(RANK6 * FF % NT3 == 0);
+         float hv[NX];
+ #pragma unroll
+         for (int j = 0; j < NX; ++j) {
+             const int i = threadIdx.x + NT3 * j;
+-            hv[j] = j < NXE ? __ldcg(&s->h_exp[i]) : __ldcg(&s->h_sh[i - TOPK * FF]);
++            if (j < NX_ACTIVE) hv[j] = __ldcg(&s->h_exp[i]);
++            if (j == NXE) hv[j] = __ldcg(&s->h_sh[i - TOPK * FF]);
+         }
+         // thread (warp, lane) slot j holds element 512j + 32warp + lane = 32-element group 16j + warp
+ #pragma unroll
+         for (int j = 0; j < NX; ++j) {
+-            const int i = threadIdx.x + NT3 * j;
+-            xs[(i >> 6) * CH + (i & 63)] = hv[j];
+-            const float sm = wsum(hv[j]);
+-            if (lane == 0) ((float *)sums)[NW3 * j + warp] = sm;
++            if (j < NX_ACTIVE || j == NXE) {
++                const int i = threadIdx.x + NT3 * j;
++                xs[(i >> 6) * CH + (i & 63)] = hv[j];
++                const float sm = wsum(hv[j]);
++                if (lane == 0) ((float *)sums)[NW3 * j + warp] = sm;
++            }
+         }
+         __syncthreads();
+     }
+@@ -574,13 +600,21 @@
+     for (; r < H; r += W) {
+         st72(stg4, lane, cv);
+         __syncwarp();
+-        ldD(L, sel, r, 1, lane, cv);
++        ldD<trim>(L, sel, r, 1, lane, cv);
+         const float dA = dot2c<L3, true>(lds9(stg + lane * 9), xs + lane * CH, sums[lane]);
+         __syncwarp();
+-        st72(stg4, lane, cv);
++        if constexpr (trim) {
++            stg4[lane] = cv[0];
++            if (lane < CHUNK1_RANK6_U4 - 32) stg4[lane + 32] = cv[1];
++        } else {
++            st72(stg4, lane, cv);
++        }
+         __syncwarp();
+         ldD(L, sel, r, 2, lane, cv);
+-        const float dB = dot2c<L3, true>(lds9(stg + lane * 9), xs + (lane + 32) * CH, sums[lane + 32]);
++        float dB = 0.f;
++        if (!trim || lane < CHUNK1_RANK6_LANES) {
++            dB = dot2c<L3, true>(lds9(stg + lane * 9), xs + (lane + 32) * CH, sums[lane + 32]);
++        }
+         __syncwarp();
+         if (lane < 18) stg4[lane] = cv[0];
+         __syncwarp();
+@@ -592,6 +626,17 @@
+         __syncwarp();
+     }
+ }
++template <bool L3>
++__global__ void __launch_bounds__(NT3, 2) moe_v3(Params P) {
++    moe_v3_body<L3, MoeV3Mode::stock>(P);
++}
++
++template <MoeV3Mode MODE>
++__global__ void __launch_bounds__(NT3, 2) moe_v3_rank6(Params P) {
++    static_assert(MODE != MoeV3Mode::stock);
++    moe_v3_body<true, MODE>(P);
++}
++
+ __global__ void moe_v3_cmp(const float * a, const float * b, unsigned * res) {
+     for (int i = threadIdx.x; i < H; i += blockDim.x) {
+         const unsigned x = __float_as_uint(a[i]), y = __float_as_uint(b[i]);
+@@ -599,6 +644,13 @@
+     }
+ }
+ 
++__global__ void moe_rank6_cmp(const float * a, const float * b, unsigned * res) {
++    for (int i = threadIdx.x; i < H; i += blockDim.x) {
++        const float x = a[i], y = b[i];
++        if (!isfinite(x) || !isfinite(y) || x != y) atomicAdd(res, 1u);
++    }
++}
++
+ struct DevState {
+     Scratch * scratch = nullptr;
+     int grid = 0;
+@@ -608,6 +660,11 @@
+     int grid_v3 = 0;   // WP4: co-resident grid of moe_v3 (512-thread blocks)
+     float * v3_ref = nullptr;      // GGML_CUDA_MOE_V3_CHECK: reference output (2 rows)
+     unsigned * v3_res = nullptr;   // [mismatch count, max |diff| bits]
++    int grid_rank6 = 0;
++    int grid_rank6_dense = 0;
++    std::atomic<unsigned long long> rank6_launches[3]{};
++    float * rank6_ref = nullptr;
++    unsigned * rank6_bad = nullptr;
+     int grid_l3 = 0;   // MOE1: co-resident grid of moe_v2<0, 1|4|8|16> (GGML_CUDA_MOE_LOP3=1 with DOWNH=2)   // C07: co-resident grids of moe_v2<0, 1|4> and moe_v2<0, 1|4|8> (GGML_CUDA_MOE_DOWNH=1|2)
+ };
+ static DevState g_dev[GGML_CUDA_MAX_DEVICES];
+@@ -618,6 +675,16 @@
+     return e != nullptr && atoi(e) != 0;
+ }
+ 
++static bool rank6_requested() {
++    static const char * value = getenv("GGML_CUDA_MOE_RANK6");
++    return value && strcmp(value, "1") == 0;
++}
++
++static bool rank6_check_requested() {
++    static const char * value = getenv("GGML_CUDA_MOE_RANK6_CHECK");
++    return value && strcmp(value, "1") == 0;
++}
++
+ static bool g_debug = env_flag("GGML_CUDA_OCCAMY_DEBUG");
+ 
+ static void reject(const char * why) {
+@@ -687,6 +754,25 @@
+                 fprintf(stderr, "occamy-fused: grid cap %d -> grid %d dx %d dh %d/%d\n", cap, d.grid, d.grid_dx, d.grid_dh[0], d.grid_dh[1]);
+             }
+         }
++        if (rank6_requested() && env_flag("GGML_CUDA_MOE_V3") && !env_flag("GGML_CUDA_OCCAMY_3L") &&
++            ggml_cuda_info().devices[device].cc == 520) {
++            int per_sm_rank6 = 0;
++            CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
++                    &per_sm_rank6, moe_v3_rank6<MoeV3Mode::rank6>, NT3, SMEM3_FLOATS * sizeof(float)));
++            d.grid_rank6 = std::min(d.grid_v3, per_sm_rank6 * nsm);
++            if (rank6_check_requested() && d.grid_rank6 > 0 && d.grid_rank6 == d.grid_v3) {
++                int per_sm_dense = 0;
++                CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
++                        &per_sm_dense, moe_v3_rank6<MoeV3Mode::dense_rank6>, NT3, SMEM3_FLOATS * sizeof(float)));
++                d.grid_rank6_dense = std::min(d.grid_v3, per_sm_dense * nsm);
++                if (d.grid_rank6_dense > 0) {
++                    CUDA_CHECK(cudaMalloc((void **)&d.rank6_ref, H * sizeof(float)));
++                    CUDA_CHECK(cudaMalloc((void **)&d.rank6_bad, sizeof(unsigned)));
++                }
++            }
++            fprintf(stderr, "occamy-fused: MOE_RANK6 device=%d blocks_per_sm=%d grid=%d stock_grid=%d dense_grid=%d\n",
++                    device, per_sm_rank6, d.grid_rank6, d.grid_v3, d.grid_rank6_dense);
++        }
+     }
+     return d;
+ }
+@@ -875,6 +961,16 @@
+ 
+ static void moe_launch_v2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_moe_match & m, float * out_override, int row);
+ 
++static int rank6_trunk_layer(const ggml_cuda_occamy_moe_match & m) {
++    int il = -1, consumed = 0;
++    const char * name = m.gate_inp->name;
++    if (sscanf(name, "blk.%d.ffn_gate_inp.weight%n", &il, &consumed) == 1 &&
++        consumed > 0 && name[consumed] == '\0' && il >= 0 && il < 40) {
++        return il;
++    }
++    return -1;
++}
++
+ // WP4: GGML_CUDA_MOE_V3=1 (default off) runs moe_v3 instead of the moe_v2 dispatch below (not with GGML_CUDA_OCCAMY_3L).
+ // GGML_CUDA_MOE_V3_CHECK=N: on the first N launches also run the moe_v2 dispatch (same env) into a scratch row first,
+ // then moe_v3 into the real output, and print the count of bitwise-different floats (expected 0) and max |diff|.
+@@ -908,6 +1004,38 @@
+     P.out  = (out_override ? out_override : (float *) m.out->data) + (size_t) row * H;
+     P.s    = d.scratch;
+     P.eps  = m.eps;
++    if (rank6_requested() && !chk && !out_override && d.grid_rank6 == d.grid_v3 &&
++        (!rank6_check_requested() || d.grid_rank6_dense > 0) &&
++        ((m.nt == 1 && row == 0) || (m.nt == 2 && (row == 0 || row == 1)))) {
++        const int layer = rank6_trunk_layer(m);
++        if (layer >= 0) {
++            const int slot = m.nt == 1 ? 0 : 1 + row;
++            const auto launch = 1 + d.rank6_launches[slot].fetch_add(1, std::memory_order_relaxed);
++            const bool check = rank6_check_requested() && launch <= 2;
++            if (check) {
++                Params reference = P;
++                reference.out = d.rank6_ref;
++                moe_v3_rank6<MoeV3Mode::dense_rank6><<<d.grid_rank6_dense, NT3, SMEM3_FLOATS * sizeof(float), st>>>(reference);
++                CUDA_CHECK(cudaGetLastError());
++                CUDA_CHECK(cudaMemsetAsync(d.rank6_bad, 0, sizeof(unsigned), st));
++            }
++            moe_v3_rank6<MoeV3Mode::rank6><<<d.grid_rank6, NT3, SMEM3_FLOATS * sizeof(float), st>>>(P);
++            CUDA_CHECK(cudaGetLastError());
++            if ((launch & (launch - 1)) == 0) {
++                fprintf(stderr, "occamy-fused: MOE_RANK6 launch q=%d row=%d layer=%d count=%llu\n", m.nt, row, layer, launch);
++            }
++            if (check) {
++                unsigned bad = 0;
++                moe_rank6_cmp<<<1, 256, 0, st>>>(d.rank6_ref, P.out, d.rank6_bad);
++                CUDA_CHECK(cudaGetLastError());
++                CUDA_CHECK(cudaMemcpyAsync(&bad, d.rank6_bad, sizeof(bad), cudaMemcpyDeviceToHost, st));
++                CUDA_CHECK(cudaStreamSynchronize(st));
++                fprintf(stderr, "occamy-fused: MOE_RANK6 check q=%d row=%d layer=%d count=%llu mismatches=%u/%d\n",
++                        m.nt, row, layer, launch, bad, H);
++            }
++            return;
++        }
++    }
+     moe_v3<true><<<d.grid_v3, NT3, SMEM3_FLOATS * sizeof(float), st>>>(P);
+     CUDA_CHECK(cudaGetLastError());
+     if (g_debug) {
