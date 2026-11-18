@@ -1,0 +1,264 @@
+{
+  "schema_version": 1,
+  "published_branch_parent": "31f46e620ed3648a3af1b9cdd519b7174e720334",
+  "source": {
+    "published_stack_recipe_commit": "3eea327fb4c289a54a8796899080bbbd1a3cdcfd",
+    "previous_split_recipe_commit": "ee5e368dd9b181f3ffbccbea8883dfca33e10972",
+    "combined_source_index_sha256": "2e9859ca0afbb29da29ae30c983e308db793edc7e79a4571fef970c1cba2d4c6",
+    "native_code_change_required": false
+  },
+  "hardware": {
+    "gpu": "NVIDIA Quadro M6000",
+    "vram_gb": 24,
+    "architecture": "sm_52"
+  },
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+  "runtime_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "warm_32k": {
+    "prompt_tokens": 32768,
+    "prompt_token_sha256": "0d28269ea9a4ab6ceeaded583312c603b10e9c1c57a6d7c477e5ed74f36c8da9",
+    "output_tokens": {
+      "cold": 192,
+      "warm": 1024
+    },
+    "configuration": {
+      "shared_server_argv": [
+        "--alias",
+        "qwen36-moe",
+        "--override-kv",
+        "tokenizer.ggml.pre=str:qwen35",
+        "-ngl",
+        "999",
+        "--fit",
+        "off",
+        "-np",
+        "1",
+        "-c",
+        "84224",
+        "--no-context-shift",
+        "-b",
+        "2048",
+        "--mixed-batch-size",
+        "1024",
+        "--prefill-single-stream",
+        "--checkpoint-min-step",
+        "2048",
+        "-fa",
+        "on",
+        "--jinja",
+        "--metrics",
+        "-lv",
+        "4",
+        "-ub",
+        "1024",
+        "--cache-ram",
+        "12288",
+        "--ctx-checkpoints",
+        "2"
+      ],
+      "shared_environment": {
+        "GGML_CUDA_MOE_DOWNX": "1",
+        "GGML_CUDA_MOE_DOWNH": "2",
+        "GGML_CUDA_OCCAMY_GDN_QKREUSE": "1",
+        "GGML_CUDA_OCCAMY_GDN_PCSHARE": "1",
+        "GGML_CUDA_MMVQ_SM52": "1",
+        "GGML_CUDA_RMS_WARP": "0",
+        "GGML_CUDA_HEAD_ROWPACK_SM52": "1",
+        "GGML_CUDA_MMQ_COMPACT_SM52": "1",
+        "GGML_CUDA_Q8_REUSE": "1",
+        "GGML_CUDA_NORM_Q8": "1",
+        "GGML_CUDA_CONCAT_T": "1",
+        "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": "1",
+        "GGML_CUDA_GATE_COPY": "1",
+        "GGML_CUDA_OCCAMY_GDN": "1",
+        "GGML_CUDA_MMQ_XMAD_SM52": "1",
+        "GGML_CUDA_GDN_COLS": "2,4",
+        "GGML_CUDA_OCCAMY_FA": "1",
+        "GGML_CUDA_OCCAMY_FUSED": "1",
+        "GGML_CUDA_OCCAMY_FA_PIPE": "3",
+        "GGML_CUDA_MOE_LOP3": "1",
+        "GGML_CUDA_MOE_TAILBAL": "1",
+        "GGML_CUDA_OCCAMY_GDN_PREF": "1",
+        "GGML_CUDA_OCCAMY_HOSTGAP": "1",
+        "GGML_CUDA_OCCAMY_SMALLFUSE": "2",
+        "GGML_CUDA_MMQ_TAIL_SM52": "1",
+        "GGML_CUDA_OCCAMY_GDN_REPACK": "1",
+        "GGML_CUDA_OCCAMY_N2SPLIT": "1",
+        "GGML_CUDA_OCCAMY_FA_ADDR": "1",
+        "GGML_CUDA_OCCAMY_N2GDN": "1",
+        "GGML_CUDA_FA_MAXWELL_GEMM": "1",
+        "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": "1",
+        "GGML_CUDA_MOE_V3": "1",
+        "LLAMA_MV1_TRACE": "1",
+        "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+        "GGML_CUDA_OCCAMY_FA_SPARSE_R2": "1",
+        "GGML_CUDA_OCCAMY_GDN_T2": "1",
+        "GGML_CUDA_OCCAMY_FA_MROW": "3",
+        "GGML_CUDA_OCCAMY_FA2_NU": "4",
+        "LLAMA_MTP_MERGE_REEVAL": "0",
+        "LLAMA_MTP_CACHE_ONLY": "1"
+      },
+      "split_extra_argv": [
+        "--spec-type",
+        "draft-mtp",
+        "--spec-draft-n-max",
+        "1",
+        "--spec-draft-type-k",
+        "f16",
+        "--spec-draft-type-v",
+        "f16"
+      ],
+      "per_arm_deadline_seconds": 190,
+      "seed": 7,
+      "temperature": 0,
+      "same_slot": true,
+      "cache_prompt": true,
+      "ignore_eos": true,
+      "context_shift": false
+    },
+    "rate_definition": "emitted token count divided by server decode duration",
+    "semantic_score_available": false,
+    "comparison_receipt_sha256": "4bb6ee50d1fb074c10cf5b6c102ddcbbd8b0ea64a7784c53340b6baae5945ec2",
+    "arms": {
+      "no-mtp": {
+        "gpu_layers_offloaded": 42,
+        "runner_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "context_shift": false,
+        "mapped_library_sha256": {
+          "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+          "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+          "libggml-cuda.so": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba"
+        },
+        "executable_sha256": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+        "complete_cached_replay": true,
+        "own_cold_warm_first_192_exact": true,
+        "n14_reference_mode": "no_mtp",
+        "n14_reference_receipt_sha256": "ae547099cf7edd563daeaeb2d68f39b16fc9ea2213de8201b4934f481729475b",
+        "observed_r2_widths": [
+          1
+        ],
+        "observed_warm_r2_widths": [
+          1
+        ],
+        "conditions": {
+          "cold": {
+            "cache_tokens": 0,
+            "evaluated_prompt_tokens": 32768,
+            "output_tokens": 192,
+            "decode_toks_s": 78.61632001100628,
+            "server_decode_ms": 2442.241,
+            "request_wall_s": 79.6625641330611,
+            "ttft_s": 77.21782729006372,
+            "draft_accepted": null,
+            "draft_proposed": null,
+            "exact_first_192_against_corresponding_n14_mode_reference": true
+          },
+          "warm": {
+            "cache_tokens": 32764,
+            "evaluated_prompt_tokens": 4,
+            "output_tokens": 1024,
+            "decode_toks_s": 78.18297274109426,
+            "server_decode_ms": 13097.481,
+            "request_wall_s": 13.19543344900012,
+            "ttft_s": 0.09582482499536127,
+            "draft_accepted": null,
+            "draft_proposed": null,
+            "exact_first_192_against_corresponding_n14_mode_reference": true
+          }
+        },
+        "receipt_sha256": "3a9f7a75f994c638f3c157eaecddedb422acebf306d346abd7271fafc11851c2"
+      },
+      "split": {
+        "gpu_layers_offloaded": 42,
+        "runner_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "context_shift": false,
+        "mapped_library_sha256": {
+          "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+          "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+          "libggml-cuda.so": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba"
+        },
+        "executable_sha256": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+        "complete_cached_replay": true,
+        "own_cold_warm_first_192_exact": true,
+        "n14_reference_mode": "merged_mtp",
+        "n14_reference_receipt_sha256": "14039883a647203923a547a853dc42539d3b39f257d767243b727927ccec9bb9",
+        "observed_r2_widths": [
+          1,
+          2
+        ],
+        "observed_warm_r2_widths": [
+          2
+        ],
+        "conditions": {
+          "cold": {
+            "cache_tokens": 0,
+            "evaluated_prompt_tokens": 32768,
+            "output_tokens": 192,
+            "decode_toks_s": 78.27322737638741,
+            "server_decode_ms": 2452.946,
+            "request_wall_s": 81.17820242792368,
+            "ttft_s": 78.723108072998,
+            "draft_accepted": 81,
+            "draft_proposed": 110,
+            "exact_first_192_against_corresponding_n14_mode_reference": true
+          },
+          "warm": {
+            "cache_tokens": 32764,
+            "evaluated_prompt_tokens": 4,
+            "output_tokens": 1024,
+            "decode_toks_s": 83.6299173615545,
+            "server_decode_ms": 12244.422,
+            "request_wall_s": 12.420571619062684,
+            "ttft_s": 0.17404605099000037,
+            "draft_accepted": 471,
+            "draft_proposed": 552,
+            "exact_first_192_against_corresponding_n14_mode_reference": true
+          }
+        },
+        "receipt_sha256": "6fc1e80dd89b43d5cffbbc3e606653c8011ad65dd723674e4756297a56a474f0"
+      }
+    },
+    "split_vs_no_mtp": {
+      "cold": {
+        "first_cross_mode_differing_output_token_1_based": 50,
+        "split_minus_no_mtp_wall_s": 1.5156382948625833,
+        "split_relative_wall_fraction": 0.019025728224502027,
+        "split_relative_decode_fraction": -0.004364140099292868
+      },
+      "warm": {
+        "first_cross_mode_differing_output_token_1_based": 50,
+        "split_minus_no_mtp_wall_s": -0.7748618299374357,
+        "split_relative_wall_fraction": -0.058721968697144286,
+        "split_relative_decode_fraction": 0.0696691930415334
+      }
+    }
+  },
+  "midpoint_recall": {
+    "prompt_tokens": 80000,
+    "effective_target_microbatch": 1024,
+    "effective_draft_microbatch": 1024,
+    "fact_start_token_index": 40000,
+    "prompt_and_template_match_n7": true,
+    "prompt_token_sha256": "2b227219205b9a53417d5a881ef97300991c19f57024bcadd09175073ab0185f",
+    "template_sha256": "f8b689676386a92d85a42af0ebd1a239f4143050410f9516e52e9dafa76dfe88",
+    "technical_pass": true,
+    "exact_fact_match": true,
+    "eos": true,
+    "generated_output_count_including_eos": 7,
+    "exact_seven_output_ids_match_both_n7_controls": true,
+    "same_runtime_environment_as_n27_split": true,
+    "exact_pinned_binary_hashes": true,
+    "live_cache_only_rows": [
+      1024
+    ],
+    "observed_long_r2_query_widths": [
+      1,
+      2
+    ],
+    "gpu_layers_offloaded": 42,
+    "runner_exit_code": 0,
+    "cleanup_exit_code": 0
+  }
+}
