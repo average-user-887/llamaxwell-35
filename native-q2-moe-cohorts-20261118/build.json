@@ -1,0 +1,21 @@
+{
+  "native_q8_control_sha256": "3b3c6db37769ee281b4bc357faf6016f34388d7270545d6b13bbc37777c79fdf",
+  "candidate_cuda_sha256": "19607daf02bc6dcd722a0695787046db9b4c6b8e010545598d3ad60649d68d00",
+  "operator_sha256": "0bb7393d854fda0dde70ebebda9dbd52cbb32b4ee8bcc17d3e4a532ff0a88c04",
+  "q8_gdn_object_sha256": "bcd063306ea65f5e8143a8d6501960dbfeda359f5b3a261d5d91d612c786eac0",
+  "objects_in_each_link": 147,
+  "device_functions_preserved": 16,
+  "device_instruction_words_preserved": 42664,
+  "added_device_symbol": "_ZN6occamy14moe_q2_cohortsENS_6ParamsEb",
+  "candidate_static_device_words": 3368,
+  "registers": 63,
+  "static_shared_bytes": 96,
+  "dynamic_shared_bytes": 39424,
+  "stack_bytes": 0,
+  "spill_load_bytes": 0,
+  "spill_store_bytes": 0,
+  "threads_per_cta": 512,
+  "ctas_per_row": 24,
+  "rows_per_grid": 2,
+  "runtime_occupancy_required": 48
+}

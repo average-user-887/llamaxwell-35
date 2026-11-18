@@ -1,0 +1,93 @@
+{
+  "prepare.py": {
+    "observed_source_sha256": "8ad26168e3697acc9eeb78d75bd3382a2dfa1f1730de314020c3a5f5eeb5d034",
+    "portable_sha256": "8ad26168e3697acc9eeb78d75bd3382a2dfa1f1730de314020c3a5f5eeb5d034",
+    "private_input_keys": []
+  },
+  "occamy-fused.base.cu": {
+    "observed_source_sha256": "95560be54eb1cbca38f4db6977d8bf46c96cbe1fb0c3cf5cdf239847b9e97f0a",
+    "portable_sha256": "95560be54eb1cbca38f4db6977d8bf46c96cbe1fb0c3cf5cdf239847b9e97f0a",
+    "private_input_keys": []
+  },
+  "occamy-fused.cu": {
+    "observed_source_sha256": "348038adec471d26d19c2ec74eddbfeb0b2a06f670ba9f5e56393b4fef4d55fd",
+    "portable_sha256": "348038adec471d26d19c2ec74eddbfeb0b2a06f670ba9f5e56393b4fef4d55fd",
+    "private_input_keys": []
+  },
+  "candidate.patch": {
+    "observed_source_sha256": "30fccc93647daaded3b69a647c62ca516c6225d82716a05b4e9982291fac5a18",
+    "portable_sha256": "30fccc93647daaded3b69a647c62ca516c6225d82716a05b4e9982291fac5a18",
+    "private_input_keys": []
+  },
+  "prepare-host.py": {
+    "observed_source_sha256": "2392d212e2a90fe5a0a11f7b24a37377a3bf3cf7edd6b30b572be444d2a5f545",
+    "portable_sha256": "2392d212e2a90fe5a0a11f7b24a37377a3bf3cf7edd6b30b572be444d2a5f545",
+    "private_input_keys": []
+  },
+  "probe.inc": {
+    "observed_source_sha256": "110a45ed5f9526d5d3a081a62b666a09ee9d6559d7ec8934d6f203707a7948d0",
+    "portable_sha256": "110a45ed5f9526d5d3a081a62b666a09ee9d6559d7ec8934d6f203707a7948d0",
+    "private_input_keys": []
+  },
+  "operator.base.cpp": {
+    "observed_source_sha256": "874a720dcf1c665a61e2e222073dde3befb787daa9cdcc5632ca7ce942b0a462",
+    "portable_sha256": "874a720dcf1c665a61e2e222073dde3befb787daa9cdcc5632ca7ce942b0a462",
+    "private_input_keys": []
+  },
+  "operator.cpp": {
+    "observed_source_sha256": "9035932873622bce8b141d9928fa4b5390d536e8cd4484f50d148c26e54687c5",
+    "portable_sha256": "9035932873622bce8b141d9928fa4b5390d536e8cd4484f50d148c26e54687c5",
+    "private_input_keys": []
+  },
+  "operator.patch": {
+    "observed_source_sha256": "ed74c2137c366af95afe31d2ed88a2afc3d2d449286fb881472d88233dce7255",
+    "portable_sha256": "ed74c2137c366af95afe31d2ed88a2afc3d2d449286fb881472d88233dce7255",
+    "private_input_keys": []
+  },
+  "verify-build.py": {
+    "observed_source_sha256": "ec0bf63b735cbc71db34626f5a65ada5e774a45b918a4ab32c4096e5de696e8b",
+    "portable_sha256": "ec0bf63b735cbc71db34626f5a65ada5e774a45b918a4ab32c4096e5de696e8b",
+    "private_input_keys": []
+  },
+  "build.sh": {
+    "observed_source_sha256": "7f614c71dbbbf72f3ea50e8dbd6a863544f0e062dea25e3be9980f71bb9cf7a1",
+    "portable_sha256": "cdba32e7eeff8da63148374bfc840a518a7a29659a62944bb88c9db8662a6f44",
+    "private_input_keys": [
+      "COMPILER_SOURCE_MOUNT"
+    ]
+  },
+  "compile.sh": {
+    "observed_source_sha256": "4f79ab19d57dbdac7877e8ea574ba8f3767db6aa38947efb524a56b222611722",
+    "portable_sha256": "f0bf51f5941032ffece390e26f1c392f4caf1e3de4ad18b5547eea543366e27b",
+    "private_input_keys": [
+      "COMPILER_SOURCE_MOUNT"
+    ]
+  },
+  "build-host.sh": {
+    "observed_source_sha256": "e6564efa2d2b69f0580b976dcaf504f90bad5f27fcc946d0121d49ee1f621984",
+    "portable_sha256": "e6564efa2d2b69f0580b976dcaf504f90bad5f27fcc946d0121d49ee1f621984",
+    "private_input_keys": []
+  },
+  "report.py": {
+    "observed_source_sha256": "bca0a639fd8ca4380bfc8e20a134e13edb0c75bbc2b308b3ec9a00bd94878825",
+    "portable_sha256": "bca0a639fd8ca4380bfc8e20a134e13edb0c75bbc2b308b3ec9a00bd94878825",
+    "private_input_keys": []
+  },
+  "release.sh": {
+    "observed_source_sha256": "721905daeb63f5decafbaf6cd2fd2984eafecfa1d62828b200c7e537d2a186ad",
+    "portable_sha256": "c47a79846db02e4c7ff3928c76a8315322a4082f54ff9a7e051829f493e6dcf0",
+    "private_input_keys": [
+      "N88_Q8_ON_RUN_NAME"
+    ]
+  },
+  "fixture.txt": {
+    "observed_source_sha256": "1e257c277322c14fc7f4f04380e1fbf66cce43819ff0994deff37dbec5dd9bbc",
+    "portable_sha256": "1e257c277322c14fc7f4f04380e1fbf66cce43819ff0994deff37dbec5dd9bbc",
+    "private_input_keys": []
+  },
+  "build.json": {
+    "observed_source_sha256": "191906b05d5d1b0c796169080710f5d413c7a6af9633a9413e1e80a64f2dd43e",
+    "portable_sha256": "191906b05d5d1b0c796169080710f5d413c7a6af9633a9413e1e80a64f2dd43e",
+    "private_input_keys": []
+  }
+}

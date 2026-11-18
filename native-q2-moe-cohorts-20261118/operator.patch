@@ -1,0 +1,299 @@
+--- a/operator.cpp
++++ b/operator.cpp
+@@ -22,7 +22,7 @@
+ constexpr int experts = 256;
+ constexpr int ranks = 8;
+ constexpr int middle = 512;
+-constexpr int width = 4;
++constexpr int width = 2;
+ constexpr int graph_size = 256;
+ constexpr int reps = 96;
+ using Ids = std::array<int32_t, ranks * width>;
+@@ -102,8 +102,12 @@
+     }
+     void report() const {
+         require(shortlist_margin > 1e-5, "router fixture has a near tie");
+-        std::fprintf(stderr, "N104 FIXTURE %s overlap=%d,%d,%d,%d,%d,%d min_margin=%.8g\n",
+-                     name, pair_overlap[0], pair_overlap[1], pair_overlap[2], pair_overlap[3], pair_overlap[4], pair_overlap[5], shortlist_margin);
++        for(int row=0;row<width;row++) {
++            std::fprintf(stderr,"Q2_COHORT FIXTURE_IDS %s row=%d ids=",name,row);
++            for(int k=0;k<ranks;k++) std::fprintf(stderr,"%s%d",k?",":"",ids[row*ranks+k]);
++            std::fprintf(stderr,"\n");
++        }
++        std::fprintf(stderr,"Q2_COHORT FIXTURE %s overlap=%d min_margin=%.8g\n",name,pair_overlap[0],shortlist_margin);
+     }
+ };
+ 
+@@ -161,7 +165,7 @@
+     }
+ };
+ 
+-enum class Mode { generic, split, router };
++enum class Mode { generic, router };
+ 
+ struct Graph {
+     ggml_context * ctx = context();
+@@ -207,16 +211,9 @@
+         if (mode == Mode::router) {
+             auto * xn = ggml_mul(ctx, ggml_rms_norm(ctx, input, 1e-6f), weights.norm);
+             output = select(ggml_soft_max(ctx, ggml_mul_mat(ctx, weights.router, xn)));
+-        } else if (mode == Mode::split) {
+-            for (int row = 0; row < width; ++row) {
+-                auto * h = ggml_view_2d(ctx, input, hidden, 1, input->nb[1], row * input->nb[1]);
+-                auto * out = block(weights, h, 1);
+-                ggml_format_name(out, "n104_v3_row_%d", row);
+-                output = output ? ggml_concat(ctx, output, out, 1) : out;
+-            }
+         } else {
+             output = block(weights, input, width);
+-            ggml_set_name(output, "n104_generic_q4");
++            ggml_set_name(output, "cohort_native_n2split");
+         }
+         ggml_build_forward_expand(graph, output);
+         require(ggml_nelements(output) == (mode == Mode::router ? ranks * width : hidden * width), "graph output shape");
+@@ -225,10 +222,10 @@
+             const auto * t = ggml_graph_node(graph, i);
+             if (t->op == GGML_OP_MUL_MAT_ID) {
+                 ++projections;
+-                require(t->src[2]->ne[0] == ranks && t->src[2]->ne[1] == (mode == Mode::split ? 1 : width), "expert rank/width shape");
+-            }
+-        }
+-        require(projections == (mode == Mode::router ? 0 : mode == Mode::generic ? 3 : 3*width), "graph projection count");
++                require(t->src[2]->ne[0] == ranks && t->src[2]->ne[1] == width, "expert rank/width shape");
++            }
++        }
++        require(projections == (mode == Mode::router ? 0 : 3), "graph projection count");
+     }
+ 
+     void allocate(ggml_backend_t backend) {
+@@ -267,119 +264,86 @@
+     for (const auto & lib : expected) { std::fprintf(stderr, "N104 MAP /runtime/%s\n", lib.c_str()); }
+ }
+ 
+-using LaunchCounter = unsigned long long (*)();
+-LaunchCounter cohort_count = nullptr;
+-LaunchCounter prior_q3_count = nullptr;
+-
+-void set_cohorts(bool enabled) {
+-    require(setenv("GGML_CUDA_OCCAMY_MOE_Q4_COHORTS", enabled ? "1" : "0", 1) == 0,
+-            "could not select q4 execution mode");
++using Count = unsigned long long (*)(unsigned);
++using ReadIds = void (*)(int *);
++Count count=nullptr;
++ReadIds read_ids=nullptr;
++using Counters=std::array<unsigned long long,4>;
++Counters snapshot() {return {count(0),count(1),count(2),count(3)};}
++void checked_delta(Counters before, Counters after, int runs, bool on) {
++    for(size_t i=0;i<before.size();++i) require(after[i]-before[i]==((i>=2)==on?unsigned(runs):0u),"physical path or second callback mismatch");
+ }
+ void load_counter() {
+-    void * handle = dlopen("/runtime/libggml-cuda.so", RTLD_NOLOAD | RTLD_NOW);
+-    require(handle, "candidate module not mapped");
+-    char executable[256]{};
+-    const auto n = readlink("/proc/self/exe", executable, sizeof(executable)-1);
+-    require(n > 0 && std::strcmp(executable, "/operator") == 0, "unexpected running operator binary");
+-    cohort_count = reinterpret_cast<LaunchCounter>(dlsym(handle, "ggml_cuda_occamy_q4_cohort_launch_count"));
+-    prior_q3_count = reinterpret_cast<LaunchCounter>(dlsym(handle,"ggml_cuda_occamy_q3_cohort_launch_count"));
+-    require(prior_q3_count && prior_q3_count()==0,"existing Q3 counter unavailable or dirty");
+-    require(cohort_count && cohort_count() == 0, "candidate launch counter unavailable or dirty");
+-    Dl_info location{};
+-    require(dladdr(reinterpret_cast<void *>(cohort_count), &location) && location.dli_fname &&
+-            std::strcmp(location.dli_fname, "/runtime/libggml-cuda.so") == 0, "unexpected launch counter provider");
+-    std::fprintf(stderr, "Q4_COHORT MAP /operator counter_provider=%s\n", location.dli_fname);
+-    dlclose(handle);
+-}
+-
+-void compare(ggml_backend_t cuda, Graph & generic, Graph & split, Graph & router, const Fixture & f) {
+-    set_cohorts(false);
+-    const auto initial_count = cohort_count();
++    void * h=dlopen("/runtime/libggml-cuda.so",RTLD_NOLOAD|RTLD_NOW);
++    require(h,"candidate DSO not mapped");
++    count=reinterpret_cast<Count>(dlsym(h,"ggml_cuda_occamy_q2_counter"));
++    read_ids=reinterpret_cast<ReadIds>(dlsym(h,"ggml_cuda_occamy_q2_router"));
++    Dl_info info{};
++    require(count && read_ids && dladdr(reinterpret_cast<void*>(count),&info) && info.dli_fname &&
++            std::strcmp(info.dli_fname,"/runtime/libggml-cuda.so")==0,"unexpected counter provider");
++    char exe[256]{};
++    require(readlink("/proc/self/exe",exe,sizeof(exe)-1)>0 && std::strcmp(exe,"/operator")==0,"unexpected operator executable");
++    require(snapshot()==Counters{},"new process counters dirty");
++    std::fprintf(stderr,"Q2_COHORT MAP /operator /runtime/libggml-cuda.so\n");
++    dlclose(h);
++}
++void set_mode(bool on,bool diag=false) {
++    require(setenv("GGML_CUDA_OCCAMY_MOE_Q2_COHORTS",on?"1":"0",1)==0 &&
++            setenv("GGML_CUDA_OCCAMY_MOE_Q2_READ_IDS",diag?"1":"0",1)==0,"cannot select typed mode");
++}
++void compare(ggml_backend_t cuda,Graph & graph,Graph & router,const Fixture & f) {
++    set_mode(false);
+     router.use(f);
+     router.run(cuda);
+-    Ids ids{};
+-    for (int row = 0; row < width; ++row) {
+-        ggml_backend_tensor_get(router.output, ids.data() + row * ranks,
+-                                row * router.output->nb[1], ranks * sizeof(int32_t));
+-    }
+-    require(ids == f.ids, "device router IDs differ from seeded reference");
+-    std::fprintf(stderr, "N104 ROUTER %s ids=%zu/%zu\n", f.name, ids.size(), f.ids.size());
+-    Output base{}, candidate{};
+-    generic.use(f);
+-    std::fprintf(stderr, "N104 GENERIC_BEGIN %s\n", f.name);
+-    generic.run(cuda);
+-    std::fprintf(stderr, "N104 GENERIC_END %s\n", f.name);
+-    ggml_backend_tensor_get(generic.output, base.data(), 0, sizeof(base));
+-    split.use(f);
+-    std::fprintf(stderr, "N104 SPLIT_BEGIN %s\n", f.name);
+-    split.run(cuda);
+-    std::fprintf(stderr, "N104 SPLIT_END %s\n", f.name);
+-    ggml_backend_tensor_get(split.output, candidate.data(), 0, sizeof(candidate));
+-    require(cohort_count() == initial_count, "candidate active in a control graph");
+-    Output cohorts{};
+-    generic.use(f); // Restore row input in case the allocation plan allowed a residual alias.
+-    set_cohorts(true);
+-    generic.run(cuda);
+-    ggml_backend_tensor_get(generic.output, cohorts.data(), 0, sizeof(cohorts));
+-    require(cohort_count() == initial_count + 1, "missing physical q4 cohort launch");
+-    std::fprintf(stderr, "Q4_COHORT DIAG %s physical=%llu\n", f.name, cohort_count()-initial_count);
+-    set_cohorts(false);
+-    for (int row = 0; row < width; ++row) {
+-        int different = 0;
+-        for (int i = row * hidden; i < (row + 1) * hidden; ++i) {
+-            require(std::isfinite(cohorts[i]) && std::isfinite(candidate[i]), "nonfinite q4 or sequential output");
+-            different += std::memcmp(&cohorts[i], &candidate[i], sizeof(float)) != 0;
+-        }
+-        std::fprintf(stderr, "Q4_COHORT ROW %s row=%d finite=2048 different=%d\n", f.name, row, different);
+-        require(different == 0, "q4 cohort differs from four original V3 row launches");
+-    }
+-    for (int row = 0; row < width; ++row) {
+-        int mismatches = 0;
+-        double delta = 0.0, magnitude = 0.0, max_abs = 0.0;
+-        for (int i = row * hidden; i < (row + 1) * hidden; ++i) {
+-            require(std::isfinite(base[i]) && std::isfinite(candidate[i]), "nonfinite output");
+-            const double diff = double(base[i]) - candidate[i];
+-            mismatches += std::memcmp(&base[i], &candidate[i], sizeof(float)) != 0;
+-            max_abs = std::max(max_abs, std::abs(diff));
+-            delta += diff * diff;
+-            magnitude += double(base[i]) * base[i];
+-        }
+-        require(magnitude > 0, "degenerate output");
+-        std::fprintf(stderr, "N104 NUMERIC %s row=%d finite=2048 mismatches=%d max_abs=%.9g relative_rms=%.9g\n",
+-                     f.name, row, mismatches, max_abs, std::sqrt(delta / magnitude));
+-    }
+-}
+-
+-void perf(ggml_backend_t cuda, Graph & generic, Graph & split, const Fixture & f) {
+-    auto batch = [&](Graph & graph, bool enabled, const char * name, int count) {
+-        graph.use(f);
+-        set_cohorts(enabled);
+-        const auto before = cohort_count();
+-        const auto start = std::chrono::steady_clock::now();
+-        for (int i = 0; i < count; ++i) { graph.run(cuda); }
+-        const auto finish = std::chrono::steady_clock::now();
+-        const auto launches = cohort_count() - before;
+-        Output input_after{};
+-        ggml_backend_tensor_get(graph.input, input_after.data(), 0, sizeof(input_after));
+-        require(std::memcmp(input_after.data(), f.input.data(), sizeof(input_after)) == 0,
+-                "repeated graph changed the seeded routing input");
+-        require(launches == (enabled ? (unsigned)count : 0), "physical launch coverage differs");
+-        if (count == reps) {
+-            const double us = std::chrono::duration<double, std::micro>(finish - start).count() / count;
+-            std::fprintf(stderr, "Q4_COHORT TIME %s mode=%s reps=%d launches=%llu us=%.6f\n",
+-                         f.name, name, count, launches, us);
++    Ids generic_ids{};
++    for(int r=0;r<width;r++) ggml_backend_tensor_get(router.output,generic_ids.data()+r*ranks,r*router.output->nb[1],ranks*sizeof(int32_t));
++    require(generic_ids==f.ids,"generic ordered expert choices differ from CPU");
++    Output base{},trial{},repeat{};
++    auto run=[&](bool on,Output & dst){
++        set_mode(on,on);graph.use(f);
++        const auto before=snapshot();graph.run(cuda);checked_delta(before,snapshot(),1,on);
++        ggml_backend_tensor_get(graph.output,dst.data(),0,sizeof(dst));
++        if(on) {
++            Ids ids{};read_ids(ids.data());require(ids==f.ids,"physical Q2 candidate expert choices differ from CPU");
++            for(int r=0;r<width;r++) {
++                std::fprintf(stderr,"Q2_COHORT ROUTES %s row=%d ids=",f.name,r);
++                for(int k=0;k<ranks;k++) std::fprintf(stderr,"%s%d",k?",":"",ids[r*ranks+k]);
++                std::fprintf(stderr,"\n");
++            }
+         }
+     };
+-    batch(generic,false,"generic",8);
+-    batch(split,false,"sequential",8);
+-    batch(generic,true,"cohorts",8);
+-    batch(generic,false,"generic",reps);
+-    batch(split,false,"sequential",reps);
+-    batch(generic,true,"cohorts",reps);
+-    batch(generic,true,"cohorts",reps);
+-    batch(split,false,"sequential",reps);
+-    batch(generic,false,"generic",reps);
+-    set_cohorts(false);
++    run(false,base);run(true,trial);run(true,repeat);
++    for(int row=0;row<width;row++) {
++        int different=0,repeat_diff=0,finite=0;double peak=0.;
++        for(int i=row*hidden;i<(row+1)*hidden;i++) {
++            finite+=std::isfinite(base[i]) && std::isfinite(trial[i]) && std::isfinite(repeat[i]);
++            different+=std::memcmp(&base[i],&trial[i],sizeof(float))!=0;
++            repeat_diff+=std::memcmp(&trial[i],&repeat[i],sizeof(float))!=0;
++            peak=std::max(peak,std::abs(double(base[i])-trial[i]));
++        }
++        std::fprintf(stderr,"Q2_COHORT ROW %s row=%d finite=%d different=%d repeat_different=%d max_abs=%.10g\n",
++                     f.name,row,finite,different,repeat_diff,peak);
++        require(finite==hidden && different==0 && repeat_diff==0,"nonfinite or nonidentical row");
++    }
++    set_mode(false);
++}
++void perf(ggml_backend_t cuda,Graph & graph,const Fixture & f) {
++    auto batch=[&](bool on,int n) {
++        set_mode(on);graph.use(f);const auto before=snapshot();
++        const auto start=std::chrono::steady_clock::now();
++        for(int i=0;i<n;i++) graph.run(cuda);
++        const auto end=std::chrono::steady_clock::now();
++        auto after=snapshot();checked_delta(before,after,n,on);
++        Output v{};ggml_backend_tensor_get(graph.input,v.data(),0,sizeof(v));
++        require(std::memcmp(v.data(),f.input.data(),sizeof(v))==0,"measured graph mutated input");
++        const double us=std::chrono::duration<double,std::micro>(end-start).count()/n;
++        std::fprintf(stderr,"Q2_COHORT TIME %s mode=%s reps=%d row0=%llu row1=%llu pair=%llu skip=%llu us=%.6f\n",
++                     f.name,on?"cohorts":"n2split",n,after[0]-before[0],after[1]-before[1],after[2]-before[2],after[3]-before[3],us);
++    };
++    batch(false,8);batch(true,8);
++    const bool first=std::strcmp(f.name,"partial")==0;
++    batch(first,reps);batch(!first,reps);batch(!first,reps);batch(first,reps);
++    set_mode(false);
+ }
+ } // namespace
+ 
+@@ -396,10 +360,14 @@
+     require(*std::max_element(independent.begin(), independent.end()) <= 2, "independent rows overlap too much");
+     require(*std::min_element(partial.begin(), partial.end()) >= 2 &&
+             *std::max_element(partial.begin(), partial.end()) <= 7, "partial rows outside realistic overlap");
++    if(!offline) {
++        require(setenv("GGML_CUDA_OCCAMY_MOE_Q2_COUNT","1",1)==0,"enable physical V3 counts");
++        require(getenv("GGML_CUDA_OCCAMY_N2SPLIT") && std::strcmp(getenv("GGML_CUDA_OCCAMY_N2SPLIT"),"1")==0,"original N2SPLIT disabled");
++    }
+     ggml_backend_t cuda = nullptr;
+     {
+         Weights weights;
+-        Graph generic(weights, Mode::generic), split(weights, Mode::split), router(weights, Mode::router);
++        Graph generic(weights, Mode::generic), router(weights, Mode::router);
+         if (offline) { return 0; }
+         ggml_backend_reg_t reg = ggml_backend_load("/runtime/libggml-cuda.so");
+         require(reg && ggml_backend_reg_dev_count(reg) == 1, "expected one CUDA device");
+@@ -409,14 +377,13 @@
+         load_counter();
+         weights.load(cuda, data);
+         generic.allocate(cuda);
+-        split.allocate(cuda);
+         router.allocate(cuda);
+         for (const auto & f : fixtures) {
+-            if (diagnostic) { compare(cuda, generic, split, router, f); }
+-            else { perf(cuda, generic, split, f); }
+-        }
+-    }
+-    require(prior_q3_count()==0, "unexpected Q3 candidate on Q4-only fixture");
+-    std::fprintf(stderr,"Q4_COHORT FINISH q3_launches=%llu q4_launches=%llu\n",prior_q3_count(),cohort_count());
++            if (diagnostic) { compare(cuda, generic, router, f); }
++            else { perf(cuda, generic, f); }
++        }
++    }
++    const auto done=snapshot();
++    std::fprintf(stderr,"Q2_COHORT FINISH row0=%llu row1=%llu pair=%llu skip=%llu\n",done[0],done[1],done[2],done[3]);
+     ggml_backend_free(cuda);
+ }

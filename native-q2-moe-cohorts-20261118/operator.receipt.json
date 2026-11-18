@@ -1,0 +1,636 @@
+{
+  "status": {
+    "runner_exit": 0,
+    "cleanup_exit": 0,
+    "started_epoch": 1795011039,
+    "finished_epoch": 1795011041,
+    "cap_seconds": 180
+  },
+  "bounded_wall_s": 2,
+  "build": {
+    "native_q8_control_sha256": "3b3c6db37769ee281b4bc357faf6016f34388d7270545d6b13bbc37777c79fdf",
+    "candidate_cuda_sha256": "19607daf02bc6dcd722a0695787046db9b4c6b8e010545598d3ad60649d68d00",
+    "operator_sha256": "0bb7393d854fda0dde70ebebda9dbd52cbb32b4ee8bcc17d3e4a532ff0a88c04",
+    "q8_gdn_object_sha256": "bcd063306ea65f5e8143a8d6501960dbfeda359f5b3a261d5d91d612c786eac0",
+    "objects_in_each_link": 147,
+    "device_functions_preserved": 16,
+    "device_instruction_words_preserved": 42664,
+    "added_device_symbol": "_ZN6occamy14moe_q2_cohortsENS_6ParamsEb",
+    "candidate_static_device_words": 3368,
+    "registers": 63,
+    "static_shared_bytes": 96,
+    "dynamic_shared_bytes": 39424,
+    "stack_bytes": 0,
+    "spill_load_bytes": 0,
+    "spill_store_bytes": 0,
+    "threads_per_cta": 512,
+    "ctas_per_row": 24,
+    "rows_per_grid": 2,
+    "runtime_occupancy_required": 48
+  },
+  "materiality_us": 50,
+  "scope": "Synchronized complete graph; actual two-row N2SPLIT vs one two-cohort kernel. Forty-layer sums are projections.",
+  "check": {
+    "executed": true,
+    "observed_lines": [
+      "Q2_COHORT FIXTURE_IDS independent row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_COHORT FIXTURE_IDS independent row=1 ids=85,222,184,46,216,151,64,219",
+      "Q2_COHORT FIXTURE independent overlap=0 min_margin=0.00021109628",
+      "Q2_COHORT FIXTURE_IDS partial row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_COHORT FIXTURE_IDS partial row=1 ids=110,73,64,128,215,96,197,82",
+      "Q2_COHORT FIXTURE partial overlap=5 min_margin=0.0011513497",
+      "N104 MAP /runtime/libggml.so.0.26.0",
+      "N104 MAP /runtime/libggml-base.so.0.26.0",
+      "N104 MAP /runtime/libggml-cuda.so",
+      "Q2_COHORT MAP /operator /runtime/libggml-cuda.so",
+      "occamy-fused MOE_V3 CHECK cohort_native_n2split row 0: bitwise-diff 0 / 2048, max_abs 0.000e+00",
+      "occamy-fused MOE_V3 CHECK cohort_native_n2split row 1: bitwise-diff 0 / 2048, max_abs 0.000e+00",
+      "Q2_COHORT residency device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1",
+      "Q2_COHORT ROUTES independent row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_COHORT ROUTES independent row=1 ids=85,222,184,46,216,151,64,219",
+      "Q2_COHORT ROUTES independent row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_COHORT ROUTES independent row=1 ids=85,222,184,46,216,151,64,219",
+      "Q2_COHORT ROW independent row=0 finite=2048 different=0 repeat_different=0 max_abs=0",
+      "Q2_COHORT ROW independent row=1 finite=2048 different=0 repeat_different=0 max_abs=0",
+      "occamy-fused MOE_V3 CHECK cohort_native_n2split row 0: bitwise-diff 0 / 2048, max_abs 0.000e+00",
+      "occamy-fused MOE_V3 CHECK cohort_native_n2split row 1: bitwise-diff 0 / 2048, max_abs 0.000e+00",
+      "Q2_COHORT ROUTES partial row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_COHORT ROUTES partial row=1 ids=110,73,64,128,215,96,197,82",
+      "Q2_COHORT ROUTES partial row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_COHORT ROUTES partial row=1 ids=110,73,64,128,215,96,197,82",
+      "Q2_COHORT ROW partial row=0 finite=2048 different=0 repeat_different=0 max_abs=0",
+      "Q2_COHORT ROW partial row=1 finite=2048 different=0 repeat_different=0 max_abs=0",
+      "Q2_COHORT FINISH row0=2 row1=2 pair=4 skip=4"
+    ],
+    "validated": {
+      "residency": {
+        "sms": 24,
+        "active_per_sm": 2,
+        "grid_ctas": 48,
+        "ctas_per_cohort": 24,
+        "threads_per_cta": 512,
+        "registers": 63,
+        "static_shared_bytes": 96,
+        "dynamic_shared_bytes": 39424,
+        "local_bytes": 0
+      },
+      "results": {
+        "independent": {
+          "ordered_experts": [
+            [
+              128,
+              215,
+              73,
+              136,
+              110,
+              167,
+              197,
+              112
+            ],
+            [
+              85,
+              222,
+              184,
+              46,
+              216,
+              151,
+              64,
+              219
+            ]
+          ],
+          "expert_overlap": 0,
+          "candidate_router_repeats": 2,
+          "output_rows": [
+            {
+              "row": 0,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            },
+            {
+              "row": 1,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            }
+          ],
+          "stock_reference": "two original V3 launches on the same native Q2 graph; separately compared against V2"
+        },
+        "partial": {
+          "ordered_experts": [
+            [
+              128,
+              215,
+              73,
+              136,
+              110,
+              167,
+              197,
+              112
+            ],
+            [
+              110,
+              73,
+              64,
+              128,
+              215,
+              96,
+              197,
+              82
+            ]
+          ],
+          "expert_overlap": 5,
+          "candidate_router_repeats": 2,
+          "output_rows": [
+            {
+              "row": 0,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            },
+            {
+              "row": 1,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            }
+          ],
+          "stock_reference": "two original V3 launches on the same native Q2 graph; separately compared against V2"
+        }
+      }
+    }
+  },
+  "perf": {
+    "executed": true,
+    "observed_lines": [
+      "Q2_COHORT FIXTURE_IDS independent row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_COHORT FIXTURE_IDS independent row=1 ids=85,222,184,46,216,151,64,219",
+      "Q2_COHORT FIXTURE independent overlap=0 min_margin=0.00021109628",
+      "Q2_COHORT FIXTURE_IDS partial row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_COHORT FIXTURE_IDS partial row=1 ids=110,73,64,128,215,96,197,82",
+      "Q2_COHORT FIXTURE partial overlap=5 min_margin=0.0011513497",
+      "N104 MAP /runtime/libggml.so.0.26.0",
+      "N104 MAP /runtime/libggml-base.so.0.26.0",
+      "N104 MAP /runtime/libggml-cuda.so",
+      "Q2_COHORT MAP /operator /runtime/libggml-cuda.so",
+      "Q2_COHORT TIME independent mode=n2split reps=8 row0=8 row1=8 pair=0 skip=0 us=380.005375",
+      "Q2_COHORT residency device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1",
+      "Q2_COHORT TIME independent mode=cohorts reps=8 row0=0 row1=0 pair=8 skip=8 us=184.583000",
+      "Q2_COHORT TIME independent mode=n2split reps=96 row0=96 row1=96 pair=0 skip=0 us=192.483344",
+      "Q2_COHORT TIME independent mode=cohorts reps=96 row0=0 row1=0 pair=96 skip=96 us=162.634062",
+      "Q2_COHORT TIME independent mode=cohorts reps=96 row0=0 row1=0 pair=96 skip=96 us=162.649083",
+      "Q2_COHORT TIME independent mode=n2split reps=96 row0=96 row1=96 pair=0 skip=0 us=191.946073",
+      "Q2_COHORT TIME partial mode=n2split reps=8 row0=8 row1=8 pair=0 skip=0 us=192.946375",
+      "Q2_COHORT TIME partial mode=cohorts reps=8 row0=0 row1=0 pair=8 skip=8 us=161.131000",
+      "Q2_COHORT TIME partial mode=cohorts reps=96 row0=0 row1=0 pair=96 skip=96 us=159.106729",
+      "Q2_COHORT TIME partial mode=n2split reps=96 row0=96 row1=96 pair=0 skip=0 us=196.656375",
+      "Q2_COHORT TIME partial mode=n2split reps=96 row0=96 row1=96 pair=0 skip=0 us=192.695635",
+      "Q2_COHORT TIME partial mode=cohorts reps=96 row0=0 row1=0 pair=96 skip=96 us=159.831021",
+      "Q2_COHORT FINISH row0=400 row1=400 pair=400 skip=400"
+    ],
+    "validated": {
+      "residency": {
+        "sms": 24,
+        "active_per_sm": 2,
+        "grid_ctas": 48,
+        "ctas_per_cohort": 24,
+        "threads_per_cta": 512,
+        "registers": 63,
+        "static_shared_bytes": 96,
+        "dynamic_shared_bytes": 39424,
+        "local_bytes": 0
+      },
+      "results": {
+        "independent": {
+          "interval_columns": [
+            "mode",
+            "reps",
+            "old_row0",
+            "old_row1",
+            "combined_launches",
+            "second_callbacks_skipped",
+            "mean_us"
+          ],
+          "all_intervals": [
+            [
+              "n2split",
+              8,
+              8,
+              8,
+              0,
+              0,
+              380.005375
+            ],
+            [
+              "cohorts",
+              8,
+              0,
+              0,
+              8,
+              8,
+              184.583
+            ],
+            [
+              "n2split",
+              96,
+              96,
+              96,
+              0,
+              0,
+              192.483344
+            ],
+            [
+              "cohorts",
+              96,
+              0,
+              0,
+              96,
+              96,
+              162.634062
+            ],
+            [
+              "cohorts",
+              96,
+              0,
+              0,
+              96,
+              96,
+              162.649083
+            ],
+            [
+              "n2split",
+              96,
+              96,
+              96,
+              0,
+              0,
+              191.946073
+            ]
+          ],
+          "n2split_minus_cohorts_us": [
+            29.849281999999988,
+            29.296990000000022
+          ],
+          "projected_ms_across_40_layers": [
+            1.1939712799999995,
+            1.171879600000001
+          ],
+          "materiality_pass": false
+        },
+        "partial": {
+          "interval_columns": [
+            "mode",
+            "reps",
+            "old_row0",
+            "old_row1",
+            "combined_launches",
+            "second_callbacks_skipped",
+            "mean_us"
+          ],
+          "all_intervals": [
+            [
+              "n2split",
+              8,
+              8,
+              8,
+              0,
+              0,
+              192.946375
+            ],
+            [
+              "cohorts",
+              8,
+              0,
+              0,
+              8,
+              8,
+              161.131
+            ],
+            [
+              "cohorts",
+              96,
+              0,
+              0,
+              96,
+              96,
+              159.106729
+            ],
+            [
+              "n2split",
+              96,
+              96,
+              96,
+              0,
+              0,
+              196.656375
+            ],
+            [
+              "n2split",
+              96,
+              96,
+              96,
+              0,
+              0,
+              192.695635
+            ],
+            [
+              "cohorts",
+              96,
+              0,
+              0,
+              96,
+              96,
+              159.831021
+            ]
+          ],
+          "n2split_minus_cohorts_us": [
+            37.549645999999996,
+            32.86461400000002
+          ],
+          "projected_ms_across_40_layers": [
+            1.50198584,
+            1.3145845600000008
+          ],
+          "materiality_pass": false
+        }
+      }
+    }
+  },
+  "complete_measurement": {
+    "technical_pass": true,
+    "materiality_pass": false,
+    "threshold_us_per_layer": 50,
+    "numeric": {
+      "residency": {
+        "sms": 24,
+        "active_per_sm": 2,
+        "grid_ctas": 48,
+        "ctas_per_cohort": 24,
+        "threads_per_cta": 512,
+        "registers": 63,
+        "static_shared_bytes": 96,
+        "dynamic_shared_bytes": 39424,
+        "local_bytes": 0
+      },
+      "results": {
+        "independent": {
+          "ordered_experts": [
+            [
+              128,
+              215,
+              73,
+              136,
+              110,
+              167,
+              197,
+              112
+            ],
+            [
+              85,
+              222,
+              184,
+              46,
+              216,
+              151,
+              64,
+              219
+            ]
+          ],
+          "expert_overlap": 0,
+          "candidate_router_repeats": 2,
+          "output_rows": [
+            {
+              "row": 0,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            },
+            {
+              "row": 1,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            }
+          ],
+          "stock_reference": "two original V3 launches on the same native Q2 graph; separately compared against V2"
+        },
+        "partial": {
+          "ordered_experts": [
+            [
+              128,
+              215,
+              73,
+              136,
+              110,
+              167,
+              197,
+              112
+            ],
+            [
+              110,
+              73,
+              64,
+              128,
+              215,
+              96,
+              197,
+              82
+            ]
+          ],
+          "expert_overlap": 5,
+          "candidate_router_repeats": 2,
+          "output_rows": [
+            {
+              "row": 0,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            },
+            {
+              "row": 1,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            }
+          ],
+          "stock_reference": "two original V3 launches on the same native Q2 graph; separately compared against V2"
+        }
+      }
+    },
+    "timing": {
+      "residency": {
+        "sms": 24,
+        "active_per_sm": 2,
+        "grid_ctas": 48,
+        "ctas_per_cohort": 24,
+        "threads_per_cta": 512,
+        "registers": 63,
+        "static_shared_bytes": 96,
+        "dynamic_shared_bytes": 39424,
+        "local_bytes": 0
+      },
+      "results": {
+        "independent": {
+          "interval_columns": [
+            "mode",
+            "reps",
+            "old_row0",
+            "old_row1",
+            "combined_launches",
+            "second_callbacks_skipped",
+            "mean_us"
+          ],
+          "all_intervals": [
+            [
+              "n2split",
+              8,
+              8,
+              8,
+              0,
+              0,
+              380.005375
+            ],
+            [
+              "cohorts",
+              8,
+              0,
+              0,
+              8,
+              8,
+              184.583
+            ],
+            [
+              "n2split",
+              96,
+              96,
+              96,
+              0,
+              0,
+              192.483344
+            ],
+            [
+              "cohorts",
+              96,
+              0,
+              0,
+              96,
+              96,
+              162.634062
+            ],
+            [
+              "cohorts",
+              96,
+              0,
+              0,
+              96,
+              96,
+              162.649083
+            ],
+            [
+              "n2split",
+              96,
+              96,
+              96,
+              0,
+              0,
+              191.946073
+            ]
+          ],
+          "n2split_minus_cohorts_us": [
+            29.849281999999988,
+            29.296990000000022
+          ],
+          "projected_ms_across_40_layers": [
+            1.1939712799999995,
+            1.171879600000001
+          ],
+          "materiality_pass": false
+        },
+        "partial": {
+          "interval_columns": [
+            "mode",
+            "reps",
+            "old_row0",
+            "old_row1",
+            "combined_launches",
+            "second_callbacks_skipped",
+            "mean_us"
+          ],
+          "all_intervals": [
+            [
+              "n2split",
+              8,
+              8,
+              8,
+              0,
+              0,
+              192.946375
+            ],
+            [
+              "cohorts",
+              8,
+              0,
+              0,
+              8,
+              8,
+              161.131
+            ],
+            [
+              "cohorts",
+              96,
+              0,
+              0,
+              96,
+              96,
+              159.106729
+            ],
+            [
+              "n2split",
+              96,
+              96,
+              96,
+              0,
+              0,
+              196.656375
+            ],
+            [
+              "n2split",
+              96,
+              96,
+              96,
+              0,
+              0,
+              192.695635
+            ],
+            [
+              "cohorts",
+              96,
+              0,
+              0,
+              96,
+              96,
+              159.831021
+            ]
+          ],
+          "n2split_minus_cohorts_us": [
+            37.549645999999996,
+            32.86461400000002
+          ],
+          "projected_ms_across_40_layers": [
+            1.50198584,
+            1.3145845600000008
+          ],
+          "materiality_pass": false
+        }
+      }
+    }
+  }
+}
