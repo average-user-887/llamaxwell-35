@@ -1,0 +1,310 @@
+{
+  "schema_version": 1,
+  "published_branch_parent": "d899acb7d3a016382c6bf34fc0ecf04e98ba732b",
+  "applicability": {
+    "base_source_revision": "da7ba0e49dd43c69f9ee5a219ea3124f7acda0c8",
+    "apply_order": [
+      "published FA2 reconstruction base",
+      "published N1 cache-only patch",
+      "bounded-lookup-r1.patch"
+    ],
+    "n1_source_index_sha256": "9a7cee5d1ac87b50c29d33305975911d49360342d94dd792444e22f447ba073f",
+    "bounded_r1_source_index_sha256": "d1d1e9ac1378ca432c835cdfe6b8957d6fd9216204037b59c53540911909f42c",
+    "patch_sha256": "bf09a6cf31f873aa7bf1ad86dcf985193b7149032c64928bfde000c462e6689a",
+    "forward_and_reverse_application_verified": true,
+    "all_six_modified_files_match_tested_r1_checkout": true
+  },
+  "hardware": {
+    "gpu": "NVIDIA Quadro M6000",
+    "vram_gb": 24,
+    "architecture": "sm_52"
+  },
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+  "runtime_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "tested_artifacts": {
+    "sha256_by_basename": {
+      "libllama-common.so.0.6.0": "b877a44e28681026613a88d8dac36b20b49e74eb6d9da906307d742d16f43814",
+      "libllama-server-impl.so": "ad7e9dd423a5bbd769fb564f4e67cc36cccec3ac566a55f7c8210be5e1eb9c7a",
+      "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+      "libggml-cuda.so": "6f37baad23c4ffbe2bcb8d5363d76b71df0af3b0ae7b2b65917104728379e058",
+      "llama-server": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+    },
+    "changed_libraries": [
+      "libllama-common.so.0.6.0",
+      "libllama-server-impl.so"
+    ],
+    "repair_incremental_relink_exit_code": 0,
+    "repair_incremental_relink_seconds": 10,
+    "common_library_sha256_unchanged_from_first_implementation": true
+  },
+  "initial_r0": {
+    "first_guard_failed_before_generation": true,
+    "runner_exit_code": 1,
+    "cleanup_exit_code": 0,
+    "exact_http_status_available": false,
+    "exact_http_response_available": false
+  },
+  "corrected_live_32k_http_guard_checks": [
+    {
+      "validation": "span outside the original input tape",
+      "http_status": 400
+    },
+    {
+      "validation": "claimed span IDs differ from the original input",
+      "http_status": 400
+    },
+    {
+      "validation": "input is not a flat integer prompt",
+      "http_status": 400
+    },
+    {
+      "validation": "raw prompt ID exceeds the vocabulary",
+      "http_status": 400
+    }
+  ],
+  "donor": {
+    "source_repository": "ggml-org/llama.cpp",
+    "source_commit": "e2eb39e81cbd43ff95dfc46bddb5155b582ccdfd",
+    "source_path": "examples/model-conversion/scripts/utils/check-nmse.py",
+    "source_blob": "324e3858e368245e39d2a2e5d5d9ebba6719ac57",
+    "source_sha256": "b0b0441a890c6573ac8d4ff32c27eeca4f7922893ed894b1631d30835dfa0bed"
+  },
+  "rate_definition": "same emitted count including EOS divided by server decode duration",
+  "configuration": {
+    "server_argv": [
+      "--alias",
+      "qwen36-moe",
+      "--override-kv",
+      "tokenizer.ggml.pre=str:qwen35",
+      "-ngl",
+      "999",
+      "--fit",
+      "off",
+      "-np",
+      "1",
+      "-c",
+      "84224",
+      "-b",
+      "2048",
+      "--mixed-batch-size",
+      "1024",
+      "--prefill-single-stream",
+      "--checkpoint-min-step",
+      "2048",
+      "--no-context-shift",
+      "-fa",
+      "on",
+      "--cache-type-k",
+      "f16",
+      "--cache-type-v",
+      "f16",
+      "--jinja",
+      "--metrics",
+      "-lv",
+      "4",
+      "-ub",
+      "1024",
+      "--cache-ram",
+      "12288",
+      "--ctx-checkpoints",
+      "2"
+    ],
+    "lookup_argv": [
+      "--spec-type",
+      "ngram-simple",
+      "--spec-ngram-simple-size-n",
+      "16",
+      "--spec-ngram-simple-size-m",
+      "255",
+      "--spec-ngram-simple-min-hits",
+      "1"
+    ],
+    "environment": {
+      "GGML_CUDA_MOE_DOWNX": "1",
+      "GGML_CUDA_MOE_DOWNH": "2",
+      "GGML_CUDA_OCCAMY_GDN_QKREUSE": "1",
+      "GGML_CUDA_OCCAMY_GDN_PCSHARE": "1",
+      "GGML_CUDA_MMVQ_SM52": "1",
+      "GGML_CUDA_RMS_WARP": "0",
+      "GGML_CUDA_HEAD_ROWPACK_SM52": "1",
+      "GGML_CUDA_MMQ_COMPACT_SM52": "1",
+      "GGML_CUDA_Q8_REUSE": "1",
+      "GGML_CUDA_NORM_Q8": "1",
+      "GGML_CUDA_CONCAT_T": "1",
+      "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": "1",
+      "GGML_CUDA_GATE_COPY": "1",
+      "GGML_CUDA_OCCAMY_GDN": "1",
+      "GGML_CUDA_MMQ_XMAD_SM52": "1",
+      "GGML_CUDA_GDN_COLS": "2,4",
+      "GGML_CUDA_OCCAMY_FA": "1",
+      "GGML_CUDA_OCCAMY_FUSED": "1",
+      "GGML_CUDA_OCCAMY_FA_PIPE": "3",
+      "GGML_CUDA_MOE_LOP3": "1",
+      "GGML_CUDA_MOE_TAILBAL": "1",
+      "GGML_CUDA_OCCAMY_GDN_PREF": "1",
+      "GGML_CUDA_OCCAMY_HOSTGAP": "1",
+      "GGML_CUDA_OCCAMY_SMALLFUSE": "2",
+      "GGML_CUDA_MMQ_TAIL_SM52": "1",
+      "GGML_CUDA_OCCAMY_GDN_REPACK": "1",
+      "GGML_CUDA_OCCAMY_N2SPLIT": "1",
+      "GGML_CUDA_OCCAMY_FA_ADDR": "1",
+      "GGML_CUDA_OCCAMY_N2GDN": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": "1",
+      "GGML_CUDA_MOE_V3": "1",
+      "GGML_CUDA_OCCAMY_GDN_T2": "1",
+      "GGML_CUDA_OCCAMY_FA_MROW": "3",
+      "GGML_CUDA_OCCAMY_FA2_NU": "4",
+      "LLAMA_TRACE": "1"
+    },
+    "request_fields_32k": {
+      "id_slot": 0,
+      "n_predict": 3072,
+      "temperature": 0,
+      "seed": 7,
+      "cache_prompt": false,
+      "ignore_eos": false,
+      "return_tokens": true,
+      "stream": false
+    },
+    "request_fields_80k": {
+      "id_slot": 0,
+      "n_predict": 3072,
+      "temperature": 0,
+      "seed": 7,
+      "cache_prompt": true,
+      "ignore_eos": false,
+      "return_tokens": true,
+      "stream": false
+    },
+    "owned_stage_cap_seconds": 480,
+    "completion_timeout_seconds": {
+      "cold": 390,
+      "warm": 90
+    },
+    "span_policy": "benchmark caller excludes one separately verified standalone terminal LF from the independent input donor only"
+  },
+  "stages": {
+    "32k": {
+      "prompt_tokens": 32768,
+      "prompt_token_sha256": "d79de7fdc29f10158c3ddfc751f2dcecfd2ec3f9907b0a431145c8e68a989142",
+      "rendered_template_sha256": "87d092e24cad4905a309e561eeffe217c69163fb12c30a7ad2d948b0ede66749",
+      "verified_exact_input_only_donor_slice": true,
+      "source_receipt_sha256": "1d37a1165931d6c38fd163357ff02d562a83abfde7e830dd0b848615aef8ca67",
+      "gpu_layers_offloaded": 42,
+      "runner_exit_code": 0,
+      "cleanup_exit_code": 0,
+      "conditions": {
+        "cold": {
+          "same_1722_generated_ids_including_eos_as_serial_and_stock": true,
+          "exact_normalized_text_and_ast": true,
+          "cache_tokens": 0,
+          "evaluated_prompt_tokens": 32768,
+          "bounded": {
+            "request_wall_s": 88.1088275150396,
+            "decode_s": 10.785352000000001,
+            "decode_toks_s": 159.66099205663383,
+            "server_first_token_s": 77.312643
+          },
+          "frozen_serial": {
+            "decode_s": 23.596803,
+            "same_count_decode_tok_s": 72.9759874674548,
+            "request_wall_s": 100.85616024106275
+          },
+          "frozen_stock_q256": {
+            "decode_s": 11.888389,
+            "same_count_decode_tok_s": 144.84721184678597,
+            "request_wall_s": 89.19069870898966
+          },
+          "bounded_over_serial_decode_ratio": 2.1878565484000894,
+          "bounded_over_stock_decode_ratio": 1.1022717663735035,
+          "draft_accepted": 1681,
+          "draft_proposed": 1837,
+          "full_q256_calls": 7,
+          "terminal_q53_accepted": 52,
+          "checkpoint_restore_replay_rows": [
+            101
+          ],
+          "restore_to_replay_ms": 1125.585000000001
+        }
+      }
+    },
+    "80k": {
+      "prompt_tokens": 80000,
+      "prompt_token_sha256": "ecaf44e84a706416e24f9892fc436724041b453eadc56b16d4f085d5f4a97d90",
+      "rendered_template_sha256": "87d092e24cad4905a309e561eeffe217c69163fb12c30a7ad2d948b0ede66749",
+      "verified_exact_input_only_donor_slice": true,
+      "source_receipt_sha256": "e76607dfbd9c54cb1e495d376cc00de39d7e6d2c5c1fda4775d272a2e15af64c",
+      "gpu_layers_offloaded": 42,
+      "runner_exit_code": 0,
+      "cleanup_exit_code": 0,
+      "conditions": {
+        "cold": {
+          "same_1722_generated_ids_including_eos_as_serial_and_stock": true,
+          "exact_normalized_text_and_ast": true,
+          "cache_tokens": 0,
+          "evaluated_prompt_tokens": 80000,
+          "bounded": {
+            "request_wall_s": 277.29157324298285,
+            "decode_s": 14.740157,
+            "decode_toks_s": 116.82372175547384,
+            "server_first_token_s": 262.526454
+          },
+          "frozen_serial": {
+            "decode_s": 29.595976,
+            "same_count_decode_tok_s": 58.18358549824476,
+            "request_wall_s": 291.09588358399924
+          },
+          "frozen_stock_q256": {
+            "decode_s": 16.348228,
+            "same_count_decode_tok_s": 105.3325167718483,
+            "request_wall_s": 277.8596775139449
+          },
+          "bounded_over_serial_decode_ratio": 2.007846727819792,
+          "bounded_over_stock_decode_ratio": 1.1090945639181455,
+          "draft_accepted": 1681,
+          "draft_proposed": 1837,
+          "full_q256_calls": 7,
+          "terminal_q53_accepted": 52,
+          "checkpoint_restore_replay_rows": [
+            101
+          ],
+          "restore_to_replay_ms": 1378.750000000025
+        },
+        "warm": {
+          "same_1722_generated_ids_including_eos_as_serial_and_stock": true,
+          "exact_normalized_text_and_ast": true,
+          "cache_tokens": 79996,
+          "evaluated_prompt_tokens": 4,
+          "bounded": {
+            "request_wall_s": 14.675343022099696,
+            "decode_s": 14.544913000000001,
+            "decode_toks_s": 118.3919078787202,
+            "server_first_token_s": 0.10506
+          },
+          "frozen_serial": {
+            "decode_s": 29.617981,
+            "same_count_decode_tok_s": 58.140357372772975,
+            "request_wall_s": 29.746612615999766
+          },
+          "frozen_stock_q256": {
+            "decode_s": 16.159631,
+            "same_count_decode_tok_s": 106.56183919051121,
+            "request_wall_s": 16.286113120033406
+          },
+          "bounded_over_serial_decode_ratio": 2.0363120081914547,
+          "bounded_over_stock_decode_ratio": 1.1110159957642922,
+          "draft_accepted": 1681,
+          "draft_proposed": 1837,
+          "full_q256_calls": 7,
+          "terminal_q53_accepted": 52,
+          "checkpoint_restore_replay_rows": [
+            101
+          ],
+          "restore_to_replay_ms": 1372.5179999999568
+        }
+      },
+      "warm_decode_2x_gate_met": true
+    }
+  }
+}

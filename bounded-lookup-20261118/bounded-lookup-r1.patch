@@ -1,0 +1,213 @@
+--- a/common/ngram-map.h
++++ b/common/ngram-map.h
+@@ -15,6 +15,7 @@
+ #include "llama.h"
+ #include "common.h"
+ 
++#include <optional>
+ #include <vector>
+ 
+ // n-gram simple
+@@ -26,7 +27,17 @@
+     uint16_t   size_mgram;      // size of m-grams to draft in self-mode
+ };
+ 
++// Half-open token interval in the original prompt.
++struct common_ngram_source_span {
++    size_t begin;
++    size_t end;
++};
++
+ // Searches for a n-gram in the history and checks whether a draft sequence should be generated.
++llama_tokens common_ngram_simple_draft(
++        const common_ngram_simple_config & config,
++        const llama_tokens & tokens, llama_token sampled,
++        std::optional<common_ngram_source_span> source_span);
+ llama_tokens common_ngram_simple_draft(
+         const common_ngram_simple_config & config,
+         const llama_tokens & tokens, llama_token sampled);
+--- a/common/ngram-map.cpp
++++ b/common/ngram-map.cpp
+@@ -49,6 +49,13 @@
+ llama_tokens common_ngram_simple_draft(
+         const common_ngram_simple_config & config,
+         const llama_tokens & tokens, llama_token sampled) {
++    return common_ngram_simple_draft(config, tokens, sampled, std::nullopt);
++}
++
++llama_tokens common_ngram_simple_draft(
++        const common_ngram_simple_config & config,
++        const llama_tokens & tokens, llama_token sampled,
++        std::optional<common_ngram_source_span> source_span) {
+ 
+     // Simple implementation of self-speculative decoding without a draft model.
+     //
+@@ -74,9 +81,23 @@
+     }
+     pattern.push_back(sampled); // add the last token to the pattern
+ 
+-    size_t match_pos = 0; // we ignore position 0, position 0 == no match
+-                          // search backwards, but skip the current match (we are currently there)
+-    for (size_t j = cur_len - n_draft_min - 1; j > 0; --j) {
++    size_t first_pos = 1; // legacy lookup ignores position zero
++    size_t last_pos = cur_len - n_draft_min - 1; // skip the current match
++    size_t source_end = cur_len;
++    if (source_span) {
++        first_pos = source_span->begin;
++        source_end = source_span->end;
++        if (source_end > cur_len || first_pos >= source_end || source_end - first_pos < 2 * n_draft_min) {
++            return draft_tokens;
++        }
++        last_pos = std::min(last_pos, source_end - n_draft_min);
++        if (last_pos < first_pos) {
++            return draft_tokens;
++        }
++    }
++
++    size_t match_pos = cur_len;
++    for (size_t j = last_pos; ; --j) {
+         bool match = true;
+         for (size_t k = 0; k < pattern.size(); ++k) {
+             if (tokens[j + k] != pattern[k]) {
+@@ -88,14 +109,17 @@
+             match_pos = j;
+             break;
+         }
+-    }
+-    if (match_pos == 0) {
++        if (j == first_pos) {
++            break;
++        }
++    }
++    if (match_pos == cur_len) {
+         return draft_tokens;
+     }
+ 
+     const size_t copy_max = std::min(
+             n_draft_max,
+-            cur_len - (match_pos + n_draft_min)
++            source_end - (match_pos + n_draft_min)
+             );
+     if (copy_max < n_draft_min) {
+         return draft_tokens;
+--- a/common/speculative.h
++++ b/common/speculative.h
+@@ -2,6 +2,7 @@
+ 
+ #include "llama.h"
+ #include "common.h"
++#include "ngram-map.h"
+ 
+ struct common_speculative;
+ 
+@@ -79,6 +80,7 @@
+     // the target's temp and seed, read only when the drafter samples probabilistically
+     float    temp = 1.0f;
+     uint32_t seed = LLAMA_DEFAULT_SEED;
++    std::optional<common_ngram_source_span> lookup_source_span = std::nullopt;
+ };
+ 
+ common_speculative_draft_params & common_speculative_get_draft_params(common_speculative * spec, llama_seq_id seq_id);
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -2036,7 +2036,7 @@
+                 continue;
+             }
+ 
+-            *dp.result = common_ngram_simple_draft(config, *dp.prompt, dp.id_last);
++            *dp.result = common_ngram_simple_draft(config, *dp.prompt, dp.id_last, dp.lookup_source_span);
+         }
+     }
+ 
+--- a/tools/server/server-task.h
++++ b/tools/server/server-task.h
+@@ -1,6 +1,7 @@
+ #pragma once
+ 
+ #include "common.h"
++#include "ngram-map.h"
+ #include "llama.h"
+ 
+ #include <string>
+@@ -155,6 +156,7 @@
+     // used by SERVER_TASK_TYPE_INFERENCE
+     task_params   params;
+     server_tokens tokens;
++    std::optional<common_ngram_source_span> lookup_source_span;
+ 
+     // only used by CLI, this allow tokenizing CLI inputs on server side
+     // we need this because mtmd_context and vocab are not accessible outside of server_context
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -3457,6 +3457,7 @@
+                             /* .result_q = */ spec_reject ? &slot.spec_draft_q : nullptr,
+                             /* .temp     = */ slot.task->params.sampling.temp,
+                             /* .seed     = */ slot.task->params.sampling.seed,
++                            /* .lookup_source_span = */ slot.task->lookup_source_span,
+                         };
+ 
+                         drafting.push_back(&slot);
+@@ -4936,6 +4937,28 @@
+             }
+         }
+ 
++        const bool bounded_lookup = data.contains("lookup_source_span");
++        if (bounded_lookup) {
++            const auto & types = params.speculative.types;
++            const bool has_ngram = std::find(types.begin(), types.end(), COMMON_SPECULATIVE_TYPE_NGRAM_SIMPLE) != types.end();
++            const bool only_ngram = std::all_of(types.begin(), types.end(), [](common_speculative_type t) {
++                return t == COMMON_SPECULATIVE_TYPE_NONE || t == COMMON_SPECULATIVE_TYPE_NGRAM_SIMPLE;
++            });
++            if (type != SERVER_TASK_TYPE_COMPLETION || res_type != TASK_RESPONSE_TYPE_NONE ||
++                    params.n_parallel != 1 || params.ctx_shift || !has_ngram || !only_ngram ||
++                    !prompt.is_array() || !std::all_of(prompt.begin(), prompt.end(),
++                        [](const json & token) { return token.is_number_integer(); })) {
++                throw std::invalid_argument("lookup_source_span requires native /completion with one flat token-ID prompt, one slot, ngram-simple and context shifting disabled");
++            }
++            const int64_t vocab_size = llama_vocab_n_tokens(ctx_server.vocab);
++            for (const auto & token : prompt) {
++                const auto id = token.get<int64_t>();
++                if (id < 0 || id >= vocab_size) {
++                    throw std::invalid_argument("lookup_source_span flat prompt contains a token ID outside the vocabulary range");
++                }
++            }
++        }
++
+         // process prompt
+         std::vector<server_tokens> inputs;
+ 
+@@ -4962,6 +4985,34 @@
+                     data);
+ 
+             task.apply_chat_session(chat_session);
++
++            if (bounded_lookup) {
++                if (inputs.size() != 1 || task.params.n_cmpl != 1 || task.tokens.has_mtmd) {
++                    throw std::invalid_argument("lookup_source_span requires one text-only completion");
++                }
++                const auto & source = data.at("lookup_source_span");
++                if (!source.is_object() || source.size() != 3 ||
++                        !source.contains("begin") || !source["begin"].is_number_integer() ||
++                        !source.contains("end") || !source["end"].is_number_integer() ||
++                        !source.contains("token_ids") || !source["token_ids"].is_array()) {
++                    throw std::invalid_argument("lookup_source_span requires integer begin, end and an array of token_ids");
++                }
++                const auto begin = source["begin"].get<int64_t>();
++                const auto end = source["end"].get<int64_t>();
++                if (begin < 0 || end <= begin || static_cast<uint64_t>(end) > task.tokens.size() ||
++                        end - begin < 2 * params.speculative.ngram_simple.size_n ||
++                        static_cast<uint64_t>(end - begin) != source["token_ids"].size()) {
++                    throw std::invalid_argument("lookup_source_span is outside the original prompt or has invalid length");
++                }
++                for (int64_t j = begin; j < end; ++j) {
++                    const auto & token = source["token_ids"][static_cast<size_t>(j - begin)];
++                    if (!token.is_number_integer() || token.get<int64_t>() != task.tokens[static_cast<size_t>(j)]) {
++                        throw std::invalid_argument("lookup_source_span token_ids differ from the original prompt");
++                    }
++                }
++                task.lookup_source_span = common_ngram_source_span{static_cast<size_t>(begin), static_cast<size_t>(end)};
++                SRV_TRC("lookup_source_span: validated %zu donor tokens\n", static_cast<size_t>(end - begin));
++            }
+ 
+             task.id_slot = json_value(data, "id_slot", -1);
+             sse_ping_interval = task.params.sse_ping_interval;
