@@ -1,0 +1,35 @@
+{
+  "publication_parent": "c6a7037be26014228bb32b30cd61e44768b77994",
+  "source_checkout": "da7ba0e49dd43c69f9ee5a219ea3124f7acda0c8",
+  "inherited_attention_c973_sha256": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+  "q3_package_relative_path": "../native-mtp-resume-first-20261118",
+  "runtime_sha256": {
+    "libggml.so.0.26.0": "1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc",
+    "libggml-base.so.0.26.0": "678cf75e5ef5b1f92460eb0f816d3bbe755ee9710fd04606c31ec24dcd41fa06",
+    "libggml-cuda.so": "a68cf344d6c810cd8f9ca8bf46a7fcf8a0b2f466d660daa21ed576ef96da44b2",
+    "operator": "4f4cdcc2cae4000a3f5a8f84796b1453540ac4964a18381b1fe6feb56243af66"
+  },
+  "check_flags": [
+    "GGML_CUDA_OCCAMY_DEBUG=1",
+    "GGML_CUDA_MOE_V3_CHECK=8"
+  ],
+  "perf_flags": [
+    "GGML_CUDA_OCCAMY_DEBUG=0",
+    "GGML_CUDA_MOE_V3_CHECK=0"
+  ],
+  "common_flags": [
+    "LD_LIBRARY_PATH=/runtime",
+    "GGML_CUDA_DISABLE_GRAPHS=1",
+    "GGML_CUDA_MOE_DOWNX=1",
+    "GGML_CUDA_MOE_DOWNH=2",
+    "GGML_CUDA_MMVQ_SM52=1",
+    "GGML_CUDA_OCCAMY_FUSED=1",
+    "GGML_CUDA_MOE_LOP3=1",
+    "GGML_CUDA_MOE_TAILBAL=1",
+    "GGML_CUDA_OCCAMY_HOSTGAP=1",
+    "GGML_CUDA_OCCAMY_SMALLFUSE=2",
+    "GGML_CUDA_OCCAMY_N2SPLIT=1",
+    "GGML_CUDA_MOE_V3=1"
+  ],
+  "pinned_container_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d"
+}

@@ -1,0 +1,122 @@
+--- a/occamy-fused.cu
++++ b/occamy-fused.cu
+@@ -610,6 +610,15 @@
+     moe_v3_body<true>(P, physical / 3);
+ }
+ 
++__global__ void __launch_bounds__(NT3, 2) moe_v3_q4_cohorts(Params P) {
++    const unsigned physical = blockIdx.y * gridDim.x + blockIdx.x;
++    const unsigned row = physical % 4;
++    P.h += row * H;
++    P.out += row * H;
++    P.s += row;
++    moe_v3_body<true>(P, physical / 4);
++}
++
+ __global__ void moe_v3_cmp(const float * a, const float * b, unsigned * res) {
+     for (int i = threadIdx.x; i < H; i += blockDim.x) {
+         const unsigned x = __float_as_uint(a[i]), y = __float_as_uint(b[i]);
+@@ -666,6 +675,35 @@
+     return available[device];
+ }
+ 
++static std::atomic<unsigned long long> q4_launches{0};
++
++static bool q4_enabled(ggml_backend_cuda_context & ctx) {
++    const char * value = getenv("GGML_CUDA_OCCAMY_MOE_Q4_COHORTS");
++    return value && strcmp(value, "1") == 0 && ggml_cuda_info().devices[ctx.device].cc == 520 &&
++           env_flag("GGML_CUDA_MOE_V3") && !env_flag("GGML_CUDA_OCCAMY_3L") &&
++           ctx.curr_stream_no == 0 && ctx.stream_context().concurrent_events.empty();
++}
++
++static bool q4_resident(int device) {
++    static std::once_flag once[GGML_CUDA_MAX_DEVICES];
++    static bool available[GGML_CUDA_MAX_DEVICES] = {};
++    std::call_once(once[device], [device] {
++        ggml_cuda_set_device(device);
++        int nsm = 0, per_sm = 0;
++        cudaFuncAttributes attr{};
++        CUDA_CHECK(cudaDeviceGetAttribute(&nsm, cudaDevAttrMultiProcessorCount, device));
++        CUDA_CHECK(cudaFuncGetAttributes(&attr, moe_v3_q4_cohorts));
++        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
++            &per_sm, moe_v3_q4_cohorts, NT3, SMEM3_FLOATS * sizeof(float)));
++        available[device] = nsm == 24 && per_sm >= 2 && nsm*per_sm >= 48;
++        fprintf(stderr, "Q4_COHORT residency device=%d sm=%d active_per_sm=%d regs=%d "
++                "static_smem=%zu dynamic_smem=%zu local=%zu admitted=%d\n",
++                device, nsm, per_sm, attr.numRegs, attr.sharedSizeBytes,
++                SMEM3_FLOATS*sizeof(float), attr.localSizeBytes, int(available[device]));
++    });
++    return available[device];
++}
++
+ static void reject(const char * why) {
+     if (!g_debug) { return; }
+     static std::set<std::string> seen;
+@@ -746,6 +784,11 @@
+     return q3_launches.load(std::memory_order_relaxed);
+ }
+ 
++extern "C" __attribute__((visibility("default"))) unsigned long long ggml_cuda_occamy_q4_cohort_launch_count();
++extern "C" unsigned long long ggml_cuda_occamy_q4_cohort_launch_count() {
++    return q4_launches.load(std::memory_order_relaxed);
++}
++
+ bool ggml_cuda_occamy_enabled() {
+     static const bool on = env_flag("GGML_CUDA_OCCAMY_FUSED");
+     return on;
+@@ -779,7 +822,7 @@
+     const ggml_tensor * h = norm->src[0];
+     const int64_t nt = ggml_nrows(h);
+     if (h->type != GGML_TYPE_F32 || h->ne[0] != H || !(nt == 1 || (nt == 2 && ggml_cuda_occamy_n2split()) ||
+-        (nt == 3 && h->ne[1] == 3 && h->ne[2] == 1 && h->ne[3] == 1 && q3_enabled(ctx))) || !ggml_is_contiguous(h)) { return false; }
++        (nt == 3 && h->ne[1] == 3 && h->ne[2] == 1 && h->ne[3] == 1 && q3_enabled(ctx)) || (nt == 4 && h->ne[1] == 4 && h->ne[2] == 1 && h->ne[3] == 1 && q4_enabled(ctx))) || !ggml_is_contiguous(h)) { return false; }
+ 
+     // window end: first ADD after i that takes h directly (the FFN residual add)
+     int end = -1;
+@@ -914,6 +957,15 @@
+             out->ne[1] != 3 || out->ne[2] != 1 || out->ne[3] != 1 ||
+             h->nb[1] != H*sizeof(float) || out->nb[1] != H*sizeof(float) ||
+             !q3_resident(ctx.device)) { return false; }
++    }
++
++    if (nt == 4) {
++        const uintptr_t src = (uintptr_t)h->data, dst = (uintptr_t)out->data;
++        const uintptr_t distance = src > dst ? src - dst : dst - src;
++        if (!src || !dst || (distance && distance < 4*H*sizeof(float)) ||
++            out->ne[1] != 4 || out->ne[2] != 1 || out->ne[3] != 1 ||
++            h->nb[1] != H*sizeof(float) || out->nb[1] != H*sizeof(float) ||
++            !q4_resident(ctx.device)) { return false; }
+     }
+ 
+     m.n_nodes = n; m.h = h; m.eps = eps; m.out = out; m.nt = (int) nt;
+@@ -965,6 +1017,30 @@
+         moe_v3_q3_cohorts<<<dim3(16,3), NT3, SMEM3_FLOATS*sizeof(float), ctx.stream()>>>(P);
+         CUDA_CHECK(cudaGetLastError());
+         q3_launches.fetch_add(1, std::memory_order_relaxed);
++        return;
++    }
++    if (m.nt == 4) {
++        GGML_ASSERT(row == 0 && v3 && q4_resident(ctx.device));
++        ggml_cuda_pool_alloc<Scratch> workspace(ctx.pool(), 4);
++        // The allocator is stream ordered on this exclusive primary-stream path.
++        // Clear only the contiguous pair of barrier words in each independent row.
++        static_assert(offsetof(Scratch, bar_gen) == offsetof(Scratch, bar_count) + sizeof(unsigned),
++                      "barrier words must be adjacent");
++        CUDA_CHECK(cudaMemset2DAsync((char *)workspace.get() + offsetof(Scratch, bar_count),
++                  sizeof(Scratch), 0, 2*sizeof(unsigned), 4, ctx.stream()));
++        Params P{};
++        P.L = {(const float *)m.gate_inp->data, (const float *)m.gate_inp_sh->data,
++               (const uint8_t *)m.gate_exps->data, (const uint8_t *)m.up_exps->data,
++               (const uint8_t *)m.down_exps->data, (const uint8_t *)m.gate_sh->data,
++               (const uint8_t *)m.up_sh->data, (const uint8_t *)m.down_sh->data};
++        P.h = (const float *)m.h->data;
++        P.out = out_override ? out_override : (float *)m.out->data;
++        P.norm = (const float *)m.norm_w->data;
++        P.s = workspace.get();
++        P.eps = m.eps;
++        moe_v3_q4_cohorts<<<dim3(12,4), NT3, SMEM3_FLOATS*sizeof(float), ctx.stream()>>>(P);
++        CUDA_CHECK(cudaGetLastError());
++        q4_launches.fetch_add(1, std::memory_order_relaxed);
+         return;
+     }
+     if (!v3 || d.grid_v3 <= 0) { moe_launch_v2(ctx, m, out_override, row); return; }

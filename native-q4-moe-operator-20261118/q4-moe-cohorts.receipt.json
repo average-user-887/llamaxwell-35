@@ -1,0 +1,614 @@
+{
+  "materiality_threshold_us": 190.0,
+  "status": {
+    "runner_exit": 0,
+    "cleanup_exit": 0,
+    "cap_seconds": 180
+  },
+  "bounded_wall_s": 2,
+  "sources": {
+    "green_q3_control": "30ec9a72d6f938656f331b91eb75266e73268bf2015a0d3dd2867eeb427dd58b",
+    "candidate": "a68cf344d6c810cd8f9ca8bf46a7fcf8a0b2f466d660daa21ed576ef96da44b2",
+    "operator": "4f4cdcc2cae4000a3f5a8f84796b1453540ac4964a18381b1fe6feb56243af66",
+    "preexisting_device_functions_unchanged": 17,
+    "preexisting_device_instruction_words_unchanged": 45992,
+    "added": "_ZN6occamy17moe_v3_q4_cohortsENS_6ParamsE",
+    "q4": {
+      "threads_per_cta": 512,
+      "cohorts": 4,
+      "ctas_per_cohort": 12,
+      "registers": 63,
+      "static_shared_bytes": 96,
+      "dynamic_shared_bytes": 39424,
+      "stack_bytes": 0,
+      "spill_bytes": 0
+    },
+    "source_guards": "Opt-in exact width4/H2048/all K8, strictly contiguous input and output, fallback on displaced overlap, Maxwell cc520, 24 SM and >=2 CTAs/SM queried for exact candidate; ordinary primary stream, independent workspaces/barriers."
+  },
+  "timing_scope": "Standalone full-graph wall time per synchronized run, two static fixtures. No native-model throughput measurement.",
+  "check": {
+    "executed": true,
+    "observed_physical_totals": [
+      [
+        0,
+        2
+      ]
+    ],
+    "actual_candidate_row_checks": [
+      [
+        "independent",
+        0,
+        0
+      ],
+      [
+        "independent",
+        1,
+        0
+      ],
+      [
+        "independent",
+        2,
+        0
+      ],
+      [
+        "independent",
+        3,
+        0
+      ],
+      [
+        "partial",
+        0,
+        0
+      ],
+      [
+        "partial",
+        1,
+        0
+      ],
+      [
+        "partial",
+        2,
+        0
+      ],
+      [
+        "partial",
+        3,
+        0
+      ]
+    ],
+    "observed_intervals": [],
+    "verified": true,
+    "residency": {
+      "sm_count": 24,
+      "active_ctas_per_sm": 2,
+      "resident_capacity": 48,
+      "ctas_launched": 48,
+      "threads_per_cta": 512,
+      "private_barrier_participants": 12,
+      "cohorts": 4,
+      "registers": 63,
+      "static_shared_bytes": 96,
+      "dynamic_shared_bytes": 39424,
+      "thread_local_bytes": 0
+    },
+    "results": {
+      "independent": {
+        "pair_overlaps": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "gpu_route_ids_equal": 32,
+        "candidate_words_checked": 8192,
+        "candidate_vs_v3_different_by_row": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "v3_vs_v2_different_by_row": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "generic_vs_v3": [
+          {
+            "row": 0,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0458954573,
+            "relative_rms": 0.0152340527
+          },
+          {
+            "row": 1,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0388704538,
+            "relative_rms": 0.0140184505
+          },
+          {
+            "row": 2,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0600202084,
+            "relative_rms": 0.0253669908
+          },
+          {
+            "row": 3,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0365581512,
+            "relative_rms": 0.0103642084
+          }
+        ]
+      },
+      "partial": {
+        "pair_overlaps": [
+          5,
+          4,
+          4,
+          2,
+          5,
+          3
+        ],
+        "gpu_route_ids_equal": 32,
+        "candidate_words_checked": 8192,
+        "candidate_vs_v3_different_by_row": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "v3_vs_v2_different_by_row": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "generic_vs_v3": [
+          {
+            "row": 0,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0458954573,
+            "relative_rms": 0.0152340527
+          },
+          {
+            "row": 1,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0689789653,
+            "relative_rms": 0.030224158
+          },
+          {
+            "row": 2,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0484392643,
+            "relative_rms": 0.0147041327
+          },
+          {
+            "row": 3,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0451333523,
+            "relative_rms": 0.0136361157
+          }
+        ]
+      }
+    }
+  },
+  "perf": {
+    "executed": true,
+    "observed_physical_totals": [
+      [
+        0,
+        400
+      ]
+    ],
+    "actual_candidate_row_checks": [],
+    "observed_intervals": [
+      [
+        "independent",
+        "generic",
+        96,
+        0,
+        456.166479
+      ],
+      [
+        "independent",
+        "sequential",
+        96,
+        0,
+        394.839698
+      ],
+      [
+        "independent",
+        "cohorts",
+        96,
+        96,
+        287.76
+      ],
+      [
+        "independent",
+        "cohorts",
+        96,
+        96,
+        297.383583
+      ],
+      [
+        "independent",
+        "sequential",
+        96,
+        0,
+        408.380208
+      ],
+      [
+        "independent",
+        "generic",
+        96,
+        0,
+        456.172937
+      ],
+      [
+        "partial",
+        "generic",
+        96,
+        0,
+        429.122927
+      ],
+      [
+        "partial",
+        "sequential",
+        96,
+        0,
+        395.751125
+      ],
+      [
+        "partial",
+        "cohorts",
+        96,
+        96,
+        283.753854
+      ],
+      [
+        "partial",
+        "cohorts",
+        96,
+        96,
+        289.053604
+      ],
+      [
+        "partial",
+        "sequential",
+        96,
+        0,
+        406.596406
+      ],
+      [
+        "partial",
+        "generic",
+        96,
+        0,
+        429.814656
+      ]
+    ],
+    "verified": true,
+    "residency": {
+      "sm_count": 24,
+      "active_ctas_per_sm": 2,
+      "resident_capacity": 48,
+      "ctas_launched": 48,
+      "threads_per_cta": 512,
+      "private_barrier_participants": 12,
+      "cohorts": 4,
+      "registers": 63,
+      "static_shared_bytes": 96,
+      "dynamic_shared_bytes": 39424,
+      "thread_local_bytes": 0
+    },
+    "results": {
+      "independent": {
+        "order": [
+          "generic",
+          "sequential",
+          "cohorts",
+          "cohorts",
+          "sequential",
+          "generic"
+        ],
+        "mean_us": [
+          456.166479,
+          394.839698,
+          287.76,
+          297.383583,
+          408.380208,
+          456.172937
+        ],
+        "q4_launches": [
+          0,
+          0,
+          96,
+          96,
+          0,
+          0
+        ],
+        "generic_minus_cohorts_us": [
+          168.406479,
+          158.789354
+        ],
+        "four_v3_rows_minus_cohorts_us": [
+          107.07969800000001,
+          110.996625
+        ],
+        "projected_generic_gain_ms_over_40_layers": [
+          6.7362591599999995,
+          6.35157416
+        ],
+        "materiality_pass": false,
+        "positive_generic_all_pairs": true,
+        "incremental_30us_all_pairs": true
+      },
+      "partial": {
+        "order": [
+          "generic",
+          "sequential",
+          "cohorts",
+          "cohorts",
+          "sequential",
+          "generic"
+        ],
+        "mean_us": [
+          429.122927,
+          395.751125,
+          283.753854,
+          289.053604,
+          406.596406,
+          429.814656
+        ],
+        "q4_launches": [
+          0,
+          0,
+          96,
+          96,
+          0,
+          0
+        ],
+        "generic_minus_cohorts_us": [
+          145.36907300000001,
+          140.761052
+        ],
+        "four_v3_rows_minus_cohorts_us": [
+          111.99727100000001,
+          117.542802
+        ],
+        "projected_generic_gain_ms_over_40_layers": [
+          5.814762920000001,
+          5.630442080000001
+        ],
+        "materiality_pass": false,
+        "positive_generic_all_pairs": true,
+        "incremental_30us_all_pairs": true
+      }
+    }
+  },
+  "complete_measurement": {
+    "technical_pass": true,
+    "materiality_pass": false,
+    "positive_generic_all_pairs": true,
+    "incremental_30us_all_pairs": true,
+    "threshold_us_per_window": 190.0,
+    "residency": {
+      "sm_count": 24,
+      "active_ctas_per_sm": 2,
+      "resident_capacity": 48,
+      "ctas_launched": 48,
+      "threads_per_cta": 512,
+      "private_barrier_participants": 12,
+      "cohorts": 4,
+      "registers": 63,
+      "static_shared_bytes": 96,
+      "dynamic_shared_bytes": 39424,
+      "thread_local_bytes": 0
+    },
+    "arithmetic": {
+      "independent": {
+        "pair_overlaps": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "gpu_route_ids_equal": 32,
+        "candidate_words_checked": 8192,
+        "candidate_vs_v3_different_by_row": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "v3_vs_v2_different_by_row": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "generic_vs_v3": [
+          {
+            "row": 0,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0458954573,
+            "relative_rms": 0.0152340527
+          },
+          {
+            "row": 1,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0388704538,
+            "relative_rms": 0.0140184505
+          },
+          {
+            "row": 2,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0600202084,
+            "relative_rms": 0.0253669908
+          },
+          {
+            "row": 3,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0365581512,
+            "relative_rms": 0.0103642084
+          }
+        ]
+      },
+      "partial": {
+        "pair_overlaps": [
+          5,
+          4,
+          4,
+          2,
+          5,
+          3
+        ],
+        "gpu_route_ids_equal": 32,
+        "candidate_words_checked": 8192,
+        "candidate_vs_v3_different_by_row": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "v3_vs_v2_different_by_row": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "generic_vs_v3": [
+          {
+            "row": 0,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0458954573,
+            "relative_rms": 0.0152340527
+          },
+          {
+            "row": 1,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0689789653,
+            "relative_rms": 0.030224158
+          },
+          {
+            "row": 2,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0484392643,
+            "relative_rms": 0.0147041327
+          },
+          {
+            "row": 3,
+            "different_words": 2048,
+            "finite": 2048,
+            "max_abs": 0.0451333523,
+            "relative_rms": 0.0136361157
+          }
+        ]
+      }
+    },
+    "timing": {
+      "independent": {
+        "order": [
+          "generic",
+          "sequential",
+          "cohorts",
+          "cohorts",
+          "sequential",
+          "generic"
+        ],
+        "mean_us": [
+          456.166479,
+          394.839698,
+          287.76,
+          297.383583,
+          408.380208,
+          456.172937
+        ],
+        "q4_launches": [
+          0,
+          0,
+          96,
+          96,
+          0,
+          0
+        ],
+        "generic_minus_cohorts_us": [
+          168.406479,
+          158.789354
+        ],
+        "four_v3_rows_minus_cohorts_us": [
+          107.07969800000001,
+          110.996625
+        ],
+        "projected_generic_gain_ms_over_40_layers": [
+          6.7362591599999995,
+          6.35157416
+        ],
+        "materiality_pass": false,
+        "positive_generic_all_pairs": true,
+        "incremental_30us_all_pairs": true
+      },
+      "partial": {
+        "order": [
+          "generic",
+          "sequential",
+          "cohorts",
+          "cohorts",
+          "sequential",
+          "generic"
+        ],
+        "mean_us": [
+          429.122927,
+          395.751125,
+          283.753854,
+          289.053604,
+          406.596406,
+          429.814656
+        ],
+        "q4_launches": [
+          0,
+          0,
+          96,
+          96,
+          0,
+          0
+        ],
+        "generic_minus_cohorts_us": [
+          145.36907300000001,
+          140.761052
+        ],
+        "four_v3_rows_minus_cohorts_us": [
+          111.99727100000001,
+          117.542802
+        ],
+        "projected_generic_gain_ms_over_40_layers": [
+          5.814762920000001,
+          5.630442080000001
+        ],
+        "materiality_pass": false,
+        "positive_generic_all_pairs": true,
+        "incremental_30us_all_pairs": true
+      }
+    },
+    "scope": "Standalone seeded 4-row/8-expert operator. Each interval uses 96 completed graph runs. Four independent V3 row outputs require three concatenations. Forty-window projections assume representative windows and unchanged accepted prefixes."
+  }
+}

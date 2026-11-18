@@ -1,0 +1,2 @@
+N104 FIXTURE independent overlap=0,0,0,0,0,0 min_margin=0.00021109628
+N104 FIXTURE partial overlap=5,4,4,2,5,3 min_margin=0.00099693925

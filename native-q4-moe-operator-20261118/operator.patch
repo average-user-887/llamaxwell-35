@@ -1,0 +1,143 @@
+--- a/operator.cpp
++++ b/operator.cpp
+@@ -22,7 +22,7 @@
+ constexpr int experts = 256;
+ constexpr int ranks = 8;
+ constexpr int middle = 512;
+-constexpr int width = 3;
++constexpr int width = 4;
+ constexpr int graph_size = 256;
+ constexpr int reps = 96;
+ using Ids = std::array<int32_t, ranks * width>;
+@@ -63,7 +63,7 @@
+     const char * name;
+     Output input;
+     Ids ids{};
+-    std::array<int, 3> pair_overlap{};
++    std::array<int, width*(width-1)/2> pair_overlap{};
+     double shortlist_margin = 1.0;
+ 
+     Fixture(const char * label, const WeightData & weights, float mix) : name(label) {
+@@ -102,8 +102,8 @@
+     }
+     void report() const {
+         require(shortlist_margin > 1e-5, "router fixture has a near tie");
+-        std::fprintf(stderr, "N104 FIXTURE %s overlap=%d,%d,%d min_margin=%.8g\n",
+-                     name, pair_overlap[0], pair_overlap[1], pair_overlap[2], shortlist_margin);
++        std::fprintf(stderr, "N104 FIXTURE %s overlap=%d,%d,%d,%d,%d,%d min_margin=%.8g\n",
++                     name, pair_overlap[0], pair_overlap[1], pair_overlap[2], pair_overlap[3], pair_overlap[4], pair_overlap[5], shortlist_margin);
+     }
+ };
+ 
+@@ -216,7 +216,7 @@
+             }
+         } else {
+             output = block(weights, input, width);
+-            ggml_set_name(output, "n104_generic_q3");
++            ggml_set_name(output, "n104_generic_q4");
+         }
+         ggml_build_forward_expand(graph, output);
+         require(ggml_nelements(output) == (mode == Mode::router ? ranks * width : hidden * width), "graph output shape");
+@@ -228,7 +228,7 @@
+                 require(t->src[2]->ne[0] == ranks && t->src[2]->ne[1] == (mode == Mode::split ? 1 : width), "expert rank/width shape");
+             }
+         }
+-        require(projections == (mode == Mode::router ? 0 : mode == Mode::generic ? 3 : 9), "graph projection count");
++        require(projections == (mode == Mode::router ? 0 : mode == Mode::generic ? 3 : 3*width), "graph projection count");
+     }
+ 
+     void allocate(ggml_backend_t backend) {
+@@ -269,10 +269,11 @@
+ 
+ using LaunchCounter = unsigned long long (*)();
+ LaunchCounter cohort_count = nullptr;
++LaunchCounter prior_q3_count = nullptr;
+ 
+ void set_cohorts(bool enabled) {
+-    require(setenv("GGML_CUDA_OCCAMY_MOE_Q3_COHORTS", enabled ? "1" : "0", 1) == 0,
+-            "could not select q3 execution mode");
++    require(setenv("GGML_CUDA_OCCAMY_MOE_Q4_COHORTS", enabled ? "1" : "0", 1) == 0,
++            "could not select q4 execution mode");
+ }
+ void load_counter() {
+     void * handle = dlopen("/runtime/libggml-cuda.so", RTLD_NOLOAD | RTLD_NOW);
+@@ -280,12 +281,14 @@
+     char executable[256]{};
+     const auto n = readlink("/proc/self/exe", executable, sizeof(executable)-1);
+     require(n > 0 && std::strcmp(executable, "/operator") == 0, "unexpected running operator binary");
+-    cohort_count = reinterpret_cast<LaunchCounter>(dlsym(handle, "ggml_cuda_occamy_q3_cohort_launch_count"));
++    cohort_count = reinterpret_cast<LaunchCounter>(dlsym(handle, "ggml_cuda_occamy_q4_cohort_launch_count"));
++    prior_q3_count = reinterpret_cast<LaunchCounter>(dlsym(handle,"ggml_cuda_occamy_q3_cohort_launch_count"));
++    require(prior_q3_count && prior_q3_count()==0,"existing Q3 counter unavailable or dirty");
+     require(cohort_count && cohort_count() == 0, "candidate launch counter unavailable or dirty");
+     Dl_info location{};
+     require(dladdr(reinterpret_cast<void *>(cohort_count), &location) && location.dli_fname &&
+             std::strcmp(location.dli_fname, "/runtime/libggml-cuda.so") == 0, "unexpected launch counter provider");
+-    std::fprintf(stderr, "Q3_COHORT MAP /operator counter_provider=%s\n", location.dli_fname);
++    std::fprintf(stderr, "Q4_COHORT MAP /operator counter_provider=%s\n", location.dli_fname);
+     dlclose(handle);
+ }
+ 
+@@ -300,7 +303,7 @@
+                                 row * router.output->nb[1], ranks * sizeof(int32_t));
+     }
+     require(ids == f.ids, "device router IDs differ from seeded reference");
+-    std::fprintf(stderr, "N104 ROUTER %s ids=24/24\n", f.name);
++    std::fprintf(stderr, "N104 ROUTER %s ids=%zu/%zu\n", f.name, ids.size(), f.ids.size());
+     Output base{}, candidate{};
+     generic.use(f);
+     std::fprintf(stderr, "N104 GENERIC_BEGIN %s\n", f.name);
+@@ -318,17 +321,17 @@
+     set_cohorts(true);
+     generic.run(cuda);
+     ggml_backend_tensor_get(generic.output, cohorts.data(), 0, sizeof(cohorts));
+-    require(cohort_count() == initial_count + 1, "missing physical q3 cohort launch");
+-    std::fprintf(stderr, "Q3_COHORT DIAG %s physical=%llu\n", f.name, cohort_count()-initial_count);
++    require(cohort_count() == initial_count + 1, "missing physical q4 cohort launch");
++    std::fprintf(stderr, "Q4_COHORT DIAG %s physical=%llu\n", f.name, cohort_count()-initial_count);
+     set_cohorts(false);
+     for (int row = 0; row < width; ++row) {
+         int different = 0;
+         for (int i = row * hidden; i < (row + 1) * hidden; ++i) {
+-            require(std::isfinite(cohorts[i]) && std::isfinite(candidate[i]), "nonfinite q3 or sequential output");
++            require(std::isfinite(cohorts[i]) && std::isfinite(candidate[i]), "nonfinite q4 or sequential output");
+             different += std::memcmp(&cohorts[i], &candidate[i], sizeof(float)) != 0;
+         }
+-        std::fprintf(stderr, "Q3_COHORT ROW %s row=%d finite=2048 different=%d\n", f.name, row, different);
+-        require(different == 0, "q3 cohort differs from three original V3 row launches");
++        std::fprintf(stderr, "Q4_COHORT ROW %s row=%d finite=2048 different=%d\n", f.name, row, different);
++        require(different == 0, "q4 cohort differs from four original V3 row launches");
+     }
+     for (int row = 0; row < width; ++row) {
+         int mismatches = 0;
+@@ -363,7 +366,7 @@
+         require(launches == (enabled ? (unsigned)count : 0), "physical launch coverage differs");
+         if (count == reps) {
+             const double us = std::chrono::duration<double, std::micro>(finish - start).count() / count;
+-            std::fprintf(stderr, "Q3_COHORT TIME %s mode=%s reps=%d launches=%llu us=%.6f\n",
++            std::fprintf(stderr, "Q4_COHORT TIME %s mode=%s reps=%d launches=%llu us=%.6f\n",
+                          f.name, name, count, launches, us);
+         }
+     };
+@@ -387,12 +390,12 @@
+     require(offline || diagnostic || std::strcmp(argv[1], "--perf") == 0, "unexpected test mode");
+     const WeightData data;
+     const std::array<Fixture, 2> fixtures = {{{"independent", data, 1.0f}, {"partial", data, .34f}}};
++    for (const auto & f : fixtures) { f.report(); }
+     const auto & independent = fixtures[0].pair_overlap;
+     const auto & partial = fixtures[1].pair_overlap;
+     require(*std::max_element(independent.begin(), independent.end()) <= 2, "independent rows overlap too much");
+     require(*std::min_element(partial.begin(), partial.end()) >= 2 &&
+             *std::max_element(partial.begin(), partial.end()) <= 7, "partial rows outside realistic overlap");
+-    for (const auto & f : fixtures) { f.report(); }
+     ggml_backend_t cuda = nullptr;
+     {
+         Weights weights;
+@@ -413,5 +416,7 @@
+             else { perf(cuda, generic, split, f); }
+         }
+     }
++    require(prior_q3_count()==0, "unexpected Q3 candidate on Q4-only fixture");
++    std::fprintf(stderr,"Q4_COHORT FINISH q3_launches=%llu q4_launches=%llu\n",prior_q3_count(),cohort_count());
+     ggml_backend_free(cuda);
+ }
