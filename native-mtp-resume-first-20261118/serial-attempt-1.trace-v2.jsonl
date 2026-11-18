@@ -1,0 +1,5 @@
+{"event":"trace_metadata","arm":"no-mtp","format":2,"scope":"literal typed events plus explicitly labeled emission reconciliation; no token IDs or text"}
+{"event":"request_begin","arm":"no-mtp","phase":"cold","requested":null,"record_available":false,"output_count":null,"finished_at_limit":false}
+{"event":"output_boundary","arm":"no-mtp","phase":"cold","observed_output_count":null,"requested_output_limit":null,"limit_stop_observed":false,"context_truncated":null,"serial_emitted_unassigned_to_cycle":0,"finish_reason":null,"request_wall_s":null}
+{"event":"request_begin","arm":"no-mtp","phase":"warm","requested":null,"record_available":false,"output_count":null,"finished_at_limit":false}
+{"event":"output_boundary","arm":"no-mtp","phase":"warm","observed_output_count":null,"requested_output_limit":null,"limit_stop_observed":false,"context_truncated":null,"serial_emitted_unassigned_to_cycle":0,"finish_reason":null,"request_wall_s":null}

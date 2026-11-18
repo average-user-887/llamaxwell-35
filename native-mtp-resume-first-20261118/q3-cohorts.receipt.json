@@ -1,0 +1,342 @@
+{
+  "scope": "Synthetic three-row full-eight-expert operator fixtures. No target-model generation.",
+  "status": {
+    "runner_exit": 0,
+    "cleanup_exit": 0,
+    "cap_seconds": 180,
+    "elapsed_s": 2
+  },
+  "runtime_build": {
+    "c973_control": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+    "candidate": "30ec9a72d6f938656f331b91eb75266e73268bf2015a0d3dd2867eeb427dd58b",
+    "operator": "e002860705b0002152ab27ecc698dcbc7b0abcb16cfcac8c926c672078cd7c58",
+    "preexisting_device_functions_unchanged": 16,
+    "preexisting_device_instruction_words_unchanged": 42664,
+    "added": "_ZN6occamy17moe_v3_q3_cohortsENS_6ParamsE",
+    "q3": {
+      "threads_per_cta": 512,
+      "cohorts": 3,
+      "ctas_per_cohort": 16,
+      "registers": 63,
+      "static_shared_bytes": 96,
+      "dynamic_shared_bytes": 39424,
+      "stack_bytes": 0,
+      "spill_bytes": 0
+    },
+    "source_guards": "Opt-in exact width3/H2048/all K8, strictly contiguous input and output, fallback on displaced overlap, Maxwell cc520, 24 SM and >=2 CTAs/SM queried for exact candidate; ordinary primary stream, independent workspaces/barriers."
+  },
+  "result": {
+    "technical_pass": true,
+    "materiality_pass": true,
+    "narrow_incremental_pass": true,
+    "materiality_threshold_us": 116.5,
+    "incremental_threshold_us": 30.0,
+    "residency": {
+      "sm_count": 24,
+      "active_ctas_per_sm": 2,
+      "resident_capacity": 48,
+      "launched_ctas": 48,
+      "cohorts": 3,
+      "private_barrier_participants": 16,
+      "registers": 63,
+      "static_shared_bytes": 96,
+      "dynamic_shared_bytes": 39424,
+      "thread_local_bytes": 0
+    },
+    "arithmetic": {
+      "independent": {
+        "pair_overlap": [
+          0,
+          0,
+          0
+        ],
+        "margin": 0.00021109628,
+        "gpu_ids_equal": 24,
+        "v3_v2_bitwise_mismatches_by_row": [
+          0,
+          0,
+          0
+        ],
+        "v3_generic_rows": [
+          {
+            "row": 0,
+            "finite": 2048,
+            "different": 2048,
+            "max_abs": 0.0458954573,
+            "relative_rms": 0.0152340534
+          },
+          {
+            "row": 1,
+            "finite": 2048,
+            "different": 2048,
+            "max_abs": 0.038870573,
+            "relative_rms": 0.0140184645
+          },
+          {
+            "row": 2,
+            "finite": 2048,
+            "different": 2048,
+            "max_abs": 0.0600200891,
+            "relative_rms": 0.0253669825
+          }
+        ],
+        "candidate_vs_v3_bitwise_mismatches": [
+          0,
+          0,
+          0
+        ],
+        "candidate_values_checked": 6144
+      },
+      "partial": {
+        "pair_overlap": [
+          5,
+          4,
+          2
+        ],
+        "margin": 0.00099693925,
+        "gpu_ids_equal": 24,
+        "v3_v2_bitwise_mismatches_by_row": [
+          0,
+          0,
+          0
+        ],
+        "v3_generic_rows": [
+          {
+            "row": 0,
+            "finite": 2048,
+            "different": 2048,
+            "max_abs": 0.0458954573,
+            "relative_rms": 0.0152340534
+          },
+          {
+            "row": 1,
+            "finite": 2048,
+            "different": 2048,
+            "max_abs": 0.0689790845,
+            "relative_rms": 0.0302241641
+          },
+          {
+            "row": 2,
+            "finite": 2048,
+            "different": 2048,
+            "max_abs": 0.0484393835,
+            "relative_rms": 0.014704135
+          }
+        ],
+        "candidate_vs_v3_bitwise_mismatches": [
+          0,
+          0,
+          0
+        ],
+        "candidate_values_checked": 6144
+      }
+    },
+    "timing": {
+      "independent": {
+        "order": [
+          "generic",
+          "sequential",
+          "cohorts",
+          "cohorts",
+          "sequential",
+          "generic"
+        ],
+        "mean_us_in_each_interval": [
+          372.507771,
+          297.551323,
+          232.653865,
+          227.501792,
+          307.943542,
+          378.831844
+        ],
+        "actual_q3_launches_in_each_interval": [
+          0,
+          0,
+          96,
+          96,
+          0,
+          0
+        ],
+        "generic_minus_cohorts_us": [
+          139.853906,
+          151.330052
+        ],
+        "three_v3_rows_minus_cohorts_us": [
+          64.89745800000003,
+          80.44174999999998
+        ],
+        "projected_generic_saving_ms_over_40_layers": [
+          5.59415624,
+          6.05320208
+        ],
+        "materiality_pass": true,
+        "incremental_pass": true
+      },
+      "partial": {
+        "order": [
+          "generic",
+          "sequential",
+          "cohorts",
+          "cohorts",
+          "sequential",
+          "generic"
+        ],
+        "mean_us_in_each_interval": [
+          360.30149,
+          299.031833,
+          224.914292,
+          220.179469,
+          308.019813,
+          366.002302
+        ],
+        "actual_q3_launches_in_each_interval": [
+          0,
+          0,
+          96,
+          96,
+          0,
+          0
+        ],
+        "generic_minus_cohorts_us": [
+          135.387198,
+          145.82283299999997
+        ],
+        "three_v3_rows_minus_cohorts_us": [
+          74.11754100000002,
+          87.84034399999999
+        ],
+        "projected_generic_saving_ms_over_40_layers": [
+          5.41548792,
+          5.832913319999999
+        ],
+        "materiality_pass": true,
+        "incremental_pass": true
+      }
+    },
+    "scope": "Two synthetic seeded K8 routes in one SM52 MoE window. Sequential V3 host reference includes two output concatenations. Projected whole-model savings assume 40 representative windows and unchanged accepted prefixes. No model or 80K measurement."
+  },
+  "chronological_intervals": [
+    {
+      "fixture": "independent",
+      "mode": "generic",
+      "iterations": 96,
+      "actual_cohort_launches": 0,
+      "microseconds_per_window": 372.507771
+    },
+    {
+      "fixture": "independent",
+      "mode": "sequential",
+      "iterations": 96,
+      "actual_cohort_launches": 0,
+      "microseconds_per_window": 297.551323
+    },
+    {
+      "fixture": "independent",
+      "mode": "cohorts",
+      "iterations": 96,
+      "actual_cohort_launches": 96,
+      "microseconds_per_window": 232.653865
+    },
+    {
+      "fixture": "independent",
+      "mode": "cohorts",
+      "iterations": 96,
+      "actual_cohort_launches": 96,
+      "microseconds_per_window": 227.501792
+    },
+    {
+      "fixture": "independent",
+      "mode": "sequential",
+      "iterations": 96,
+      "actual_cohort_launches": 0,
+      "microseconds_per_window": 307.943542
+    },
+    {
+      "fixture": "independent",
+      "mode": "generic",
+      "iterations": 96,
+      "actual_cohort_launches": 0,
+      "microseconds_per_window": 378.831844
+    },
+    {
+      "fixture": "partial",
+      "mode": "generic",
+      "iterations": 96,
+      "actual_cohort_launches": 0,
+      "microseconds_per_window": 360.30149
+    },
+    {
+      "fixture": "partial",
+      "mode": "sequential",
+      "iterations": 96,
+      "actual_cohort_launches": 0,
+      "microseconds_per_window": 299.031833
+    },
+    {
+      "fixture": "partial",
+      "mode": "cohorts",
+      "iterations": 96,
+      "actual_cohort_launches": 96,
+      "microseconds_per_window": 224.914292
+    },
+    {
+      "fixture": "partial",
+      "mode": "cohorts",
+      "iterations": 96,
+      "actual_cohort_launches": 96,
+      "microseconds_per_window": 220.179469
+    },
+    {
+      "fixture": "partial",
+      "mode": "sequential",
+      "iterations": 96,
+      "actual_cohort_launches": 0,
+      "microseconds_per_window": 308.019813
+    },
+    {
+      "fixture": "partial",
+      "mode": "generic",
+      "iterations": 96,
+      "actual_cohort_launches": 0,
+      "microseconds_per_window": 366.002302
+    }
+  ],
+  "numerical_rows_vs_sequential_v3": [
+    {
+      "fixture": "independent",
+      "row": 0,
+      "finite": 2048,
+      "different": 0
+    },
+    {
+      "fixture": "independent",
+      "row": 1,
+      "finite": 2048,
+      "different": 0
+    },
+    {
+      "fixture": "independent",
+      "row": 2,
+      "finite": 2048,
+      "different": 0
+    },
+    {
+      "fixture": "partial",
+      "row": 0,
+      "finite": 2048,
+      "different": 0
+    },
+    {
+      "fixture": "partial",
+      "row": 1,
+      "finite": 2048,
+      "different": 0
+    },
+    {
+      "fixture": "partial",
+      "row": 2,
+      "finite": 2048,
+      "different": 0
+    }
+  ]
+}

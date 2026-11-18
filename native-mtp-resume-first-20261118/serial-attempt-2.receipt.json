@@ -1,0 +1,426 @@
+{
+  "outcome": "complete",
+  "configured_model_profile": {
+    "prompt_tokens": 80000,
+    "output_caps_by_phase": {
+      "cold": 192,
+      "warm": 3072
+    },
+    "slot_context": 84224,
+    "slots": 1,
+    "batch": 2048,
+    "microbatch": 1024,
+    "seed": 7,
+    "temperature": 0,
+    "ignore_eos": true,
+    "context_shift": false,
+    "spec_type": "none",
+    "cache_k": "f16",
+    "cache_v": "f16",
+    "sparse_revision": 2,
+    "width3_r2_enabled": true,
+    "diagnostic_cuda_phase_events": false
+  },
+  "format_version": 1,
+  "mode": "no-mtp",
+  "cap_seconds": 430,
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+  "image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "fleet_admitted_cap_w": 250,
+  "native_q3_cuda_sha256": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+  "runtime_maps": {
+    "libggml-cuda.so": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+    "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+    "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+  },
+  "profile_instrumented": false,
+  "status": {
+    "runner_exit": 0,
+    "cleanup_exit": 0,
+    "bounded_wall_s": 317,
+    "technical_pass": true
+  },
+  "observed_requests": {
+    "cold": {
+      "n_out": 192,
+      "completed_request": true,
+      "ttft_s": 260.38305199099705,
+      "wall_s": 262.87950121599715,
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "prompt_ms": 260363.592,
+        "prompt_per_token_ms": 3.2545449,
+        "prompt_per_second": 307.26262218720655,
+        "predicted_n": 192,
+        "predicted_ms": 2491.486,
+        "predicted_per_token_ms": 13.044429319371726,
+        "predicted_per_second": 76.66107696370761
+      },
+      "unassigned_serial_outputs": 0
+    },
+    "warm": {
+      "n_out": 3072,
+      "completed_request": true,
+      "ttft_s": 0.12616176600567997,
+      "wall_s": 40.160783912055194,
+      "timings": {
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "prompt_ms": 108.097,
+        "prompt_per_token_ms": 27.02425,
+        "prompt_per_second": 37.003802140669954,
+        "predicted_n": 3072,
+        "predicted_ms": 40029.665,
+        "predicted_per_token_ms": 13.034732985998046,
+        "predicted_per_second": 76.71810393616833
+      },
+      "unassigned_serial_outputs": 0
+    }
+  },
+  "speculative_trace_marker_count": 0,
+  "validated_report": {
+    "mode": "no-mtp",
+    "depth": 0,
+    "technical_pass": true,
+    "profile": false,
+    "metrics": {
+      "cold": {
+        "prompt_n": 80000,
+        "cache_n": 0,
+        "evaluated_prompt_n": 80000,
+        "n_out": 192,
+        "ttft_s": 260.38305199099705,
+        "request_wall_s": 262.87950121599715,
+        "decode_s": 2.491486,
+        "decode_toks_s": 77.06244385880555,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "draft_acceptance_fraction": null,
+        "prior_n6_decode_toks_s": 71.56771312082196,
+        "same_prior_n6_first_192": false,
+        "same_prior_n6_first_191": false,
+        "first_prior_n6_mismatch_token_1_based": 61,
+        "prompt_eval_s": 260.363592,
+        "unassigned_serial_outputs": 0,
+        "structure": {
+          "characters": 668,
+          "nonempty_lines": 16,
+          "distinct_nonempty_lines": 16,
+          "repeated_line_occurrences": 0,
+          "largest_identical_line_count": 1,
+          "markdown_fence_lines": 0
+        },
+        "draft_n_rejected": 0,
+        "prompt_checkpoint_marker_count": 0,
+        "speculative_checkpoint_marker_count": 0
+      },
+      "warm": {
+        "prompt_n": 80000,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "n_out": 3072,
+        "ttft_s": 0.12616176600567997,
+        "request_wall_s": 40.160783912055194,
+        "decode_s": 40.029665,
+        "decode_toks_s": 76.74308540928334,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "draft_n_rejected": 0,
+        "draft_acceptance_fraction": null,
+        "sse_checkpoints": [
+          {
+            "output_token": 1,
+            "elapsed_s": 0.12616176600567997,
+            "event_first_token": 1,
+            "event_last_token": 1
+          },
+          {
+            "output_token": 512,
+            "elapsed_s": 6.791224791086279,
+            "event_first_token": 512,
+            "event_last_token": 512
+          },
+          {
+            "output_token": 1024,
+            "elapsed_s": 13.467096798005514,
+            "event_first_token": 1024,
+            "event_last_token": 1024
+          },
+          {
+            "output_token": 1536,
+            "elapsed_s": 20.13576683809515,
+            "event_first_token": 1536,
+            "event_last_token": 1536
+          },
+          {
+            "output_token": 2048,
+            "elapsed_s": 26.81467034399975,
+            "event_first_token": 2048,
+            "event_last_token": 2048
+          },
+          {
+            "output_token": 2560,
+            "elapsed_s": 33.47782079898752,
+            "event_first_token": 2560,
+            "event_last_token": 2560
+          },
+          {
+            "output_token": 3072,
+            "elapsed_s": 40.155836670077406,
+            "event_first_token": 3072,
+            "event_last_token": 3072
+          }
+        ],
+        "sse_segments": [
+          {
+            "after_output_token": 1,
+            "through_output_token": 512,
+            "elapsed_s": 6.665063025080599,
+            "stream_decode_toks_s": 76.66844230536299
+          },
+          {
+            "after_output_token": 512,
+            "through_output_token": 1024,
+            "elapsed_s": 6.675872006919235,
+            "stream_decode_toks_s": 76.69410070614528
+          },
+          {
+            "after_output_token": 1024,
+            "through_output_token": 1536,
+            "elapsed_s": 6.668670040089637,
+            "stream_decode_toks_s": 76.77692807142066
+          },
+          {
+            "after_output_token": 1536,
+            "through_output_token": 2048,
+            "elapsed_s": 6.6789035059046,
+            "stream_decode_toks_s": 76.65928988903008
+          },
+          {
+            "after_output_token": 2048,
+            "through_output_token": 2560,
+            "elapsed_s": 6.663150454987772,
+            "stream_decode_toks_s": 76.84052813436577
+          },
+          {
+            "after_output_token": 2560,
+            "through_output_token": 3072,
+            "elapsed_s": 6.678015871089883,
+            "stream_decode_toks_s": 76.66947936085681
+          }
+        ],
+        "prompt_eval_s": 0.108097,
+        "unassigned_serial_outputs": 0,
+        "structure": {
+          "characters": 11932,
+          "nonempty_lines": 283,
+          "distinct_nonempty_lines": 211,
+          "repeated_line_occurrences": 72,
+          "largest_identical_line_count": 11,
+          "markdown_fence_lines": 0
+        },
+        "prompt_checkpoint_marker_count": 1,
+        "speculative_checkpoint_marker_count": 0
+      }
+    },
+    "host_rounds_restores": null,
+    "warm_dispatch_samples": [
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 2000,
+        "n_kv": 80128
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 3000,
+        "n_kv": 80128
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 4000,
+        "n_kv": 80384
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 5000,
+        "n_kv": 80384
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 6000,
+        "n_kv": 80640
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 7000,
+        "n_kv": 80640
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 8000,
+        "n_kv": 80640
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 9000,
+        "n_kv": 80896
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 10000,
+        "n_kv": 80896
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 11000,
+        "n_kv": 81152
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 12000,
+        "n_kv": 81152
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 13000,
+        "n_kv": 81152
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 14000,
+        "n_kv": 81408
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 15000,
+        "n_kv": 81408
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 16000,
+        "n_kv": 81664
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 17000,
+        "n_kv": 81664
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 18000,
+        "n_kv": 81664
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 19000,
+        "n_kv": 81920
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 20000,
+        "n_kv": 81920
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 21000,
+        "n_kv": 81920
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 22000,
+        "n_kv": 82176
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 23000,
+        "n_kv": 82176
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 24000,
+        "n_kv": 82432
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 25000,
+        "n_kv": 82432
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 26000,
+        "n_kv": 82432
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 27000,
+        "n_kv": 82688
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 28000,
+        "n_kv": 82688
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 29000,
+        "n_kv": 82944
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 30000,
+        "n_kv": 82944
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 31000,
+        "n_kv": 82944
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 32000,
+        "n_kv": 83200
+      }
+    ],
+    "semantic_score": null,
+    "instrumented_phase_summary": null,
+    "mapped_objects": {
+      "libggml-cuda.so": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+      "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+      "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+      "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+    }
+  }
+}

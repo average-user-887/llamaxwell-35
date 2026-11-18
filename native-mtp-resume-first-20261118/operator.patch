@@ -1,0 +1,141 @@
+--- a/operator.cpp
++++ b/operator.cpp
+@@ -11,6 +11,8 @@
+ #include <cstdlib>
+ #include <cstring>
+ #include <fstream>
++#include <dlfcn.h>
++#include <unistd.h>
+ #include <numeric>
+ #include <string>
+ #include <vector>
+@@ -199,6 +201,9 @@
+ 
+     Graph(const Weights & weights, Mode mode) {
+         ggml_set_input(input);
++        // The same seeded rows are evaluated repeatedly during timing.
++        // Pin their allocation so GGML cannot reuse it for the residual.
++        ggml_set_output(input);
+         if (mode == Mode::router) {
+             auto * xn = ggml_mul(ctx, ggml_rms_norm(ctx, input, 1e-6f), weights.norm);
+             output = select(ggml_soft_max(ctx, ggml_mul_mat(ctx, weights.router, xn)));
+@@ -262,7 +267,31 @@
+     for (const auto & lib : expected) { std::fprintf(stderr, "N104 MAP /runtime/%s\n", lib.c_str()); }
+ }
+ 
++using LaunchCounter = unsigned long long (*)();
++LaunchCounter cohort_count = nullptr;
++
++void set_cohorts(bool enabled) {
++    require(setenv("GGML_CUDA_OCCAMY_MOE_Q3_COHORTS", enabled ? "1" : "0", 1) == 0,
++            "could not select q3 execution mode");
++}
++void load_counter() {
++    void * handle = dlopen("/runtime/libggml-cuda.so", RTLD_NOLOAD | RTLD_NOW);
++    require(handle, "candidate module not mapped");
++    char executable[256]{};
++    const auto n = readlink("/proc/self/exe", executable, sizeof(executable)-1);
++    require(n > 0 && std::strcmp(executable, "/operator") == 0, "unexpected running operator binary");
++    cohort_count = reinterpret_cast<LaunchCounter>(dlsym(handle, "ggml_cuda_occamy_q3_cohort_launch_count"));
++    require(cohort_count && cohort_count() == 0, "candidate launch counter unavailable or dirty");
++    Dl_info location{};
++    require(dladdr(reinterpret_cast<void *>(cohort_count), &location) && location.dli_fname &&
++            std::strcmp(location.dli_fname, "/runtime/libggml-cuda.so") == 0, "unexpected launch counter provider");
++    std::fprintf(stderr, "Q3_COHORT MAP /operator counter_provider=%s\n", location.dli_fname);
++    dlclose(handle);
++}
++
+ void compare(ggml_backend_t cuda, Graph & generic, Graph & split, Graph & router, const Fixture & f) {
++    set_cohorts(false);
++    const auto initial_count = cohort_count();
+     router.use(f);
+     router.run(cuda);
+     Ids ids{};
+@@ -283,6 +312,24 @@
+     split.run(cuda);
+     std::fprintf(stderr, "N104 SPLIT_END %s\n", f.name);
+     ggml_backend_tensor_get(split.output, candidate.data(), 0, sizeof(candidate));
++    require(cohort_count() == initial_count, "candidate active in a control graph");
++    Output cohorts{};
++    generic.use(f); // Restore row input in case the allocation plan allowed a residual alias.
++    set_cohorts(true);
++    generic.run(cuda);
++    ggml_backend_tensor_get(generic.output, cohorts.data(), 0, sizeof(cohorts));
++    require(cohort_count() == initial_count + 1, "missing physical q3 cohort launch");
++    std::fprintf(stderr, "Q3_COHORT DIAG %s physical=%llu\n", f.name, cohort_count()-initial_count);
++    set_cohorts(false);
++    for (int row = 0; row < width; ++row) {
++        int different = 0;
++        for (int i = row * hidden; i < (row + 1) * hidden; ++i) {
++            require(std::isfinite(cohorts[i]) && std::isfinite(candidate[i]), "nonfinite q3 or sequential output");
++            different += std::memcmp(&cohorts[i], &candidate[i], sizeof(float)) != 0;
++        }
++        std::fprintf(stderr, "Q3_COHORT ROW %s row=%d finite=2048 different=%d\n", f.name, row, different);
++        require(different == 0, "q3 cohort differs from three original V3 row launches");
++    }
+     for (int row = 0; row < width; ++row) {
+         int mismatches = 0;
+         double delta = 0.0, magnitude = 0.0, max_abs = 0.0;
+@@ -300,25 +347,36 @@
+     }
+ }
+ 
+-double measure(ggml_backend_t cuda, Graph & graph) {
+-    const auto start = std::chrono::steady_clock::now();
+-    for (int i = 0; i < reps; ++i) { graph.run(cuda); }
+-    return std::chrono::duration<double, std::micro>(std::chrono::steady_clock::now() - start).count() / reps;
+-}
+-
+ void perf(ggml_backend_t cuda, Graph & generic, Graph & split, const Fixture & f) {
+-    generic.use(f);
+-    split.use(f);
+-    for (int i = 0; i < 8; ++i) {
+-        generic.run(cuda);
+-        split.run(cuda);
+-    }
+-    const double g1 = measure(cuda, generic);
+-    const double s1 = measure(cuda, split);
+-    const double s2 = measure(cuda, split);
+-    const double g2 = measure(cuda, generic);
+-    std::fprintf(stderr, "N104 ABBA %s repeats=%d generic1_us=%.6f split1_us=%.6f split2_us=%.6f generic2_us=%.6f\n",
+-                 f.name, reps, g1, s1, s2, g2);
++    auto batch = [&](Graph & graph, bool enabled, const char * name, int count) {
++        graph.use(f);
++        set_cohorts(enabled);
++        const auto before = cohort_count();
++        const auto start = std::chrono::steady_clock::now();
++        for (int i = 0; i < count; ++i) { graph.run(cuda); }
++        const auto finish = std::chrono::steady_clock::now();
++        const auto launches = cohort_count() - before;
++        Output input_after{};
++        ggml_backend_tensor_get(graph.input, input_after.data(), 0, sizeof(input_after));
++        require(std::memcmp(input_after.data(), f.input.data(), sizeof(input_after)) == 0,
++                "repeated graph changed the seeded routing input");
++        require(launches == (enabled ? (unsigned)count : 0), "physical launch coverage differs");
++        if (count == reps) {
++            const double us = std::chrono::duration<double, std::micro>(finish - start).count() / count;
++            std::fprintf(stderr, "Q3_COHORT TIME %s mode=%s reps=%d launches=%llu us=%.6f\n",
++                         f.name, name, count, launches, us);
++        }
++    };
++    batch(generic,false,"generic",8);
++    batch(split,false,"sequential",8);
++    batch(generic,true,"cohorts",8);
++    batch(generic,false,"generic",reps);
++    batch(split,false,"sequential",reps);
++    batch(generic,true,"cohorts",reps);
++    batch(generic,true,"cohorts",reps);
++    batch(split,false,"sequential",reps);
++    batch(generic,false,"generic",reps);
++    set_cohorts(false);
+ }
+ } // namespace
+ 
+@@ -345,6 +403,7 @@
+         cuda = ggml_backend_dev_init(ggml_backend_reg_dev_get(reg, 0), nullptr);
+         require(cuda && std::strcmp(ggml_backend_name(cuda), "CUDA0") == 0, "expected CUDA0 backend");
+         check_mappings();
++        load_counter();
+         weights.load(cuda, data);
+         generic.allocate(cuda);
+         split.allocate(cuda);

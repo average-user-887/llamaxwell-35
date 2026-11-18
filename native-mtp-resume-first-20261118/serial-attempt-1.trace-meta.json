@@ -1,0 +1,8 @@
+{
+  "format": 2,
+  "entries": 5,
+  "converter_sha256": "e0ed9f3abfd79935e55b1e9b28d5fed3c7ed81e5b94c3538ad305291e8fc878b",
+  "published_trace_sha256": "74d2313efbe3e41549f5ace2c447393093670f3f569df51689ac1ec89fd7213c",
+  "runner_exit": 2,
+  "cleanup_exit": 0
+}

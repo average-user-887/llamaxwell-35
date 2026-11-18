@@ -1,0 +1,42 @@
+{
+  "outcome": "startup_health_timeout",
+  "configured_model_profile": {
+    "prompt_tokens": 80000,
+    "output_caps_by_phase": {
+      "cold": 192,
+      "warm": 3072
+    },
+    "slot_context": 84224,
+    "slots": 1,
+    "batch": 2048,
+    "microbatch": 1024,
+    "seed": 7,
+    "temperature": 0,
+    "ignore_eos": true,
+    "context_shift": false,
+    "spec_type": "none",
+    "cache_k": "f16",
+    "cache_v": "f16",
+    "sparse_revision": 2,
+    "width3_r2_enabled": true,
+    "diagnostic_cuda_phase_events": false
+  },
+  "format_version": 1,
+  "mode": "no-mtp",
+  "cap_seconds": 430,
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+  "image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "fleet_admitted_cap_w": 250,
+  "native_q3_cuda_sha256": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+  "runtime_maps": null,
+  "profile_instrumented": false,
+  "status": {
+    "runner_exit": 2,
+    "cleanup_exit": 0,
+    "bounded_wall_s": 47,
+    "technical_pass": false
+  },
+  "observed_requests": {},
+  "speculative_trace_marker_count": 0,
+  "validated_report": null
+}
