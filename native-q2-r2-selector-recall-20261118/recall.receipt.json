@@ -1,0 +1,60 @@
+{
+  "mode": "recall",
+  "runner_exit": 0,
+  "cleanup_exit": 0,
+  "bounded_wall_s": 280,
+  "validation": {
+    "technical_pass": true,
+    "expected_fact_match": true,
+    "eos_terminated": true,
+    "exact_output_ids_to_n50_and_n88": 7,
+    "source_fact_position": 40000,
+    "prompt_tokens_evaluated": 80000,
+    "cached_prompt_tokens": 0,
+    "requested_wall_s": 265.63110425893683,
+    "offered_drafts": 3,
+    "accepted_drafts": 3,
+    "physical_request_counter_deltas": {
+      "row0": 0,
+      "row1": 0,
+      "combined": 120,
+      "skip": 120,
+      "q2_sparse": 30
+    },
+    "sparse_q2_dispatch_samples": [
+      {
+        "calls": 1,
+        "width": 80128,
+        "kv_heads": 2,
+        "revision": 2
+      },
+      {
+        "calls": 10,
+        "width": 80128,
+        "kv_heads": 2,
+        "revision": 2
+      }
+    ],
+    "first_fast_selector_width": 80128,
+    "candidate_software_sha256": "9e999bcaf04397f267548abdfa3e326b65bee122fb1e24f92be55529f40a335e",
+    "experts": 8,
+    "gpu_layers_offloaded": 42,
+    "scope": "One independent known midpoint fact. The first dispatch witnesses the new selector. The Q2 counter covers aggregate sparse selection."
+  },
+  "refusal": null,
+  "trace_sha256": "8412e90e909c77013a877defdec1c1e5e264b40b7639e4b35ac242b2b7914df4",
+  "typed_event_counts": {
+    "fast_selector_first_dispatch": 1,
+    "host_counter_snapshot": 1,
+    "offload": 1,
+    "owned_run_outcome": 1,
+    "physical_counter_boundary": 2,
+    "process_q8_admission": 1,
+    "request_boundary_begin": 1,
+    "request_boundary_result": 1,
+    "slot_release": 1,
+    "sparse_attention_dispatch_sample": 3,
+    "t2_counter_sample": 1,
+    "trace_metadata": 1
+  }
+}

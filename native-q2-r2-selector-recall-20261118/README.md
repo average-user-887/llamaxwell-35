@@ -1,0 +1,11 @@
+# Independent 80K midpoint recall with the exact Q2 sparse selector
+
+The full-eight-expert Qwen/Occamy 35B selector build recovered the exact expected midpoint fact from an 80,000-token prompt on one Quadro M6000. All seven output IDs, including EOS, matched both the archived N50 and N88 scored controls. The request evaluated all 80,000 input tokens with zero cached tokens. It completed in 265.631 seconds. The complete owned run took 280 seconds, with runner and cleanup exits both zero.
+
+The recorded model configuration offloaded 42/42 GPU layers and used one native draft row. It accepted all three offered drafts. The new fast selector's first dispatch was observed within the scored request at 80,128 padded keys. Both sampled sparse Q2 dispatch points used that width and R2. Request-boundary counters recorded 30 aggregate sparse Q2 launches, 120 paired MoE launches, 120 second-row acknowledgments and zero legacy MoE row launches. The aggregate counter covers sparse Q2 and does not resolve each fast-selector branch individually.
+
+This scored fixture is independent of the [forced-throughput continuation](../native-q2-r2-selector-model-20261118). It is one known fact at prompt token index 40,000. The scoped result does not provide a general 80K recall rate or independent broad model-quality score. The [standalone selector experiment](../native-q2-r2-selector-20261118) supplies its distinct physical operator timing and bitwise attention comparisons.
+
+The [typed recall receipt](recall.receipt.json) records the score, exact-output count, software identity, request metrics and cleanup. The [count-only trace](recall.trace-v2.jsonl) records the available offload, selector and sparse dispatch markers, two five-counter boundaries, the complete nonstreaming response outcome and the literal cumulative host snapshot. It includes no prompt, answer string, token IDs, private digests or device identifiers.
+
+The runner and guards reuse the model packet's existing architecture and require the original owner-held scored controls. Apply the three owner-model substitutions in `release.sh.in` and follow [the launch notes](RELEASE.md) in the matching campaign layout. Run `python3 -B export.py --check` there to revalidate the archived score and typed parser. Use the approved exclusive lease and stop deadline if reproducing the hardware arm.

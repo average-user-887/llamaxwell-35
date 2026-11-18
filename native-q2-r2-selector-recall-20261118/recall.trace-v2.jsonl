@@ -1,0 +1,15 @@
+{"event":"trace_metadata","format":2,"arm":"native_D1_midpoint_recall","transport":"one non-streaming response","log_boundary_available":true}
+{"event":"offload","phase":"startup","relative_log_line":161,"layers":42,"total_layers":42}
+{"event":"process_q8_admission","phase":"startup","relative_log_line":206,"original_blocks":3,"candidate_blocks":3,"grid":72}
+{"event":"t2_counter_sample","phase":"startup","relative_log_line":211,"calls":1}
+{"event":"physical_counter_boundary","boundary":"before_request","counters":{"row0":0,"row1":0,"combined":39,"skip":39,"q2_sparse":0}}
+{"event":"request_boundary_begin","phase":"recall","expected_prompt_tokens":80000,"reference_midpoint_token":40000,"response_record_available":true}
+{"event":"sparse_attention_dispatch_sample","phase":"recall","relative_log_line":108,"calls":1,"query_rows":1,"key_width":80128,"kv_heads":2,"splits":24,"blocks_per_sm":2,"retained_old_blocks":16,"recent_keys":4096,"revision":2}
+{"event":"fast_selector_first_dispatch","phase":"recall","relative_log_line":110,"key_width":80128,"kv_heads":2,"plans":4,"query_rows":2}
+{"event":"sparse_attention_dispatch_sample","phase":"recall","relative_log_line":115,"calls":1,"query_rows":2,"key_width":80128,"kv_heads":2,"splits":12,"blocks_per_sm":1,"retained_old_blocks":16,"recent_keys":4096,"revision":2}
+{"event":"sparse_attention_dispatch_sample","phase":"recall","relative_log_line":116,"calls":10,"query_rows":2,"key_width":80128,"kv_heads":2,"splits":12,"blocks_per_sm":1,"retained_old_blocks":16,"recent_keys":4096,"revision":2}
+{"event":"slot_release","phase":"recall","relative_log_line":126,"resident_slot_tokens":80006,"context_truncated":false}
+{"event":"request_boundary_result","phase":"recall","wall_s":265.63110425893683,"finish_reason":"eos","max_output":128,"server_timing":{"cache_n":0,"prompt_n":80000,"prompt_ms":265525.05,"predicted_n":7,"predicted_ms":75.909,"draft_n":3,"draft_n_accepted":3},"score":{"allowlist_match":true,"eos_terminated":true,"recall_pass":true,"n_out_including_eos":7}}
+{"event":"physical_counter_boundary","boundary":"after_request","counters":{"row0":0,"row1":0,"combined":159,"skip":159,"q2_sparse":30}}
+{"event":"host_counter_snapshot","phase":"shutdown","relative_log_line":13,"rounds":3,"speculative_restores":0,"accepted_prefix_histogram":[0,3,0,0],"reported_costs":{"draft_ms":{"cumulative_ms":7.962,"calls":3},"tgt_decode_ms":{"cumulative_ms":227647.884,"calls":44},"spec_process_ms":{"cumulative_ms":37656.068,"calls":44},"sample_accept_ms":{"cumulative_ms":1.204,"calls":3}},"cost_scope":"process cumulative; individual cycle cost unknown"}
+{"event":"owned_run_outcome","phase":"shutdown","runner_exit":0,"cleanup_exit":0,"bounded_wall_s":280}
