@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "server_args": [
+    "--alias",
+    "qwen36-moe",
+    "--override-kv",
+    "tokenizer.ggml.pre=str:qwen35",
+    "-ngl",
+    "999",
+    "--fit",
+    "off",
+    "-np",
+    "1",
+    "-c",
+    "84224",
+    "-b",
+    "2048",
+    "--mixed-batch-size",
+    "1024",
+    "--prefill-single-stream",
+    "--checkpoint-min-step",
+    "2048",
+    "--no-context-shift",
+    "-fa",
+    "on",
+    "--cache-type-k",
+    "f16",
+    "--cache-type-v",
+    "f16",
+    "--jinja",
+    "--metrics",
+    "-lv",
+    "4",
+    "-ub",
+    "1024",
+    "--cache-ram",
+    "12288",
+    "--ctx-checkpoints",
+    "2"
+  ],
+  "environment": {
+    "GGML_CUDA_MOE_DOWNX": "1",
+    "GGML_CUDA_MOE_DOWNH": "2",
+    "GGML_CUDA_OCCAMY_GDN_QKREUSE": "1",
+    "GGML_CUDA_OCCAMY_GDN_PCSHARE": "1",
+    "GGML_CUDA_MMVQ_SM52": "1",
+    "GGML_CUDA_RMS_WARP": "0",
+    "GGML_CUDA_HEAD_ROWPACK_SM52": "1",
+    "GGML_CUDA_MMQ_COMPACT_SM52": "1",
+    "GGML_CUDA_Q8_REUSE": "1",
+    "GGML_CUDA_NORM_Q8": "1",
+    "GGML_CUDA_CONCAT_T": "1",
+    "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": "1",
+    "GGML_CUDA_GATE_COPY": "1",
+    "GGML_CUDA_OCCAMY_GDN": "1",
+    "GGML_CUDA_MMQ_XMAD_SM52": "1",
+    "GGML_CUDA_GDN_COLS": "2,4",
+    "GGML_CUDA_OCCAMY_FA": "1",
+    "GGML_CUDA_OCCAMY_FUSED": "1",
+    "GGML_CUDA_OCCAMY_FA_PIPE": "3",
+    "GGML_CUDA_MOE_LOP3": "1",
+    "GGML_CUDA_MOE_TAILBAL": "1",
+    "GGML_CUDA_OCCAMY_GDN_PREF": "1",
+    "GGML_CUDA_OCCAMY_HOSTGAP": "1",
+    "GGML_CUDA_OCCAMY_SMALLFUSE": "2",
+    "GGML_CUDA_MMQ_TAIL_SM52": "1",
+    "GGML_CUDA_OCCAMY_GDN_REPACK": "1",
+    "GGML_CUDA_OCCAMY_N2SPLIT": "1",
+    "GGML_CUDA_OCCAMY_FA_ADDR": "1",
+    "GGML_CUDA_OCCAMY_N2GDN": "1",
+    "GGML_CUDA_FA_MAXWELL_GEMM": "1",
+    "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": "1",
+    "GGML_CUDA_MOE_V3": "1",
+    "GGML_CUDA_OCCAMY_GDN_T2": "1",
+    "GGML_CUDA_OCCAMY_FA_MROW": "3",
+    "GGML_CUDA_OCCAMY_FA2_NU": "4"
+  },
+  "profiles": {
+    "serial": {
+      "server_args": [
+        "--spec-type",
+        "none"
+      ],
+      "environment": {}
+    },
+    "q64": {
+      "server_args": [
+        "--spec-type",
+        "ngram-simple",
+        "--spec-ngram-simple-size-n",
+        "16",
+        "--spec-ngram-simple-size-m",
+        "63",
+        "--spec-ngram-simple-min-hits",
+        "1"
+      ],
+      "environment": {
+        "LLAMA_TRACE": "1"
+      }
+    },
+    "q256": {
+      "server_args": [
+        "--spec-type",
+        "ngram-simple",
+        "--spec-ngram-simple-size-n",
+        "16",
+        "--spec-ngram-simple-size-m",
+        "255",
+        "--spec-ngram-simple-min-hits",
+        "1"
+      ],
+      "environment": {
+        "LLAMA_TRACE": "1"
+      }
+    },
+    "q512": {
+      "server_args": [
+        "--spec-type",
+        "ngram-simple",
+        "--spec-ngram-simple-size-n",
+        "16",
+        "--spec-ngram-simple-size-m",
+        "511",
+        "--spec-ngram-simple-min-hits",
+        "1"
+      ],
+      "environment": {
+        "LLAMA_TRACE": "1"
+      }
+    }
+  },
+  "request_fields": {
+    "id_slot": 0,
+    "n_predict": 3072,
+    "temperature": 0,
+    "seed": 7,
+    "cache_prompt": false,
+    "ignore_eos": false,
+    "return_tokens": true,
+    "stream": false
+  },
+  "caller_inputs": {
+    "model_file": "The pinned GGUF",
+    "prompt": "The caller's fixed 32,768-token prompt input",
+    "runtime_libraries": "The reconstructed FA2 and cache-only build"
+  }
+}

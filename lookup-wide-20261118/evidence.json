@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "branch_base_revision": "19c4f88ee7a0d493364c80803eacfd0bd4a789b7",
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+  "runtime_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "hardware": {
+    "gpu": "NVIDIA Quadro M6000",
+    "vram_gb": 24,
+    "architecture": "sm_52"
+  },
+  "source_provenance": {
+    "original_experiment_base_revision": "da7ba0e49dd43c69f9ee5a219ea3124f7acda0c8",
+    "reconstructed_build_source_index_sha256": "9a7cee5d1ac87b50c29d33305975911d49360342d94dd792444e22f447ba073f",
+    "published_reconstruction_revision": "a23f943208ccdb5c2eb6ae5e4e9cd0f0009aff7f",
+    "tested_runtime_binary_sha256": {
+      "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+      "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+      "libggml-cuda.so": "6f37baad23c4ffbe2bcb8d5363d76b71df0af3b0ae7b2b65917104728379e058",
+      "llama-server": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+      "libllama-server-impl.so": "1138515898887c6ec6be01a210cfb59bb8e1338ccf6eeef1d032ffd4fdb22b65"
+    }
+  },
+  "fixed_fixture": {
+    "source_repository": "ggml-org/llama.cpp",
+    "source_commit": "e2eb39e81cbd43ff95dfc46bddb5155b582ccdfd",
+    "source_path": "examples/model-conversion/scripts/utils/check-nmse.py",
+    "source_blob": "324e3858e368245e39d2a2e5d5d9ebba6719ac57",
+    "source_sha256": "b0b0441a890c6573ac8d4ff32c27eeca4f7922893ed894b1631d30835dfa0bed",
+    "donor_token_n": 1721,
+    "prompt_n": 32768,
+    "prompt_sha256": "d79de7fdc29f10158c3ddfc751f2dcecfd2ec3f9907b0a431145c8e68a989142",
+    "template_sha256": "87d092e24cad4905a309e561eeffe217c69163fb12c30a7ad2d948b0ede66749",
+    "donor_file_verified_against_cached_blob": true,
+    "expected_output_used_only_after_generation": true
+  },
+  "measurement": {
+    "rate_definition": "same-count emitted tokens including EOS divided by server decode duration",
+    "wall_definition": "nonstreaming completion request round trip",
+    "client_ttft_available": false,
+    "arms": {
+      "serial_initial": {
+        "verifier_width": 1,
+        "output_tokens_including_eos": 1722,
+        "same_output_ids_as_initial_serial": true,
+        "exact_edit_ast": true,
+        "exact_text_after_outer_whitespace_or_fence": true,
+        "eos": true,
+        "cold_cache_tokens": 0,
+        "gpu_layers_offloaded": 42,
+        "runner_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "request_wall_s": 100.85616024106275,
+        "server_first_token_s": 77.248779,
+        "decode_s": 23.596803,
+        "same_count_decode_tok_s": 72.9759874674548,
+        "server_reported_decode_tok_s": 72.93360884523213,
+        "receipt_sha256": "e103d574d3384ece151ef6159c597f663bb465178fac2327bc1cc4a247ec4566"
+      },
+      "q64": {
+        "verifier_width": 64,
+        "output_tokens_including_eos": 1722,
+        "same_output_ids_as_initial_serial": true,
+        "exact_edit_ast": true,
+        "exact_text_after_outer_whitespace_or_fence": true,
+        "eos": true,
+        "cold_cache_tokens": 0,
+        "gpu_layers_offloaded": 42,
+        "runner_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "request_wall_s": 102.36116441502236,
+        "server_first_token_s": 76.830518,
+        "decode_s": 25.5214,
+        "same_count_decode_tok_s": 67.47278754300312,
+        "server_reported_decode_tok_s": 67.4336047395519,
+        "receipt_sha256": "b7ba72ab99652216824d5928af1c62848de0cfe3c51d74e8923563f7e8f212a8",
+        "full_width_calls_logged": 27,
+        "traced_recurrent_restores": 2,
+        "draft_tokens_proposed": 1701,
+        "draft_tokens_accepted": 1662,
+        "replays": [
+          {
+            "accepted": 35,
+            "drafted": 63,
+            "restore_to_replay_ms": 599.0599999999944
+          },
+          {
+            "accepted": 52,
+            "drafted": 63,
+            "restore_to_replay_ms": 852.7470000000079
+          }
+        ]
+      },
+      "q256_initial": {
+        "verifier_width": 256,
+        "output_tokens_including_eos": 1722,
+        "same_output_ids_as_initial_serial": true,
+        "exact_edit_ast": true,
+        "exact_text_after_outer_whitespace_or_fence": true,
+        "eos": true,
+        "cold_cache_tokens": 0,
+        "gpu_layers_offloaded": 42,
+        "runner_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "request_wall_s": 89.19069870898966,
+        "server_first_token_s": 77.292855,
+        "decode_s": 11.888389,
+        "same_count_decode_tok_s": 144.84721184678597,
+        "server_reported_decode_tok_s": 144.7630961604638,
+        "receipt_sha256": "2ab0973c05338457cb0d53d66ee32e3d867bf63daf3a5b1f0cb44972f271531a",
+        "full_width_calls_logged": 8,
+        "traced_recurrent_restores": 2,
+        "draft_tokens_proposed": 2040,
+        "draft_tokens_accepted": 1681,
+        "replays": [
+          {
+            "accepted": 99,
+            "drafted": 255,
+            "restore_to_replay_ms": 1126.9700000000144,
+            "replay_rows": 101
+          },
+          {
+            "accepted": 52,
+            "drafted": 255,
+            "restore_to_replay_ms": 857.5680000000006,
+            "replay_rows": 54
+          }
+        ]
+      },
+      "q256_repeat": {
+        "verifier_width": 256,
+        "output_tokens_including_eos": 1722,
+        "same_output_ids_as_initial_serial": true,
+        "exact_edit_ast": true,
+        "exact_text_after_outer_whitespace_or_fence": true,
+        "eos": true,
+        "cold_cache_tokens": 0,
+        "gpu_layers_offloaded": 42,
+        "runner_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "request_wall_s": 89.06013490003534,
+        "server_first_token_s": 77.172045,
+        "decode_s": 11.878212,
+        "same_count_decode_tok_s": 144.9713138644099,
+        "server_reported_decode_tok_s": 144.88712610955253,
+        "receipt_sha256": "e8cbb206b788bbd8e07a72f42d0002de16eee27c191fb47b0dd97e239b65325b",
+        "full_width_calls_logged": 8,
+        "traced_recurrent_restores": 2,
+        "draft_tokens_proposed": 2040,
+        "draft_tokens_accepted": 1681,
+        "replays": [
+          {
+            "accepted": 99,
+            "drafted": 255,
+            "restore_to_replay_ms": 1122.2179999999894,
+            "replay_rows": 101
+          },
+          {
+            "accepted": 52,
+            "drafted": 255,
+            "restore_to_replay_ms": 858.0040000000082,
+            "replay_rows": 54
+          }
+        ]
+      },
+      "serial_repeat": {
+        "verifier_width": 1,
+        "output_tokens_including_eos": 1722,
+        "same_output_ids_as_initial_serial": true,
+        "exact_edit_ast": true,
+        "exact_text_after_outer_whitespace_or_fence": true,
+        "eos": true,
+        "cold_cache_tokens": 0,
+        "gpu_layers_offloaded": 42,
+        "runner_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "request_wall_s": 100.99436516605783,
+        "server_first_token_s": 77.361727,
+        "decode_s": 23.623001,
+        "same_count_decode_tok_s": 72.89505681348446,
+        "server_reported_decode_tok_s": 72.85272518931866,
+        "receipt_sha256": "93fd1c4cfa006cff19b18d6bdd9eb574acd113342e6fa16ba13184f067d6652e"
+      },
+      "q512_supplemental": {
+        "verifier_width": 512,
+        "output_tokens_including_eos": 1722,
+        "same_output_ids_as_initial_serial": true,
+        "exact_edit_ast": true,
+        "exact_text_after_outer_whitespace_or_fence": true,
+        "eos": true,
+        "cold_cache_tokens": 0,
+        "gpu_layers_offloaded": 42,
+        "runner_exit_code": 0,
+        "cleanup_exit_code": 0,
+        "request_wall_s": 89.50338115508202,
+        "decode_s": 12.74219,
+        "same_count_decode_tok_s": 135.14160438668705,
+        "full_width_calls_logged": 5,
+        "traced_recurrent_restores": 2,
+        "draft_tokens_proposed": 2555,
+        "draft_tokens_accepted": 1684,
+        "replays": [
+          {
+            "accepted": 99,
+            "drafted": 511,
+            "replay_rows": 101,
+            "restore_to_replay_ms": 1132.5999999999965
+          },
+          {
+            "accepted": 52,
+            "drafted": 511,
+            "replay_rows": 54,
+            "restore_to_replay_ms": 852.5269999999949
+          }
+        ],
+        "receipt_sha256": "46ce7a19284d4be990bcfb7fb508dd25d0a7f1a66d777753216679bacb53d271"
+      }
+    },
+    "serial_q256_order": [
+      "serial_initial",
+      "q256_initial",
+      "q256_repeat",
+      "serial_repeat"
+    ],
+    "aggregate": {
+      "serial": {
+        "n": 2,
+        "median_decode_s": 23.609901999999998,
+        "median_request_wall_s": 100.92526270356029,
+        "output_count_over_median_decode_s": 72.93549968991825
+      },
+      "q256": {
+        "n": 2,
+        "median_decode_s": 11.8833005,
+        "median_request_wall_s": 89.1254168045125,
+        "output_count_over_median_decode_s": 144.90923628498663
+      },
+      "decode_duration_ratio_of_medians": 1.9868135119531813,
+      "wall_seconds_saved": 11.799845899047796,
+      "wall_fraction_saved": 0.11691667262444032
+    }
+  },
+  "teacher_forced_capacity": {
+    "comparison": {
+      "1": {
+        "measured_target_decisions": 1536,
+        "mean_ms_per_block": 13.646371196614583,
+        "oracle_checked_positions_per_s": 73.2795543659315
+      },
+      "64": {
+        "measured_target_decisions": 1536,
+        "mean_ms_per_block": 868.140778625,
+        "oracle_checked_positions_per_s": 73.72076231848716,
+        "packed_attention_delta": {
+          "engaged": 240,
+          "fallback": 0,
+          "fused_calls": 240,
+          "softmax_launches": 480
+        }
+      }
+    },
+    "all_1722_outputs_including_eos_match": true,
+    "scope": "all-logit capacity with supplied inputs and no online rollback or proposal costs",
+    "receipt_sha256": "7636e6c73fed3cb1b18b42ab57e1eca7eb4997d39d9902b3906026cbb508f0ab"
+  }
+}
