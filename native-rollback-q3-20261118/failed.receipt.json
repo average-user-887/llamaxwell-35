@@ -1,0 +1,91 @@
+{
+  "release": "first",
+  "gpu_model": "Quadro M6000 24GB",
+  "model_layers_offloaded": 42,
+  "cap_seconds": 190,
+  "runner_exit": 2,
+  "cleanup_exit": 0,
+  "started_unix_epoch_s": 1795004641,
+  "completed_unix_epoch_s": 1795004675,
+  "bounded_wall_s": 34,
+  "individual_phase_times_s": null,
+  "timing_scope": "Per-state, per-graph and per-phase wall/GPU timings were not recorded. Total bounded wall includes admission, model loading, prefill, snapshots, analyses and cleanup.",
+  "runtime_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "mapped_object_sha256": {
+    "state": "69f030d3bc0df6f19c125e210925b773f669b56e05b720a20b7bf4ee2d8d14be",
+    "libllama.so": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+    "libggml.so": "1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc",
+    "libggml-base.so": "678cf75e5ef5b1f92460eb0f816d3bbe755ee9710fd04606c31ec24dcd41fa06",
+    "libggml-cuda.so": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5"
+  },
+  "causal_timeline": {
+    "wide_a": [
+      {
+        "event": "N34_START",
+        "offload": "42/42",
+        "rs": 2,
+        "prompt": 2000,
+        "vocab": 248320,
+        "excluded": 5
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2000,
+        "graphs": 1,
+        "in": 1,
+        "out": 1,
+        "position_after": 2000
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2001,
+        "graphs": 1,
+        "in": 1,
+        "out": 1,
+        "position_after": 2001
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2002,
+        "graphs": 1,
+        "in": 1,
+        "out": 1,
+        "position_after": 2002
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2003,
+        "graphs": 1,
+        "in": 1,
+        "out": 1,
+        "position_after": 2003
+      }
+    ]
+  },
+  "measurement_complete": false,
+  "first_observable": "full state's recurrent suffix differs",
+  "completed_trim_calls": 0,
+  "saved_partial_recurrent_bytes": 65864428,
+  "last_completed_position": 2003,
+  "root_cause": "The first assertion compared the partial eight-byte envelope plus recurrent record with the full recurrent suffix. Both serialized blobs contain one envelope at byte zero.",
+  "observed_contexts": {
+    "wide_a": {
+      "n_ctx": 84224,
+      "n_seq_max": 1,
+      "n_batch": 2048,
+      "n_ubatch": 1024,
+      "n_rs_seq": 2,
+      "n_outputs_max": 3,
+      "n_outputs_max_per_seq": 3
+    }
+  },
+  "prefill_boundaries_accepted_by_harness": [
+    972,
+    1996,
+    2000
+  ]
+}

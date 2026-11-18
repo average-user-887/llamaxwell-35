@@ -1,0 +1,22 @@
+--- state.original.cpp
++++ state.corrected.cpp
+@@ -243,13 +243,16 @@
+         std::vector<uint8_t> data(n);
+         require(llama_state_seq_get_data_ext(ctx.get(),data.data(),n,0,flags) == n, "incomplete partial state");
+         write_file(base+stage+".state", data.data(), data.size());
+-        // For this pinned hybrid writer flags=0 emits attention KV, then exactly the same recurrent record.
++        // Both outputs have a single magic/sequence envelope. Full then adds KV before the recurrent body.
+         const auto total=llama_state_seq_get_size_ext(ctx.get(),0,0);
+         require(total>n && total-n<128*1024*1024,"unexpected full hybrid serialization length");
+         std::vector<uint8_t> full(total);
+         require(llama_state_seq_get_data_ext(ctx.get(),full.data(),total,0,0)==total &&
+-                std::memcmp(full.data()+total-n,data.data(),n)==0,"full state's recurrent suffix differs");
+-        write_file(base+stage+".kv",full.data(),total-n);
++                std::memcmp(full.data(),data.data(),8)==0 &&
++                std::memcmp(full.data()+total-n+8,data.data()+8,n-8)==0,"full state envelope or recurrent body differs");
++        const uint32_t expected_header[2] = {0xaf143cd8u,0u};
++        require(std::memcmp(full.data(),expected_header,8)==0,"state magic or sequence id differs");
++        write_file(base+stage+".kv",full.data()+8,total-n);
+         std::cout<<"ROLL3_KV stage="<<stage<<" pos="<<pos()<<" bytes="<<total-n<<" full_bytes="<<total<<"\n";
+         std::cout << "N34_STATE stage=" << stage << " pos=" << pos() << " bytes=" << n << "\n";
+     };
