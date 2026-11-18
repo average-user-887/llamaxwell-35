@@ -1,0 +1,35 @@
+Q8PA_DSO 6dee483215371a1201c7740389290364f924350beb6e8676c086db07953e54eb  /candidate/libggml-cuda.so
+print_info: n_expert_used         = 8
+N82_ADMISSION original_blocks=3 candidate_blocks=3 grid=72 admitted=1
+Q2_COHORT residency device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1
+N82_EVENT specialization=2 grid=72 slot=0 tensor=blk.0.attn_qkv.weight us=162.304001
+N82_EVENT specialization=2 grid=72 slot=1 tensor=blk.1.attn_qkv.weight us=160.703995
+N82_EVENT specialization=2 grid=72 slot=2 tensor=blk.2.attn_qkv.weight us=159.104004
+N82_EVENT specialization=2 grid=72 slot=3 tensor=blk.4.attn_qkv.weight us=184.223999
+N82_EVENT specialization=2 grid=72 slot=4 tensor=blk.5.attn_qkv.weight us=188.544006
+N82_EVENT specialization=2 grid=72 slot=5 tensor=blk.6.attn_qkv.weight us=185.791992
+N82_EVENT specialization=2 grid=72 slot=6 tensor=blk.8.attn_qkv.weight us=185.376007
+N82_EVENT specialization=2 grid=72 slot=7 tensor=blk.9.attn_qkv.weight us=188.447998
+N82_EVENT specialization=2 grid=72 slot=8 tensor=blk.10.attn_qkv.weight us=184.704010
+N82_EVENT specialization=2 grid=72 slot=9 tensor=blk.12.attn_qkv.weight us=173.087997
+N82_EVENT specialization=2 grid=72 slot=10 tensor=blk.13.attn_qkv.weight us=184.735992
+N82_EVENT specialization=2 grid=72 slot=11 tensor=blk.14.attn_qkv.weight us=171.488007
+N82_EVENT specialization=2 grid=72 slot=12 tensor=blk.16.attn_qkv.weight us=169.343994
+N82_EVENT specialization=2 grid=72 slot=13 tensor=blk.17.attn_qkv.weight us=189.888000
+N82_EVENT specialization=2 grid=72 slot=14 tensor=blk.18.attn_qkv.weight us=172.352005
+N82_EVENT specialization=2 grid=72 slot=15 tensor=blk.20.attn_qkv.weight us=176.639999
+N82_EVENT specialization=2 grid=72 slot=16 tensor=blk.21.attn_qkv.weight us=188.863998
+N82_EVENT specialization=2 grid=72 slot=17 tensor=blk.22.attn_qkv.weight us=185.407990
+N82_EVENT specialization=2 grid=72 slot=18 tensor=blk.24.attn_qkv.weight us=154.016006
+N82_EVENT specialization=2 grid=72 slot=19 tensor=blk.25.attn_qkv.weight us=154.847992
+N82_EVENT specialization=2 grid=72 slot=20 tensor=blk.26.attn_qkv.weight us=154.208008
+N82_EVENT specialization=2 grid=72 slot=21 tensor=blk.28.attn_qkv.weight us=155.136002
+N82_EVENT specialization=2 grid=72 slot=22 tensor=blk.29.attn_qkv.weight us=154.239990
+N82_EVENT specialization=2 grid=72 slot=23 tensor=blk.30.attn_qkv.weight us=154.112000
+N82_EVENT specialization=2 grid=72 slot=24 tensor=blk.32.attn_qkv.weight us=156.031998
+N82_EVENT specialization=2 grid=72 slot=25 tensor=blk.33.attn_qkv.weight us=153.119995
+N82_EVENT specialization=2 grid=72 slot=26 tensor=blk.34.attn_qkv.weight us=156.064011
+N82_EVENT specialization=2 grid=72 slot=27 tensor=blk.36.attn_qkv.weight us=153.951996
+N82_EVENT specialization=2 grid=72 slot=28 tensor=blk.37.attn_qkv.weight us=156.448013
+N82_EVENT specialization=2 grid=72 slot=29 tensor=blk.38.attn_qkv.weight us=153.440002
+Q8CLK_COHORT fallback0=0 fallback1=0 paired=40 skipped=40

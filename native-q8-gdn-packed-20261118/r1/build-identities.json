@@ -1,0 +1,9 @@
+{
+  "original_cuda_sha256": "19607daf02bc6dcd722a0695787046db9b4c6b8e010545598d3ad60649d68d00",
+  "cuda_sha256": "cb5a7f377a6831a9d9f14cce0021412cb4f3c91382b46b8a4b93ca41601fea5c",
+  "fixture_executable_sha256": "6baa45524a1ea097e35a2b16e51ba73d76dd7f0ae314ac2875a4b18a0abd04fc",
+  "gdn_object_sha256": "4bade4cabe5197c94855e51e19155988b08a408d6c9003100a8cde19fb2f553e",
+  "original_gdn_object_sha256": "bcd063306ea65f5e8143a8d6501960dbfeda359f5b3a261d5d91d612c786eac0",
+  "original_moe_cohort_object_sha256": "bbea6f5c611282090050592a6e49f2c15238c104eb1b1420cb23e562220176eb",
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae"
+}

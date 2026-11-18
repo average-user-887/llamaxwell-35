@@ -1,0 +1,186 @@
+--- a/ggml/src/ggml-cuda/occamy-gdn.cu
++++ b/ggml/src/ggml-cuda/occamy-gdn.cu
+@@ -568,7 +568,7 @@
+     const Layer & L = PP.p[0].L;
+     Scratch * const s0 = PP.p[0].s, * const s1 = PP.p[1].s;
+ 
+-    if constexpr (T2 == 2) {   // ---- phase A ----
++    if constexpr (T2 == 2 || T2 == 3) {   // ---- phase A ----
+         uint4 * packed = reinterpret_cast<uint4 *>(smem);
+         float2 * scales = reinterpret_cast<float2 *>(packed + 2*8*32);
+         float * partial = reinterpret_cast<float *>(scales + 2*64);
+@@ -577,6 +577,34 @@
+         uint4 first[8];
+ #pragma unroll
+         for (int j = 0; j < 4; ++j) { first[j] = packed[j*32+lane]; first[4+j] = packed[(8+j)*32+lane]; }
++        if constexpr (T2 == 3) {
++            uint4 next0{}, next1{};
++            unsigned next8=0;
++            int t=gw;
++            const unsigned * p=(const unsigned *)L.qkv + size_t(t)*(ROW_H/4);
++            if (t<NROWS_A) {
++                next0=__ldg((const uint4 *)p+lane);
++                next1=__ldg((const uint4 *)p+32+lane);
++                next8=__ldg(p+256+lane);
++            }
++            for (; t<NROWS_A; t+=W) {
++                const unsigned w[9]={next0.x,next0.y,next0.z,next0.w,next1.x,next1.y,next1.z,next1.w,next8};
++                if (t+W<NROWS_A) {
++                    p+=size_t(W)*(ROW_H/4);
++                    next0=__ldg((const uint4 *)p+lane);
++                    next1=__ldg((const uint4 *)p+32+lane);
++                    next8=__ldg(p+256+lane);
++                }
++            float a0, a1;
++            q8a_dot(w, packed, scales, first, lane, a0, a1);
++            a0 = warp_sum(a0); a1 = warp_sum(a1);
++            if (lane == 0) {
++                float * d0 = t < NQKV ? &s0->qkv[t] : t < NQKV + DI ? &s0->z[t - NQKV] : &s0->ab[t - NQKV - DI];
++                float * d1 = t < NQKV ? &s1->qkv[t] : t < NQKV + DI ? &s1->z[t - NQKV] : &s1->ab[t - NQKV - DI];
++                *d0 = a0; *d1 = a1;
++            }
++        }
++        } else {
+         uint4 c0, c1, c2;
+         int t = gw;
+         if (t < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, t); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
+@@ -596,6 +624,7 @@
+             }
+             __syncwarp();
+         }
++        }
+     } else {   // ---- phase A ----
+ #pragma unroll
+         for (int k = 0; k < 2; ++k) {
+@@ -1520,23 +1549,23 @@
+     cudaStream_t stream = nullptr;
+     cudaEvent_t begin[30], end[30];
+     std::string names[30];
+-    bool candidate = false;
++    int specialization = 0;
+ };
+ static thread_local N82Events n82_events;
+-static void n82_before(int device, cudaStream_t st, const char * name, int grid, bool candidate) {
++static void n82_before(int device, cudaStream_t st, const char * name, int grid, int specialization) {
+     auto & e = n82_events;
+     GGML_ASSERT(e.count < 30 && grid == 72);
+     if (e.count == 0) {
+         cudaStreamCaptureStatus capture;
+         CUDA_CHECK(cudaStreamIsCapturing(st, &capture));
+         GGML_ASSERT(capture == cudaStreamCaptureStatusNone);
+-        e.stream = st; e.device = device; e.candidate = candidate;
++        e.stream = st; e.device = device; e.specialization = specialization;
+         for (int i = 0; i < 30; ++i) {
+             CUDA_CHECK(cudaEventCreate(&e.begin[i]));
+             CUDA_CHECK(cudaEventCreate(&e.end[i]));
+         }
+     }
+-    GGML_ASSERT(e.stream == st && e.device == device && e.candidate == candidate);
++    GGML_ASSERT(e.stream == st && e.device == device && e.specialization == specialization);
+     e.names[e.count] = name;
+     CUDA_CHECK(cudaEventRecord(e.begin[e.count], st));
+ }
+@@ -1550,13 +1579,63 @@
+             float ms;
+             CUDA_CHECK(cudaEventElapsedTime(&ms, e.begin[i], e.end[i]));
+             std::fprintf(stderr, "N82_EVENT specialization=%d grid=72 slot=%d tensor=%s us=%.6f\n",
+-                         e.candidate ? 2 : 1, i, e.names[i].c_str(), ms*1000.f);
++                         e.specialization, i, e.names[i].c_str(), ms*1000.f);
+             CUDA_CHECK(cudaEventDestroy(e.begin[i]));
+             CUDA_CHECK(cudaEventDestroy(e.end[i]));
+         }
+     }
+ }
+ 
++// Experimental q2-only immutable copies for a single fixed target model and stream.
++// A fresh process owns these copies through teardown. No source allocation is rewritten.
++__host__ __device__ static inline int q8pa_src_word(int dst) {
++    const int lane = dst < 256 ? (dst % 128) / 4 : dst - 256;
++    const int word = dst < 256 ? (dst / 128)*4 + dst % 4 : 8;
++    return 9*lane + word;
++}
++__global__ void q8pa_pack_rows(Layer source, unsigned * packed) {
++    const int linear = blockIdx.x * blockDim.x + threadIdx.x;
++    if (linear >= NROWS_A * (ROW_H / 4)) return;
++    const int row = linear / (ROW_H / 4), word = linear % (ROW_H / 4);
++    packed[linear] = ((const unsigned *)rowA(source, row))[q8pa_src_word(word)];
++}
++
++static const uint8_t * q8pa_lookup(int device, cudaStream_t stream, const Layer & source, const char * name, bool allow_create) {
++    struct Entry {
++        Layer original;
++        uint8_t * packed;
++    };
++    static thread_local std::vector<Entry> entries;
++    static thread_local int owner_device = -1;
++    static thread_local cudaStream_t owner_stream = nullptr;
++    if (entries.empty()) { owner_device = device; owner_stream = stream; }
++    GGML_ASSERT(device==owner_device && stream==owner_stream);
++    for (const auto & e : entries) {
++        if (e.original.qkv==source.qkv) {
++            GGML_ASSERT(e.original.gate==source.gate && e.original.alpha==source.alpha && e.original.beta==source.beta);
++            return e.packed;
++        }
++    }
++    GGML_ASSERT(allow_create && entries.size()<30);
++    cudaStreamCaptureStatus capture;
++    CUDA_CHECK(cudaStreamIsCapturing(stream,&capture));
++    GGML_ASSERT(capture==cudaStreamCaptureStatusNone);
++    constexpr size_t bytes=size_t(NROWS_A)*ROW_H;
++    uint8_t * dst=nullptr;
++    CUDA_CHECK(cudaMalloc(&dst,bytes));
++    cudaEvent_t begin,end;
++    CUDA_CHECK(cudaEventCreate(&begin)); CUDA_CHECK(cudaEventCreate(&end));
++    CUDA_CHECK(cudaEventRecord(begin,stream));
++    q8pa_pack_rows<<<(NROWS_A*(ROW_H/4)+255)/256,256,0,stream>>>(source,(unsigned *)dst);
++    CUDA_CHECK(cudaGetLastError());
++    CUDA_CHECK(cudaEventRecord(end,stream)); CUDA_CHECK(cudaEventSynchronize(end));
++    float ms=0; CUDA_CHECK(cudaEventElapsedTime(&ms,begin,end));
++    CUDA_CHECK(cudaEventDestroy(begin)); CUDA_CHECK(cudaEventDestroy(end));
++    entries.push_back({source,dst});
++    fprintf(stderr,"Q8PA_COPY tensor=%s bytes=%zu copy_ms=%.6f resident_bytes=%zu\n",name,bytes,ms,entries.size()*bytes);
++    return dst;
++}
++
+ // GDN2: MTP1 verify window (one sequence, two tokens) as one gdn_fused2<1> launch. p[0] = token 1 -> snapshot plane 1
+ // (conv_out1/state_out1), p[1] = token 2 -> plane 0 (conv_out/state_out); both read the s_copy source row.
+ bool ggml_cuda_occamy_gdn_t2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m) {
+@@ -1575,8 +1654,25 @@
+     PP.p[0] = fill_params(m, nullptr, &ov0, d.scratch);  PP.p[0].L.out = pk;
+     PP.p[1] = fill_params(m, nullptr, &ov1, d.scratch2); PP.p[1].L.out = pk;
+     static const bool events = env_flag("GGML_CUDA_OCCAMY_GDN_T2_Q8A_EVENTS");
+-    if (events) n82_before(ctx.device, st, m.wqkv->name, d.gridT2, d.q8a);
+-    if (d.q8a) {
++    static const bool packed = env_flag("GGML_CUDA_OCCAMY_GDN_T2_Q8A_PACKED");
++    if (packed) {
++        GGML_ASSERT(d.q8a && d.gridT2==72);
++        static thread_local bool checked=false;
++        if (!checked) {
++            int active=0;
++            cudaFuncAttributes f{};
++            CUDA_CHECK(cudaFuncGetAttributes(&f,gdn_fused2<3>));
++            CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&active,gdn_fused2<3>,NT,SMEM3_FLOATS*sizeof(float)));
++            GGML_ASSERT(active==3 && f.numRegs<=80 && f.localSizeBytes==0);
++            fprintf(stderr,"Q8PA_ADMISSION grid=%d active=%d regs=%d local=%zu\n",d.gridT2,active,f.numRegs,f.localSizeBytes);
++            checked=true;
++        }
++        PP.p[0].L.qkv=q8pa_lookup(ctx.device,st,PP.p[0].L,m.wqkv->name,false);
++    }
++    if (events) n82_before(ctx.device, st, m.wqkv->name, d.gridT2, packed ? 3 : (d.q8a ? 2 : 1));
++    if (packed) {
++        gdn_fused2<3><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
++    } else if (d.q8a) {
+         gdn_fused2<2><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
+     } else {
+         gdn_fused2<1><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
+@@ -1617,6 +1713,10 @@
+     DevState & d = dev_state(ctx.device);
+     Params P = fill_params(m, out_override, ov, d.scratch);
+     cudaStream_t st = ctx.stream();
++    if (m.nt==1 && env_flag("GGML_CUDA_OCCAMY_GDN_T2_Q8A_PACKED")) {
++        GGML_ASSERT(d.q8a && d.gridT2==72);
++        (void)q8pa_lookup(ctx.device,st,P.L,m.wqkv->name,true);
++    }
+     if (m.zero_conv && !ov) { CUDA_CHECK(cudaMemsetAsync(m.zero_conv, 0, CONV_N * sizeof(float), st)); }
+     if (m.zero_ssm && !ov)  { CUDA_CHECK(cudaMemsetAsync(m.zero_ssm,  0, SSM_N  * sizeof(float), st)); }
+     const size_t smem = SMEM2_FLOATS * sizeof(float);

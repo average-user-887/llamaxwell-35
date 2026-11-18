@@ -1,0 +1,52 @@
+--- a/state.cpp
++++ b/state.cpp
+@@ -1,4 +1,8 @@
+ #include "llama.h"
++#include <map>
++#include <set>
++#include <chrono>
++#include <utility>
+ #include "ggml-backend.h"
+ 
+ #include <algorithm>
+@@ -18,6 +22,9 @@
+ #include <string>
+ #include <vector>
+ 
++// ABI declaration from the matching llama-model.h; the linker checks the pinned runtime.
++const std::vector<std::pair<std::string, ggml_tensor *>> & llama_internal_get_tensor_map(const llama_model *);
++
+ // Observe the actual submitted ggml graph at libllama's existing dynamic call.
+ // Reads tensor metadata only. The original scheduler receives the same arguments.
+ namespace {
+@@ -169,6 +176,30 @@
+     using Model = std::unique_ptr<llama_model, decltype(&llama_model_free)>;
+     Model model(llama_model_load_from_file(model_path, mp), llama_model_free);
+     require(model && offloaded.load(), "missing actual 42/42 GPU offload proof");
++    const char * layout=std::getenv("GGML_CUDA_OCCAMY_GDN_T2_Q8A_PACKED");
++    if (layout && std::strcmp(layout,"1")==0) {
++        using Prepare=void (*)(const ggml_tensor *,const ggml_tensor *,const ggml_tensor *,const ggml_tensor *);
++        const auto prepare=cuda_symbol<Prepare>("ggml_cuda_q8pa_prepare");
++        const auto start=std::chrono::steady_clock::now();
++        std::set<const void *> weights;
++        std::map<std::string,ggml_tensor *> tensors;
++        for (const auto & entry : llama_internal_get_tensor_map(model.get())) tensors.emplace(entry);
++        int layers=0;
++        for (int i=0; i<40; ++i) {
++            if (i%4==3) continue;
++            const auto prefix="blk."+std::to_string(i)+".";
++            auto * q=tensors.at(prefix+"attn_qkv.weight"), *g=tensors.at(prefix+"attn_gate.weight"),
++                 *a=tensors.at(prefix+"ssm_alpha.weight"), *b=tensors.at(prefix+"ssm_beta.weight");
++            for (const auto * tensor : {q,g,a,b}) require(tensor && weights.insert(tensor->data).second,
++                                                           "duplicate/missing GDN source weight");
++            prepare(q,g,a,b);
++            ++layers;
++        }
++        const double wall_ms=std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count();
++        require(layers==30 && weights.size()==120,"missing before-context source weights");
++        std::fprintf(stderr,"Q8PA_PREPARED before_context=1 layers=%d tensors=%zu bytes=%lld wall_ms=%.6f\n",
++                     layers,weights.size(),14229504LL*layers,wall_ms);
++    }
+     const auto vocab = llama_model_get_vocab(model.get());
+     const int n_vocab = llama_vocab_n_tokens(vocab);
+     require(n_vocab == 248320, "unexpected vocabulary");

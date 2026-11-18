@@ -1,0 +1,59 @@
+--- a/ggml/src/ggml-cuda/occamy-gdn.cu
++++ b/ggml/src/ggml-cuda/occamy-gdn.cu
+@@ -1605,11 +1605,12 @@
+         Layer original;
+         uint8_t * packed;
+     };
+-    static thread_local std::vector<Entry> entries;
+-    static thread_local int owner_device = -1;
+-    static thread_local cudaStream_t owner_stream = nullptr;
+-    if (entries.empty()) { owner_device = device; owner_stream = stream; }
+-    GGML_ASSERT(device==owner_device && stream==owner_stream);
++    static std::mutex pack_mutex;
++    std::lock_guard<std::mutex> lk(pack_mutex);
++    static std::vector<Entry> entries;
++    static int owner_device = -1;
++    if (entries.empty()) { owner_device = device; }
++    GGML_ASSERT(device==owner_device);
+     for (const auto & e : entries) {
+         if (e.original.qkv==source.qkv) {
+             GGML_ASSERT(e.original.gate==source.gate && e.original.alpha==source.alpha && e.original.beta==source.beta);
+@@ -1636,6 +1637,27 @@
+     return dst;
+ }
+ 
++extern "C" __attribute__((visibility("default"))) void ggml_cuda_q8pa_prepare(
++    const ggml_tensor * qkv, const ggml_tensor * gate, const ggml_tensor * alpha, const ggml_tensor * beta) {
++    GGML_ASSERT(env_flag("GGML_CUDA_OCCAMY_GDN_T2_Q8A_PACKED"));
++    constexpr int device=0;
++    ggml_cuda_set_device(device);
++    cudaDeviceProp prop;
++    CUDA_CHECK(cudaGetDeviceProperties(&prop,device));
++    GGML_ASSERT(prop.major==5 && prop.minor==2 && prop.multiProcessorCount==24);
++    GGML_ASSERT(is_q4_mat(qkv,H,NQKV) && is_q4_mat(gate,H,DI) && is_q4_mat(alpha,H,NVH) && is_q4_mat(beta,H,NVH));
++    for (const ggml_tensor * t : {qkv,gate,alpha,beta}) {
++        GGML_ASSERT(t->data && t->buffer && t->buffer->buft==ggml_backend_cuda_buffer_type(device));
++    }
++    Layer source{};
++    source.qkv=(const uint8_t *)qkv->data; source.gate=(const uint8_t *)gate->data;
++    source.alpha=(const uint8_t *)alpha->data; source.beta=(const uint8_t *)beta->data;
++    cudaStream_t stream;
++    CUDA_CHECK(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
++    (void)q8pa_lookup(device,stream,source,qkv->name,true);
++    CUDA_CHECK(cudaStreamDestroy(stream));
++}
++
+ // GDN2: MTP1 verify window (one sequence, two tokens) as one gdn_fused2<1> launch. p[0] = token 1 -> snapshot plane 1
+ // (conv_out1/state_out1), p[1] = token 2 -> plane 0 (conv_out/state_out); both read the s_copy source row.
+ bool ggml_cuda_occamy_gdn_t2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m) {
+@@ -1713,10 +1735,6 @@
+     DevState & d = dev_state(ctx.device);
+     Params P = fill_params(m, out_override, ov, d.scratch);
+     cudaStream_t st = ctx.stream();
+-    if (m.nt==1 && env_flag("GGML_CUDA_OCCAMY_GDN_T2_Q8A_PACKED")) {
+-        GGML_ASSERT(d.q8a && d.gridT2==72);
+-        (void)q8pa_lookup(ctx.device,st,P.L,m.wqkv->name,true);
+-    }
+     if (m.zero_conv && !ov) { CUDA_CHECK(cudaMemsetAsync(m.zero_conv, 0, CONV_N * sizeof(float), st)); }
+     if (m.zero_ssm && !ov)  { CUDA_CHECK(cudaMemsetAsync(m.zero_ssm,  0, SSM_N  * sizeof(float), st)); }
+     const size_t smem = SMEM2_FLOATS * sizeof(float);

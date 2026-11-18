@@ -1,0 +1,8 @@
+stage=2k
+cap_s=180
+start_epoch=1795015108
+deadline_epoch=1795015288
+runner_exit=134
+cleanup=complete
+cleaned_epoch=1795015134
+status=incomplete

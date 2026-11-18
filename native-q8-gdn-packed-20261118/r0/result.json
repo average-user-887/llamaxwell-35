@@ -1,0 +1,14 @@
+{
+  "status": "aborted_after_control",
+  "runner_exit": 134,
+  "cleanup": "complete",
+  "complete_order_reversed_pairs": 0,
+  "a1_physical_q2_kernel_events": 30,
+  "b1_physical_q2_kernel_events": 0,
+  "b1_completed_weight_packs": 0,
+  "a1_complete_states_logits_match_archived_Q8": true,
+  "a1_full_choices_match_archived_Q8": true,
+  "b1_prefix_state_present": true,
+  "cause": "The fixed prefix bypassed the assumed single-row GDN preparation. The first measured two-row lookup saw no prepared entries.",
+  "candidate_timing_us": null
+}

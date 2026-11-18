@@ -1,0 +1,67 @@
+Q8PA_DSO cb5a7f377a6831a9d9f14cce0021412cb4f3c91382b46b8a4b93ca41601fea5c  /candidate/libggml-cuda.so
+print_info: n_expert_used         = 8
+Q8PA_COPY tensor=blk.0.attn_qkv.weight bytes=14229504 copy_ms=0.833440 resident_bytes=14229504
+Q8PA_COPY tensor=blk.1.attn_qkv.weight bytes=14229504 copy_ms=0.109344 resident_bytes=28459008
+Q8PA_COPY tensor=blk.2.attn_qkv.weight bytes=14229504 copy_ms=0.108736 resident_bytes=42688512
+Q8PA_COPY tensor=blk.4.attn_qkv.weight bytes=14229504 copy_ms=0.109440 resident_bytes=56918016
+Q8PA_COPY tensor=blk.5.attn_qkv.weight bytes=14229504 copy_ms=0.108672 resident_bytes=71147520
+Q8PA_COPY tensor=blk.6.attn_qkv.weight bytes=14229504 copy_ms=0.108992 resident_bytes=85377024
+Q8PA_COPY tensor=blk.8.attn_qkv.weight bytes=14229504 copy_ms=0.108864 resident_bytes=99606528
+Q8PA_COPY tensor=blk.9.attn_qkv.weight bytes=14229504 copy_ms=0.108608 resident_bytes=113836032
+Q8PA_COPY tensor=blk.10.attn_qkv.weight bytes=14229504 copy_ms=0.108896 resident_bytes=128065536
+Q8PA_COPY tensor=blk.12.attn_qkv.weight bytes=14229504 copy_ms=0.109120 resident_bytes=142295040
+Q8PA_COPY tensor=blk.13.attn_qkv.weight bytes=14229504 copy_ms=0.109120 resident_bytes=156524544
+Q8PA_COPY tensor=blk.14.attn_qkv.weight bytes=14229504 copy_ms=0.108864 resident_bytes=170754048
+Q8PA_COPY tensor=blk.16.attn_qkv.weight bytes=14229504 copy_ms=0.108896 resident_bytes=184983552
+Q8PA_COPY tensor=blk.17.attn_qkv.weight bytes=14229504 copy_ms=0.109152 resident_bytes=199213056
+Q8PA_COPY tensor=blk.18.attn_qkv.weight bytes=14229504 copy_ms=0.108704 resident_bytes=213442560
+Q8PA_COPY tensor=blk.20.attn_qkv.weight bytes=14229504 copy_ms=0.109344 resident_bytes=227672064
+Q8PA_COPY tensor=blk.21.attn_qkv.weight bytes=14229504 copy_ms=0.109056 resident_bytes=241901568
+Q8PA_COPY tensor=blk.22.attn_qkv.weight bytes=14229504 copy_ms=0.108992 resident_bytes=256131072
+Q8PA_COPY tensor=blk.24.attn_qkv.weight bytes=14229504 copy_ms=0.109440 resident_bytes=270360576
+Q8PA_COPY tensor=blk.25.attn_qkv.weight bytes=14229504 copy_ms=0.109152 resident_bytes=284590080
+Q8PA_COPY tensor=blk.26.attn_qkv.weight bytes=14229504 copy_ms=0.108928 resident_bytes=298819584
+Q8PA_COPY tensor=blk.28.attn_qkv.weight bytes=14229504 copy_ms=0.109376 resident_bytes=313049088
+Q8PA_COPY tensor=blk.29.attn_qkv.weight bytes=14229504 copy_ms=0.108288 resident_bytes=327278592
+Q8PA_COPY tensor=blk.30.attn_qkv.weight bytes=14229504 copy_ms=0.109056 resident_bytes=341508096
+Q8PA_COPY tensor=blk.32.attn_qkv.weight bytes=14229504 copy_ms=0.108480 resident_bytes=355737600
+Q8PA_COPY tensor=blk.33.attn_qkv.weight bytes=14229504 copy_ms=0.108832 resident_bytes=369967104
+Q8PA_COPY tensor=blk.34.attn_qkv.weight bytes=14229504 copy_ms=0.108448 resident_bytes=384196608
+Q8PA_COPY tensor=blk.36.attn_qkv.weight bytes=14229504 copy_ms=0.109792 resident_bytes=398426112
+Q8PA_COPY tensor=blk.37.attn_qkv.weight bytes=14229504 copy_ms=0.108928 resident_bytes=412655616
+Q8PA_COPY tensor=blk.38.attn_qkv.weight bytes=14229504 copy_ms=0.108672 resident_bytes=426885120
+Q8PA_PREPARED before_context=1 layers=30 tensors=120 bytes=426885120 wall_ms=11.429571
+N82_ADMISSION original_blocks=3 candidate_blocks=3 grid=72 admitted=1
+Q8PA_ADMISSION grid=72 active=3 regs=80 local=0
+Q2_COHORT residency device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1
+N82_EVENT specialization=3 grid=72 slot=0 tensor=blk.0.attn_qkv.weight us=159.743988
+N82_EVENT specialization=3 grid=72 slot=1 tensor=blk.1.attn_qkv.weight us=161.311996
+N82_EVENT specialization=3 grid=72 slot=2 tensor=blk.2.attn_qkv.weight us=158.528000
+N82_EVENT specialization=3 grid=72 slot=3 tensor=blk.4.attn_qkv.weight us=182.912003
+N82_EVENT specialization=3 grid=72 slot=4 tensor=blk.5.attn_qkv.weight us=169.568008
+N82_EVENT specialization=3 grid=72 slot=5 tensor=blk.6.attn_qkv.weight us=187.520004
+N82_EVENT specialization=3 grid=72 slot=6 tensor=blk.8.attn_qkv.weight us=187.552002
+N82_EVENT specialization=3 grid=72 slot=7 tensor=blk.9.attn_qkv.weight us=164.959991
+N82_EVENT specialization=3 grid=72 slot=8 tensor=blk.10.attn_qkv.weight us=188.672012
+N82_EVENT specialization=3 grid=72 slot=9 tensor=blk.12.attn_qkv.weight us=182.975998
+N82_EVENT specialization=3 grid=72 slot=10 tensor=blk.13.attn_qkv.weight us=184.800003
+N82_EVENT specialization=3 grid=72 slot=11 tensor=blk.14.attn_qkv.weight us=186.304001
+N82_EVENT specialization=3 grid=72 slot=12 tensor=blk.16.attn_qkv.weight us=187.968002
+N82_EVENT specialization=3 grid=72 slot=13 tensor=blk.17.attn_qkv.weight us=187.328003
+N82_EVENT specialization=3 grid=72 slot=14 tensor=blk.18.attn_qkv.weight us=185.279999
+N82_EVENT specialization=3 grid=72 slot=15 tensor=blk.20.attn_qkv.weight us=187.839996
+N82_EVENT specialization=3 grid=72 slot=16 tensor=blk.21.attn_qkv.weight us=184.671997
+N82_EVENT specialization=3 grid=72 slot=17 tensor=blk.22.attn_qkv.weight us=156.608002
+N82_EVENT specialization=3 grid=72 slot=18 tensor=blk.24.attn_qkv.weight us=156.000000
+N82_EVENT specialization=3 grid=72 slot=19 tensor=blk.25.attn_qkv.weight us=157.151993
+N82_EVENT specialization=3 grid=72 slot=20 tensor=blk.26.attn_qkv.weight us=152.799988
+N82_EVENT specialization=3 grid=72 slot=21 tensor=blk.28.attn_qkv.weight us=155.872009
+N82_EVENT specialization=3 grid=72 slot=22 tensor=blk.29.attn_qkv.weight us=156.512009
+N82_EVENT specialization=3 grid=72 slot=23 tensor=blk.30.attn_qkv.weight us=156.479996
+N82_EVENT specialization=3 grid=72 slot=24 tensor=blk.32.attn_qkv.weight us=157.151993
+N82_EVENT specialization=3 grid=72 slot=25 tensor=blk.33.attn_qkv.weight us=154.016006
+N82_EVENT specialization=3 grid=72 slot=26 tensor=blk.34.attn_qkv.weight us=157.056000
+N82_EVENT specialization=3 grid=72 slot=27 tensor=blk.36.attn_qkv.weight us=159.488007
+N82_EVENT specialization=3 grid=72 slot=28 tensor=blk.37.attn_qkv.weight us=155.903992
+N82_EVENT specialization=3 grid=72 slot=29 tensor=blk.38.attn_qkv.weight us=156.959991
+Q8CLK_COHORT fallback0=0 fallback1=0 paired=40 skipped=40

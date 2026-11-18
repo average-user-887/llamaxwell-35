@@ -1,0 +1,23 @@
+from pathlib import Path
+import shlex
+rel=Path('CMakeFiles/ggml-cuda.dir'); d=Path('../sparse/r2/build/ggml/src/ggml-cuda') / rel
+src='@CUDA_BUILD_SOURCE_MOUNT@/ggml/src/ggml-cuda/occamy-gdn.cu'
+cmds=[]
+flags=dict(s.split(' = ',1) for s in (d/'flags.make').read_text().splitlines() if ' = ' in s)
+cmd=['/usr/local/cuda/bin/nvcc','-forward-unknown-to-host-compiler','-ccbin=/usr/bin/g++-14']
+for key in ['CUDA_DEFINES','CUDA_INCLUDES','CUDA_FLAGS']: cmd+=shlex.split(flags[key])
+cmds.append(shlex.join(cmd+['-x','cu','-c',src,'-o','/work/occamy-gdn.cu.o']))
+objects=shlex.split((d/'objects1.rsp').read_text())
+target=str(rel/'occamy-gdn.cu.o'); assert objects.count(target)==1
+objects[objects.index(target)]='/work/occamy-gdn.cu.o'
+cmd=shlex.split((d/'link.txt').read_text()); cmd[cmd.index('-o')+1]='/work/libggml-cuda.so'
+i=cmd.index('@'+str(rel/'objects1.rsp'));cmd[i:i+1]=objects
+moe = str(rel/'occamy-fused.cu.o')
+assert cmd.count(moe)==1
+cmd[cmd.index(moe)]='/baseline/occamy-fused.cu.o'
+cmds.append(shlex.join(cmd))
+baseline=cmd.copy()
+baseline[baseline.index('/work/libggml-cuda.so')]='/work/relinked-original.so'
+baseline[baseline.index('/work/occamy-gdn.cu.o')]='/baseline/occamy-gdn.cu.o'
+cmds.append(shlex.join(baseline))
+Path('commands.sh').write_text('set -eu\n'+'\n'.join(cmds)+'\n')
