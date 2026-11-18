@@ -1,0 +1,229 @@
+{
+  "mode": "depth1",
+  "clock": "monotonic host microseconds at actual call boundaries",
+  "parse_issue": null,
+  "deferred_physical_rollback_us": null,
+  "validated": true,
+  "parity": {
+    "cold": {
+      "first_id_difference_1_based": null,
+      "text_equal": true,
+      "checked_ids": 192
+    },
+    "warm": {
+      "first_id_difference_1_based": null,
+      "text_equal": true,
+      "checked_ids": 3072
+    }
+  },
+  "measurement": {
+    "cold": {
+      "attempts": 101,
+      "verified_attempts": 101,
+      "unverified_attempts": 0,
+      "replay_attempts": 0,
+      "stage": {
+        "draft": {
+          "calls": 101,
+          "total_us": 240658,
+          "mean_us_per_verified_attempt": 2382.7524752475247,
+          "mean_us_per_observed_call": 2382.7524752475247
+        },
+        "target_decode": {
+          "calls": 101,
+          "total_us": 183627,
+          "mean_us_per_verified_attempt": 1818.0891089108911,
+          "mean_us_per_observed_call": 1818.0891089108911
+        },
+        "target_output_wait": {
+          "calls": 101,
+          "total_us": 1788456,
+          "mean_us_per_verified_attempt": 17707.48514851485,
+          "mean_us_per_observed_call": 17707.48514851485
+        },
+        "cache_process": {
+          "calls": 101,
+          "total_us": 20037,
+          "mean_us_per_verified_attempt": 198.3861386138614,
+          "mean_us_per_observed_call": 198.3861386138614
+        },
+        "sample": {
+          "calls": 101,
+          "total_us": 37125,
+          "mean_us_per_verified_attempt": 367.5742574257426,
+          "mean_us_per_observed_call": 367.5742574257426
+        },
+        "checkpoint_save": {
+          "calls": 0,
+          "total_us": 0,
+          "mean_us_per_verified_attempt": 0.0,
+          "mean_us_per_observed_call": null
+        },
+        "target_trim": {
+          "calls": 101,
+          "total_us": 8929,
+          "mean_us_per_verified_attempt": 88.4059405940594,
+          "mean_us_per_observed_call": 88.4059405940594
+        },
+        "draft_trim": {
+          "calls": 101,
+          "total_us": 4237,
+          "mean_us_per_verified_attempt": 41.95049504950495,
+          "mean_us_per_observed_call": 41.95049504950495
+        },
+        "target_load": {
+          "calls": 0,
+          "total_us": 0,
+          "mean_us_per_verified_attempt": 0.0,
+          "mean_us_per_observed_call": null
+        },
+        "draft_load": {
+          "calls": 0,
+          "total_us": 0,
+          "mean_us_per_verified_attempt": 0.0,
+          "mean_us_per_observed_call": null
+        },
+        "sampler_restore": {
+          "calls": 0,
+          "total_us": 0,
+          "mean_us_per_verified_attempt": 0.0,
+          "mean_us_per_observed_call": null
+        }
+      },
+      "trim_by_outcome": {
+        "all_accepted": {
+          "attempts": 89,
+          "direct_target_trim_total_us": 7873,
+          "target_checkpoint_load_total_us": 0,
+          "draft_checkpoint_load_total_us": 0,
+          "deferred_physical_rollback_us": null
+        },
+        "native_rejection": {
+          "attempts": 12,
+          "direct_target_trim_total_us": 1056,
+          "target_checkpoint_load_total_us": 0,
+          "draft_checkpoint_load_total_us": 0,
+          "deferred_physical_rollback_us": null
+        },
+        "checkpoint_restore": {
+          "attempts": 0,
+          "direct_target_trim_total_us": 0,
+          "target_checkpoint_load_total_us": 0,
+          "draft_checkpoint_load_total_us": 0,
+          "deferred_physical_rollback_us": null
+        }
+      },
+      "offered": 101,
+      "accepted": 89,
+      "emitted_in_verified_attempts": 190,
+      "verified_span_total_us": 2320346,
+      "other_us_inside_verified_span": 37277,
+      "inter_attempt_gap_total_us": 823,
+      "inter_attempt_gap_count": 100
+    },
+    "warm": {
+      "attempts": 1621,
+      "verified_attempts": 1621,
+      "unverified_attempts": 0,
+      "replay_attempts": 0,
+      "stage": {
+        "draft": {
+          "calls": 1621,
+          "total_us": 3862855,
+          "mean_us_per_verified_attempt": 2383.0074028377544,
+          "mean_us_per_observed_call": 2383.0074028377544
+        },
+        "target_decode": {
+          "calls": 1621,
+          "total_us": 2635969,
+          "mean_us_per_verified_attempt": 1626.137569401604,
+          "mean_us_per_observed_call": 1626.137569401604
+        },
+        "target_output_wait": {
+          "calls": 1621,
+          "total_us": 28768432,
+          "mean_us_per_verified_attempt": 17747.336212214683,
+          "mean_us_per_observed_call": 17747.336212214683
+        },
+        "cache_process": {
+          "calls": 1621,
+          "total_us": 309552,
+          "mean_us_per_verified_attempt": 190.96360271437385,
+          "mean_us_per_observed_call": 190.96360271437385
+        },
+        "sample": {
+          "calls": 1621,
+          "total_us": 636413,
+          "mean_us_per_verified_attempt": 392.60518198642814,
+          "mean_us_per_observed_call": 392.60518198642814
+        },
+        "checkpoint_save": {
+          "calls": 0,
+          "total_us": 0,
+          "mean_us_per_verified_attempt": 0.0,
+          "mean_us_per_observed_call": null
+        },
+        "target_trim": {
+          "calls": 1621,
+          "total_us": 140037,
+          "mean_us_per_verified_attempt": 86.38926588525601,
+          "mean_us_per_observed_call": 86.38926588525601
+        },
+        "draft_trim": {
+          "calls": 1621,
+          "total_us": 67220,
+          "mean_us_per_verified_attempt": 41.46822948797039,
+          "mean_us_per_observed_call": 41.46822948797039
+        },
+        "target_load": {
+          "calls": 0,
+          "total_us": 0,
+          "mean_us_per_verified_attempt": 0.0,
+          "mean_us_per_observed_call": null
+        },
+        "draft_load": {
+          "calls": 0,
+          "total_us": 0,
+          "mean_us_per_verified_attempt": 0.0,
+          "mean_us_per_observed_call": null
+        },
+        "sampler_restore": {
+          "calls": 0,
+          "total_us": 0,
+          "mean_us_per_verified_attempt": 0.0,
+          "mean_us_per_observed_call": null
+        }
+      },
+      "trim_by_outcome": {
+        "all_accepted": {
+          "attempts": 1449,
+          "direct_target_trim_total_us": 124107,
+          "target_checkpoint_load_total_us": 0,
+          "draft_checkpoint_load_total_us": 0,
+          "deferred_physical_rollback_us": null
+        },
+        "native_rejection": {
+          "attempts": 172,
+          "direct_target_trim_total_us": 15930,
+          "target_checkpoint_load_total_us": 0,
+          "draft_checkpoint_load_total_us": 0,
+          "deferred_physical_rollback_us": null
+        },
+        "checkpoint_restore": {
+          "attempts": 0,
+          "direct_target_trim_total_us": 0,
+          "target_checkpoint_load_total_us": 0,
+          "draft_checkpoint_load_total_us": 0,
+          "deferred_physical_rollback_us": null
+        }
+      },
+      "offered": 1621,
+      "accepted": 1449,
+      "emitted_in_verified_attempts": 3070,
+      "verified_span_total_us": 36980265,
+      "other_us_inside_verified_span": 559787,
+      "inter_attempt_gap_total_us": 13468,
+      "inter_attempt_gap_count": 1620
+    }
+  }
+}

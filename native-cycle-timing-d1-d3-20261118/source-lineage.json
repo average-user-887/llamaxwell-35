@@ -1,0 +1,6 @@
+{
+  "pinned_source_commit": "b9c6598b8f0b04eeff3e8ae4f34beafc30d2c287",
+  "source_package": "../native-cycle-timing-d2-20261118",
+  "diagnostic_server_impl_sha256": "6644d1683750aab2b8f881e0cd9dde07307896ec6026a913dc85ba3991e0bd3e",
+  "instrumentation_patch_sha256": "4f5088fe8e72ef816af98516d9605678485d1ca9e0b0306e76806ea899ff4965"
+}

@@ -1,0 +1,12 @@
+{
+  "cold": {
+    "first_id_difference_1_based": null,
+    "text_equal": true,
+    "checked_ids": 192
+  },
+  "warm": {
+    "first_id_difference_1_based": null,
+    "text_equal": true,
+    "checked_ids": 3072
+  }
+}

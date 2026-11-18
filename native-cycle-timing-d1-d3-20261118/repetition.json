@@ -1,0 +1,318 @@
+{
+  "scope": "One matched unscored forced 3072-output 80K continuation. Separate short scored checks are excluded.",
+  "normalize": "Strip and collapse whitespace; replace digit runs with #. Windows use overlapping 24 Unicode word tokens after digit normalization. Repeated instances exclude the first.",
+  "arms": {
+    "q4_serial_on": {
+      "nonblank_lines": 293,
+      "comment_only_lines": 21,
+      "trailing_comment_only_lines": 0,
+      "normalized_duplicates": {
+        "duplicates": 94,
+        "total": 293
+      },
+      "normalized_duplicates_by_quarter": [
+        {
+          "duplicates": 4,
+          "total": 73
+        },
+        {
+          "duplicates": 19,
+          "total": 73
+        },
+        {
+          "duplicates": 18,
+          "total": 73
+        },
+        {
+          "duplicates": 14,
+          "total": 74
+        }
+      ],
+      "normalized_duplicates_second_half": {
+        "duplicates": 45,
+        "total": 147
+      },
+      "normalized_24_word_windows": {
+        "excess_instances": 129,
+        "total": 1322,
+        "highest_multiplicity": 4
+      },
+      "python_keyword_led_lines": 164,
+      "fence_lines": 0,
+      "replacement_or_control_characters": 0
+    },
+    "q4_depth3_off": {
+      "nonblank_lines": 260,
+      "comment_only_lines": 62,
+      "trailing_comment_only_lines": 33,
+      "normalized_duplicates": {
+        "duplicates": 49,
+        "total": 260
+      },
+      "normalized_duplicates_by_quarter": [
+        {
+          "duplicates": 23,
+          "total": 65
+        },
+        {
+          "duplicates": 5,
+          "total": 65
+        },
+        {
+          "duplicates": 7,
+          "total": 65
+        },
+        {
+          "duplicates": 4,
+          "total": 65
+        }
+      ],
+      "normalized_duplicates_second_half": {
+        "duplicates": 13,
+        "total": 130
+      },
+      "normalized_24_word_windows": {
+        "excess_instances": 30,
+        "total": 1385,
+        "highest_multiplicity": 2
+      },
+      "python_keyword_led_lines": 102,
+      "fence_lines": 0,
+      "replacement_or_control_characters": 0
+    },
+    "q4_depth3_attention": {
+      "nonblank_lines": 298,
+      "comment_only_lines": 29,
+      "trailing_comment_only_lines": 0,
+      "normalized_duplicates": {
+        "duplicates": 101,
+        "total": 298
+      },
+      "normalized_duplicates_by_quarter": [
+        {
+          "duplicates": 5,
+          "total": 74
+        },
+        {
+          "duplicates": 28,
+          "total": 75
+        },
+        {
+          "duplicates": 23,
+          "total": 74
+        },
+        {
+          "duplicates": 8,
+          "total": 75
+        }
+      ],
+      "normalized_duplicates_second_half": {
+        "duplicates": 40,
+        "total": 149
+      },
+      "normalized_24_word_windows": {
+        "excess_instances": 96,
+        "total": 1308,
+        "highest_multiplicity": 4
+      },
+      "python_keyword_led_lines": 158,
+      "fence_lines": 0,
+      "replacement_or_control_characters": 0
+    },
+    "q4_depth3_combined": {
+      "nonblank_lines": 253,
+      "comment_only_lines": 40,
+      "trailing_comment_only_lines": 0,
+      "normalized_duplicates": {
+        "duplicates": 68,
+        "total": 253
+      },
+      "normalized_duplicates_by_quarter": [
+        {
+          "duplicates": 15,
+          "total": 63
+        },
+        {
+          "duplicates": 5,
+          "total": 63
+        },
+        {
+          "duplicates": 6,
+          "total": 63
+        },
+        {
+          "duplicates": 26,
+          "total": 64
+        }
+      ],
+      "normalized_duplicates_second_half": {
+        "duplicates": 40,
+        "total": 127
+      },
+      "normalized_24_word_windows": {
+        "excess_instances": 28,
+        "total": 1198,
+        "highest_multiplicity": 2
+      },
+      "python_keyword_led_lines": 106,
+      "fence_lines": 0,
+      "replacement_or_control_characters": 0
+    },
+    "q3_serial_off": {
+      "nonblank_lines": 283,
+      "comment_only_lines": 2,
+      "trailing_comment_only_lines": 0,
+      "normalized_duplicates": {
+        "duplicates": 73,
+        "total": 283
+      },
+      "normalized_duplicates_by_quarter": [
+        {
+          "duplicates": 5,
+          "total": 70
+        },
+        {
+          "duplicates": 9,
+          "total": 71
+        },
+        {
+          "duplicates": 8,
+          "total": 71
+        },
+        {
+          "duplicates": 16,
+          "total": 71
+        }
+      ],
+      "normalized_duplicates_second_half": {
+        "duplicates": 38,
+        "total": 142
+      },
+      "normalized_24_word_windows": {
+        "excess_instances": 46,
+        "total": 1318,
+        "highest_multiplicity": 2
+      },
+      "python_keyword_led_lines": 170,
+      "fence_lines": 0,
+      "replacement_or_control_characters": 0
+    },
+    "q3_serial_on": {
+      "nonblank_lines": 283,
+      "comment_only_lines": 2,
+      "trailing_comment_only_lines": 0,
+      "normalized_duplicates": {
+        "duplicates": 73,
+        "total": 283
+      },
+      "normalized_duplicates_by_quarter": [
+        {
+          "duplicates": 5,
+          "total": 70
+        },
+        {
+          "duplicates": 9,
+          "total": 71
+        },
+        {
+          "duplicates": 8,
+          "total": 71
+        },
+        {
+          "duplicates": 16,
+          "total": 71
+        }
+      ],
+      "normalized_duplicates_second_half": {
+        "duplicates": 38,
+        "total": 142
+      },
+      "normalized_24_word_windows": {
+        "excess_instances": 46,
+        "total": 1318,
+        "highest_multiplicity": 2
+      },
+      "python_keyword_led_lines": 170,
+      "fence_lines": 0,
+      "replacement_or_control_characters": 0
+    },
+    "q3_depth2_off": {
+      "nonblank_lines": 293,
+      "comment_only_lines": 5,
+      "trailing_comment_only_lines": 0,
+      "normalized_duplicates": {
+        "duplicates": 108,
+        "total": 293
+      },
+      "normalized_duplicates_by_quarter": [
+        {
+          "duplicates": 13,
+          "total": 73
+        },
+        {
+          "duplicates": 28,
+          "total": 73
+        },
+        {
+          "duplicates": 15,
+          "total": 73
+        },
+        {
+          "duplicates": 11,
+          "total": 74
+        }
+      ],
+      "normalized_duplicates_second_half": {
+        "duplicates": 34,
+        "total": 147
+      },
+      "normalized_24_word_windows": {
+        "excess_instances": 89,
+        "total": 1355,
+        "highest_multiplicity": 3
+      },
+      "python_keyword_led_lines": 154,
+      "fence_lines": 0,
+      "replacement_or_control_characters": 0
+    },
+    "q3_depth2_on": {
+      "nonblank_lines": 311,
+      "comment_only_lines": 18,
+      "trailing_comment_only_lines": 0,
+      "normalized_duplicates": {
+        "duplicates": 109,
+        "total": 311
+      },
+      "normalized_duplicates_by_quarter": [
+        {
+          "duplicates": 7,
+          "total": 77
+        },
+        {
+          "duplicates": 27,
+          "total": 78
+        },
+        {
+          "duplicates": 17,
+          "total": 78
+        },
+        {
+          "duplicates": 18,
+          "total": 78
+        }
+      ],
+      "normalized_duplicates_second_half": {
+        "duplicates": 48,
+        "total": 156
+      },
+      "normalized_24_word_windows": {
+        "excess_instances": 71,
+        "total": 1359,
+        "highest_multiplicity": 2
+      },
+      "python_keyword_led_lines": 179,
+      "fence_lines": 0,
+      "replacement_or_control_characters": 0
+    }
+  }
+}
