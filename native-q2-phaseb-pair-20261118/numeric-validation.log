@@ -1,0 +1,101 @@
+{
+  "residency": {
+    "sms": 24,
+    "active_per_sm": 2,
+    "grid_ctas": 48,
+    "ctas_per_cohort": 24,
+    "threads_per_cta": 512,
+    "registers": 63,
+    "static_shared_bytes": 96,
+    "dynamic_shared_bytes": 39424,
+    "local_bytes": 0
+  },
+  "results": {
+    "independent": {
+      "ordered_experts": [
+        [
+          128,
+          215,
+          73,
+          136,
+          110,
+          167,
+          197,
+          112
+        ],
+        [
+          85,
+          222,
+          184,
+          46,
+          216,
+          151,
+          64,
+          219
+        ]
+      ],
+      "expert_overlap": 0,
+      "candidate_router_repeats": 2,
+      "output_rows": [
+        {
+          "row": 0,
+          "finite": 2048,
+          "different_words": 0,
+          "repeat_different_words": 0,
+          "max_abs": 0.0
+        },
+        {
+          "row": 1,
+          "finite": 2048,
+          "different_words": 0,
+          "repeat_different_words": 0,
+          "max_abs": 0.0
+        }
+      ],
+      "stock_reference": "unchanged 19607daf two-row cohort instructions on the same native Q2 graph"
+    },
+    "partial": {
+      "ordered_experts": [
+        [
+          128,
+          215,
+          73,
+          136,
+          110,
+          167,
+          197,
+          112
+        ],
+        [
+          110,
+          73,
+          64,
+          128,
+          215,
+          96,
+          197,
+          82
+        ]
+      ],
+      "expert_overlap": 5,
+      "candidate_router_repeats": 2,
+      "output_rows": [
+        {
+          "row": 0,
+          "finite": 2048,
+          "different_words": 0,
+          "repeat_different_words": 0,
+          "max_abs": 0.0
+        },
+        {
+          "row": 1,
+          "finite": 2048,
+          "different_words": 0,
+          "repeat_different_words": 0,
+          "max_abs": 0.0
+        }
+      ],
+      "stock_reference": "unchanged 19607daf two-row cohort instructions on the same native Q2 graph"
+    }
+  }
+}

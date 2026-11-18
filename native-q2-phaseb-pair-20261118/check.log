@@ -1,0 +1,48 @@
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  /runtime/libggml.so.0.26.0
+678cf75e5ef5b1f92460eb0f816d3bbe755ee9710fd04606c31ec24dcd41fa06  /runtime/libggml-base.so.0.26.0
+babdbaa629c8d20f76f995c2e161c22895b53d4825a92b56baf8d70160f3508b  /runtime/libggml-cuda.so
+378bd3ae31da25dd6905299de6fd3caa18b04e935148d961fa54183e2386e3a4  /operator
+Q2_COHORT FIXTURE_IDS independent row=0 ids=128,215,73,136,110,167,197,112
+Q2_COHORT FIXTURE_IDS independent row=1 ids=85,222,184,46,216,151,64,219
+Q2_COHORT FIXTURE independent overlap=0 min_margin=0.00021109628
+Q2_COHORT FIXTURE_IDS partial row=0 ids=128,215,73,136,110,167,197,112
+Q2_COHORT FIXTURE_IDS partial row=1 ids=110,73,64,128,215,96,197,82
+Q2_COHORT FIXTURE partial overlap=5 min_margin=0.0011513497
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 24463 MiB):
+  Device 0: Quadro M6000 24GB, compute capability 5.2, VMM: yes, VRAM: 24463 MiB
+load_backend: loaded CUDA backend from /runtime/libggml-cuda.so
+N104 MAP /runtime/libggml.so.0.26.0
+N104 MAP /runtime/libggml-base.so.0.26.0
+N104 MAP /runtime/libggml-cuda.so
+Q2_COHORT MAP /operator /runtime/libggml-cuda.so
+ggml_cuda_hg_try_defer: GGML_CUDA_OCCAMY_HOSTGAP engaged on device 0
+ggml_cuda_graph_set_enabled: disabling CUDA graphs due to GPU architecture
+occamy-fused: window rejected: no residual ADD within 128 nodes
+ggml_cuda_graph_set_enabled: disabling CUDA graphs due to GPU architecture
+occamy-fused: device 0: 24 SMs x 2 blocks/SM -> grid 48, smem 41728 B
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+occamy-fused: device 0: TAILBAL variant 2 blocks/SM -> grid 48
+occamy-fused: device 0: MOE_V3 variant 2 blocks/SM x 512 thr -> grid 48, smem 39424 B
+occamy-fused: device 0: DOWNH=1 variant 2 blocks/SM -> grid 48
+occamy-fused: device 0: DOWNH=2 variant 2 blocks/SM -> grid 48
+occamy-fused: fused MoE window 0..42 (43 nodes) node_0 -> cohort_native_n2split
+Q2_COHORT residency device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1
+Q2_PAIR ROUTES independent mode=cohorts row=0 ids=128,215,73,136,110,167,197,112
+Q2_PAIR ROUTES independent mode=cohorts row=1 ids=85,222,184,46,216,151,64,219
+Q2_GATEUP residency device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1
+Q2_PAIR ROUTES independent mode=gateup row=0 ids=128,215,73,136,110,167,197,112
+Q2_PAIR ROUTES independent mode=gateup row=1 ids=85,222,184,46,216,151,64,219
+Q2_PAIR ROUTES independent mode=gateup row=0 ids=128,215,73,136,110,167,197,112
+Q2_PAIR ROUTES independent mode=gateup row=1 ids=85,222,184,46,216,151,64,219
+Q2_COHORT ROW independent row=0 finite=2048 different=0 repeat_different=0 max_abs=0
+Q2_COHORT ROW independent row=1 finite=2048 different=0 repeat_different=0 max_abs=0
+Q2_PAIR ROUTES partial mode=cohorts row=0 ids=128,215,73,136,110,167,197,112
+Q2_PAIR ROUTES partial mode=cohorts row=1 ids=110,73,64,128,215,96,197,82
+Q2_PAIR ROUTES partial mode=gateup row=0 ids=128,215,73,136,110,167,197,112
+Q2_PAIR ROUTES partial mode=gateup row=1 ids=110,73,64,128,215,96,197,82
+Q2_PAIR ROUTES partial mode=gateup row=0 ids=128,215,73,136,110,167,197,112
+Q2_PAIR ROUTES partial mode=gateup row=1 ids=110,73,64,128,215,96,197,82
+Q2_COHORT ROW partial row=0 finite=2048 different=0 repeat_different=0 max_abs=0
+Q2_COHORT ROW partial row=1 finite=2048 different=0 repeat_different=0 max_abs=0
+Q2_PAIR FINISH row0=0 row1=0 pair=6 skip=6 gateup=4
+ggml_cuda_hostgap: deferred=8 flushes=8
