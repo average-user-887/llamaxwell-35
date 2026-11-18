@@ -1,0 +1,11 @@
+{
+  "attention_reference_sha256": "fd436e975b2729c6ccd96abf51ef3f5f054e73c734ce1efdc4141b996b245b6c",
+  "moe_reference_sha256": "a68cf344d6c810cd8f9ca8bf46a7fcf8a0b2f466d660daa21ed576ef96da44b2",
+  "combined_sha256": "abe7dcfdbf2d7df0b31b5478212f3234ffdd8e2b8f9a077c0a216b2e32865aae",
+  "audit_sha256": "9b388405bf735df4c3763d043289be358af6c38e1aae431fa988dd267782e0b0",
+  "attention_object_sha256": "969fd340bc6a5ed48e533dcf31364454f1c15ba2fd596045fe6c6b26f2fae75f",
+  "moe_object_sha256": "3c08b5fc0efc1b82b2798935767c81f1bc7da361e887578fa6728f0c16c0809d",
+  "combined_manifest_sha256": "01713420912b8166911c55195c54e6f247c97f08d3b00a813f61c8ebd95f27e8",
+  "rollback_executable_sha256": "4a73fe673077bd95ea70e3728aaffbf445a7bbd737cadaed6b1da81d97a7b35c",
+  "rollback_manifest_sha256": "50f38734149e7554b9563c128e0e5296803832774d6f44242b4085fc3fa66730"
+}

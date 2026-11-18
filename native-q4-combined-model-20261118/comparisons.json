@@ -1,0 +1,61 @@
+{
+  "pairs": {
+    "attention_only": {
+      "cold": {
+        "decode_ratio": 1.2332894480202847,
+        "base_minus_trial_wall_s": -0.5499150260584429,
+        "base_minus_trial_ms_per_native_cycle": 12.255637931034485,
+        "first_different_id_1based": 19
+      },
+      "warm": {
+        "decode_ratio": 1.188576235711645,
+        "base_minus_trial_wall_s": 8.069212020956911,
+        "base_minus_trial_ms_per_native_cycle": 13.175073359837022,
+        "first_different_id_1based": 19
+      }
+    },
+    "moe_over_attention": {
+      "cold": {
+        "decode_ratio": 1.031000314400105,
+        "base_minus_trial_wall_s": 1.2238748419331387,
+        "base_minus_trial_ms_per_native_cycle": 3.3883333333333283,
+        "first_different_id_1based": 59
+      },
+      "warm": {
+        "decode_ratio": 1.1083334751926635,
+        "base_minus_trial_wall_s": 4.196414934005588,
+        "base_minus_trial_ms_per_native_cycle": 3.4754494666592706,
+        "first_different_id_1based": 59
+      }
+    },
+    "combined_over_off": {
+      "cold": {
+        "decode_ratio": 1.2715218086552453,
+        "base_minus_trial_wall_s": 0.6739598158746958,
+        "base_minus_trial_ms_per_native_cycle": 15.643971264367813,
+        "first_different_id_1based": 19
+      },
+      "warm": {
+        "decode_ratio": 1.3173388298577018,
+        "base_minus_trial_wall_s": 12.2656269549625,
+        "base_minus_trial_ms_per_native_cycle": 16.650522826496292,
+        "first_different_id_1based": 19
+      }
+    },
+    "strict_native_over_serial": {
+      "cold": {
+        "decode_ratio": 0.9673542090362379,
+        "base_minus_trial_wall_s": -5.137050147051923,
+        "base_minus_trial_ms_per_native_cycle": null,
+        "first_different_id_1based": 60
+      },
+      "warm": {
+        "decode_ratio": 1.040350649318009,
+        "base_minus_trial_wall_s": 1.4216221449896693,
+        "base_minus_trial_ms_per_native_cycle": null,
+        "first_different_id_1based": 60
+      }
+    }
+  },
+  "strict_warm_2x": false
+}

@@ -1,0 +1,23 @@
+{
+  "format": 2,
+  "arm": "depth3-attn",
+  "depth": 3,
+  "runner_exit": 0,
+  "cleanup_exit": 0,
+  "technical_pass": true,
+  "failure_class": null,
+  "bounded_wall_s": 354,
+  "trace_sha256": "488a7343506a6afc2dbace18c579971d5e6d09885a62920d349f3a8fe772cb4f",
+  "converter_sha256": "e1d505130006c8f4071ed3304b8a43206ebbe511d32989799f1976084c0e5a01",
+  "events": {
+    "cycle": 1031,
+    "host_counter_record_incomplete": 13,
+    "host_counter_snapshot": 29,
+    "output_boundary": 2,
+    "request_begin": 2,
+    "runtime_state_marker": 1,
+    "slot_release": 2,
+    "sse_clock_checkpoint": 7,
+    "trace_metadata": 1
+  }
+}

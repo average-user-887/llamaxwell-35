@@ -1,0 +1,118 @@
+--- a/state.cpp
++++ b/state.cpp
+@@ -148,6 +148,10 @@
+     require(n_prompt == 2000 && oracle.size() == 192 && ends == Tokens({972,1996,2000}), "wrong fixture");
+     require(std::string(getenv("GGML_CUDA_OCCAMY_FA_Q3_R2") ? getenv("GGML_CUDA_OCCAMY_FA_Q3_R2") : "") == "1",
+             "N100 q3 profile absent");
++    for (const char * name : {"GGML_CUDA_OCCAMY_FA_Q4_R2","GGML_CUDA_OCCAMY_MOE_Q4_COHORTS"}) {
++        const char * value=getenv(name);
++        require(value && !std::strcmp(value,"1"),"combined Q4 flags missing");
++    }
+     llama_log_set(log_callback, nullptr);
+     ggml_backend_load_all_from_path("/candidate");
+     llama_backend_init();
+@@ -173,7 +177,7 @@
+            name.rfind("libggml-base.so",0)==0 || name.rfind("libggml-cuda.so",0)==0) found.insert(path);
+     }
+     require(found==expected && expected.size()==4, "unexpected actual runtime mappings");
+-    for(const auto & path:found) std::fprintf(stderr,"ROLL3_MAP %s\n",path.c_str());
++    for(const auto & path:found) std::fprintf(stderr,"ROLL4_MAP %s\n",path.c_str());
+     const auto cuda = ggml_backend_dev_by_name("CUDA0");
+     require(cuda && ggml_backend_dev_type(cuda) == GGML_BACKEND_DEVICE_TYPE_GPU &&
+             std::strstr(ggml_backend_dev_description(cuda), "M6000"), "admitted CUDA0 M6000 unavailable");
+@@ -208,9 +212,9 @@
+     cp.n_batch = logical_batch;
+     cp.n_ubatch = 1024;
+     cp.n_seq_max = 1;
+-    cp.n_rs_seq = 2;
+-    cp.n_outputs_max = 3;
+-    cp.n_outputs_max_per_seq = 3;
++    cp.n_rs_seq = 3;
++    cp.n_outputs_max = 4;
++    cp.n_outputs_max_per_seq = 4;
+     cp.n_threads = cp.n_threads_batch = 2;
+     cp.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_ENABLED;
+     cp.offload_kqv = cp.op_offload = true;
+@@ -218,7 +222,7 @@
+     cp.type_k = cp.type_v = GGML_TYPE_F16;
+     using Context = std::unique_ptr<llama_context, decltype(&llama_free)>;
+     Context ctx(llama_init_from_model(model.get(), cp), llama_free);
+-    require(ctx && llama_n_ctx(ctx.get()) == context_size && llama_n_rs_seq(ctx.get()) == 2, "context shape mismatch");
++    require(ctx && llama_n_ctx(ctx.get()) == context_size && llama_n_rs_seq(ctx.get()) == 3, "context shape mismatch");
+     auto mem = llama_get_memory(ctx.get());
+     require(mem && llama_memory_seq_pos_max(mem, 0) == -1, "new sequence has prior state");
+     Batch batch;
+@@ -234,6 +238,8 @@
+     const float * last_logits = llama_get_logits(ctx.get());
+     require(last_logits, "missing prefill logits");
+     const auto base = out + "/" + mode + ".";
++    using Counter=unsigned long long (*)();
++    const auto moe_count=cuda_symbol<Counter>("ggml_cuda_occamy_q4_cohort_launch_count");
+     const auto pos = [&]{ return llama_memory_seq_pos_max(mem, 0); };
+     const auto snapshot = [&](const char * stage) {
+         llama_synchronize(ctx.get());
+@@ -253,7 +259,7 @@
+         const uint32_t expected_header[2] = {0xaf143cd8u,0u};
+         require(std::memcmp(full.data(),expected_header,8)==0,"state magic or sequence id differs");
+         write_file(base+stage+".kv",full.data()+8,total-n);
+-        std::cout<<"ROLL3_KV stage="<<stage<<" pos="<<pos()<<" bytes="<<total-n<<" full_bytes="<<total<<"\n";
++        std::cout<<"ROLL4_KV stage="<<stage<<" pos="<<pos()<<" bytes="<<total-n<<" full_bytes="<<total<<"\n";
+         std::cout << "N34_STATE stage=" << stage << " pos=" << pos() << " bytes=" << n << "\n";
+     };
+     auto decode = [&](const char * stage, const Tokens & input, bool keep_logits) {
+@@ -262,10 +268,10 @@
+         batch.fill(input,0,at,width,true,true);
+         GraphRows shape;
+         trace_graph = &shape;
+-        count_q3.store(width == 3);
++        count_q4.store(width == 4);
+         require(llama_decode(ctx.get(),batch.b) == 0, "decode failed");
+         llama_synchronize(ctx.get());
+-        count_q3.store(false);
++        count_q4.store(false);
+         trace_graph = nullptr;
+         require(shape.calls == 1 && shape.input == width && shape.output == width && pos() == at+width-1,
+                 "actual submitted shape or resulting position mismatch");
+@@ -287,21 +293,26 @@
+     for (int i=0; i<4; ++i) decode("prefix",{oracle[i]},false);
+     snapshot("prefix");
+     const auto keep=oracle[4];
+-    const llama_token wrong=mode=="wide_a"?42:44, tail=mode=="wide_a"?43:45;
++    const llama_token wrong=mode=="wide_a"?42:44, middle=mode=="wide_a"?43:45, tail=mode=="wide_a"?46:47;
++    const auto moe_before=moe_count();
+     llama_token first_choice;
+     if (mode=="serial") {
+         first_choice=decode("kept",{keep},true).front();
+     } else {
+-        const auto decisions=decode("badtriple",{keep,wrong,tail},true);
++        const auto decisions=decode("badquad",{keep,wrong,middle,tail},true);
+         first_choice=decisions.front();
+-        snapshot("badtriple");
+-        require(first_choice!=wrong,"first proposal was not rejected");
++        snapshot("badquad");
++        require(first_choice!=wrong && decisions[1]!=middle && decisions[2]!=tail,"forced proposal coincided with target choice");
++        require(moe_count()-moe_before==40,"target width-four did not launch all forty MoE cohorts");
+         const auto before=pos();
+-        require(before==2006 && llama_memory_seq_rm(mem,0,before-1,-1),"two-position native rewind refused");
++        require(before==2007 && llama_memory_seq_rm(mem,0,before-2,-1),"three-position native rewind refused");
+         require(pos()==2004,"incorrect retained position after rewind");
+-        std::cout<<"ROLL3_REMOVE start="<<before-1<<" after="<<pos()<<" before="<<before
+-                 <<" wrong="<<wrong<<" tail="<<tail<<" first_choice="<<first_choice<<"\n";
++        std::cout<<"ROLL4_REMOVE start="<<before-2<<" after="<<pos()<<" before="<<before
++                 <<" wrong="<<wrong<<" middle="<<middle<<" tail="<<tail<<" first_choice="<<first_choice<<"\n";
+     }
++    const auto observed_moe=moe_count()-moe_before;
++    require(observed_moe==(mode=="serial"?0u:40u),"unexpected Q4 candidate launch coverage");
++    std::cout<<"ROLL4_MOE active_q4="<<observed_moe<<" off_prefill="<<moe_before<<" independent_wrong="<<(mode=="serial"?0:3)<<"\n";
+     snapshot("kept");
+     const auto chosen=out+"/correction.id";
+     if(mode=="wide_a") {
+@@ -327,7 +338,7 @@
+             const float scores[] = {1.0,4.0,8.0};
+             require(greedy(scores,{0,0,1}).id == 1, "EOS-masked greedy failed");
+             require(8+20+30*(98304+2097152+24) == partial_size,"state dimensions inconsistent");
+-            std::puts("N34_CPU_PASS partial_bytes=65864428 layers=30 q3_inputs=3 q3_outputs=3");
++            std::puts("N34_CPU_PASS partial_bytes=65864428 layers=30 q4_inputs=4 q4_outputs=4");
+             return 0;
+         }
+         require(argc==7,"usage: state MODE MODEL PROMPT_IDS ORACLE_IDS PREFILL_ENDS OUTDIR");

@@ -1,0 +1,231 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+
+card=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+campaign=$(dirname -- "$card")
+lab=$(dirname -- "$campaign")
+runner=$campaign/runner
+# shellcheck source=../runner/night_trial_runtime.sh
+source "$runner/night_trial_runtime.sh"
+probe=$card/native_probe.py
+measured=$campaign/night-native-depth2-q3-80k-r1
+operator=$card
+stream_probe=$campaign/night-n18-warm3072/n18_probe.py
+model_dir=$(dirname -- "$lab")/uroboros-models
+model=occamy-1.0-Q4_0-headq40b-mtp.gguf
+n1=$campaign/night-cache-only/libs
+r2=$campaign/sparse/r2/libs
+cap=430
+
+check() {
+  (cd "$card" && sha256sum --check --quiet FROZEN.sha256) || return
+  (cd "$measured" && sha256sum --check --quiet FROZEN.sha256) || return
+  [[ $(stat -Lc '%s %Y' "$model_dir/$model") == '20080296992 1791834438' ]] || return
+  grep -Fxq "@PRIVATE_MODEL_FILE_SHA256@  $model_dir/$model" "$campaign/model.sha256" || return
+  night_profile || return
+  python3 -B "$probe" check
+}
+
+bounded_docker() { timeout -k 1s 8s docker "$@"; }
+
+capture_logs() { bounded_docker logs "$1" > "$2" 2>&1; }
+
+runtime_inventory() {
+  local name=$1 out=$2 path inode
+  bounded_docker exec "$name" cat /proc/1/maps |
+    awk '$6 ~ /\/lib(ggml-cuda\.so|llama-server-impl\.so|llama(-common)?\.so(\.[0-9]+)*)$/ || $6 == "/audit.so" {
+      if (NF != 6) exit 2; print $6, $5
+    }' | sort -u > "$out/runtime-library-inodes.txt"
+  {
+    while read -r path inode; do
+      [[ $(bounded_docker exec "$name" stat -Lc '%i' "$path") == "$inode" ]]
+      bounded_docker exec "$name" sha256sum "$path"
+    done < "$out/runtime-library-inodes.txt"
+    bounded_docker exec "$name" sha256sum /proc/1/exe
+  } > "$out/runtime-library-hashes.txt"
+}
+
+wait_for_health() {
+  local name=$1 port=$2 started=$SECONDS remaining probe_timeout running
+  local health_deadline=$((started + 45))
+  while (( SECONDS < health_deadline )); do
+    remaining=$((health_deadline - SECONDS))
+    probe_timeout=$((remaining < 2 ? remaining : 2))
+    if curl -fsS --noproxy '*' --max-time "$probe_timeout" "http://127.0.0.1:$port/health" >/dev/null 2>&1; then
+      printf 'owned server ready after %ss\n' "$((SECONDS - started))"
+      return 0
+    fi
+    remaining=$((health_deadline - SECONDS))
+    (( remaining > 0 )) || break
+    probe_timeout=$((remaining < 2 ? remaining : 2))
+    if ! running=$(timeout -k 1s "${probe_timeout}s" docker inspect -f '{{.State.Running}}' "$name") || [[ $running != true ]]; then
+      echo 'owned server exited or could not be inspected during startup' >&2
+      return 2
+    fi
+    if (( SECONDS < health_deadline )); then sleep 1; fi
+  done
+  echo 'owned server failed to become healthy within 45s' >&2
+  return 2
+}
+
+arm() {
+  local stage=$1 profile=$2 name=$3 out=$4 owner=$5 binding port admitted=0 attempt env argv flag_names flag_pattern
+  local -a environment=() args=() trace_mount=()
+  capture_name=$name
+  capture_file=$out/server.log
+  trap 'capture_logs "$capture_name" "$capture_file" || true' EXIT
+  trap 'exit 124' INT TERM
+  for attempt in 1 2 3 4; do
+    if night_admit_idle >> "$out/admission.txt" 2>&1; then admitted=1; break; fi
+    if (( attempt < 4 )); then sleep 3; fi
+  done
+  (( admitted )) || { echo 'fresh idle Fleet admission did not pass'; return 90; }
+  env=$(python3 -B "$probe" env "$stage" "$profile")
+  argv=$(python3 -B "$probe" args "$stage" "$profile")
+  mapfile -t environment <<< "$env"
+  mapfile -t args <<< "$argv"
+  if (( profile )); then
+    touch "$out/phase.tsv"
+    chmod 0666 "$out/phase.tsv"
+    trace_mount=(-v "$out/phase.tsv:/native-phase.tsv")
+  fi
+  truncate -s 4096 "$out/counter-live.bin"
+  chmod 0666 "$out/counter-live.bin"
+  printf '%s\n' "${environment[@]}" > "$out/environment.args"
+  printf '%s\n' "${args[@]}" > "$out/server.args"
+  bounded_docker run -d --pull never --name "$name" --label "resume.q4.combined.owner=$owner" \
+    --device "nvidia.com/gpu=$N3_GPU" -p 127.0.0.1::8080 \
+    --log-driver json-file --log-opt max-size=32m --log-opt max-file=1 \
+    -v "$model_dir:/models:ro" -v "$measured/libs:/candidate:ro" -v "$operator/libggml-cuda.so:/candidate/libggml-cuda.so:ro" \
+    -v "$card/audit.so:/audit.so:ro" -v "$out/counter-live.bin:/native-moe-counters" -v "$n1:$n1:ro" -v "$r2:$r2:ro" \
+    "${trace_mount[@]}" --entrypoint /candidate/llama-server "${environment[@]}" "$night_image" "${args[@]}" >/dev/null
+  binding=$(bounded_docker port "$name" 8080/tcp)
+  [[ $binding =~ ^127\.0\.0\.1:([0-9]+)$ ]] || { echo 'owned loopback endpoint unavailable'; return 2; }
+  port=${BASH_REMATCH[1]}
+  wait_for_health "$name" "$port"
+  capture_logs "$name" "$out/server-start.log"
+  runtime_inventory "$name" "$out"
+  bounded_docker exec "$name" sh -ec 'tr "\000" "\n" < /proc/1/cmdline' > "$out/pid1-server.args"
+  # Capture all explicitly configured names plus known instrumentation flags.
+  flag_names=$(printf '%s\n' "${environment[@]}" | sed -n 's/^\([A-Z0-9_]*\)=.*$/\1/p' | paste -sd '|')
+  flag_pattern="^($flag_names|GGML_CUDA_MAXWELL_GRAPHS|GGML_CUDA_OCCAMY_3L|GGML_CUDA_OCCAMY_CHECK|GGML_CUDA_MOE_V3_CHECK|LLAMA_MV3_PHASE|GGML_CUDA_NODE_TIMING|GGML_CUDA_NODE_TIMING_SPLIT|GGML_CUDA_DISABLE_GRAPHS|GGML_CUDA_MV1|GGML_CUDA_MV1_OUT|GGML_CUDA_OCCAMY_FA_Q3_R2_CHECK|GGML_CUDA_OCCAMY_FA_SPARSE_R2_CHECK|GGML_CUDA_OCCAMY_FA_SPARSE_PROFILE)="
+  bounded_docker exec "$name" sh -ec 'tr "\000" "\n" < /proc/1/environ | grep -E "$1"' flags "$flag_pattern" > "$out/pid1-flags.txt"
+  cp "$out/counter-live.bin" "$out/counter-start.bin"
+  python3 -B "$probe" ready "$stage" "$profile" "$out"
+  local short_probe=$campaign/night-native-depth2/probe.py
+  if [[ $stage == smoke-* ]]; then python3 -B "$short_probe" perf 2k "$port" "$out" cold
+  else python3 -B "$stream_probe" cold "$port" "$out"; fi
+  cp "$out/counter-live.bin" "$out/counter-cold.bin"
+  capture_logs "$name" "$out/server-pre-warm.log"
+  if [[ $stage == smoke-* ]]; then python3 -B "$short_probe" perf 2k "$port" "$out" warm
+  else python3 -B "$stream_probe" warm "$port" "$out"; fi
+  cp "$out/counter-live.bin" "$out/counter-warm.bin"
+  if [[ $stage == smoke-* ]]; then
+    capture_logs "$name" "$out/server-post-warm.log"
+    python3 -B "$short_probe" quality "$port" "$out"
+  fi
+  bounded_docker stop --time 5 "$name" >/dev/null
+  [[ $(bounded_docker inspect -f '{{.State.ExitCode}}' "$name") == 0 ]]
+  capture_logs "$name" "$out/server.log"
+  if (( profile )); then chmod 0600 "$out/phase.tsv"; fi
+  trap - EXIT
+  python3 -B "$probe" verify "$stage" "$profile" "$out"
+}
+
+cleanup() {
+  local name=$1 owner=$2 deadline=$3 left
+  left=$((deadline - $(date +%s) - 1))
+  (( left > 0 )) || return 1
+  if (( left > 10 )); then left=10; fi
+  # shellcheck disable=SC2016
+  timeout -k 1s "${left}s" bash -euc '
+    owned=$(docker ps -aq --filter "name=^/$1$" --filter "label=resume.q4.combined.owner=$2")
+    if [[ -n $owned ]]; then
+      [[ $owned =~ ^[0-9a-f]+$ ]]
+      docker rm -f "$owned"
+    fi
+    [[ -z $(docker ps -aq --filter "name=^/$1$") ]]
+  ' cleanup "$name" "$owner"
+}
+
+usage() {
+  echo 'usage: release.sh --check | --run serial-on|depth3-off|depth3-attn|depth3-combined|smoke-off|smoke-on | --compare RECEIPT [RECEIPT ...]' >&2
+  exit 2
+}
+
+valid() { [[ $1 == serial-on || $1 == depth3-off || $1 == depth3-attn || $1 == depth3-combined || $1 == smoke-off || $1 == smoke-on ]]; }
+
+case ${1:-} in
+  __arm)
+    [[ $# == 4 && ${RESUME_Q4_NATIVE_LOCK_FD:-} =~ ^[0-9]+$ &&
+       $(readlink "/proc/$$/fd/$RESUME_Q4_NATIVE_LOCK_FD") == "$lab/gpu-bench.lock" ]] || usage
+    valid "$2" || usage
+    [[ $3 == 0 || $3 == 1 ]] || usage
+    [[ $4 =~ ^[0-9]{8}T[0-9]{6}Z-[0-9]+-[0-9]+$ ]] || usage
+    arm "$2" "$3" "nmmoon-combined-q4-$2-$4" "$card/receipts/$2-$4/private" "$4"
+    exit ;;
+  --check) [[ $# == 1 ]] || usage; check; exit ;;
+  --compare) [[ $# -ge 3 && $# -le 7 ]] || usage; shift; check >&2; exec python3 -B "$probe" compare "$@" ;;
+  --run)
+    [[ $# == 2 ]] || usage
+    valid "$2" || usage ;;
+  *) usage ;;
+esac
+
+stage=$2
+if [[ $stage == smoke-* ]]; then cap=190; fi
+profile=0
+if [[ ${3:-} == --profile-phase ]]; then profile=1; fi
+id=$(date -u +%Y%m%dT%H%M%SZ)-$$-$RANDOM
+name=nmmoon-combined-q4-$stage-$id
+out=$card/receipts/$stage-$id
+mkdir -p "$out/private"
+printf 'COMBINED_Q4_RECEIPT=%s\n' "$out"
+start=$(date +%s)
+deadline=$((start + cap))
+if [[ -n ${ROOT_GPU_DEADLINE_EPOCH:-} ]]; then
+  [[ $ROOT_GPU_DEADLINE_EPOCH =~ ^[0-9]+$ ]] || exit 2
+  if (( ROOT_GPU_DEADLINE_EPOCH < deadline )); then deadline=$ROOT_GPU_DEADLINE_EPOCH; fi
+fi
+printf 'mode=%s\nprofile=%d\nstart_epoch=%s\ndeadline_epoch=%s\ncap_seconds=%s\n' \
+  "$stage" "$profile" "$start" "$deadline" "$cap" > "$out/private/manifest.txt"
+rc=0
+clean=0
+rejected=0
+# Failures before any GPU work also get a private receipt and sanitized status.
+check > "$out/private/preflight.log" 2>&1 || { rc=$?; rejected=1; }
+if (( ! rejected )) && [[ ${N3_GPU:-} != GPU-* ]]; then
+  echo "M6000 selector is missing or invalid" >> "$out/private/preflight.log"
+  rc=2
+  rejected=1
+fi
+if (( ! rejected )); then
+  night_lock_gpu >> "$out/private/preflight.log" 2>&1 || { rc=$?; rejected=1; }
+fi
+if (( ! rejected )); then
+  export RESUME_Q4_NATIVE_LOCK_FD=$night_lock_fd
+  trap night_interrupt INT TERM
+  left=$((deadline - $(date +%s) - 25))
+  if (( left > 0 && ! night_interrupted )); then
+    timeout -k 3s "${left}s" "$card/release.sh" __arm "$stage" "$profile" "$id" > "$out/private/run.log" 2>&1 &
+    night_child_pid=$!
+    wait "$night_child_pid" || rc=$?
+    night_child_pid=
+    cleanup "$name" "$id" "$deadline" > "$out/private/cleanup.log" 2>&1 || clean=$?
+  else
+    rc=124
+  fi
+  exec {night_lock_fd}>&-
+fi
+finish=$(date +%s)
+printf 'runner_exit=%s\ncleanup_exit=%s\ncompleted_epoch=%s\n' "$rc" "$clean" "$finish" > "$out/private/status.txt"
+python3 -B "$probe" finalize "$stage" "$profile" "$out" "$rc" "$clean" "$start" "$finish"
+python3 -B "$card/trace_export.py" "$out"
+(cd "$out/private" && find . -type f -print0 | sort -z | xargs -0 sha256sum) > "$out/private.checksums"
+mv -- "$out/private.checksums" "$out/private/observations.sha256"
+(cd "$out/sanitized" && sha256sum receipt.json cycles.jsonl trace-v2.jsonl trace-v2-meta.json) > "$out/sanitized.checksums"
+mv -- "$out/sanitized.checksums" "$out/sanitized/SHA256SUMS"
+(( clean == 0 )) || exit 125
+(( ! night_interrupted )) || exit 130
+exit "$rc"

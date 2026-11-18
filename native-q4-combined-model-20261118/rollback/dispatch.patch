@@ -1,0 +1,43 @@
+--- a/dispatch.inc
++++ b/dispatch.inc
+@@ -5,7 +5,7 @@
+ struct ggml_cuda_gated_delta_net_fused_cache { float * data; int64_t slot_stride; };
+ static_assert(sizeof(ggml_cuda_gated_delta_net_fused_cache) == 16);
+ namespace {
+-std::atomic<bool> count_q3{false};
++std::atomic<bool> count_q4{false};
+ std::atomic<int> t2_attempts{0}, t2_launched{0}, stock{0}, stock_cache{0}, wrong_shape{0};
+ template <class F> F cuda_symbol(const char * name) {
+     static void * handle = dlopen("/candidate/libggml-cuda.so", RTLD_NOLOAD | RTLD_LAZY);
+@@ -24,11 +24,11 @@
+     return f;
+ }
+ void count_stock(const ggml_tensor * dst, std::atomic<int> & counter) {
+-    if (!count_q3.load()) return;
++    if (!count_q4.load()) return;
+     const auto * v = dst->src[2];
+     int32_t snapshots=0;
+     std::memcpy(&snapshots,dst->op_params,sizeof(snapshots));
+-    if (!v || v->ne[0]!=128 || v->ne[1]!=32 || v->ne[2]!=3 || v->ne[3]!=1 || snapshots!=3) ++wrong_shape;
++    if (!v || v->ne[0]!=128 || v->ne[1]!=32 || v->ne[2]!=4 || v->ne[3]!=1 || snapshots!=4) ++wrong_shape;
+     ++counter;
+ }
+ }
+@@ -36,7 +36,7 @@
+     static auto fn = cuda_symbol<decltype(&ggml_cuda_occamy_gdn_t2)>(
+         "_Z23ggml_cuda_occamy_gdn_t2R25ggml_backend_cuda_contextRK26ggml_cuda_occamy_gdn_match");
+     const bool launched = fn(ctx, match);
+-    if (count_q3.load()) {
++    if (count_q4.load()) {
+         ++t2_attempts;
+         if (launched) ++t2_launched;
+     }
+@@ -52,7 +52,7 @@
+                                                ggml_cuda_gated_delta_net_fused_cache cache) {
+     static auto fn = cuda_symbol<decltype(&ggml_cuda_op_gated_delta_net_fused_cache)>(
+         "_Z40ggml_cuda_op_gated_delta_net_fused_cacheR25ggml_backend_cuda_contextP11ggml_tensor37ggml_cuda_gated_delta_net_fused_cache");
+-    if (count_q3.load() && (!cache.data || cache.slot_stride<128*128*32)) ++wrong_shape;
++    if (count_q4.load() && (!cache.data || cache.slot_stride<128*128*32)) ++wrong_shape;
+     fn(ctx, dst, cache);
+     count_stock(dst, stock_cache);
+ }

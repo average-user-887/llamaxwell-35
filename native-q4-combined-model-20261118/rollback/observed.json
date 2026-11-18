@@ -1,0 +1,3256 @@
+{
+  "format": 1,
+  "runtime_cuda_sha256": "abe7dcfdbf2d7df0b31b5478212f3234ffdd8e2b8f9a077c0a216b2e32865aae",
+  "runner_exit": 0,
+  "cleanup_exit": 0,
+  "cap_s": 190,
+  "bounded_wall_s": 67,
+  "long_sparse_attention_qualified": false,
+  "phase_times_s": null,
+  "timelines": {
+    "wide_a": [
+      {
+        "event": "N34_START",
+        "rs": 3,
+        "offload": "42/42",
+        "prompt": 2000,
+        "vocab": 248320,
+        "excluded": 5
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2000,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2001,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2002,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2003,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "ROLL4_KV",
+        "stage": "prefix",
+        "pos": 2003,
+        "bytes": 41090280,
+        "full_bytes": 106954708
+      },
+      {
+        "event": "N34_STATE",
+        "stage": "prefix",
+        "pos": 2003,
+        "bytes": 65864428
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "badquad",
+        "at": 2004,
+        "in": 4,
+        "out": 4,
+        "graphs": 1
+      },
+      {
+        "event": "ROLL4_KV",
+        "stage": "badquad",
+        "pos": 2007,
+        "bytes": 41172296,
+        "full_bytes": 107036724
+      },
+      {
+        "event": "N34_STATE",
+        "stage": "badquad",
+        "pos": 2007,
+        "bytes": 65864428
+      },
+      {
+        "event": "ROLL4_REMOVE",
+        "start": 2005,
+        "after": 2004,
+        "before": 2007
+      },
+      {
+        "event": "ROLL4_MOE",
+        "active_q4": 40,
+        "off_prefill": 39,
+        "independent_wrong": 3
+      },
+      {
+        "event": "ROLL4_KV",
+        "stage": "kept",
+        "pos": 2004,
+        "bytes": 41110784,
+        "full_bytes": 106975212
+      },
+      {
+        "event": "N34_STATE",
+        "stage": "kept",
+        "pos": 2004,
+        "bytes": 65864428
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "corrected",
+        "at": 2005,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "ROLL4_KV",
+        "stage": "corrected",
+        "pos": 2005,
+        "bytes": 41131288,
+        "full_bytes": 106995716
+      },
+      {
+        "event": "N34_STATE",
+        "stage": "corrected",
+        "pos": 2005,
+        "bytes": 65864428
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "follow",
+        "at": 2006,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "follow",
+        "at": 2007,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "follow",
+        "at": 2008,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "follow",
+        "at": 2009,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_END",
+        "end": 2009,
+        "t2_attempts": 0,
+        "t2_launches": 0,
+        "stock": 0,
+        "stock_cache": 30,
+        "wrong_shape": 0
+      }
+    ],
+    "wide_b": [
+      {
+        "event": "N34_START",
+        "rs": 3,
+        "offload": "42/42",
+        "prompt": 2000,
+        "vocab": 248320,
+        "excluded": 5
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2000,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2001,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2002,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2003,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "ROLL4_KV",
+        "stage": "prefix",
+        "pos": 2003,
+        "bytes": 41090280,
+        "full_bytes": 106954708
+      },
+      {
+        "event": "N34_STATE",
+        "stage": "prefix",
+        "pos": 2003,
+        "bytes": 65864428
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "badquad",
+        "at": 2004,
+        "in": 4,
+        "out": 4,
+        "graphs": 1
+      },
+      {
+        "event": "ROLL4_KV",
+        "stage": "badquad",
+        "pos": 2007,
+        "bytes": 41172296,
+        "full_bytes": 107036724
+      },
+      {
+        "event": "N34_STATE",
+        "stage": "badquad",
+        "pos": 2007,
+        "bytes": 65864428
+      },
+      {
+        "event": "ROLL4_REMOVE",
+        "start": 2005,
+        "after": 2004,
+        "before": 2007
+      },
+      {
+        "event": "ROLL4_MOE",
+        "active_q4": 40,
+        "off_prefill": 39,
+        "independent_wrong": 3
+      },
+      {
+        "event": "ROLL4_KV",
+        "stage": "kept",
+        "pos": 2004,
+        "bytes": 41110784,
+        "full_bytes": 106975212
+      },
+      {
+        "event": "N34_STATE",
+        "stage": "kept",
+        "pos": 2004,
+        "bytes": 65864428
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "corrected",
+        "at": 2005,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "ROLL4_KV",
+        "stage": "corrected",
+        "pos": 2005,
+        "bytes": 41131288,
+        "full_bytes": 106995716
+      },
+      {
+        "event": "N34_STATE",
+        "stage": "corrected",
+        "pos": 2005,
+        "bytes": 65864428
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "follow",
+        "at": 2006,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "follow",
+        "at": 2007,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "follow",
+        "at": 2008,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "follow",
+        "at": 2009,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_END",
+        "end": 2009,
+        "t2_attempts": 0,
+        "t2_launches": 0,
+        "stock": 0,
+        "stock_cache": 30,
+        "wrong_shape": 0
+      }
+    ],
+    "serial": [
+      {
+        "event": "N34_START",
+        "rs": 3,
+        "offload": "42/42",
+        "prompt": 2000,
+        "vocab": 248320,
+        "excluded": 5
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2000,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2001,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2002,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "prefix",
+        "at": 2003,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "ROLL4_KV",
+        "stage": "prefix",
+        "pos": 2003,
+        "bytes": 41090280,
+        "full_bytes": 106954708
+      },
+      {
+        "event": "N34_STATE",
+        "stage": "prefix",
+        "pos": 2003,
+        "bytes": 65864428
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "kept",
+        "at": 2004,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "ROLL4_MOE",
+        "active_q4": 0,
+        "off_prefill": 39,
+        "independent_wrong": 0
+      },
+      {
+        "event": "ROLL4_KV",
+        "stage": "kept",
+        "pos": 2004,
+        "bytes": 41110784,
+        "full_bytes": 106975212
+      },
+      {
+        "event": "N34_STATE",
+        "stage": "kept",
+        "pos": 2004,
+        "bytes": 65864428
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "corrected",
+        "at": 2005,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "ROLL4_KV",
+        "stage": "corrected",
+        "pos": 2005,
+        "bytes": 41131288,
+        "full_bytes": 106995716
+      },
+      {
+        "event": "N34_STATE",
+        "stage": "corrected",
+        "pos": 2005,
+        "bytes": 65864428
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "follow",
+        "at": 2006,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "follow",
+        "at": 2007,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "follow",
+        "at": 2008,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_CALL",
+        "stage": "follow",
+        "at": 2009,
+        "in": 1,
+        "out": 1,
+        "graphs": 1
+      },
+      {
+        "event": "N34_END",
+        "end": 2009,
+        "t2_attempts": 0,
+        "t2_launches": 0,
+        "stock": 0,
+        "stock_cache": 0,
+        "wrong_shape": 0
+      }
+    ]
+  },
+  "refusals": {},
+  "measured_comparisons": {
+    "wide_a_vs_wide_b": {
+      "choices_equal": true,
+      "logit_row_differences": {
+        "kept": {
+          "f32_count": 248320,
+          "different_words": 0,
+          "different_bytes": 0,
+          "nonfinite_a": 0,
+          "nonfinite_b": 0,
+          "max_abs": 0.0,
+          "rms": 0.0
+        },
+        "corrected": {
+          "f32_count": 248320,
+          "different_words": 0,
+          "different_bytes": 0,
+          "nonfinite_a": 0,
+          "nonfinite_b": 0,
+          "max_abs": 0.0,
+          "rms": 0.0
+        }
+      },
+      "first_choice_equal": true,
+      "kept": {
+        "attention_kv": {
+          "bytes": 41110784,
+          "different_bytes": 0
+        },
+        "recurrent": {
+          "raw_bitwise_equal": true,
+          "metadata_bytes": 748,
+          "metadata_equal": true,
+          "payload_f32_words": 16465920,
+          "different_f32_words": 0,
+          "different_payload_bytes": 0,
+          "nonfinite_values_a_plus_b": 0,
+          "max_abs": 0.0,
+          "nonidentical_layer_rows": 0,
+          "per_layer": [
+            {
+              "layer": 0,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 1,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 2,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 4,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 5,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 6,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 8,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 9,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 10,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 12,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 13,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 14,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 16,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 17,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 18,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 20,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 21,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 22,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 24,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 25,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 26,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 28,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 29,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 30,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 32,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 33,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 34,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 36,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 37,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 38,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 0,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 1,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 2,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 4,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 5,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 6,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 8,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 9,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 10,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 12,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 13,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 14,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 16,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 17,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 18,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 20,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 21,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 22,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 24,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 25,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 26,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 28,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 29,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 30,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 32,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 33,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 34,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 36,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 37,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 38,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            }
+          ]
+        }
+      },
+      "corrected": {
+        "attention_kv": {
+          "bytes": 41131288,
+          "different_bytes": 0
+        },
+        "recurrent": {
+          "raw_bitwise_equal": true,
+          "metadata_bytes": 748,
+          "metadata_equal": true,
+          "payload_f32_words": 16465920,
+          "different_f32_words": 0,
+          "different_payload_bytes": 0,
+          "nonfinite_values_a_plus_b": 0,
+          "max_abs": 0.0,
+          "nonidentical_layer_rows": 0,
+          "per_layer": [
+            {
+              "layer": 0,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 1,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 2,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 4,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 5,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 6,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 8,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 9,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 10,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 12,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 13,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 14,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 16,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 17,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 18,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 20,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 21,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 22,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 24,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 25,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 26,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 28,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 29,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 30,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 32,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 33,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 34,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 36,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 37,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 38,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 0,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 1,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 2,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 4,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 5,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 6,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 8,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 9,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 10,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 12,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 13,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 14,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 16,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 17,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 18,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 20,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 21,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 22,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 24,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 25,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 26,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 28,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 29,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 30,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 32,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 33,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 34,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 36,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 37,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            },
+            {
+              "layer": 38,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 0,
+              "different_bytes": 0,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0,
+              "rms": 0.0
+            }
+          ]
+        }
+      }
+    },
+    "wide_a_vs_serial": {
+      "choices_equal": true,
+      "logit_row_differences": {
+        "kept": {
+          "f32_count": 248320,
+          "different_words": 248320,
+          "different_bytes": 749570,
+          "nonfinite_a": 0,
+          "nonfinite_b": 0,
+          "max_abs": 0.4751548767089844,
+          "rms": 0.09223572702498838
+        },
+        "corrected": {
+          "f32_count": 248320,
+          "different_words": 248320,
+          "different_bytes": 757400,
+          "nonfinite_a": 0,
+          "nonfinite_b": 0,
+          "max_abs": 0.66786789894104,
+          "rms": 0.1284010844646945
+        }
+      },
+      "first_choice_equal": true,
+      "kept": {
+        "attention_kv": {
+          "bytes": 41110784,
+          "different_bytes": 15593
+        },
+        "recurrent": {
+          "raw_bitwise_equal": false,
+          "metadata_bytes": 748,
+          "metadata_equal": true,
+          "payload_f32_words": 16465920,
+          "different_f32_words": 15518964,
+          "different_payload_bytes": 40883869,
+          "nonfinite_values_a_plus_b": 0,
+          "max_abs": 0.9282351732254028,
+          "nonidentical_layer_rows": 60,
+          "per_layer": [
+            {
+              "layer": 0,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 5113,
+              "different_bytes": 5249,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 3.814697265625e-06,
+              "rms": 8.976571572548618e-08
+            },
+            {
+              "layer": 1,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 7984,
+              "different_bytes": 15049,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.00021266937255859375,
+              "rms": 2.0510674480979774e-05
+            },
+            {
+              "layer": 2,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8080,
+              "different_bytes": 22556,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.01901686191558838,
+              "rms": 0.002825061537053479
+            },
+            {
+              "layer": 4,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 24895,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.14806747436523438,
+              "rms": 0.017318643139149756
+            },
+            {
+              "layer": 5,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 24973,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.1649332046508789,
+              "rms": 0.017607257824061952
+            },
+            {
+              "layer": 6,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25093,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.1849350929260254,
+              "rms": 0.022183799068609376
+            },
+            {
+              "layer": 8,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 24959,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.2745785713195801,
+              "rms": 0.026344144192703152
+            },
+            {
+              "layer": 9,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8190,
+              "different_bytes": 25429,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4596743583679199,
+              "rms": 0.03748550496009479
+            },
+            {
+              "layer": 10,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8188,
+              "different_bytes": 25532,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4984006881713867,
+              "rms": 0.03975970279053252
+            },
+            {
+              "layer": 12,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25393,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.24039196968078613,
+              "rms": 0.030261856263681323
+            },
+            {
+              "layer": 13,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25675,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.38982295989990234,
+              "rms": 0.04694798226857114
+            },
+            {
+              "layer": 14,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25762,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.44594478607177734,
+              "rms": 0.05132311190531901
+            },
+            {
+              "layer": 16,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25606,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.445564866065979,
+              "rms": 0.04689923207713347
+            },
+            {
+              "layer": 17,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25504,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.478302001953125,
+              "rms": 0.04283808253737783
+            },
+            {
+              "layer": 18,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25628,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4942004084587097,
+              "rms": 0.048096986010288015
+            },
+            {
+              "layer": 20,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25466,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.45448192954063416,
+              "rms": 0.04851690579026653
+            },
+            {
+              "layer": 21,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8190,
+              "different_bytes": 25598,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.5066366195678711,
+              "rms": 0.049555821093718366
+            },
+            {
+              "layer": 22,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8188,
+              "different_bytes": 25588,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4334011673927307,
+              "rms": 0.0475259180557922
+            },
+            {
+              "layer": 24,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 26105,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.7816708087921143,
+              "rms": 0.06582711305369376
+            },
+            {
+              "layer": 25,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 26063,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.9282351732254028,
+              "rms": 0.07715130738117155
+            },
+            {
+              "layer": 26,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 26069,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.7657642960548401,
+              "rms": 0.07601150529942118
+            },
+            {
+              "layer": 28,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25768,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.5741477012634277,
+              "rms": 0.05550883788517168
+            },
+            {
+              "layer": 29,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25819,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4487345218658447,
+              "rms": 0.05491401192277169
+            },
+            {
+              "layer": 30,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25720,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4744415283203125,
+              "rms": 0.05131701687486725
+            },
+            {
+              "layer": 32,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25273,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.31916379928588867,
+              "rms": 0.039778447844240575
+            },
+            {
+              "layer": 33,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25143,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.3268470764160156,
+              "rms": 0.03515891945874902
+            },
+            {
+              "layer": 34,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 25173,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4164409637451172,
+              "rms": 0.03773192959176598
+            },
+            {
+              "layer": 36,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 24535,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4134864807128906,
+              "rms": 0.035840837340147425
+            },
+            {
+              "layer": 37,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 24578,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.6031131744384766,
+              "rms": 0.042179783589526405
+            },
+            {
+              "layer": 38,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 8192,
+              "different_bytes": 24442,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.2994222640991211,
+              "rms": 0.028301715909885748
+            },
+            {
+              "layer": 0,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 135499,
+              "different_bytes": 138831,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 1.9073486328125e-06,
+              "rms": 5.84647074805247e-09
+            },
+            {
+              "layer": 1,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 477618,
+              "different_bytes": 732367,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 5.698204040527344e-05,
+              "rms": 3.3488813177293953e-07
+            },
+            {
+              "layer": 2,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 509849,
+              "different_bytes": 1253994,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.018854955211281776,
+              "rms": 0.00010320643783831029
+            },
+            {
+              "layer": 4,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524268,
+              "different_bytes": 1393742,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.017513349652290344,
+              "rms": 8.741749578912248e-05
+            },
+            {
+              "layer": 5,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524253,
+              "different_bytes": 1372673,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.04569220542907715,
+              "rms": 0.00021377931037319426
+            },
+            {
+              "layer": 6,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524275,
+              "different_bytes": 1440964,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0798041820526123,
+              "rms": 0.000281475562141837
+            },
+            {
+              "layer": 8,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524213,
+              "different_bytes": 1297203,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.09338390827178955,
+              "rms": 0.00030907016084925654
+            },
+            {
+              "layer": 9,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524016,
+              "different_bytes": 1410307,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0966799259185791,
+              "rms": 0.00043436022369644137
+            },
+            {
+              "layer": 10,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 523761,
+              "different_bytes": 1436539,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.016904622316360474,
+              "rms": 0.0001179824541736864
+            },
+            {
+              "layer": 12,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524270,
+              "different_bytes": 1403237,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.024058401584625244,
+              "rms": 0.00011635506182559352
+            },
+            {
+              "layer": 13,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524261,
+              "different_bytes": 1348995,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.03358614444732666,
+              "rms": 0.00014247153839923483
+            },
+            {
+              "layer": 14,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524244,
+              "different_bytes": 1355514,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.06438213586807251,
+              "rms": 0.0002250593074592119
+            },
+            {
+              "layer": 16,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524244,
+              "different_bytes": 1334854,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.00434252992272377,
+              "rms": 7.778321087192245e-05
+            },
+            {
+              "layer": 17,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524258,
+              "different_bytes": 1359738,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.06000159680843353,
+              "rms": 0.0003118165583893042
+            },
+            {
+              "layer": 18,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524283,
+              "different_bytes": 1387680,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.010601028800010681,
+              "rms": 8.533509822869213e-05
+            },
+            {
+              "layer": 20,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524274,
+              "different_bytes": 1375795,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.07172249630093575,
+              "rms": 0.0004959375812385609
+            },
+            {
+              "layer": 21,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524027,
+              "different_bytes": 1458768,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.16805577278137207,
+              "rms": 0.0007515033173333264
+            },
+            {
+              "layer": 22,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 523772,
+              "different_bytes": 1470156,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.011658869683742523,
+              "rms": 0.00014921352930467605
+            },
+            {
+              "layer": 24,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524282,
+              "different_bytes": 1488951,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.07961622066795826,
+              "rms": 0.0002800544679498959
+            },
+            {
+              "layer": 25,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524269,
+              "different_bytes": 1394782,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.10710024833679199,
+              "rms": 0.00034438694333082574
+            },
+            {
+              "layer": 26,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524280,
+              "different_bytes": 1424350,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.12263021990656853,
+              "rms": 0.0003441807819050035
+            },
+            {
+              "layer": 28,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524280,
+              "different_bytes": 1437257,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.010124358857865445,
+              "rms": 0.00012409138479276276
+            },
+            {
+              "layer": 29,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524270,
+              "different_bytes": 1460704,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.05379091203212738,
+              "rms": 0.00037849461993201577
+            },
+            {
+              "layer": 30,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524281,
+              "different_bytes": 1458790,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.05665527284145355,
+              "rms": 0.00030003290662591165
+            },
+            {
+              "layer": 32,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524273,
+              "different_bytes": 1452601,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.01999986171722412,
+              "rms": 0.00016334245886258486
+            },
+            {
+              "layer": 33,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524288,
+              "different_bytes": 1493213,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.031230270862579346,
+              "rms": 0.00020655850483122253
+            },
+            {
+              "layer": 34,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524265,
+              "different_bytes": 1459927,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.031027933582663536,
+              "rms": 0.00019434169903211537
+            },
+            {
+              "layer": 36,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524254,
+              "different_bytes": 1381761,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.048693060874938965,
+              "rms": 0.00020831927676929002
+            },
+            {
+              "layer": 37,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524240,
+              "different_bytes": 1362067,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.05623829364776611,
+              "rms": 0.00022523015038159754
+            },
+            {
+              "layer": 38,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524248,
+              "different_bytes": 1369466,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.007589384913444519,
+              "rms": 0.00010859547637686328
+            }
+          ]
+        }
+      },
+      "corrected": {
+        "attention_kv": {
+          "bytes": 41131288,
+          "different_bytes": 30869
+        },
+        "recurrent": {
+          "raw_bitwise_equal": false,
+          "metadata_bytes": 748,
+          "metadata_equal": true,
+          "payload_f32_words": 16465920,
+          "different_f32_words": 15839145,
+          "different_payload_bytes": 44533821,
+          "nonfinite_values_a_plus_b": 0,
+          "max_abs": 2.3147478103637695,
+          "nonidentical_layer_rows": 60,
+          "per_layer": [
+            {
+              "layer": 0,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 5113,
+              "different_bytes": 5249,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 3.814697265625e-06,
+              "rms": 8.976571572548618e-08
+            },
+            {
+              "layer": 1,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 7984,
+              "different_bytes": 15049,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.00021266937255859375,
+              "rms": 2.0510674480979774e-05
+            },
+            {
+              "layer": 2,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16160,
+              "different_bytes": 44498,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.026719093322753906,
+              "rms": 0.0036275403254506884
+            },
+            {
+              "layer": 4,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 49316,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.15876436233520508,
+              "rms": 0.021494319919750666
+            },
+            {
+              "layer": 5,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 49568,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.1696786880493164,
+              "rms": 0.023018826018341945
+            },
+            {
+              "layer": 6,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 49985,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.18680381774902344,
+              "rms": 0.028692103947744508
+            },
+            {
+              "layer": 8,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 49434,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.2745785713195801,
+              "rms": 0.03138062388062485
+            },
+            {
+              "layer": 9,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16380,
+              "different_bytes": 50167,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4596743583679199,
+              "rms": 0.04295011672921214
+            },
+            {
+              "layer": 10,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16376,
+              "different_bytes": 50837,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4984006881713867,
+              "rms": 0.05125387121543433
+            },
+            {
+              "layer": 12,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 50823,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.3216872215270996,
+              "rms": 0.04640337455647449
+            },
+            {
+              "layer": 13,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 51018,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.38982295989990234,
+              "rms": 0.058802144982043766
+            },
+            {
+              "layer": 14,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 51160,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.6122970581054688,
+              "rms": 0.06289894569669433
+            },
+            {
+              "layer": 16,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 51213,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.445564866065979,
+              "rms": 0.06258809938959733
+            },
+            {
+              "layer": 17,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 50991,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.478302001953125,
+              "rms": 0.05576953435710286
+            },
+            {
+              "layer": 18,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 50959,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4942004084587097,
+              "rms": 0.05991531650256455
+            },
+            {
+              "layer": 20,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 50836,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.45448192954063416,
+              "rms": 0.06387543582489462
+            },
+            {
+              "layer": 21,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16380,
+              "different_bytes": 50914,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.5066366195678711,
+              "rms": 0.06326878632077204
+            },
+            {
+              "layer": 22,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16376,
+              "different_bytes": 50757,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4334011673927307,
+              "rms": 0.05804485300700374
+            },
+            {
+              "layer": 24,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 51678,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.7816708087921143,
+              "rms": 0.07709368304832287
+            },
+            {
+              "layer": 25,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 51595,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.9282351732254028,
+              "rms": 0.08839524669030688
+            },
+            {
+              "layer": 26,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 51549,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.7657642960548401,
+              "rms": 0.0866176222863592
+            },
+            {
+              "layer": 28,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 51287,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.5741477012634277,
+              "rms": 0.06964860869043156
+            },
+            {
+              "layer": 29,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 51449,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4602165222167969,
+              "rms": 0.07084675147328663
+            },
+            {
+              "layer": 30,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 51024,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4744415283203125,
+              "rms": 0.06295122401760579
+            },
+            {
+              "layer": 32,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 50776,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.3787856101989746,
+              "rms": 0.059932436932349044
+            },
+            {
+              "layer": 33,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 50424,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4665861129760742,
+              "rms": 0.05547596251721388
+            },
+            {
+              "layer": 34,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 50341,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.4801645278930664,
+              "rms": 0.05558064819771552
+            },
+            {
+              "layer": 36,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 49263,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.46894025802612305,
+              "rms": 0.055444705324776966
+            },
+            {
+              "layer": 37,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 49209,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.9878149032592773,
+              "rms": 0.06096129853110493
+            },
+            {
+              "layer": 38,
+              "kind": "conv",
+              "f32_count": 24576,
+              "different_words": 16384,
+              "different_bytes": 49176,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 2.3147478103637695,
+              "rms": 0.05510539747620509
+            },
+            {
+              "layer": 0,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 212665,
+              "different_bytes": 218265,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 1.9073486328125e-06,
+              "rms": 7.782449645851299e-09
+            },
+            {
+              "layer": 1,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 490860,
+              "different_bytes": 807095,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.00010055303573608398,
+              "rms": 6.251557480122029e-07
+            },
+            {
+              "layer": 2,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 509935,
+              "different_bytes": 1347647,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.01056826114654541,
+              "rms": 7.728508174477313e-05
+            },
+            {
+              "layer": 4,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524282,
+              "different_bytes": 1478527,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.015620231628417969,
+              "rms": 0.00011603499800969471
+            },
+            {
+              "layer": 5,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524280,
+              "different_bytes": 1466552,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.03986668586730957,
+              "rms": 0.00020760521102504314
+            },
+            {
+              "layer": 6,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524283,
+              "different_bytes": 1531608,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.043374478816986084,
+              "rms": 0.00024931801221997726
+            },
+            {
+              "layer": 8,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524268,
+              "different_bytes": 1395661,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.038477540016174316,
+              "rms": 0.0002157763933483543
+            },
+            {
+              "layer": 9,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524023,
+              "different_bytes": 1492619,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.0504072904586792,
+              "rms": 0.0002967197313174499
+            },
+            {
+              "layer": 10,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 523770,
+              "different_bytes": 1530383,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.02745717763900757,
+              "rms": 0.00017681852312209162
+            },
+            {
+              "layer": 12,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524284,
+              "different_bytes": 1509207,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.06345376372337341,
+              "rms": 0.00026105526881239015
+            },
+            {
+              "layer": 13,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524283,
+              "different_bytes": 1477469,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.04402283951640129,
+              "rms": 0.00022299185576682494
+            },
+            {
+              "layer": 14,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524280,
+              "different_bytes": 1482499,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.04136064648628235,
+              "rms": 0.0003320395634065007
+            },
+            {
+              "layer": 16,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524281,
+              "different_bytes": 1471648,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.06035326421260834,
+              "rms": 0.0002323014354261871
+            },
+            {
+              "layer": 17,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524277,
+              "different_bytes": 1501735,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.07929354906082153,
+              "rms": 0.0003736246378810006
+            },
+            {
+              "layer": 18,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524283,
+              "different_bytes": 1534853,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.023142725229263306,
+              "rms": 0.00021186725513656235
+            },
+            {
+              "layer": 20,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524278,
+              "different_bytes": 1480477,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.09105861932039261,
+              "rms": 0.0005768605582128636
+            },
+            {
+              "layer": 21,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524030,
+              "different_bytes": 1541890,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.12453746795654297,
+              "rms": 0.0006839364232409899
+            },
+            {
+              "layer": 22,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 523776,
+              "different_bytes": 1557000,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.018184661865234375,
+              "rms": 0.00021832477265638133
+            },
+            {
+              "layer": 24,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524287,
+              "different_bytes": 1579625,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.2821640521287918,
+              "rms": 0.0008204923029285619
+            },
+            {
+              "layer": 25,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524285,
+              "different_bytes": 1529381,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.10550999641418457,
+              "rms": 0.0004962254352391569
+            },
+            {
+              "layer": 26,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524286,
+              "different_bytes": 1535012,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.19472777843475342,
+              "rms": 0.0007451649435787388
+            },
+            {
+              "layer": 28,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524283,
+              "different_bytes": 1528515,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.028505757451057434,
+              "rms": 0.0002214007907878419
+            },
+            {
+              "layer": 29,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524284,
+              "different_bytes": 1547190,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.1092107892036438,
+              "rms": 0.000518992021514236
+            },
+            {
+              "layer": 30,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524283,
+              "different_bytes": 1550809,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.03911048173904419,
+              "rms": 0.00028444753886627756
+            },
+            {
+              "layer": 32,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524283,
+              "different_bytes": 1531846,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.03696244955062866,
+              "rms": 0.00024328206949873394
+            },
+            {
+              "layer": 33,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524288,
+              "different_bytes": 1573649,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.08911964297294617,
+              "rms": 0.0003822662739724867
+            },
+            {
+              "layer": 34,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524284,
+              "different_bytes": 1515624,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.029743492603302002,
+              "rms": 0.0002879314371904068
+            },
+            {
+              "layer": 36,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524280,
+              "different_bytes": 1467997,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.058498382568359375,
+              "rms": 0.0003544601429530826
+            },
+            {
+              "layer": 37,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524279,
+              "different_bytes": 1464484,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.11531901359558105,
+              "rms": 0.000469400439123041
+            },
+            {
+              "layer": 38,
+              "kind": "ssm",
+              "f32_count": 524288,
+              "different_words": 524284,
+              "different_bytes": 1454009,
+              "nonfinite_a": 0,
+              "nonfinite_b": 0,
+              "max_abs": 0.03237414360046387,
+              "rms": 0.00022490321287323712
+            }
+          ]
+        }
+      }
+    }
+  },
+  "measurement_complete": true,
+  "same_shaped_rejected_suffix_isolation_pass": true,
+  "same_fresh_serial_prefill_state_and_attn_kv": true,
+  "rejected_tail_states_different": {
+    "state": true,
+    "kv": true
+  }
+}
