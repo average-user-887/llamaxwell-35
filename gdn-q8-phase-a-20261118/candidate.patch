@@ -1,0 +1,215 @@
+--- a/ggml/src/ggml-cuda/occamy-gdn.cu
++++ b/ggml/src/ggml-cuda/occamy-gdn.cu
+@@ -7,6 +7,7 @@
+ //   B: per (v head, 16-column group): conv1d(4)+silu, l2norm q/k, gate/beta, delta rule on 2 columns per warp
+ //   C: per-head rmsnorm * ssm_norm * silu(z) -> ssm_out GEMV (K=4096) + residual; q/k conv state write
+ #include "occamy-gdn.cuh"
++#include "sm52-xmad.cuh"
+ #include "gated_delta_net.cuh"
+ #include "ggml-impl.h"
+ #include "ggml-backend-impl.h"
+@@ -481,6 +482,78 @@
+ // per state tile one read, token 1 delta rule -> plane-1 store, token 2 continues from the registers -> plane-0 store.
+ // Conv state rows written: plane 1 = [c1,c2,x1], plane 0 = [c2,x1,x2] (v channels in B by their owner, q/k in C).
+ // PCS publish counts on scratch's hcnt only; the finishing block builds xg/sg for both tokens. Phase C is unchanged.
++// Phase A only: recompute stock's 1024 logical RMS lanes in a 256-thread
++// persistent CTA. Each logical lane accumulates two elements before the two
++// XOR-tree reductions. Both token rows' reductions share this CTA barrier.
++static __device__ __forceinline__ void q8a_prepare(const Params2 & pp, uint4 * packed, float2 * ds,
++                                                   float * partial) {
++    const int tid = threadIdx.x, lane = tid & 31;
++#pragma unroll
++    for (int k = 0; k < 2; ++k) {
++        const float * h = pp.p[k].h;
++#pragma unroll
++        for (int i = tid; i < 1024; i += NT) {
++            const float x = h[i], y = h[i + 1024];
++            const float sq = warp_sum(fmaf(y, y, x*x));
++            if (lane == 0) partial[k*32+(i >> 5)] = sq;
++        }
++    }
++    __syncthreads();
++#pragma unroll
++    for (int k = 0; k < 2; ++k) {
++        const float inv = rsqrtf(warp_sum(partial[k*32+lane]) / H + pp.p[k].eps_attn);
++        for (int i = tid; i < H; i += NT) {
++            const float x = (inv * pp.p[k].h[i]) * __ldg(pp.p[0].L.attn_norm + i);
++            const float amax = warp_reduce_max<32>(fabsf(x));
++            const float sum = warp_sum(x);
++            const float d = amax / 127.0f;
++            const int q = amax == 0.f ? 0 : int(roundf(x/d));
++            const int other = __shfl_down_sync(0xffffffffu, q, 2);
++            const int block = i >> 5;
++            if (lane == 0) ds[k * 64 + block] = __half22float2(make_half2(d, sum));
++            if ((lane & 2) == 0) {
++                // One uint4 per (token, paired block, packed-weight word, lane).
++                // x/y carry low-nibble values from even/odd bytes, z/w high.
++                const int j = (lane & 15) >> 2;
++                const int field = ((lane >> 4) * 2) + (lane & 1);
++                const int slot = ((k * 8 + (block & 1) * 4 + j) * 32 + (block >> 1)) * 4 + field;
++                ((unsigned *)packed)[slot] = (unsigned(q) & 65535u) | (unsigned(other) << 16);
++            }
++        }
++    }
++    __syncthreads();
++}
++
++// Shared weights stay in their native 18-byte Q4_0 layout. An unsigned pair
++// of nibbles times a signed pair of activations requires two sm_52 XMADs.
++static __device__ __forceinline__ void q8a_dot(const unsigned * w, const uint4 * packed,
++                                             const float2 * ds, const uint4 (&first)[8], int lane, float & v0, float & v1) {
++    float accum0 = 0.f, accum1 = 0.f;
++#pragma unroll
++    for (int b = 0; b < 2; ++b) {
++        int e0 = 0, o0 = 0, e1 = 0, o1 = 0;
++#pragma unroll
++        for (int j = 0; j < 4; ++j) {
++            const unsigned v = b == 0 ? __byte_perm(w[j], w[j+1], 0x5432) : w[j+5];
++            const unsigned mask = 0x000f000fu;
++            const unsigned le = v & mask, lo = (v >> 8) & mask;
++            const unsigned he = (v >> 4) & mask, ho = (v >> 12) & mask;
++            const uint4 a = b == 0 ? first[j] : packed[(b*4+j)*32+lane], z = b == 0 ? first[4+j] : packed[(8+b*4+j)*32+lane];
++            e0 = ggml_cuda_sm52_mad2(le, a.x, e0); e1 = ggml_cuda_sm52_mad2(le, z.x, e1);
++            o0 = ggml_cuda_sm52_mad2(lo, a.y, o0); o1 = ggml_cuda_sm52_mad2(lo, z.y, o1);
++            e0 = ggml_cuda_sm52_mad2(he, a.z, e0); e1 = ggml_cuda_sm52_mad2(he, z.z, e1);
++            o0 = ggml_cuda_sm52_mad2(ho, a.w, o0); o1 = ggml_cuda_sm52_mad2(ho, z.w, o1);
++        }
++        const unsigned scale_bits = b == 0 ? w[0] : w[4] >> 16;
++        const float d4 = __half2float(__ushort_as_half((unsigned short)scale_bits));
++        const float2 s0 = ds[2*lane+b], s1 = ds[64+2*lane+b];
++        accum0 += d4 * ((e0+o0) * s0.x - 8.f*s0.y);
++        accum1 += d4 * ((e1+o1) * s1.x - 8.f*s1.y);
++    }
++    v0 = accum0;
++    v1 = accum1;
++}
++
+ template <int T2>
+ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+     extern __shared__ float smem[];
+@@ -495,7 +568,35 @@
+     const Layer & L = PP.p[0].L;
+     Scratch * const s0 = PP.p[0].s, * const s1 = PP.p[1].s;
+ 
+-    {   // ---- phase A ----
++    if constexpr (T2 == 2) {   // ---- phase A ----
++        uint4 * packed = reinterpret_cast<uint4 *>(smem);
++        float2 * scales = reinterpret_cast<float2 *>(packed + 2*8*32);
++        float * partial = reinterpret_cast<float *>(scales + 2*64);
++        static_assert(2*8*32*4 + 2*64*2 + 2*32 <= SMEM_FLOATS, "phase A scratch");
++        q8a_prepare(PP, packed, scales, partial);
++        uint4 first[8];
++#pragma unroll
++        for (int j = 0; j < 4; ++j) { first[j] = packed[j*32+lane]; first[4+j] = packed[(8+j)*32+lane]; }
++        uint4 c0, c1, c2;
++        int t = gw;
++        if (t < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, t); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
++        for (; t < NROWS_A; t += W) {
++            stg4[lane] = c0; stg4[lane + 32] = c1; if (lane < 8) stg4[lane + 64] = c2;
++            __syncwarp();
++            const int tn = t + W;
++            if (tn < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, tn); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
++            const unsigned * w = stg + lane * 9;
++            float a0, a1;
++            q8a_dot(w, packed, scales, first, lane, a0, a1);
++            a0 = warp_sum(a0); a1 = warp_sum(a1);
++            if (lane == 0) {
++                float * d0 = t < NQKV ? &s0->qkv[t] : t < NQKV + DI ? &s0->z[t - NQKV] : &s0->ab[t - NQKV - DI];
++                float * d1 = t < NQKV ? &s1->qkv[t] : t < NQKV + DI ? &s1->z[t - NQKV] : &s1->ab[t - NQKV - DI];
++                *d0 = a0; *d1 = a1;
++            }
++            __syncwarp();
++        }
++    } else {   // ---- phase A ----
+ #pragma unroll
+         for (int k = 0; k < 2; ++k) {
+             const float * hk = PP.p[k].h; float * xk = xs + k * XS_HALF;
+@@ -862,6 +963,7 @@
+     int grid_rp = 0;   // GDN3 card B: grid of the REPACK variant (co-resident blocks only)
+     Scratch * scratch2 = nullptr;   // D1BF: second sequence's scratch
+     int grid2 = 0;                  // D1BF: grid of gdn_fused2 (co-resident, <= grid_rp)
++    bool q8a = false;
+     int gridT2 = 0;                 // GDN2: grid of gdn_fused2<1> (co-resident, <= grid_rp)
+ };
+ __global__ void rp_pack(const unsigned * __restrict__ src, unsigned * __restrict__ dst) {
+@@ -964,6 +1066,14 @@
+                 CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per_smt, gdn_fused2<1>, NT, SMEM3_FLOATS * sizeof(float)));
+                 d.gridT2 = std::min(per_smt * nsm, d.grid_rp);
+                 if (d.gridT2 * NW * N2R < H) { d.gridT2 = 0; }   // phase C holds at most N2R rows per warp
++                if (env_flag("GGML_CUDA_OCCAMY_GDN_T2_Q8A")) {
++                    int q8_residency = 0;
++                    CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&q8_residency, gdn_fused2<2>, NT, SMEM3_FLOATS * sizeof(float)));
++                    d.q8a = ggml_cuda_info().devices[device].cc == 520 && per_smt == 3 &&
++                            q8_residency == per_smt && d.gridT2 == 72 && nsm == 24;
++                    std::fprintf(stderr, "N82_ADMISSION original_blocks=%d candidate_blocks=%d grid=%d admitted=%d\n",
++                                 per_smt, q8_residency, d.gridT2, int(d.q8a));
++                }
+                 if (d.gridT2 > 0 && d.scratch2 == nullptr) {
+                     CUDA_CHECK(cudaMalloc((void **)&d.scratch2, sizeof(Scratch)));
+                     CUDA_CHECK(cudaMemset(d.scratch2, 0, sizeof(Scratch)));
+@@ -1404,6 +1514,49 @@
+     return true;
+ }
+ 
++// Optional single-q2 measurement, covering exactly the handler's native launch.
++struct N82Events {
++    int count = 0, device = -1;
++    cudaStream_t stream = nullptr;
++    cudaEvent_t begin[30], end[30];
++    std::string names[30];
++    bool candidate = false;
++};
++static thread_local N82Events n82_events;
++static void n82_before(int device, cudaStream_t st, const char * name, int grid, bool candidate) {
++    auto & e = n82_events;
++    GGML_ASSERT(e.count < 30 && grid == 72);
++    if (e.count == 0) {
++        cudaStreamCaptureStatus capture;
++        CUDA_CHECK(cudaStreamIsCapturing(st, &capture));
++        GGML_ASSERT(capture == cudaStreamCaptureStatusNone);
++        e.stream = st; e.device = device; e.candidate = candidate;
++        for (int i = 0; i < 30; ++i) {
++            CUDA_CHECK(cudaEventCreate(&e.begin[i]));
++            CUDA_CHECK(cudaEventCreate(&e.end[i]));
++        }
++    }
++    GGML_ASSERT(e.stream == st && e.device == device && e.candidate == candidate);
++    e.names[e.count] = name;
++    CUDA_CHECK(cudaEventRecord(e.begin[e.count], st));
++}
++static void n82_after(cudaStream_t st) {
++    auto & e = n82_events;
++    CUDA_CHECK(cudaGetLastError());
++    CUDA_CHECK(cudaEventRecord(e.end[e.count], st));
++    if (++e.count == 30) {
++        CUDA_CHECK(cudaEventSynchronize(e.end[29]));
++        for (int i = 0; i < 30; ++i) {
++            float ms;
++            CUDA_CHECK(cudaEventElapsedTime(&ms, e.begin[i], e.end[i]));
++            std::fprintf(stderr, "N82_EVENT specialization=%d grid=72 slot=%d tensor=%s us=%.6f\n",
++                         e.candidate ? 2 : 1, i, e.names[i].c_str(), ms*1000.f);
++            CUDA_CHECK(cudaEventDestroy(e.begin[i]));
++            CUDA_CHECK(cudaEventDestroy(e.end[i]));
++        }
++    }
++}
++
+ // GDN2: MTP1 verify window (one sequence, two tokens) as one gdn_fused2<1> launch. p[0] = token 1 -> snapshot plane 1
+ // (conv_out1/state_out1), p[1] = token 2 -> plane 0 (conv_out/state_out); both read the s_copy source row.
+ bool ggml_cuda_occamy_gdn_t2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m) {
+@@ -1421,7 +1574,14 @@
+     Params2 PP;
+     PP.p[0] = fill_params(m, nullptr, &ov0, d.scratch);  PP.p[0].L.out = pk;
+     PP.p[1] = fill_params(m, nullptr, &ov1, d.scratch2); PP.p[1].L.out = pk;
+-    gdn_fused2<1><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
++    static const bool events = env_flag("GGML_CUDA_OCCAMY_GDN_T2_Q8A_EVENTS");
++    if (events) n82_before(ctx.device, st, m.wqkv->name, d.gridT2, d.q8a);
++    if (d.q8a) {
++        gdn_fused2<2><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
++    } else {
++        gdn_fused2<1><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
++    }
++    if (events) n82_after(st);
+     CUDA_CHECK(cudaGetLastError());
+     if (g_debug && (++g_launch_t2 == 1 || g_launch_t2 % 3000 == 0)) { fprintf(stderr, "occamy-gdn: t2 launches %ld\n", g_launch_t2); }
+     return true;
