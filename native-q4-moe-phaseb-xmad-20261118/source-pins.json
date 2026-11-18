@@ -1,0 +1,103 @@
+{
+  "occamy-fused.base.cu": {
+    "observed_source_sha256": "a31319430dc9db530c85a7c45b13441383289e44b1d0afb8191e37fdcfe94ac0",
+    "portable_sha256": "a31319430dc9db530c85a7c45b13441383289e44b1d0afb8191e37fdcfe94ac0",
+    "private_input_keys": []
+  },
+  "occamy-fused.cu": {
+    "observed_source_sha256": "41ed2a17f8e14ba840ab2a2a458537530fa8326126c6f147c5e6b94b747432a9",
+    "portable_sha256": "41ed2a17f8e14ba840ab2a2a458537530fa8326126c6f147c5e6b94b747432a9",
+    "private_input_keys": []
+  },
+  "candidate.patch": {
+    "observed_source_sha256": "9b7bf6ba44ee4cfb94b5b53db27091a79e03b45a6cabe3c2d57ffa000ca3a1fd",
+    "portable_sha256": "9b7bf6ba44ee4cfb94b5b53db27091a79e03b45a6cabe3c2d57ffa000ca3a1fd",
+    "private_input_keys": []
+  },
+  "xmad.inc": {
+    "observed_source_sha256": "b5f8e59a424b8d547352ba438d5cb0d0966eb83a8a372469b60e0eb35d74e855",
+    "portable_sha256": "b5f8e59a424b8d547352ba438d5cb0d0966eb83a8a372469b60e0eb35d74e855",
+    "private_input_keys": []
+  },
+  "operator.base.cpp": {
+    "observed_source_sha256": "874a720dcf1c665a61e2e222073dde3befb787daa9cdcc5632ca7ce942b0a462",
+    "portable_sha256": "874a720dcf1c665a61e2e222073dde3befb787daa9cdcc5632ca7ce942b0a462",
+    "private_input_keys": []
+  },
+  "operator.cpp": {
+    "observed_source_sha256": "b706286f3c58a7f2dcdd5dcef38958cc07bb5a03e20e9dcc323554149a765082",
+    "portable_sha256": "b706286f3c58a7f2dcdd5dcef38958cc07bb5a03e20e9dcc323554149a765082",
+    "private_input_keys": []
+  },
+  "operator.patch": {
+    "observed_source_sha256": "7fc3dafc6b5f8fd98ca585e2c761b252ccf6f3f1406b2efc25685845d32c0b85",
+    "portable_sha256": "7fc3dafc6b5f8fd98ca585e2c761b252ccf6f3f1406b2efc25685845d32c0b85",
+    "private_input_keys": []
+  },
+  "prepare.py": {
+    "observed_source_sha256": "cab87bb45dcdeaaf8f24c87900553c06de937632842fd7c25cd9aaaff45e33fa",
+    "portable_sha256": "cab87bb45dcdeaaf8f24c87900553c06de937632842fd7c25cd9aaaff45e33fa",
+    "private_input_keys": []
+  },
+  "prepare-host.py": {
+    "observed_source_sha256": "7c48b704bc50f8793aba2639d3cb12a28864e5ca7074da3c66eb98e674fd9243",
+    "portable_sha256": "7c48b704bc50f8793aba2639d3cb12a28864e5ca7074da3c66eb98e674fd9243",
+    "private_input_keys": []
+  },
+  "build.sh": {
+    "observed_source_sha256": "e1d172e6d70de7c09aeeaab11f16b2891d09ea8dc53b58353f19ff502d8c8ba5",
+    "portable_sha256": "2e36a8becbd5c6fd6a46ac3e8907486712ca5b787d83dca6e1c2078dacc6dc1e",
+    "private_input_keys": [
+      "COMPILER_SOURCE_MOUNT"
+    ]
+  },
+  "compile.sh": {
+    "observed_source_sha256": "51157fafd5aa027fb75488758deeda79462f9c6322f0e06921e87fa915a78913",
+    "portable_sha256": "af6a849971d5906752a5a02f71c5762a8e50f2857413d146b422ede980d4b12e",
+    "private_input_keys": [
+      "COMPILER_SOURCE_MOUNT"
+    ]
+  },
+  "build-host.sh": {
+    "observed_source_sha256": "e6564efa2d2b69f0580b976dcaf504f90bad5f27fcc946d0121d49ee1f621984",
+    "portable_sha256": "e6564efa2d2b69f0580b976dcaf504f90bad5f27fcc946d0121d49ee1f621984",
+    "private_input_keys": []
+  },
+  "verify-build.py": {
+    "observed_source_sha256": "72c8d532e7a687c9cc76728464bebd820eac6219e4b959d41a0dd1f315e17e6b",
+    "portable_sha256": "72c8d532e7a687c9cc76728464bebd820eac6219e4b959d41a0dd1f315e17e6b",
+    "private_input_keys": []
+  },
+  "check-layout.py": {
+    "observed_source_sha256": "dd779767e9bb91fdef4ec9f0422e11c24f9574694678b7e604b63b8d12cb70b9",
+    "portable_sha256": "dd779767e9bb91fdef4ec9f0422e11c24f9574694678b7e604b63b8d12cb70b9",
+    "private_input_keys": []
+  },
+  "report.py": {
+    "observed_source_sha256": "5af7e1d1fed9906e2310c5dbf0779dbe05516e069ea2ffe087a8d5da0148e67e",
+    "portable_sha256": "5af7e1d1fed9906e2310c5dbf0779dbe05516e069ea2ffe087a8d5da0148e67e",
+    "private_input_keys": []
+  },
+  "legacy.py": {
+    "observed_source_sha256": "bfe7876bd320c59255faa75e4ebc5c09b6e8aa81f150e0225b3f2f45475f6b14",
+    "portable_sha256": "bfe7876bd320c59255faa75e4ebc5c09b6e8aa81f150e0225b3f2f45475f6b14",
+    "private_input_keys": []
+  },
+  "release.sh": {
+    "observed_source_sha256": "807aff803723b36b5afad6f116ae3823ec20e457b6a316af40d70005854708a6",
+    "portable_sha256": "d2713c07cfc397cc44becdacc0a1789a8359ad79e088d0854a07b120f736eddb",
+    "private_input_keys": [
+      "BASELINE_RUN_NAME"
+    ]
+  },
+  "fixture.txt": {
+    "observed_source_sha256": "2ab045ab0771747709e6ee913d51c0ca53eb3f0d66425d5beb601d8d4a2217d3",
+    "portable_sha256": "2ab045ab0771747709e6ee913d51c0ca53eb3f0d66425d5beb601d8d4a2217d3",
+    "private_input_keys": []
+  },
+  "build.json": {
+    "observed_source_sha256": "4c2222cd3071ec6005ad19bd1f25ca8aaf9cba5ca56ffd8b101eb072a1c8dd0a",
+    "portable_sha256": "4c2222cd3071ec6005ad19bd1f25ca8aaf9cba5ca56ffd8b101eb072a1c8dd0a",
+    "private_input_keys": []
+  }
+}

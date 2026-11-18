@@ -1,0 +1,20 @@
+{
+  "control": "abe7dcfdbf2d7df0b31b5478212f3234ffdd8e2b8f9a077c0a216b2e32865aae",
+  "candidate": "e448454ebf03245e2da66febe5b8e653eb5452991fd31648a9a9994d2f9f27ec",
+  "operator": "a2b3e0aa3620a689281ae6b4b2db7f948b07849b15718109cf695ec760665ed4",
+  "existing_device_functions_unchanged": 18,
+  "existing_instruction_words_unchanged": 49336,
+  "candidate_symbol": "_ZN6occamy18moe_q4_phaseb_xmadENS_6ParamsE",
+  "signed_xmad_static_count": 134,
+  "first_signed_xmad_offset": "0x1308",
+  "last_signed_xmad_offset": "0x3ae8",
+  "registers": 62,
+  "static_shared_bytes": 96,
+  "dynamic_shared_bytes": 39424,
+  "threads_per_cta": 512,
+  "ctas": 48,
+  "stack": 0,
+  "spill_stores": 0,
+  "spill_loads": 0,
+  "resident_admission": "actual SKU + at least two simultaneously active CTAs per SM; CPU did not query physical GPU"
+}

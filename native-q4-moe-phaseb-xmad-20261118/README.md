@@ -1,0 +1,9 @@
+# Four-row Maxwell integer MoE gate/up experiment
+
+This sm_52 kernel replaced the FP32-activation gate/up dot products in the four-row Qwen35B MoE cohort operator with signed XMAD dot products over a shared Q8_1 activation pack. All eight selected experts and the shared expert remained active. There was no model integration.
+
+The operator passed its predeclared numerical checks and missed the required 50 µs saving against the existing cohorts in every comparison. Two 96-run pairs saved −6.753 and +5.768 µs with independent routing, and +21.945 and +27.826 µs with partial overlap. The hardware admitted two concurrent 512-thread CTAs per SM across 24 SMs, with 62 registers per thread and 39,424 dynamic shared bytes per CTA. The 18 previous kernels retained their 49,336 instruction words. The new kernel contained 134 signed XMAD instructions and had no stack or spills.
+
+Each fixture checked 32 ordered expert choices by direct readback against an independent CPU reference and the generic GPU router. Both candidate executions agreed bit for bit. The 4,608 intermediate gated activations for every row were compared directly with an independent generic graph. Relative RMS was at most 2.151 × 10⁻⁷ and peak absolute error at most 4.769 × 10⁻⁶. Full residual-output relative RMS against generic ranged from 0.819% to 1.886% and against previous V3 from 0.470% to 1.561%. The two kernels use different activation arithmetic. Scoped numerical success and one geometry's lower latency do not establish model throughput.
+
+Read operator.receipt.json for all warmups, completed intervals in both orders, actual launch counters, numerical rows, routes, comparison bounds and successful cleanup. The actual all-stage wall was three seconds under a 180-second cap. The implementation and earlier cohort source, the exact unified patches and the operator program accompany the receipt.

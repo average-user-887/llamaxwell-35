@@ -1,0 +1,1299 @@
+{
+  "status": {
+    "runner_exit": 0,
+    "cleanup_exit": 0,
+    "started_epoch": 1795009293,
+    "finished_epoch": 1795009296,
+    "cap_seconds": 180
+  },
+  "bounded_wall_s": 3,
+  "build": {
+    "control": "abe7dcfdbf2d7df0b31b5478212f3234ffdd8e2b8f9a077c0a216b2e32865aae",
+    "candidate": "e448454ebf03245e2da66febe5b8e653eb5452991fd31648a9a9994d2f9f27ec",
+    "operator": "a2b3e0aa3620a689281ae6b4b2db7f948b07849b15718109cf695ec760665ed4",
+    "existing_device_functions_unchanged": 18,
+    "existing_instruction_words_unchanged": 49336,
+    "candidate_symbol": "_ZN6occamy18moe_q4_phaseb_xmadENS_6ParamsE",
+    "signed_xmad_static_count": 134,
+    "first_signed_xmad_offset": "0x1308",
+    "last_signed_xmad_offset": "0x3ae8",
+    "registers": 62,
+    "static_shared_bytes": 96,
+    "dynamic_shared_bytes": 39424,
+    "threads_per_cta": 512,
+    "ctas": 48,
+    "stack": 0,
+    "spill_stores": 0,
+    "spill_loads": 0,
+    "resident_admission": "actual SKU + at least two simultaneously active CTAs per SM; CPU did not query physical GPU"
+  },
+  "numeric_policy": {
+    "candidate_generic_relative_rms_additive": 0.005,
+    "candidate_generic_absolute_peak_additive": 0.015,
+    "candidate_v3_relative_rms_max": 0.05,
+    "candidate_v3_absolute_peak_max": 0.15
+  },
+  "materiality_us": 50.0,
+  "scope": "Synthetic four-row standalone integer gate/up; paired synchronized standalone timing; forty-layer savings are extrapolations.",
+  "check": {
+    "executed": true,
+    "observed_lines": [
+      "N104 FIXTURE_IDS independent row=0 ids=128,215,73,136,110,167,197,112",
+      "N104 FIXTURE_IDS independent row=1 ids=85,222,184,46,216,151,64,219",
+      "N104 FIXTURE_IDS independent row=2 ids=188,213,181,187,153,70,237,53",
+      "N104 FIXTURE_IDS independent row=3 ids=234,169,55,129,81,66,7,233",
+      "N104 FIXTURE independent overlap=0,0,0,0,0,0 min_margin=0.00021109628",
+      "N104 FIXTURE_IDS partial row=0 ids=128,215,73,136,110,167,197,112",
+      "N104 FIXTURE_IDS partial row=1 ids=110,73,64,128,215,96,197,82",
+      "N104 FIXTURE_IDS partial row=2 ids=128,55,112,52,73,167,237,71",
+      "N104 FIXTURE_IDS partial row=3 ids=128,110,55,73,215,178,3,96",
+      "N104 FIXTURE partial overlap=5,4,4,2,5,3 min_margin=0.00099693925",
+      "N104 MAP /runtime/libggml.so.0.26.0",
+      "N104 MAP /runtime/libggml-base.so.0.26.0",
+      "N104 MAP /runtime/libggml-cuda.so",
+      "Q4_COHORT MAP /operator counter_provider=/runtime/libggml-cuda.so",
+      "N104 ROUTER independent ids=32/32",
+      "N104 GENERIC_BEGIN independent",
+      "N104 GENERIC_END independent",
+      "N104 SPLIT_BEGIN independent",
+      "occamy-fused MOE_V3 CHECK n104_v3_row_0 row 0: bitwise-diff 0 / 2048, max_abs 0.000e+00",
+      "occamy-fused MOE_V3 CHECK n104_v3_row_1 row 0: bitwise-diff 0 / 2048, max_abs 0.000e+00",
+      "occamy-fused MOE_V3 CHECK n104_v3_row_2 row 0: bitwise-diff 0 / 2048, max_abs 0.000e+00",
+      "occamy-fused MOE_V3 CHECK n104_v3_row_3 row 0: bitwise-diff 0 / 2048, max_abs 0.000e+00",
+      "N104 SPLIT_END independent",
+      "Q4_COHORT residency device=0 sm=24 active_per_sm=2 regs=63 static_smem=96 dynamic_smem=39424 local=0 admitted=1",
+      "Q4_COHORT DIAG independent physical=1",
+      "Q4_XMAD residency device=0 sm=24 active_per_sm=2 regs=62 static_smem=96 dynamic_smem=39424 local=0 admitted=1",
+      "Q4_XMAD EXPERTS independent row=0 ids=128,215,73,136,110,167,197,112",
+      "Q4_XMAD PHASE independent row=0 finite=4608 generic_rms=1.93275259096e-07 generic_peak=3.81469726562e-06",
+      "Q4_XMAD EXPERTS independent row=1 ids=85,222,184,46,216,151,64,219",
+      "Q4_XMAD PHASE independent row=1 finite=4608 generic_rms=2.15051881275e-07 generic_peak=3.81469726562e-06",
+      "Q4_XMAD EXPERTS independent row=2 ids=188,213,181,187,153,70,237,53",
+      "Q4_XMAD PHASE independent row=2 finite=4608 generic_rms=1.79348383807e-07 generic_peak=3.81469726562e-06",
+      "Q4_XMAD EXPERTS independent row=3 ids=234,169,55,129,81,66,7,233",
+      "Q4_XMAD PHASE independent row=3 finite=4608 generic_rms=1.71804538391e-07 generic_peak=2.86102294922e-06",
+      "Q4_XMAD ROUTE independent matched=32 repeat_equal=1 launches=2",
+      "Q4_COHORT ROW independent row=0 finite=2048 different=0",
+      "Q4_COHORT ROW independent row=1 finite=2048 different=0",
+      "Q4_COHORT ROW independent row=2 finite=2048 different=0",
+      "Q4_COHORT ROW independent row=3 finite=2048 different=0",
+      "Q4_XMAD ROW independent row=0 finite=2048 old_rms=0.015234052702 old_peak=0.0458954572678 generic_rms=0.0171857113022 generic_peak=0.0444366335869 v3_rms=0.00588494681305 v3_peak=0.0230619311333 changed_v3=2048",
+      "N104 NUMERIC independent row=0 finite=2048 mismatches=2048 max_abs=0.0458954573 relative_rms=0.0152340527",
+      "Q4_XMAD ROW independent row=1 finite=2048 old_rms=0.0140184505333 old_peak=0.0388704538345 generic_rms=0.0113561066819 generic_peak=0.0322049856186 v3_rms=0.00540246688218 v3_peak=0.0216736495495 changed_v3=2048",
+      "N104 NUMERIC independent row=1 finite=2048 mismatches=2048 max_abs=0.0388704538 relative_rms=0.0140184505",
+      "Q4_XMAD ROW independent row=2 finite=2048 old_rms=0.0253669908217 old_peak=0.0600202083588 generic_rms=0.0140892115555 generic_peak=0.0371656417847 v3_rms=0.0139748855021 v3_peak=0.0436702370644 changed_v3=2048",
+      "N104 NUMERIC independent row=2 finite=2048 mismatches=2048 max_abs=0.0600202084 relative_rms=0.0253669908",
+      "Q4_XMAD ROW independent row=3 finite=2048 old_rms=0.0103642084247 old_peak=0.0365581512451 generic_rms=0.00818676087427 generic_peak=0.0277540683746 v3_rms=0.00469816864645 v3_peak=0.0178189277649 changed_v3=2048",
+      "N104 NUMERIC independent row=3 finite=2048 mismatches=2048 max_abs=0.0365581512 relative_rms=0.0103642084",
+      "N104 ROUTER partial ids=32/32",
+      "N104 GENERIC_BEGIN partial",
+      "N104 GENERIC_END partial",
+      "N104 SPLIT_BEGIN partial",
+      "occamy-fused MOE_V3 CHECK n104_v3_row_0 row 0: bitwise-diff 0 / 2048, max_abs 0.000e+00",
+      "occamy-fused MOE_V3 CHECK n104_v3_row_1 row 0: bitwise-diff 0 / 2048, max_abs 0.000e+00",
+      "occamy-fused MOE_V3 CHECK n104_v3_row_2 row 0: bitwise-diff 0 / 2048, max_abs 0.000e+00",
+      "occamy-fused MOE_V3 CHECK n104_v3_row_3 row 0: bitwise-diff 0 / 2048, max_abs 0.000e+00",
+      "N104 SPLIT_END partial",
+      "Q4_COHORT DIAG partial physical=1",
+      "Q4_XMAD EXPERTS partial row=0 ids=128,215,73,136,110,167,197,112",
+      "Q4_XMAD PHASE partial row=0 finite=4608 generic_rms=1.93275259096e-07 generic_peak=3.81469726562e-06",
+      "Q4_XMAD EXPERTS partial row=1 ids=110,73,64,128,215,96,197,82",
+      "Q4_XMAD PHASE partial row=1 finite=4608 generic_rms=2.141124102e-07 generic_peak=3.81469726562e-06",
+      "Q4_XMAD EXPERTS partial row=2 ids=128,55,112,52,73,167,237,71",
+      "Q4_XMAD PHASE partial row=2 finite=4608 generic_rms=1.81716591382e-07 generic_peak=2.86102294922e-06",
+      "Q4_XMAD EXPERTS partial row=3 ids=128,110,55,73,215,178,3,96",
+      "Q4_XMAD PHASE partial row=3 finite=4608 generic_rms=2.0285254093e-07 generic_peak=4.76837158203e-06",
+      "Q4_XMAD ROUTE partial matched=32 repeat_equal=1 launches=2",
+      "Q4_COHORT ROW partial row=0 finite=2048 different=0",
+      "Q4_COHORT ROW partial row=1 finite=2048 different=0",
+      "Q4_COHORT ROW partial row=2 finite=2048 different=0",
+      "Q4_COHORT ROW partial row=3 finite=2048 different=0",
+      "Q4_XMAD ROW partial row=0 finite=2048 old_rms=0.015234052702 old_peak=0.0458954572678 generic_rms=0.0171857113022 generic_peak=0.0444366335869 v3_rms=0.00588494681305 v3_peak=0.0230619311333 changed_v3=2048",
+      "N104 NUMERIC partial row=0 finite=2048 mismatches=2048 max_abs=0.0458954573 relative_rms=0.0152340527",
+      "Q4_XMAD ROW partial row=1 finite=2048 old_rms=0.0302241580128 old_peak=0.0689789652824 generic_rms=0.0172537725068 generic_peak=0.0393659770489 v3_rms=0.015605155722 v3_peak=0.0536930561066 changed_v3=2048",
+      "N104 NUMERIC partial row=1 finite=2048 mismatches=2048 max_abs=0.0689789653 relative_rms=0.030224158",
+      "Q4_XMAD ROW partial row=2 finite=2048 old_rms=0.0147041326882 old_peak=0.0484392642975 generic_rms=0.018860045499 generic_peak=0.0434200763702 v3_rms=0.0155222013849 v3_peak=0.0478595495224 changed_v3=2048",
+      "N104 NUMERIC partial row=2 finite=2048 mismatches=2048 max_abs=0.0484392643 relative_rms=0.0147041327",
+      "Q4_XMAD ROW partial row=3 finite=2048 old_rms=0.0136361157362 old_peak=0.0451333522797 generic_rms=0.0144880531052 generic_peak=0.0417265892029 v3_rms=0.0148436002544 v3_peak=0.0527746081352 changed_v3=2048",
+      "N104 NUMERIC partial row=3 finite=2048 mismatches=2048 max_abs=0.0451333523 relative_rms=0.0136361157",
+      "Q4_COHORT FINISH q3_launches=0 q4_launches=2",
+      "Q4_XMAD FINISH launches=4"
+    ],
+    "validated": {
+      "cohorts_residency": {
+        "sm_count": 24,
+        "active_ctas_per_sm": 2,
+        "resident_capacity": 48,
+        "ctas_launched": 48,
+        "threads_per_cta": 512,
+        "private_barrier_participants": 12,
+        "cohorts": 4,
+        "registers": 63,
+        "static_shared_bytes": 96,
+        "dynamic_shared_bytes": 39424,
+        "thread_local_bytes": 0
+      },
+      "xmad_residency": {
+        "sm_count": 24,
+        "blocks_per_sm": 2,
+        "registers": 62,
+        "threads_per_block": 512,
+        "launched_ctas": 48,
+        "cohorts": 4,
+        "ctas_per_cohort": 12,
+        "dynamic_shared": 39424,
+        "static_shared": 96,
+        "local_bytes": 0
+      },
+      "original_controls": {
+        "independent": {
+          "pair_overlaps": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "gpu_route_ids_equal": 32,
+          "candidate_words_checked": 8192,
+          "candidate_vs_v3_different_by_row": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "v3_vs_v2_different_by_row": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "generic_vs_v3": [
+            {
+              "row": 0,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0458954573,
+              "relative_rms": 0.0152340527
+            },
+            {
+              "row": 1,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0388704538,
+              "relative_rms": 0.0140184505
+            },
+            {
+              "row": 2,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0600202084,
+              "relative_rms": 0.0253669908
+            },
+            {
+              "row": 3,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0365581512,
+              "relative_rms": 0.0103642084
+            }
+          ]
+        },
+        "partial": {
+          "pair_overlaps": [
+            5,
+            4,
+            4,
+            2,
+            5,
+            3
+          ],
+          "gpu_route_ids_equal": 32,
+          "candidate_words_checked": 8192,
+          "candidate_vs_v3_different_by_row": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "v3_vs_v2_different_by_row": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "generic_vs_v3": [
+            {
+              "row": 0,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0458954573,
+              "relative_rms": 0.0152340527
+            },
+            {
+              "row": 1,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0689789653,
+              "relative_rms": 0.030224158
+            },
+            {
+              "row": 2,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0484392643,
+              "relative_rms": 0.0147041327
+            },
+            {
+              "row": 3,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0451333523,
+              "relative_rms": 0.0136361157
+            }
+          ]
+        }
+      },
+      "xmad": {
+        "independent": {
+          "actual_ordered_experts": [
+            [
+              0,
+              [
+                128,
+                215,
+                73,
+                136,
+                110,
+                167,
+                197,
+                112
+              ]
+            ],
+            [
+              1,
+              [
+                85,
+                222,
+                184,
+                46,
+                216,
+                151,
+                64,
+                219
+              ]
+            ],
+            [
+              2,
+              [
+                188,
+                213,
+                181,
+                187,
+                153,
+                70,
+                237,
+                53
+              ]
+            ],
+            [
+              3,
+              [
+                234,
+                169,
+                55,
+                129,
+                81,
+                66,
+                7,
+                233
+              ]
+            ]
+          ],
+          "rank_overlap": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "full_output": [
+            {
+              "old_rms": 0.015234052702,
+              "old_peak": 0.0458954572678,
+              "generic_rms": 0.0171857113022,
+              "generic_peak": 0.0444366335869,
+              "v3_rms": 0.00588494681305,
+              "v3_peak": 0.0230619311333,
+              "row": 0,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            },
+            {
+              "old_rms": 0.0140184505333,
+              "old_peak": 0.0388704538345,
+              "generic_rms": 0.0113561066819,
+              "generic_peak": 0.0322049856186,
+              "v3_rms": 0.00540246688218,
+              "v3_peak": 0.0216736495495,
+              "row": 1,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            },
+            {
+              "old_rms": 0.0253669908217,
+              "old_peak": 0.0600202083588,
+              "generic_rms": 0.0140892115555,
+              "generic_peak": 0.0371656417847,
+              "v3_rms": 0.0139748855021,
+              "v3_peak": 0.0436702370644,
+              "row": 2,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            },
+            {
+              "old_rms": 0.0103642084247,
+              "old_peak": 0.0365581512451,
+              "generic_rms": 0.00818676087427,
+              "generic_peak": 0.0277540683746,
+              "v3_rms": 0.00469816864645,
+              "v3_peak": 0.0178189277649,
+              "row": 3,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            }
+          ],
+          "phase_b_generic_comparison": [
+            {
+              "row": 0,
+              "finite": 4608,
+              "generic_relative_rms": 1.93275259096e-07,
+              "generic_absolute_peak": 3.81469726562e-06
+            },
+            {
+              "row": 1,
+              "finite": 4608,
+              "generic_relative_rms": 2.15051881275e-07,
+              "generic_absolute_peak": 3.81469726562e-06
+            },
+            {
+              "row": 2,
+              "finite": 4608,
+              "generic_relative_rms": 1.79348383807e-07,
+              "generic_absolute_peak": 3.81469726562e-06
+            },
+            {
+              "row": 3,
+              "finite": 4608,
+              "generic_relative_rms": 1.71804538391e-07,
+              "generic_absolute_peak": 2.86102294922e-06
+            }
+          ],
+          "repeated_candidate_bitwise": true,
+          "all_within_policy": true
+        },
+        "partial": {
+          "actual_ordered_experts": [
+            [
+              0,
+              [
+                128,
+                215,
+                73,
+                136,
+                110,
+                167,
+                197,
+                112
+              ]
+            ],
+            [
+              1,
+              [
+                110,
+                73,
+                64,
+                128,
+                215,
+                96,
+                197,
+                82
+              ]
+            ],
+            [
+              2,
+              [
+                128,
+                55,
+                112,
+                52,
+                73,
+                167,
+                237,
+                71
+              ]
+            ],
+            [
+              3,
+              [
+                128,
+                110,
+                55,
+                73,
+                215,
+                178,
+                3,
+                96
+              ]
+            ]
+          ],
+          "rank_overlap": [
+            5,
+            4,
+            4,
+            2,
+            5,
+            3
+          ],
+          "full_output": [
+            {
+              "old_rms": 0.015234052702,
+              "old_peak": 0.0458954572678,
+              "generic_rms": 0.0171857113022,
+              "generic_peak": 0.0444366335869,
+              "v3_rms": 0.00588494681305,
+              "v3_peak": 0.0230619311333,
+              "row": 0,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            },
+            {
+              "old_rms": 0.0302241580128,
+              "old_peak": 0.0689789652824,
+              "generic_rms": 0.0172537725068,
+              "generic_peak": 0.0393659770489,
+              "v3_rms": 0.015605155722,
+              "v3_peak": 0.0536930561066,
+              "row": 1,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            },
+            {
+              "old_rms": 0.0147041326882,
+              "old_peak": 0.0484392642975,
+              "generic_rms": 0.018860045499,
+              "generic_peak": 0.0434200763702,
+              "v3_rms": 0.0155222013849,
+              "v3_peak": 0.0478595495224,
+              "row": 2,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            },
+            {
+              "old_rms": 0.0136361157362,
+              "old_peak": 0.0451333522797,
+              "generic_rms": 0.0144880531052,
+              "generic_peak": 0.0417265892029,
+              "v3_rms": 0.0148436002544,
+              "v3_peak": 0.0527746081352,
+              "row": 3,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            }
+          ],
+          "phase_b_generic_comparison": [
+            {
+              "row": 0,
+              "finite": 4608,
+              "generic_relative_rms": 1.93275259096e-07,
+              "generic_absolute_peak": 3.81469726562e-06
+            },
+            {
+              "row": 1,
+              "finite": 4608,
+              "generic_relative_rms": 2.141124102e-07,
+              "generic_absolute_peak": 3.81469726562e-06
+            },
+            {
+              "row": 2,
+              "finite": 4608,
+              "generic_relative_rms": 1.81716591382e-07,
+              "generic_absolute_peak": 2.86102294922e-06
+            },
+            {
+              "row": 3,
+              "finite": 4608,
+              "generic_relative_rms": 2.0285254093e-07,
+              "generic_absolute_peak": 4.76837158203e-06
+            }
+          ],
+          "repeated_candidate_bitwise": true,
+          "all_within_policy": true
+        }
+      },
+      "numeric_pass": true
+    }
+  },
+  "perf": {
+    "executed": true,
+    "observed_lines": [
+      "N104 FIXTURE_IDS independent row=0 ids=128,215,73,136,110,167,197,112",
+      "N104 FIXTURE_IDS independent row=1 ids=85,222,184,46,216,151,64,219",
+      "N104 FIXTURE_IDS independent row=2 ids=188,213,181,187,153,70,237,53",
+      "N104 FIXTURE_IDS independent row=3 ids=234,169,55,129,81,66,7,233",
+      "N104 FIXTURE independent overlap=0,0,0,0,0,0 min_margin=0.00021109628",
+      "N104 FIXTURE_IDS partial row=0 ids=128,215,73,136,110,167,197,112",
+      "N104 FIXTURE_IDS partial row=1 ids=110,73,64,128,215,96,197,82",
+      "N104 FIXTURE_IDS partial row=2 ids=128,55,112,52,73,167,237,71",
+      "N104 FIXTURE_IDS partial row=3 ids=128,110,55,73,215,178,3,96",
+      "N104 FIXTURE partial overlap=5,4,4,2,5,3 min_margin=0.00099693925",
+      "N104 MAP /runtime/libggml.so.0.26.0",
+      "N104 MAP /runtime/libggml-base.so.0.26.0",
+      "N104 MAP /runtime/libggml-cuda.so",
+      "Q4_COHORT MAP /operator counter_provider=/runtime/libggml-cuda.so",
+      "Q4_COHORT residency device=0 sm=24 active_per_sm=2 regs=63 static_smem=96 dynamic_smem=39424 local=0 admitted=1",
+      "Q4_XMAD TIME independent mode=cohorts reps=8 old=8 new=0 us=517.479750",
+      "Q4_XMAD residency device=0 sm=24 active_per_sm=2 regs=62 static_smem=96 dynamic_smem=39424 local=0 admitted=1",
+      "Q4_XMAD TIME independent mode=xmad reps=8 old=0 new=8 us=289.896000",
+      "Q4_XMAD TIME independent mode=cohorts reps=96 old=96 new=0 us=285.996260",
+      "Q4_XMAD TIME independent mode=xmad reps=96 old=0 new=96 us=292.749615",
+      "Q4_XMAD TIME independent mode=xmad reps=96 old=0 new=96 us=292.835302",
+      "Q4_XMAD TIME independent mode=cohorts reps=96 old=96 new=0 us=298.603135",
+      "Q4_XMAD TIME partial mode=cohorts reps=8 old=8 new=0 us=288.056250",
+      "Q4_XMAD TIME partial mode=xmad reps=8 old=0 new=8 us=267.363000",
+      "Q4_XMAD TIME partial mode=cohorts reps=96 old=96 new=0 us=287.573531",
+      "Q4_XMAD TIME partial mode=xmad reps=96 old=0 new=96 us=265.628594",
+      "Q4_XMAD TIME partial mode=xmad reps=96 old=0 new=96 us=265.973208",
+      "Q4_XMAD TIME partial mode=cohorts reps=96 old=96 new=0 us=293.799323",
+      "Q4_COHORT FINISH q3_launches=0 q4_launches=400",
+      "Q4_XMAD FINISH launches=400"
+    ],
+    "validated": {
+      "cohorts_residency": {
+        "sm_count": 24,
+        "active_ctas_per_sm": 2,
+        "resident_capacity": 48,
+        "ctas_launched": 48,
+        "threads_per_cta": 512,
+        "private_barrier_participants": 12,
+        "cohorts": 4,
+        "registers": 63,
+        "static_shared_bytes": 96,
+        "dynamic_shared_bytes": 39424,
+        "thread_local_bytes": 0
+      },
+      "xmad_residency": {
+        "sm_count": 24,
+        "blocks_per_sm": 2,
+        "registers": 62,
+        "threads_per_block": 512,
+        "launched_ctas": 48,
+        "cohorts": 4,
+        "ctas_per_cohort": 12,
+        "dynamic_shared": 39424,
+        "static_shared": 96,
+        "local_bytes": 0
+      },
+      "timing": {
+        "independent": {
+          "complete_intervals": [
+            [
+              "cohorts",
+              8,
+              8,
+              0,
+              517.47975
+            ],
+            [
+              "xmad",
+              8,
+              0,
+              8,
+              289.896
+            ],
+            [
+              "cohorts",
+              96,
+              96,
+              0,
+              285.99626
+            ],
+            [
+              "xmad",
+              96,
+              0,
+              96,
+              292.749615
+            ],
+            [
+              "xmad",
+              96,
+              0,
+              96,
+              292.835302
+            ],
+            [
+              "cohorts",
+              96,
+              96,
+              0,
+              298.603135
+            ]
+          ],
+          "incremental_savings_us": [
+            -6.753354999999999,
+            5.767832999999996
+          ],
+          "projected_ms_at_40_layers": [
+            -0.2701342,
+            0.23071331999999983
+          ],
+          "materiality_pass": false,
+          "positive_both_orders": false
+        },
+        "partial": {
+          "complete_intervals": [
+            [
+              "cohorts",
+              8,
+              8,
+              0,
+              288.05625
+            ],
+            [
+              "xmad",
+              8,
+              0,
+              8,
+              267.363
+            ],
+            [
+              "cohorts",
+              96,
+              96,
+              0,
+              287.573531
+            ],
+            [
+              "xmad",
+              96,
+              0,
+              96,
+              265.628594
+            ],
+            [
+              "xmad",
+              96,
+              0,
+              96,
+              265.973208
+            ],
+            [
+              "cohorts",
+              96,
+              96,
+              0,
+              293.799323
+            ]
+          ],
+          "incremental_savings_us": [
+            21.94493699999998,
+            27.826115000000016
+          ],
+          "projected_ms_at_40_layers": [
+            0.8777974799999992,
+            1.1130446000000007
+          ],
+          "materiality_pass": false,
+          "positive_both_orders": true
+        }
+      }
+    }
+  },
+  "complete_measurement": {
+    "technical_pass": true,
+    "materiality_pass": false,
+    "numeric_policy": {
+      "candidate_generic_relative_rms_additive": 0.005,
+      "candidate_generic_absolute_peak_additive": 0.015,
+      "candidate_v3_relative_rms_max": 0.05,
+      "candidate_v3_absolute_peak_max": 0.15
+    },
+    "threshold_us": 50.0,
+    "numeric": {
+      "cohorts_residency": {
+        "sm_count": 24,
+        "active_ctas_per_sm": 2,
+        "resident_capacity": 48,
+        "ctas_launched": 48,
+        "threads_per_cta": 512,
+        "private_barrier_participants": 12,
+        "cohorts": 4,
+        "registers": 63,
+        "static_shared_bytes": 96,
+        "dynamic_shared_bytes": 39424,
+        "thread_local_bytes": 0
+      },
+      "xmad_residency": {
+        "sm_count": 24,
+        "blocks_per_sm": 2,
+        "registers": 62,
+        "threads_per_block": 512,
+        "launched_ctas": 48,
+        "cohorts": 4,
+        "ctas_per_cohort": 12,
+        "dynamic_shared": 39424,
+        "static_shared": 96,
+        "local_bytes": 0
+      },
+      "original_controls": {
+        "independent": {
+          "pair_overlaps": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "gpu_route_ids_equal": 32,
+          "candidate_words_checked": 8192,
+          "candidate_vs_v3_different_by_row": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "v3_vs_v2_different_by_row": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "generic_vs_v3": [
+            {
+              "row": 0,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0458954573,
+              "relative_rms": 0.0152340527
+            },
+            {
+              "row": 1,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0388704538,
+              "relative_rms": 0.0140184505
+            },
+            {
+              "row": 2,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0600202084,
+              "relative_rms": 0.0253669908
+            },
+            {
+              "row": 3,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0365581512,
+              "relative_rms": 0.0103642084
+            }
+          ]
+        },
+        "partial": {
+          "pair_overlaps": [
+            5,
+            4,
+            4,
+            2,
+            5,
+            3
+          ],
+          "gpu_route_ids_equal": 32,
+          "candidate_words_checked": 8192,
+          "candidate_vs_v3_different_by_row": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "v3_vs_v2_different_by_row": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "generic_vs_v3": [
+            {
+              "row": 0,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0458954573,
+              "relative_rms": 0.0152340527
+            },
+            {
+              "row": 1,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0689789653,
+              "relative_rms": 0.030224158
+            },
+            {
+              "row": 2,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0484392643,
+              "relative_rms": 0.0147041327
+            },
+            {
+              "row": 3,
+              "different_words": 2048,
+              "finite": 2048,
+              "max_abs": 0.0451333523,
+              "relative_rms": 0.0136361157
+            }
+          ]
+        }
+      },
+      "xmad": {
+        "independent": {
+          "actual_ordered_experts": [
+            [
+              0,
+              [
+                128,
+                215,
+                73,
+                136,
+                110,
+                167,
+                197,
+                112
+              ]
+            ],
+            [
+              1,
+              [
+                85,
+                222,
+                184,
+                46,
+                216,
+                151,
+                64,
+                219
+              ]
+            ],
+            [
+              2,
+              [
+                188,
+                213,
+                181,
+                187,
+                153,
+                70,
+                237,
+                53
+              ]
+            ],
+            [
+              3,
+              [
+                234,
+                169,
+                55,
+                129,
+                81,
+                66,
+                7,
+                233
+              ]
+            ]
+          ],
+          "rank_overlap": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "full_output": [
+            {
+              "old_rms": 0.015234052702,
+              "old_peak": 0.0458954572678,
+              "generic_rms": 0.0171857113022,
+              "generic_peak": 0.0444366335869,
+              "v3_rms": 0.00588494681305,
+              "v3_peak": 0.0230619311333,
+              "row": 0,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            },
+            {
+              "old_rms": 0.0140184505333,
+              "old_peak": 0.0388704538345,
+              "generic_rms": 0.0113561066819,
+              "generic_peak": 0.0322049856186,
+              "v3_rms": 0.00540246688218,
+              "v3_peak": 0.0216736495495,
+              "row": 1,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            },
+            {
+              "old_rms": 0.0253669908217,
+              "old_peak": 0.0600202083588,
+              "generic_rms": 0.0140892115555,
+              "generic_peak": 0.0371656417847,
+              "v3_rms": 0.0139748855021,
+              "v3_peak": 0.0436702370644,
+              "row": 2,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            },
+            {
+              "old_rms": 0.0103642084247,
+              "old_peak": 0.0365581512451,
+              "generic_rms": 0.00818676087427,
+              "generic_peak": 0.0277540683746,
+              "v3_rms": 0.00469816864645,
+              "v3_peak": 0.0178189277649,
+              "row": 3,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            }
+          ],
+          "phase_b_generic_comparison": [
+            {
+              "row": 0,
+              "finite": 4608,
+              "generic_relative_rms": 1.93275259096e-07,
+              "generic_absolute_peak": 3.81469726562e-06
+            },
+            {
+              "row": 1,
+              "finite": 4608,
+              "generic_relative_rms": 2.15051881275e-07,
+              "generic_absolute_peak": 3.81469726562e-06
+            },
+            {
+              "row": 2,
+              "finite": 4608,
+              "generic_relative_rms": 1.79348383807e-07,
+              "generic_absolute_peak": 3.81469726562e-06
+            },
+            {
+              "row": 3,
+              "finite": 4608,
+              "generic_relative_rms": 1.71804538391e-07,
+              "generic_absolute_peak": 2.86102294922e-06
+            }
+          ],
+          "repeated_candidate_bitwise": true,
+          "all_within_policy": true
+        },
+        "partial": {
+          "actual_ordered_experts": [
+            [
+              0,
+              [
+                128,
+                215,
+                73,
+                136,
+                110,
+                167,
+                197,
+                112
+              ]
+            ],
+            [
+              1,
+              [
+                110,
+                73,
+                64,
+                128,
+                215,
+                96,
+                197,
+                82
+              ]
+            ],
+            [
+              2,
+              [
+                128,
+                55,
+                112,
+                52,
+                73,
+                167,
+                237,
+                71
+              ]
+            ],
+            [
+              3,
+              [
+                128,
+                110,
+                55,
+                73,
+                215,
+                178,
+                3,
+                96
+              ]
+            ]
+          ],
+          "rank_overlap": [
+            5,
+            4,
+            4,
+            2,
+            5,
+            3
+          ],
+          "full_output": [
+            {
+              "old_rms": 0.015234052702,
+              "old_peak": 0.0458954572678,
+              "generic_rms": 0.0171857113022,
+              "generic_peak": 0.0444366335869,
+              "v3_rms": 0.00588494681305,
+              "v3_peak": 0.0230619311333,
+              "row": 0,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            },
+            {
+              "old_rms": 0.0302241580128,
+              "old_peak": 0.0689789652824,
+              "generic_rms": 0.0172537725068,
+              "generic_peak": 0.0393659770489,
+              "v3_rms": 0.015605155722,
+              "v3_peak": 0.0536930561066,
+              "row": 1,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            },
+            {
+              "old_rms": 0.0147041326882,
+              "old_peak": 0.0484392642975,
+              "generic_rms": 0.018860045499,
+              "generic_peak": 0.0434200763702,
+              "v3_rms": 0.0155222013849,
+              "v3_peak": 0.0478595495224,
+              "row": 2,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            },
+            {
+              "old_rms": 0.0136361157362,
+              "old_peak": 0.0451333522797,
+              "generic_rms": 0.0144880531052,
+              "generic_peak": 0.0417265892029,
+              "v3_rms": 0.0148436002544,
+              "v3_peak": 0.0527746081352,
+              "row": 3,
+              "finite": 2048,
+              "changed_vs_v3": 2048,
+              "within_policy": true
+            }
+          ],
+          "phase_b_generic_comparison": [
+            {
+              "row": 0,
+              "finite": 4608,
+              "generic_relative_rms": 1.93275259096e-07,
+              "generic_absolute_peak": 3.81469726562e-06
+            },
+            {
+              "row": 1,
+              "finite": 4608,
+              "generic_relative_rms": 2.141124102e-07,
+              "generic_absolute_peak": 3.81469726562e-06
+            },
+            {
+              "row": 2,
+              "finite": 4608,
+              "generic_relative_rms": 1.81716591382e-07,
+              "generic_absolute_peak": 2.86102294922e-06
+            },
+            {
+              "row": 3,
+              "finite": 4608,
+              "generic_relative_rms": 2.0285254093e-07,
+              "generic_absolute_peak": 4.76837158203e-06
+            }
+          ],
+          "repeated_candidate_bitwise": true,
+          "all_within_policy": true
+        }
+      },
+      "numeric_pass": true
+    },
+    "timing": {
+      "cohorts_residency": {
+        "sm_count": 24,
+        "active_ctas_per_sm": 2,
+        "resident_capacity": 48,
+        "ctas_launched": 48,
+        "threads_per_cta": 512,
+        "private_barrier_participants": 12,
+        "cohorts": 4,
+        "registers": 63,
+        "static_shared_bytes": 96,
+        "dynamic_shared_bytes": 39424,
+        "thread_local_bytes": 0
+      },
+      "xmad_residency": {
+        "sm_count": 24,
+        "blocks_per_sm": 2,
+        "registers": 62,
+        "threads_per_block": 512,
+        "launched_ctas": 48,
+        "cohorts": 4,
+        "ctas_per_cohort": 12,
+        "dynamic_shared": 39424,
+        "static_shared": 96,
+        "local_bytes": 0
+      },
+      "timing": {
+        "independent": {
+          "complete_intervals": [
+            [
+              "cohorts",
+              8,
+              8,
+              0,
+              517.47975
+            ],
+            [
+              "xmad",
+              8,
+              0,
+              8,
+              289.896
+            ],
+            [
+              "cohorts",
+              96,
+              96,
+              0,
+              285.99626
+            ],
+            [
+              "xmad",
+              96,
+              0,
+              96,
+              292.749615
+            ],
+            [
+              "xmad",
+              96,
+              0,
+              96,
+              292.835302
+            ],
+            [
+              "cohorts",
+              96,
+              96,
+              0,
+              298.603135
+            ]
+          ],
+          "incremental_savings_us": [
+            -6.753354999999999,
+            5.767832999999996
+          ],
+          "projected_ms_at_40_layers": [
+            -0.2701342,
+            0.23071331999999983
+          ],
+          "materiality_pass": false,
+          "positive_both_orders": false
+        },
+        "partial": {
+          "complete_intervals": [
+            [
+              "cohorts",
+              8,
+              8,
+              0,
+              288.05625
+            ],
+            [
+              "xmad",
+              8,
+              0,
+              8,
+              267.363
+            ],
+            [
+              "cohorts",
+              96,
+              96,
+              0,
+              287.573531
+            ],
+            [
+              "xmad",
+              96,
+              0,
+              96,
+              265.628594
+            ],
+            [
+              "xmad",
+              96,
+              0,
+              96,
+              265.973208
+            ],
+            [
+              "cohorts",
+              96,
+              96,
+              0,
+              293.799323
+            ]
+          ],
+          "incremental_savings_us": [
+            21.94493699999998,
+            27.826115000000016
+          ],
+          "projected_ms_at_40_layers": [
+            0.8777974799999992,
+            1.1130446000000007
+          ],
+          "materiality_pass": false,
+          "positive_both_orders": true
+        }
+      }
+    }
+  }
+}
