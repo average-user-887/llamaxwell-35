@@ -1,0 +1,48 @@
+{
+  "original_runner_exit": 1,
+  "cleanup_exit": 0,
+  "strict_comparison_pass": false,
+  "reason": "Log rotation removed the beginning of the warm request and the required request-local restore marker.",
+  "startup_runtime_and_exact_flags_verified": true,
+  "warm_q1_observed_in_retained_tail": true,
+  "no_draft_metrics_reported_by_http": true,
+  "q8a_two_row_launch_markers_in_retained_logs": 0,
+  "cold_runtime_terminal_marker": [
+    80191,
+    0
+  ],
+  "warm_runtime_terminal_marker": [
+    83071,
+    0
+  ],
+  "http_validated_observations": {
+    "cold": {
+      "cache_n": 0,
+      "evaluated_prompt_n": 80000,
+      "n_out": 192,
+      "ttft_s": 260.5136752719991,
+      "request_wall_s": 263.12344356405083,
+      "decode_toks_s": 73.6983037107096,
+      "first_id_difference_1_based": 170,
+      "text_equal": false
+    },
+    "warm": {
+      "cache_n": 79996,
+      "evaluated_prompt_n": 4,
+      "n_out": 3072,
+      "ttft_s": 0.12466456205584109,
+      "request_wall_s": 40.30257142102346,
+      "decode_toks_s": 76.46927992299304,
+      "first_id_difference_1_based": 170,
+      "text_equal": false
+    }
+  },
+  "runtime_sha256": {
+    "libggml-cuda.so": "3b3c6db37769ee281b4bc357faf6016f34388d7270545d6b13bbc37777c79fdf",
+    "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+    "libllama-server-impl.so": "1138515898887c6ec6be01a210cfb59bb8e1338ccf6eeef1d032ffd4fdb22b65",
+    "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+  },
+  "serial_trace_sha256": "42050cdf270b8d32b51503a59ac08dcd47e93a7936500a07731ef3fe419c3993"
+}

@@ -1,0 +1,12 @@
+{"event":"trace_metadata","arm":"no-mtp","format":2,"scope":"literal typed events plus labeled stream-emission reconciliation"}
+{"event":"log_discontinuity","arm":"no-mtp"}
+{"event":"slot_release","arm":"no-mtp","phase":"unattributed","relative_log_line":5707,"resident_slot_tokens":83071,"context_truncated":false}
+{"event":"independent_stream_observation","arm":"no-mtp","phase":"cold","output_count":192,"finish_reason":"limit","reported_cache_tokens":0,"reported_evaluated_tokens":80000}
+{"event":"independent_stream_observation","arm":"no-mtp","phase":"warm","output_count":3072,"finish_reason":"limit","reported_cache_tokens":79996,"reported_evaluated_tokens":4}
+{"event":"sse_clock_checkpoint","arm":"no-mtp","phase":"warm","output_token":1,"elapsed_s":0.12466456205584109,"event_first_token":1,"event_last_token":1}
+{"event":"sse_clock_checkpoint","arm":"no-mtp","phase":"warm","output_token":512,"elapsed_s":6.812732006073929,"event_first_token":512,"event_last_token":512}
+{"event":"sse_clock_checkpoint","arm":"no-mtp","phase":"warm","output_token":1024,"elapsed_s":13.539230434107594,"event_first_token":1024,"event_last_token":1024}
+{"event":"sse_clock_checkpoint","arm":"no-mtp","phase":"warm","output_token":1536,"elapsed_s":20.24968520202674,"event_first_token":1536,"event_last_token":1536}
+{"event":"sse_clock_checkpoint","arm":"no-mtp","phase":"warm","output_token":2048,"elapsed_s":26.93094168510288,"event_first_token":2048,"event_last_token":2048}
+{"event":"sse_clock_checkpoint","arm":"no-mtp","phase":"warm","output_token":2560,"elapsed_s":33.611190017079934,"event_first_token":2560,"event_last_token":2560}
+{"event":"sse_clock_checkpoint","arm":"no-mtp","phase":"warm","output_token":3072,"elapsed_s":40.29768787510693,"event_first_token":3072,"event_last_token":3072}

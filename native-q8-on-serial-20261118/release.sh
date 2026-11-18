@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+
+card=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+campaign=$(dirname -- "$card")
+lab=$(dirname -- "$campaign")
+runner=$campaign/runner
+# shellcheck source=../runner/night_trial_runtime.sh
+source "$runner/night_trial_runtime.sh"
+probe=$card/serial_probe.py
+stream_probe=$campaign/night-n18-warm3072/n18_probe.py
+model_dir=$(dirname -- "$lab")/uroboros-models
+model=occamy-1.0-Q4_0-headq40b-mtp.gguf
+n1=$campaign/night-cache-only/libs
+r2=$campaign/sparse/r2/libs
+cap=430
+n82=$campaign/night-gdn-t2-q8-fast
+
+check() {
+  (cd "$card" && sha256sum --check --quiet FROZEN.sha256)
+  [[ $(stat -Lc '%s %Y' "$model_dir/$model") == '20080296992 1791834438' ]]
+  grep -Fxq "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae  $model_dir/$model" "$campaign/model.sha256"
+  night_profile
+  python3 -B "$probe" check
+}
+
+bounded_docker() { timeout -k 1s 8s docker "$@"; }
+
+capture_logs() { bounded_docker logs "$1" > "$2" 2>&1; }
+
+runtime_inventory() {
+  local name=$1 out=$2 path inode
+  bounded_docker exec "$name" cat /proc/1/maps |
+    awk '$6 ~ /\/lib(ggml-cuda\.so|llama-server-impl\.so|llama(-common)?\.so(\.[0-9]+)*)$/ {
+      if (NF != 6) exit 2; print $6, $5
+    }' | sort -u > "$out/runtime-library-inodes.txt"
+  {
+    while read -r path inode; do
+      [[ $(bounded_docker exec "$name" stat -Lc '%i' "$path") == "$inode" ]]
+      bounded_docker exec "$name" sha256sum "$path"
+    done < "$out/runtime-library-inodes.txt"
+    bounded_docker exec "$name" sha256sum /proc/1/exe
+  } > "$out/runtime-library-hashes.txt"
+}
+
+wait_for_health() {
+  local name=$1 port=$2 started=$SECONDS remaining probe_timeout running
+  local health_deadline=$((started + 45))
+  while (( SECONDS < health_deadline )); do
+    remaining=$((health_deadline - SECONDS))
+    probe_timeout=$((remaining < 2 ? remaining : 2))
+    if curl -fsS --noproxy '*' --max-time "$probe_timeout" "http://127.0.0.1:$port/health" >/dev/null 2>&1; then
+      printf 'owned server ready after %ss\n' "$((SECONDS - started))"
+      return 0
+    fi
+    remaining=$((health_deadline - SECONDS))
+    (( remaining > 0 )) || break
+    probe_timeout=$((remaining < 2 ? remaining : 2))
+    if ! running=$(timeout -k 1s "${probe_timeout}s" docker inspect -f '{{.State.Running}}' "$name") || [[ $running != true ]]; then
+      echo 'owned server exited or could not be inspected during startup' >&2
+      return 2
+    fi
+    if (( SECONDS < health_deadline )); then sleep 1; fi
+  done
+  echo 'owned server failed to become healthy within 45s' >&2
+  return 2
+}
+
+arm() {
+  local stage=$1 name=$2 out=$3 owner=$4 binding port admitted=0 attempt vector flag_names flag_pattern
+  local -a environment=() args=()
+  capture_name=$name
+  capture_file=$out/server.log
+  trap 'capture_logs "$capture_name" "$capture_file" || true' EXIT
+  trap 'exit 124' INT TERM
+  for attempt in 1 2 3 4; do
+    if night_admit_idle >> "$out/admission.txt" 2>&1; then admitted=1; break; fi
+    if (( attempt < 4 )); then sleep 3; fi
+  done
+  (( admitted )) || { echo 'fresh idle Fleet admission did not pass'; return 90; }
+  vector=$(python3 -B "$probe" env "$stage")
+  mapfile -t environment <<< "$vector"
+  vector=$(python3 -B "$probe" args "$stage")
+  mapfile -t args <<< "$vector"
+  printf '%s\n' "${environment[@]}" > "$out/environment.args"
+  printf '%s\n' "${args[@]}" > "$out/server.args"
+  bounded_docker run -d --pull never --name "$name" --label "resume.q8.serial.owner=$owner" \
+    --device "nvidia.com/gpu=$N3_GPU" -p 127.0.0.1::8080 \
+    --log-driver json-file --log-opt max-size=4m --log-opt max-file=1 \
+    -v "$model_dir:/models:ro" -v "$campaign/night-moe-rank6-80k/libs:/candidate:ro" -v "$n82/libggml-cuda.so:/candidate/libggml-cuda.so:ro" -v "$n1:$n1:ro" -v "$r2:$r2:ro" \
+    --entrypoint /candidate/llama-server "${environment[@]}" "$night_image" "${args[@]}" >/dev/null
+  binding=$(bounded_docker port "$name" 8080/tcp)
+  [[ $binding =~ ^127\.0\.0\.1:([0-9]+)$ ]] || { echo 'owned loopback endpoint unavailable'; return 2; }
+  port=${BASH_REMATCH[1]}
+  wait_for_health "$name" "$port"
+  capture_logs "$name" "$out/server-start.log"
+  runtime_inventory "$name" "$out"
+  flag_names=$(printf '%s\n' "${environment[@]}" | sed -n 's/^\([A-Z0-9_]*\)=.*$/\1/p' | paste -sd '|')
+  flag_pattern="^($flag_names|LLAMA_TRACE|LLAMA_MV3_PHASE|GGML_CUDA_NODE_TIMING|GGML_CUDA_NODE_TIMING_SPLIT|GGML_CUDA_MOE_RANK[46](_CHECK)?|GGML_CUDA_OCCAMY_FA_SPARSE_PROFILE|GGML_CUDA_OCCAMY_FA_SPARSE_R2_CHECK)="
+  bounded_docker exec "$name" sh -ec 'tr "\000" "\n" < /proc/1/environ | grep -E "$1"' flags "$flag_pattern" > "$out/pid1-selected-environment.txt"
+  bounded_docker exec "$name" sh -ec 'tr "\000" "\n" < /proc/1/cmdline' > "$out/pid1-server.args"
+  python3 -B "$probe" ready "$out"
+  python3 -B "$stream_probe" cold "$port" "$out"
+  capture_logs "$name" "$out/server-pre-warm.log"
+  python3 -B "$stream_probe" warm "$port" "$out"
+  bounded_docker stop --time 5 "$name" >/dev/null
+  [[ $(bounded_docker inspect -f '{{.State.ExitCode}}' "$name") == 0 ]]
+  capture_logs "$name" "$out/server.log"
+  trap - EXIT
+  python3 -B "$probe" verify "$out"
+}
+
+cleanup() {
+  local name=$1 owner=$2 deadline=$3 left
+  left=$((deadline - $(date +%s) - 1))
+  (( left > 0 )) || return 1
+  if (( left > 10 )); then left=10; fi
+  # shellcheck disable=SC2016
+  timeout -k 1s "${left}s" bash -euc '
+    owned=$(docker ps -aq --filter "name=^/$1$" --filter "label=resume.q8.serial.owner=$2")
+    if [[ -n $owned ]]; then
+      [[ $owned =~ ^[0-9a-f]+$ ]]
+      docker rm -f "$owned"
+    fi
+    [[ -z $(docker ps -aq --filter "name=^/$1$") ]]
+  ' cleanup "$name" "$owner"
+}
+
+usage() { echo 'usage: release.sh --check | --run serial | --compare SERIAL_RECEIPT' >&2; exit 2; }
+case ${1:-} in
+  __arm)
+    [[ $# == 3 && ${RESUME_Q8_SERIAL_LOCK_FD:-} =~ ^[0-9]+$ &&
+       $(readlink "/proc/$$/fd/$RESUME_Q8_SERIAL_LOCK_FD") == "$lab/gpu-bench.lock" ]] || usage
+    [[ $2 == serial ]] || usage
+    [[ $3 =~ ^[0-9]{8}T[0-9]{6}Z-[0-9]+-[0-9]+$ ]] || usage
+    arm "$2" "nmmoon-resume-q8-serial-$2-$3" "$card/receipts/$2-$3" "$3"
+    exit ;;
+  --check) [[ $# == 1 ]] || usage; check; exit ;;
+  --compare) [[ $# == 2 ]] || usage; check >&2; exec python3 -B "$probe" compare "$2" ;;
+  --run) [[ $# == 2 && ( $2 == serial ) ]] || usage; check ;;
+  *) usage ;;
+esac
+
+stage=$2
+night_lock_gpu
+export RESUME_Q8_SERIAL_LOCK_FD=$night_lock_fd
+trap night_interrupt INT TERM
+start=$(date +%s)
+deadline=$((start + cap))
+if [[ -n ${ROOT_GPU_DEADLINE_EPOCH:-} ]]; then
+  [[ $ROOT_GPU_DEADLINE_EPOCH =~ ^[0-9]+$ ]] || exit 2
+  (( deadline <= ROOT_GPU_DEADLINE_EPOCH )) || { echo 'full serial arm exceeds the supplied benchmark lease' >&2; exit 2; }
+fi
+id=$(date -u +%Y%m%dT%H%M%SZ)-$$-$RANDOM
+name=nmmoon-resume-q8-serial-$stage-$id
+out=$card/receipts/$stage-$id
+mkdir -p "$out"
+printf 'Q8_SERIAL_RECEIPT=%s\n' "$out"
+printf 'stage=%s\nimage=%s\nstart_epoch=%s\ndeadline_epoch=%s\ncap_seconds=%s\n' \
+  "$stage" "$night_image" "$start" "$deadline" "$cap" > "$out/manifest.txt"
+sha256sum "$card/FROZEN.sha256" "$campaign/model.sha256" >> "$out/manifest.txt"
+left=$((deadline - $(date +%s) - 25))
+(( left > 0 && ! night_interrupted )) || exit 124
+printf 'container=%s\narm_deadline_epoch=%s\n' "$name" "$deadline" > "$out/status.txt"
+timeout -k 3s "${left}s" "$card/release.sh" __arm "$stage" "$id" > "$out/run.log" 2>&1 &
+night_child_pid=$!
+rc=0
+wait "$night_child_pid" || rc=$?
+night_child_pid=
+clean=0
+cleanup "$name" "$id" "$deadline" > "$out/cleanup.log" 2>&1 || clean=$?
+printf 'runner_exit=%s\ncleanup_exit=%s\ncompleted_epoch=%s\n' "$rc" "$clean" "$(date +%s)" >> "$out/status.txt"
+exec {night_lock_fd}>&-
+python3 -B "$probe" finalize "$out" "$rc" "$clean" "$(( $(date +%s) - start ))"
+(cd "$out" && find . -type f -print0 | sort -z | xargs -0 sha256sum) > "$out.checksums"
+mv -- "$out.checksums" "$out/observations.sha256"
+(( clean == 0 )) || exit 125
+(( ! night_interrupted )) || exit 130
+exit "$rc"

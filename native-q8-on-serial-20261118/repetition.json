@@ -1,0 +1,26 @@
+{
+  "scope": "One forced unscored 3072-output 80K continuation. The serial verifier failed its log gate.",
+  "normalization": "Strip lines, collapse whitespace and replace digit runs. Recurrent 24-word windows count excess instances.",
+  "arms": {
+    "serial": {
+      "nonblank_lines": 283,
+      "normalized_duplicate_lines": 73,
+      "final_quarter_lines": 71,
+      "final_quarter_normalized_duplicates": 16,
+      "trailing_comment_only_lines": 0,
+      "recurrent_24_word_window_instances": 46,
+      "total_24_word_windows": 1318,
+      "python_keyword_led_lines": 170
+    },
+    "native_on": {
+      "nonblank_lines": 304,
+      "normalized_duplicate_lines": 127,
+      "final_quarter_lines": 76,
+      "final_quarter_normalized_duplicates": 39,
+      "trailing_comment_only_lines": 0,
+      "recurrent_24_word_window_instances": 63,
+      "total_24_word_windows": 1336,
+      "python_keyword_led_lines": 203
+    }
+  }
+}

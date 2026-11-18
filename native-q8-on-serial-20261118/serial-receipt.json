@@ -1,0 +1,21 @@
+{
+  "runner_exit": 1,
+  "cleanup_exit": 0,
+  "bounded_wall_s": 330,
+  "technical_pass": false,
+  "observations": {
+    "cold": {
+      "n_out": 192,
+      "wall_s": 263.12344356405083,
+      "ttft_s": 260.5136752719991,
+      "finish_reason": "limit"
+    },
+    "warm": {
+      "n_out": 3072,
+      "wall_s": 40.30257142102346,
+      "ttft_s": 0.12466456205584109,
+      "finish_reason": "limit"
+    }
+  },
+  "validated": null
+}

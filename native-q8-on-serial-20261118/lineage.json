@@ -1,0 +1,8 @@
+{
+  "source_checkout": "da7ba0e49dd43c69f9ee5a219ea3124f7acda0c8",
+  "native_q8_cuda_sha256": "3b3c6db37769ee281b4bc357faf6016f34388d7270545d6b13bbc37777c79fdf",
+  "actual_serial_wrapper_sha256": "5a7b3335919402f765361f884b7c278fd8e8078693f2db2769981ca664bda778",
+  "actual_typed_guard_sha256": "f8c86167c2769b8393bd1e6b19740ed3bf0ce5e0e90d7c7e176e450cbea3b19d",
+  "public_typed_guard_sha256": "431390a3a661c9bdb3346625dd733ac480a62cdc415c9ad9eb4ba79a1482177d",
+  "private_paths_in_portable_guard": "Original reference supplied through N88_PRIVATE_REFERENCE"
+}
