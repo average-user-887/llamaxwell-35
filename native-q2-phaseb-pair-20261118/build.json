@@ -1,0 +1,39 @@
+{
+  "native_q2_control_sha256": "19607daf02bc6dcd722a0695787046db9b4c6b8e010545598d3ad60649d68d00",
+  "candidate_cuda_sha256": "babdbaa629c8d20f76f995c2e161c22895b53d4825a92b56baf8d70160f3508b",
+  "operator_sha256": "378bd3ae31da25dd6905299de6fd3caa18b04e935148d961fa54183e2386e3a4",
+  "q8_gdn_object_sha256": "bcd063306ea65f5e8143a8d6501960dbfeda359f5b3a261d5d91d612c786eac0",
+  "objects_in_each_link": 147,
+  "device_functions_preserved": 17,
+  "device_instruction_words_preserved": 46032,
+  "added_device_symbol": "_ZN6occamy14moe_q2_gate_upENS_6ParamsEb",
+  "candidate_static_device_words": 3344,
+  "phase_b_static_loop_opcodes": {
+    "cohorts": {
+      "LDS.U.128": 32,
+      "LDS.U.32": 22,
+      "FFMA": 134,
+      "PRMT": 136,
+      "LDG": 9,
+      "SHFL.BFLY": 10
+    },
+    "gateup": {
+      "LDS.U.128": 16,
+      "LDS.U.32": 21,
+      "FFMA": 134,
+      "PRMT": 136,
+      "LDG": 9,
+      "SHFL.BFLY": 10
+    }
+  },
+  "registers": 63,
+  "static_shared_bytes": 96,
+  "dynamic_shared_bytes": 39424,
+  "stack_bytes": 0,
+  "spill_load_bytes": 0,
+  "spill_store_bytes": 0,
+  "threads_per_cta": 512,
+  "ctas_per_row": 24,
+  "rows_per_grid": 2,
+  "runtime_occupancy_required": 48
+}

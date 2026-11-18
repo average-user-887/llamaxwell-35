@@ -1,0 +1,78 @@
+--- a/operator.cpp
++++ b/operator.cpp
+@@ -267,18 +267,26 @@
+ using Count = unsigned long long (*)(unsigned);
+ using ReadIds = void (*)(int *);
+ Count count=nullptr;
++using GateUpCount=unsigned long long (*)();
++GateUpCount gate_up_count=nullptr;
+ ReadIds read_ids=nullptr;
+-using Counters=std::array<unsigned long long,4>;
+-Counters snapshot() {return {count(0),count(1),count(2),count(3)};}
++using Counters=std::array<unsigned long long,5>;
++Counters snapshot() {return {count(0),count(1),count(2),count(3),gate_up_count()};}
+ void checked_delta(Counters before, Counters after, int runs, bool on) {
+-    for(size_t i=0;i<before.size();++i) require(after[i]-before[i]==((i>=2)==on?unsigned(runs):0u),"physical path or second callback mismatch");
++    const unsigned n=unsigned(runs);
++    const Counters expected={0,0,n,n,on?n:0u};
++    for (size_t i=0;i<before.size();++i)
++        require(after[i]-before[i]==expected[i],"physical row, pair, acknowledgment or gate/up dispatch mismatch");
+ }
+ void load_counter() {
+     void * h=dlopen("/runtime/libggml-cuda.so",RTLD_NOLOAD|RTLD_NOW);
+     require(h,"candidate DSO not mapped");
+     count=reinterpret_cast<Count>(dlsym(h,"ggml_cuda_occamy_q2_counter"));
+     read_ids=reinterpret_cast<ReadIds>(dlsym(h,"ggml_cuda_occamy_q2_router"));
++    gate_up_count=reinterpret_cast<GateUpCount>(dlsym(h,"ggml_cuda_occamy_q2_gate_up_count"));
+     Dl_info info{};
++    require(gate_up_count && dladdr(reinterpret_cast<void*>(gate_up_count),&info) && info.dli_fname &&
++            std::strcmp(info.dli_fname,"/runtime/libggml-cuda.so")==0,"unexpected gate/up counter provider");
+     require(count && read_ids && dladdr(reinterpret_cast<void*>(count),&info) && info.dli_fname &&
+             std::strcmp(info.dli_fname,"/runtime/libggml-cuda.so")==0,"unexpected counter provider");
+     char exe[256]{};
+@@ -288,7 +296,8 @@
+     dlclose(h);
+ }
+ void set_mode(bool on,bool diag=false) {
+-    require(setenv("GGML_CUDA_OCCAMY_MOE_Q2_COHORTS",on?"1":"0",1)==0 &&
++    require(setenv("GGML_CUDA_OCCAMY_MOE_Q2_COHORTS","1",1)==0 &&
++            setenv("GGML_CUDA_OCCAMY_MOE_Q2_GATE_UP",on?"1":"0",1)==0 &&
+             setenv("GGML_CUDA_OCCAMY_MOE_Q2_READ_IDS",diag?"1":"0",1)==0,"cannot select typed mode");
+ }
+ void compare(ggml_backend_t cuda,Graph & graph,Graph & router,const Fixture & f) {
+@@ -300,13 +309,13 @@
+     require(generic_ids==f.ids,"generic ordered expert choices differ from CPU");
+     Output base{},trial{},repeat{};
+     auto run=[&](bool on,Output & dst){
+-        set_mode(on,on);graph.use(f);
++        set_mode(on,true);graph.use(f);
+         const auto before=snapshot();graph.run(cuda);checked_delta(before,snapshot(),1,on);
+         ggml_backend_tensor_get(graph.output,dst.data(),0,sizeof(dst));
+-        if(on) {
++        {
+             Ids ids{};read_ids(ids.data());require(ids==f.ids,"physical Q2 candidate expert choices differ from CPU");
+             for(int r=0;r<width;r++) {
+-                std::fprintf(stderr,"Q2_COHORT ROUTES %s row=%d ids=",f.name,r);
++                std::fprintf(stderr,"Q2_PAIR ROUTES %s mode=%s row=%d ids=",f.name,on?"gateup":"cohorts",r);
+                 for(int k=0;k<ranks;k++) std::fprintf(stderr,"%s%d",k?",":"",ids[r*ranks+k]);
+                 std::fprintf(stderr,"\n");
+             }
+@@ -337,8 +346,8 @@
+         Output v{};ggml_backend_tensor_get(graph.input,v.data(),0,sizeof(v));
+         require(std::memcmp(v.data(),f.input.data(),sizeof(v))==0,"measured graph mutated input");
+         const double us=std::chrono::duration<double,std::micro>(end-start).count()/n;
+-        std::fprintf(stderr,"Q2_COHORT TIME %s mode=%s reps=%d row0=%llu row1=%llu pair=%llu skip=%llu us=%.6f\n",
+-                     f.name,on?"cohorts":"n2split",n,after[0]-before[0],after[1]-before[1],after[2]-before[2],after[3]-before[3],us);
++        std::fprintf(stderr,"Q2_PAIR TIME %s mode=%s reps=%d row0=%llu row1=%llu pair=%llu skip=%llu gateup=%llu us=%.6f\n",
++                     f.name,on?"gateup":"cohorts",n,after[0]-before[0],after[1]-before[1],after[2]-before[2],after[3]-before[3],after[4]-before[4],us);
+     };
+     batch(false,8);batch(true,8);
+     const bool first=std::strcmp(f.name,"partial")==0;
+@@ -384,6 +393,6 @@
+         }
+     }
+     const auto done=snapshot();
+-    std::fprintf(stderr,"Q2_COHORT FINISH row0=%llu row1=%llu pair=%llu skip=%llu\n",done[0],done[1],done[2],done[3]);
++    std::fprintf(stderr,"Q2_PAIR FINISH row0=%llu row1=%llu pair=%llu skip=%llu gateup=%llu\n",done[0],done[1],done[2],done[3],done[4]);
+     ggml_backend_free(cuda);
+ }
