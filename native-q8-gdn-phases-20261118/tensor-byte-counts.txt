@@ -1,0 +1,6 @@
+65864428 t2.prefix.state
+65864428 t2.badpair.state
+65864428 t2.kept.state
+65864428 t2.corrected.state
+1986560 t2.badpair.logits
+993280 t2.corrected.logits

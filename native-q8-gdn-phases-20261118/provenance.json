@@ -1,0 +1,26 @@
+{
+  "measured_cuda_parent_sha256": "19607daf02bc6dcd722a0695787046db9b4c6b8e010545598d3ad60649d68d00",
+  "parent_q8_gdn_object_sha256": "bcd063306ea65f5e8143a8d6501960dbfeda359f5b3a261d5d91d612c786eac0",
+  "unchanged_moe_cohort_object_sha256": "bbea6f5c611282090050592a6e49f2c15238c104eb1b1420cb23e562220176eb",
+  "changed_gdn_object_sha256": "528fc88bc0ead9a7eb10e7f12be6ed3596621514da2f956b3a7ecc309d12c6ff",
+  "measured_cuda_sha256": "1cae4cfafbc8d183a0aa7255f3ead2c6c8f41193f2e21bf5823d4b75b8bc446e",
+  "fixture_executable_sha256": "e65f80432afbbf5622c8ec433ed6d3d1b63e535b0d722de02597e45399f88ed6",
+  "baseline_q8_gdn_source_sha256": "cdab6a823ca92a648f83dadf35379151347bdafac564949d0c759d36827728e9",
+  "measured_gdn_source_sha256": "f7a4bfe8cbce3edf0b5c6cc5cbec4073d1c7c3c6d493792160b888cbb7f3a50e",
+  "frozen_packet_manifest_sha256": "dbcb2dfb267ac47d795e77110277fcfa30333f765f6327f4933bbc64827238fe",
+  "compiled_receipt_sha256": "8c66cf05562b3ad0302564bd9a2acb81394cb545b211c0ab4d51d6f87e22c8e1",
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+  "raw_little_endian_u32_clock_sha256": "c0b34eeec6349adc93d19f7e03e2a21c9e84f31008eee7694441b0a8cafc64d5",
+  "raw_clock_shape": [
+    30,
+    72,
+    8,
+    6
+  ],
+  "raw_clock_count": 103680,
+  "build_compiler": "CUDA 12.8 sm_52",
+  "target": "single Quadro M6000, 24 SM, full 8 experts",
+  "gpu_stage_cap_s": 180,
+  "attempts": 1,
+  "verified_cleanup": true
+}

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+d=CMakeFiles/ggml-cuda.dir
+source_path=@CUDA_BUILD_SOURCE_MOUNT@/ggml/src/ggml-cuda/occamy-gdn.cu
+bash /work/commands.sh
+for which in old new; do
+  if [[ $which == old ]]; then object=/baseline/occamy-gdn.cu.o; else object=/work/occamy-gdn.cu.o; fi
+  /usr/local/cuda/bin/cuobjdump -sass "$object" > "/work/$which.sass"
+done

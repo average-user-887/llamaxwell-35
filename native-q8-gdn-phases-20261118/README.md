@@ -1,0 +1,17 @@
+# Native MTP1 Q8 recurrent phase timing on Maxwell
+
+The Q8 recurrent kernel averaged 169.497 µs across 30 layers without internal clocks and 170.111 µs with them. The mean difference of +0.362% passed the 5% limit, while the 90th percentile absolute paired layer difference reached 11.677% against a 10% limit. That second result leaves phase attribution descriptive. One fixed 2K verification supplies these measurements.
+
+| Mean estimate per recurrent layer | Original event scale | Instrumented event scale |
+|---|---:|---:|
+| A projection through final local arrival | 80.70 µs | 81.01 µs |
+| B recurrence from first local release to final local arrival | 39.01 µs | 39.15 µs |
+| C output projection from first local release to final marker | 44.96 µs | 45.11 µs |
+
+Every one of the 30 named recurrent layers used the Q8 two-token specialization on a Quadro M6000, with 72 blocks and three resident blocks per SM in both arms. Both rows used all eight experts. The fixed target call executed 40 paired MoE kernels, skipped each second callback and recorded zero row fallbacks. Both arms matched the previous Q8 fixture for four complete recurrent snapshots, two verification logit rows, the corrected logit row, and all recorded target choices, including rollback of the deliberately wrong suffix.
+
+The 60 event intervals and 103,680 little-endian clock readings cover two fresh model processes in control/clock order. Each phase estimate uses the longest same-CTA interval divided by the longest same-CTA full span, scaled against the corresponding layer event. The controlling CTA can change across phases, so the estimated intervals do not sum to the whole event. The instrumented specialization used the original 80 registers, and its three spill instructions occurred in C. All 17 existing GDN device functions retained identical instruction and scheduling words. The original build relinked to the exact native Q8 and two-row MoE library. The runner completed in its first attempt, cleaned up after 63 seconds and had a 180-second allowance.
+
+Run `python3 -B replay-clock.py` with NumPy to reconstruct the per-layer estimates and perturbation verdict from the recorded events and compressed clocks. `summary.json` contains the 30 rows and the full distribution summaries. `clock-marks.u32.gz` expands to an array with dimensions [layer, CTA, warp, mark]. The six marks cover entry, before/after each of the two grid barriers, and final stores. `provenance.json` pins the input model, build and numeric clock readings by hash.
+
+The CUDA patch applies over the previously published [Q8 GDN kernel](../gdn-q8-phase-a-20261118/README.md). The unmodified MoE object comes from the [native two-row cohort build](../native-q2-moe-cohorts-20261118/README.md). The complete measured CUDA and C++ fixture sources accompany the patch. The original CUDA build mount and the earlier fixture's private target values are supplied locally to `hydrate-source.py`. It verifies each reconstructed source against its measured hash. The portable analyzer checks the width and compares the complete trace to the sealed reference. The original analyzer additionally checked two fixed input values directly. Exact tensor comparison ran locally on complete snapshots and logits. Only the resulting equality flags and tensor byte counts are public. The physical runner requires the lab fixture, model, pinned runner dependencies and authorized device.

@@ -1,0 +1,37 @@
+Q8CLK_DSO 1cae4cfafbc8d183a0aa7255f3ead2c6c8f41193f2e21bf5823d4b75b8bc446e  /candidate/libggml-cuda.so
+print_info: n_expert_used         = 8
+N82_ADMISSION original_blocks=3 candidate_blocks=3 grid=72 admitted=1
+Q8CLK_BEGIN mode=clock cc=52 grid=72 sm=24 standard_blocks=3 diagnostic_blocks=3
+Q2_COHORT residency device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1
+Q8CLK_EVENT mode=clock layer_slot=0 tensor=blk.0.attn_qkv.weight us=153.855988
+Q8CLK_EVENT mode=clock layer_slot=1 tensor=blk.1.attn_qkv.weight us=159.584000
+Q8CLK_EVENT mode=clock layer_slot=2 tensor=blk.2.attn_qkv.weight us=159.488007
+Q8CLK_EVENT mode=clock layer_slot=3 tensor=blk.4.attn_qkv.weight us=167.936005
+Q8CLK_EVENT mode=clock layer_slot=4 tensor=blk.5.attn_qkv.weight us=160.511993
+Q8CLK_EVENT mode=clock layer_slot=5 tensor=blk.6.attn_qkv.weight us=160.416000
+Q8CLK_EVENT mode=clock layer_slot=6 tensor=blk.8.attn_qkv.weight us=177.440002
+Q8CLK_EVENT mode=clock layer_slot=7 tensor=blk.9.attn_qkv.weight us=170.624008
+Q8CLK_EVENT mode=clock layer_slot=8 tensor=blk.10.attn_qkv.weight us=162.624008
+Q8CLK_EVENT mode=clock layer_slot=9 tensor=blk.12.attn_qkv.weight us=182.912003
+Q8CLK_EVENT mode=clock layer_slot=10 tensor=blk.13.attn_qkv.weight us=188.192001
+Q8CLK_EVENT mode=clock layer_slot=11 tensor=blk.14.attn_qkv.weight us=186.048004
+Q8CLK_EVENT mode=clock layer_slot=12 tensor=blk.16.attn_qkv.weight us=187.680008
+Q8CLK_EVENT mode=clock layer_slot=13 tensor=blk.17.attn_qkv.weight us=187.808014
+Q8CLK_EVENT mode=clock layer_slot=14 tensor=blk.18.attn_qkv.weight us=183.967987
+Q8CLK_EVENT mode=clock layer_slot=15 tensor=blk.20.attn_qkv.weight us=176.608002
+Q8CLK_EVENT mode=clock layer_slot=16 tensor=blk.21.attn_qkv.weight us=161.216003
+Q8CLK_EVENT mode=clock layer_slot=17 tensor=blk.22.attn_qkv.weight us=172.255997
+Q8CLK_EVENT mode=clock layer_slot=18 tensor=blk.24.attn_qkv.weight us=187.136002
+Q8CLK_EVENT mode=clock layer_slot=19 tensor=blk.25.attn_qkv.weight us=183.136002
+Q8CLK_EVENT mode=clock layer_slot=20 tensor=blk.26.attn_qkv.weight us=188.127991
+Q8CLK_EVENT mode=clock layer_slot=21 tensor=blk.28.attn_qkv.weight us=174.912003
+Q8CLK_EVENT mode=clock layer_slot=22 tensor=blk.29.attn_qkv.weight us=159.839996
+Q8CLK_EVENT mode=clock layer_slot=23 tensor=blk.30.attn_qkv.weight us=156.000000
+Q8CLK_EVENT mode=clock layer_slot=24 tensor=blk.32.attn_qkv.weight us=161.344009
+Q8CLK_EVENT mode=clock layer_slot=25 tensor=blk.33.attn_qkv.weight us=158.879990
+Q8CLK_EVENT mode=clock layer_slot=26 tensor=blk.34.attn_qkv.weight us=158.879990
+Q8CLK_EVENT mode=clock layer_slot=27 tensor=blk.36.attn_qkv.weight us=159.488007
+Q8CLK_EVENT mode=clock layer_slot=28 tensor=blk.37.attn_qkv.weight us=159.679993
+Q8CLK_EVENT mode=clock layer_slot=29 tensor=blk.38.attn_qkv.weight us=156.736008
+Q8CLK_END mode=clock distinct_t2_layers=30
+Q8CLK_COHORT fallback0=0 fallback1=0 paired=40 skipped=40

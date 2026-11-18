@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+cd "$(dirname "$0")"
+card=$(pwd -P)
+base=$(dirname "$card")/sparse/r2
+mountsrc=@CUDA_BUILD_SOURCE_MOUNT@
+python3 -B prepare.py
+python3 -B commands.py
+timeout -k 3s 480s taskset -c 0-1 nice -n 19 docker run --rm --pull never --runtime runc --network none --cpuset-cpus 0-1 \
+  --tmpfs /tmp:rw,size=256m --user "$(id -u):$(id -g)" -e NVIDIA_VISIBLE_DEVICES=void -e TMPDIR=/tmp \
+  -v "$base/src:$mountsrc:ro" -v "$card/occamy-gdn.cu:$mountsrc/ggml/src/ggml-cuda/occamy-gdn.cu:ro" \
+  -v "$card/../resume-q2-moe-cohorts/occamy-fused.cu.o:/baseline/occamy-fused.cu.o:ro" -v "$card/../night-gdn-t2-q8-fast/occamy-gdn.cu.o:/baseline/occamy-gdn.cu.o:ro" -v "$base/build:/b:ro" -v "$card:/work" -w /b/ggml/src/ggml-cuda \
+  --entrypoint /bin/bash sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed -euc '
+  exec nice -n 19 bash /work/compile.sh
+' > build.log 2>&1
+cmp -s relinked-original.so "$card/../resume-q2-moe-cohorts/libggml-cuda.so"
+sha256sum relinked-original.so "$card/../resume-q2-moe-cohorts/libggml-cuda.so" > original-relink.sha256
+rm relinked-original.so
+python3 -B verify_sass.py > compiled.json

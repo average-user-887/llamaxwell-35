@@ -1,0 +1,43 @@
+{
+  "unchanged_device_functions": 17,
+  "new_device_functions": [
+    "_ZN10occamy_gdn16gdn_fused2_clockENS_7Params2EPVj"
+  ],
+  "original_t2": {
+    "stack": 0,
+    "spill_store": 0,
+    "spill_load": 0,
+    "registers": 80,
+    "barriers": 1,
+    "static_shared": 2512
+  },
+  "instrumented_t2": {
+    "stack": 8,
+    "spill_store": 4,
+    "spill_load": 8,
+    "registers": 80,
+    "barriers": 1,
+    "static_shared": 2512
+  },
+  "dynamic_shared_bytes": 27392,
+  "static_bar_sync_instructions_in_each": 15,
+  "clock_offsets_hex": [
+    "0x50",
+    "0x29a8",
+    "0x2bf0",
+    "0x50a8",
+    "0x52d0",
+    "0x8828"
+  ],
+  "spill_offsets_hex": [
+    "0x5450",
+    "0x6a48",
+    "0x78b0"
+  ],
+  "spill_mark_intervals": [
+    5,
+    5,
+    5
+  ],
+  "whole_control_t2_instruction_sha256": "ea983f2e1a4951b3960e49da131f016e6f6b48c382bc874753c792457d279038"
+}
