@@ -1,0 +1,331 @@
+{
+  "schema_version": 1,
+  "published_branch_parent": "3ded5dda2309112f1fe5fb248caa7a50f69ef3cd",
+  "hardware": "NVIDIA Quadro M6000",
+  "published_q3_source": {
+    "commit": "7f6bd99b57bdf9f4c8e151f28517c83834511e04",
+    "patch_sha256": "e5d80418b3013100a877b3517fb250ff809285087673b87623e5a04c21edd1c9"
+  },
+  "mapped_runtime_sha256": {
+    "libggml-cuda.so": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+    "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+    "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+    "llama-server": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+  },
+  "shared_configuration": {
+    "model_independent_server_argv": [
+      "--alias",
+      "qwen36-moe",
+      "--override-kv",
+      "tokenizer.ggml.pre=str:qwen35",
+      "-ngl",
+      "999",
+      "-np",
+      "1",
+      "-c",
+      "84224",
+      "--no-context-shift",
+      "-b",
+      "2048",
+      "--mixed-batch-size",
+      "1024",
+      "--prefill-single-stream",
+      "--checkpoint-min-step",
+      "2048",
+      "-fa",
+      "on",
+      "--jinja",
+      "--metrics",
+      "-lv",
+      "4",
+      "-ub",
+      "1024",
+      "--cache-ram",
+      "12288",
+      "--ctx-checkpoints",
+      "2",
+      "--spec-type",
+      "draft-mtp",
+      "--spec-draft-n-max",
+      "2",
+      "--spec-draft-type-k",
+      "f16",
+      "--spec-draft-type-v",
+      "f16"
+    ],
+    "numeric_environment": {
+      "GGML_CUDA_MOE_DOWNX": "1",
+      "GGML_CUDA_MOE_DOWNH": "2",
+      "GGML_CUDA_OCCAMY_GDN_QKREUSE": "1",
+      "GGML_CUDA_OCCAMY_GDN_PCSHARE": "1",
+      "GGML_CUDA_MMVQ_SM52": "1",
+      "GGML_CUDA_RMS_WARP": "0",
+      "GGML_CUDA_HEAD_ROWPACK_SM52": "1",
+      "GGML_CUDA_MMQ_COMPACT_SM52": "1",
+      "GGML_CUDA_Q8_REUSE": "1",
+      "GGML_CUDA_NORM_Q8": "1",
+      "GGML_CUDA_CONCAT_T": "1",
+      "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": "1",
+      "GGML_CUDA_GATE_COPY": "1",
+      "GGML_CUDA_OCCAMY_GDN": "1",
+      "GGML_CUDA_MMQ_XMAD_SM52": "1",
+      "GGML_CUDA_GDN_COLS": "2,4",
+      "GGML_CUDA_OCCAMY_FA": "1",
+      "GGML_CUDA_OCCAMY_FUSED": "1",
+      "GGML_CUDA_OCCAMY_FA_PIPE": "3",
+      "GGML_CUDA_MOE_LOP3": "1",
+      "GGML_CUDA_MOE_TAILBAL": "1",
+      "GGML_CUDA_OCCAMY_GDN_PREF": "1",
+      "GGML_CUDA_OCCAMY_HOSTGAP": "1",
+      "GGML_CUDA_OCCAMY_SMALLFUSE": "2",
+      "GGML_CUDA_MMQ_TAIL_SM52": "1",
+      "GGML_CUDA_OCCAMY_GDN_REPACK": "1",
+      "GGML_CUDA_OCCAMY_N2SPLIT": "1",
+      "GGML_CUDA_OCCAMY_FA_ADDR": "1",
+      "GGML_CUDA_OCCAMY_N2GDN": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": "1",
+      "GGML_CUDA_MOE_V3": "1",
+      "LLAMA_MV1_TRACE": "1",
+      "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+      "GGML_CUDA_OCCAMY_FA_SPARSE_R2": "1",
+      "GGML_CUDA_OCCAMY_GDN_T2": "1",
+      "GGML_CUDA_OCCAMY_FA_MROW": "3",
+      "GGML_CUDA_OCCAMY_FA2_NU": "4",
+      "LLAMA_MTP_MERGE_REEVAL": "0",
+      "LLAMA_MTP_CACHE_ONLY": "1",
+      "LLAMA_TRACE": "1"
+    },
+    "flag_only_delta": {
+      "variable": "GGML_CUDA_OCCAMY_FA_Q3_R2",
+      "off": "0",
+      "on": "1"
+    },
+    "request_settings": {
+      "cold": {
+        "prompt_sha256": "7c1dcdc2f609928922953fc626d8b90e5b5288092036f21b57f6ffda0a128dcc",
+        "prompt_n": 80000,
+        "n_predict": 192,
+        "n_out": 192,
+        "seed": 7,
+        "temperature": 0,
+        "id_slot": 0,
+        "cache_prompt": true,
+        "ignore_eos": true,
+        "truncated": false
+      },
+      "warm": {
+        "prompt_sha256": "7c1dcdc2f609928922953fc626d8b90e5b5288092036f21b57f6ffda0a128dcc",
+        "prompt_n": 80000,
+        "n_predict": 3072,
+        "n_out": 3072,
+        "seed": 7,
+        "temperature": 0,
+        "id_slot": 0,
+        "cache_prompt": true,
+        "ignore_eos": true,
+        "truncated": false
+      }
+    },
+    "model_mtp_heads": 1,
+    "effective_native_depth": 2
+  },
+  "initial_startup_refusal": {
+    "runner_exit": 1,
+    "cleanup_exit": 0,
+    "generation_started": false,
+    "reason": "stock CUDA library discovered through physical executable directory",
+    "unexpected_stock_cuda_sha256": "fca6993ad38e5107aee2a434c59d3f405f7270940961d167eab000d5ee65b3ba",
+    "corrected_launcher_exact_same_bytes": true,
+    "device_free_candidate_plugin_discovery_verified": true
+  },
+  "arms": {
+    "off": {
+      "runner_exit": 0,
+      "cleanup_exit": 0,
+      "gpu_layers_offloaded": 42,
+      "effective_draft_depth": 2,
+      "effective_target_recurrent_snapshot_planes": 2,
+      "warm_observed_long_attention_modes_and_widths": [
+        [
+          "mrow",
+          3
+        ],
+        [
+          "sparse-r2",
+          1
+        ]
+      ],
+      "per_kernel_event_timing": false,
+      "total_attention_dispatch_coverage": null,
+      "request_metrics": {
+        "cold": {
+          "rounds": 71,
+          "proposal_width_counts": {
+            "2": 71
+          },
+          "accepted_prefix_histogram": [
+            8,
+            6,
+            57
+          ],
+          "prefix_probability": [
+            0.8873239436619719,
+            0.8028169014084507
+          ],
+          "checkpoint_restore_events": 0,
+          "native_rejected_suffix_rounds": 14,
+          "n_out": 192,
+          "cache_n": 0,
+          "evaluated_prompt_n": 80000,
+          "draft_tokens": 142,
+          "accepted_tokens": 120,
+          "decode_toks_s": 57.48597656548236,
+          "decode_ms_per_round": 47.04147887323944,
+          "decode_s": 3.339945,
+          "prompt_s": 266.196557,
+          "wall_s": 269.5605697740102,
+          "ttft_s": 266.2159876000369,
+          "emitted_tokens_per_round": 2.704225352112676,
+          "trace_yield_including_one_correction_or_bonus": 2.6901408450704225
+        },
+        "warm": {
+          "rounds": 1239,
+          "proposal_width_counts": {
+            "2": 1239
+          },
+          "accepted_prefix_histogram": [
+            224,
+            199,
+            816
+          ],
+          "prefix_probability": [
+            0.8192090395480226,
+            0.6585956416464891
+          ],
+          "checkpoint_restore_events": 0,
+          "native_rejected_suffix_rounds": 423,
+          "n_out": 3072,
+          "cache_n": 79996,
+          "evaluated_prompt_n": 4,
+          "draft_tokens": 2478,
+          "accepted_tokens": 1831,
+          "decode_toks_s": 52.79136489994602,
+          "decode_ms_per_round": 46.96637207425343,
+          "decode_s": 58.191335,
+          "prompt_s": 0.24809299999999998,
+          "wall_s": 58.465408082003705,
+          "ttft_s": 0.26910492801107466,
+          "emitted_tokens_per_round": 2.4794188861985473,
+          "trace_yield_including_one_correction_or_bonus": 2.477804681194512
+        }
+      },
+      "aggregate_private_receipt_sha256": "62c04a4d457e18b3a94c6c54c5ad09e41eaecc875b5d36d0d6fc483862f555f3"
+    },
+    "on": {
+      "runner_exit": 0,
+      "cleanup_exit": 0,
+      "gpu_layers_offloaded": 42,
+      "effective_draft_depth": 2,
+      "effective_target_recurrent_snapshot_planes": 2,
+      "warm_observed_long_attention_modes_and_widths": [
+        [
+          "sparse-r2",
+          1
+        ],
+        [
+          "sparse-r2",
+          3
+        ]
+      ],
+      "per_kernel_event_timing": false,
+      "total_attention_dispatch_coverage": null,
+      "request_metrics": {
+        "cold": {
+          "rounds": 74,
+          "proposal_width_counts": {
+            "2": 74
+          },
+          "accepted_prefix_histogram": [
+            10,
+            11,
+            53
+          ],
+          "prefix_probability": [
+            0.8648648648648649,
+            0.7162162162162162
+          ],
+          "checkpoint_restore_events": 0,
+          "native_rejected_suffix_rounds": 21,
+          "n_out": 192,
+          "cache_n": 0,
+          "evaluated_prompt_n": 80000,
+          "draft_tokens": 148,
+          "accepted_tokens": 117,
+          "decode_toks_s": 71.56771312082196,
+          "decode_ms_per_round": 36.253702702702704,
+          "decode_s": 2.6827739999999998,
+          "prompt_s": 266.60645400000004,
+          "wall_s": 269.31265328999143,
+          "ttft_s": 266.6243899849942,
+          "emitted_tokens_per_round": 2.5945945945945947,
+          "trace_yield_including_one_correction_or_bonus": 2.581081081081081
+        },
+        "warm": {
+          "rounds": 1193,
+          "proposal_width_counts": {
+            "2": 1193
+          },
+          "accepted_prefix_histogram": [
+            172,
+            164,
+            857
+          ],
+          "prefix_probability": [
+            0.8558256496227996,
+            0.7183570829840737
+          ],
+          "checkpoint_restore_events": 0,
+          "native_rejected_suffix_rounds": 336,
+          "n_out": 3072,
+          "cache_n": 79996,
+          "evaluated_prompt_n": 4,
+          "draft_tokens": 2386,
+          "accepted_tokens": 1878,
+          "decode_toks_s": 71.78181412879671,
+          "decode_ms_per_round": 35.87288767812238,
+          "decode_s": 42.796355000000005,
+          "prompt_s": 0.249634,
+          "wall_s": 43.068098166026175,
+          "ttft_s": 0.2663871260592714,
+          "emitted_tokens_per_round": 2.5750209555741828,
+          "trace_yield_including_one_correction_or_bonus": 2.5741827326068734
+        }
+      },
+      "aggregate_private_receipt_sha256": "5bfa6b9074e98d9f400e1a281e8158b243a3af41720abcd5df77bd0cc468df1a"
+    }
+  },
+  "comparisons": {
+    "cold": {
+      "decode_speed_ratio": 1.244959508329811,
+      "all_in_ms_saved_per_round": 10.787776170536738,
+      "wall_s_saved": 0.24791648401878774,
+      "first_different_id_1based": 19
+    },
+    "warm": {
+      "decode_speed_ratio": 1.3597264299728327,
+      "all_in_ms_saved_per_round": 11.093484396131046,
+      "wall_s_saved": 15.39730991597753,
+      "first_different_id_1based": 19
+    }
+  },
+  "semantic_score_on_performance_fixture": null,
+  "historical_depth_one_same_input_warm": {
+    "decode_toks_s": 82.47579448191831,
+    "request_wall_s": 37.518097745021805,
+    "separate_runtime_and_experiment": true
+  },
+  "separate_operator_projection_ms_per_ten_layers": 11.344299999999999,
+  "comparison_summary_sha256": "dc936aff9d8f8ee4ac8084158767b74e960c4467f4f49d2e0b2d4e31f497ae41",
+  "rate_definition": "emitted output count divided by server decode duration"
+}
