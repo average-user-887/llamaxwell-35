@@ -1,0 +1,22 @@
+{
+  "model": "Occamy 35B Q4_0 full eight experts, native MTP head",
+  "operator_public_commit": "9e2c75f2cdf44f78d8aea6babc0b46d9da9ee519",
+  "candidate_cuda": "19607daf02bc6dcd722a0695787046db9b4c6b8e010545598d3ad60649d68d00",
+  "initial_source_sha256": {
+    "release.sh": "d1fd437ea2946272c24141274bc89dce21ca4738096e5a7fbdd6c22112121167",
+    "supervise.c": "894ec66d86f0ee7f398da0f12e44ef6a969e09e3547f9fa67eda428f25bba98d",
+    "supervise": "520194c14cc999399be51d181c21f3f9ea0b2c54cbdc39a9539684f502008da5",
+    "check-layout.py": "4fdb9c163ac484059153d8f5e91744c033ea2495d9d5887c0e1cfd391a21e4cb",
+    "model.py": "93c9a0c1544f4db9443e44b73a7c829570a5fbd572ea631433e471609f00f8b8",
+    "offline.py": "2c61ae9e42fd0a81df253f8f6624aaff4577b7c35b3a6212433db19c73004393",
+    "generate-release.py": "bb58323b833bbc40e5a53e41566742855f92166832fb747df0c11408b59cb339",
+    "INPUTS.sha256": "59a09a5ed3319d7fa103b2b5a7dc54790188ecbfbc1ae700fdb9bffddbd96c1d",
+    "FROZEN.sha256": "d3ba79ab3e0ea0ea2cfe6f8981410aa35a457195772a3619e3a6d64b26167a58",
+    "RELEASE.md": "ae2d7a336753798333dde8db5ca99e23790e55aa41182f0cfe3a48fc0ac19086"
+  },
+  "recovery_release": "1758c5dfa38fe57db46388a59663d388a74877ae6d49a546060be0f7ae19a61c",
+  "recovery_frozen": "96c581bc39ee124f711d4e58cc984f2521b6e1e5622c12deb84cba4162de9022",
+  "offline_public": "81d38b8f1f3e3e2aeb6d0ce58b2e6095b11dca71fa8f5bf355fef6e47a0fa46a",
+  "trace_export": "e1d505130006c8f4071ed3304b8a43206ebbe511d32989799f1976084c0e5a01",
+  "public_parent_at_stage": "6d91e01c752c025b7aa11cb4592cbc62269dcba5"
+}

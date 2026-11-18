@@ -1,0 +1,59 @@
+{
+  "historical_public_commit": "6d91e01c752c025b7aa11cb4592cbc62269dcba5",
+  "matched_decode_rate_definition": "all response IDs divided by reported decode seconds",
+  "phases": {
+    "cold": {
+      "historical_decode_rate": 86.37357832239118,
+      "candidate_decode_rate": 91.93240478412405,
+      "same_convention_rate_ratio": 1.0643579503095777,
+      "historical_request_wall_s": 268.1063108209055,
+      "candidate_request_wall_s": 267.5510883589741,
+      "historical_ms_per_offered_round": 22.008930693069306,
+      "candidate_ms_per_offered_round": 20.67812871287129
+    },
+    "warm": {
+      "historical_decode_rate": 86.26331173895689,
+      "candidate_decode_rate": 92.0067406917601,
+      "same_convention_rate_ratio": 1.0665802046898398,
+      "historical_request_wall_s": 35.87659360188991,
+      "candidate_request_wall_s": 33.656742624007165,
+      "historical_ms_per_offered_round": 21.68812119366626,
+      "candidate_ms_per_offered_round": 20.334261875761268
+    }
+  },
+  "warm_first_round_snapshot": 125,
+  "warm_last_round_snapshot": 1725,
+  "warm_complete_rounds_in_window": 1600,
+  "matching_cumulative_histograms": 65,
+  "matched_window_host_components": {
+    "draft_ms": {
+      "historical_ms_per_round_in_window": 2.35135875,
+      "candidate_ms_per_round_in_window": 2.361465,
+      "saving_ms_per_round_in_window": -0.010106249999999761,
+      "historical_calls_in_window": 1600,
+      "candidate_calls_in_window": 1600
+    },
+    "tgt_decode_ms": {
+      "historical_ms_per_round_in_window": 18.40400125,
+      "candidate_ms_per_round_in_window": 17.005251874999995,
+      "saving_ms_per_round_in_window": 1.3987493750000048,
+      "historical_calls_in_window": 1600,
+      "candidate_calls_in_window": 1600
+    },
+    "spec_process_ms": {
+      "historical_ms_per_round_in_window": 0.17106375000000298,
+      "candidate_ms_per_round_in_window": 0.1761424999999963,
+      "saving_ms_per_round_in_window": -0.005078749999993304,
+      "historical_calls_in_window": 1600,
+      "candidate_calls_in_window": 1600
+    },
+    "sample_accept_ms": {
+      "historical_ms_per_round_in_window": 0.339515,
+      "candidate_ms_per_round_in_window": 0.350310625,
+      "saving_ms_per_round_in_window": -0.010795624999999975,
+      "historical_calls_in_window": 1600,
+      "candidate_calls_in_window": 1600
+    }
+  },
+  "scope": "Distinct process measurements. Host target time encompasses all target work, without kernel-exclusive attribution."
+}

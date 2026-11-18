@@ -1,0 +1,20 @@
+--- initial.release.sh
++++ release.sh
+@@ -48,7 +48,7 @@
+ 
+ wait_for_health() {
+   local name=$1 port=$2 started=$SECONDS remaining probe_timeout running
+-  local health_deadline=$((started + 45))
++  local health_deadline=$((started + 75))
+   while (( SECONDS < health_deadline )); do
+     remaining=$((health_deadline - SECONDS))
+     probe_timeout=$((remaining < 2 ? remaining : 2))
+@@ -65,7 +65,7 @@
+     fi
+     if (( SECONDS < health_deadline )); then sleep 1; fi
+   done
+-  echo 'owned server failed to become healthy within 45s' >&2
++  echo 'owned server failed to become healthy within 75s' >&2
+   return 2
+ }
+ 

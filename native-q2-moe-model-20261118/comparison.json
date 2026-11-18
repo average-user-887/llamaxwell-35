@@ -1,0 +1,82 @@
+{
+  "same_candidate_cuda_sha256": "19607daf02bc6dcd722a0695787046db9b4c6b8e010545598d3ad60649d68d00",
+  "same_cohort_flags": true,
+  "semantic_score": null,
+  "strict_warm_2x": false,
+  "measured": {
+    "cold": {
+      "serial": {
+        "n_out": 192,
+        "decode_toks_s": 74.19707748532193,
+        "request_wall_s": 264.10557552892715,
+        "ttft_s": 261.5133873129962,
+        "decode_s": 2.587703,
+        "cache_n": 0,
+        "evaluated_prompt_n": 80000,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "decode_ms_per_round": null,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "native": {
+        "n_out": 192,
+        "decode_toks_s": 91.93240478412405,
+        "request_wall_s": 267.5510883589741,
+        "ttft_s": 265.45746542105917,
+        "decode_s": 2.088491,
+        "cache_n": 0,
+        "evaluated_prompt_n": 80000,
+        "draft_n": 101,
+        "draft_n_accepted": 89,
+        "decode_ms_per_round": 20.67812871287129,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "native_over_serial_tps": 1.2390299982140216,
+      "serial_minus_native_wall_s": -3.445512830046937,
+      "native_vs_n88_host_ms_per_round_saved": 1.330801980198018,
+      "native_over_historical_n88_tps": 1.0699305050232404,
+      "native_text_matches_archived_n88": true,
+      "strict_first_id_difference_1_based": 170,
+      "strict_text_equal": false
+    },
+    "warm": {
+      "serial": {
+        "n_out": 3072,
+        "decode_toks_s": 76.69488773898152,
+        "request_wall_s": 40.182331691961735,
+        "ttft_s": 0.12272314296569675,
+        "decode_s": 40.054821000000004,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "decode_ms_per_round": null,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "native": {
+        "n_out": 3072,
+        "decode_toks_s": 92.0067406917601,
+        "request_wall_s": 33.656742624007165,
+        "ttft_s": 0.26306001900229603,
+        "decode_s": 33.388858,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "draft_n": 1642,
+        "draft_n_accepted": 1429,
+        "decode_ms_per_round": 20.334261875761268,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "native_over_serial_tps": 1.1996463311203995,
+      "serial_minus_native_wall_s": 6.52558906795457,
+      "native_vs_n88_host_ms_per_round_saved": 1.3538593179049911,
+      "native_over_historical_n88_tps": 1.0669275118225945,
+      "native_text_matches_archived_n88": true,
+      "strict_first_id_difference_1_based": 170,
+      "strict_text_equal": false
+    }
+  }
+}

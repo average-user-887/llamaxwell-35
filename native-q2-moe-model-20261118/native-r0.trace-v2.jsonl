@@ -1,0 +1,4 @@
+{"event":"trace_metadata","arm":"native","format":2,"scope":"literal typed events plus labeled stream-emission reconciliation"}
+{"event":"offload_evidence","arm":"native","phase":"startup","offload":{"server_clock":"0.27.200.608","layers":42,"total":42}}
+{"event":"log_discontinuity","arm":"native"}
+{"event":"run_outcome","arm":"native","runner_exit":2,"cleanup_exit":0,"bounded_wall_s":47,"readiness_budget_expired":true,"validated":false}

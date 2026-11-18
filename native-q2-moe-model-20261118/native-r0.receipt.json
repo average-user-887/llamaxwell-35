@@ -1,0 +1,30 @@
+{
+  "official": {
+    "mode": "native",
+    "runner_exit": 2,
+    "cleanup_exit": 0,
+    "bounded_wall_s": 47,
+    "observations": {},
+    "snapshots": {},
+    "refusal": null,
+    "validated": null
+  },
+  "readiness_seconds": 45,
+  "readiness_budget_expired": true,
+  "ready_inventory_available": false,
+  "offload": {
+    "server_clock": "0.27.200.608",
+    "layers": 42,
+    "total": 42
+  },
+  "completed_responses": {},
+  "scored_semantic_quality": null,
+  "token_or_text_payload_published": false,
+  "trace_sha256": "d44766aa09921b72ec6f19ef950717f7a0cfc52d1f42f8ef34785a05cef35fd0",
+  "trace_event_counts": {
+    "log_discontinuity": 1,
+    "offload_evidence": 1,
+    "run_outcome": 1,
+    "trace_metadata": 1
+  }
+}
