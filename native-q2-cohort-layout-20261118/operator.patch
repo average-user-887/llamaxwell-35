@@ -1,0 +1,115 @@
+--- a/operator.cpp
++++ b/operator.cpp
+@@ -267,26 +267,31 @@
+ using Count = unsigned long long (*)(unsigned);
+ using ReadIds = void (*)(int *);
+ Count count=nullptr;
+-using OffsetsCount=unsigned long long (*)();
+-OffsetsCount offsets_count=nullptr;
++using LayoutCount=unsigned long long (*)();
++LayoutCount layout_count=nullptr;
+ ReadIds read_ids=nullptr;
++using ReadMap = void (*)(float *);
++ReadMap read_map=nullptr;
+ using Counters=std::array<unsigned long long,5>;
+-Counters snapshot() {return {count(0),count(1),count(2),count(3),offsets_count()};}
++Counters snapshot() {return {count(0),count(1),count(2),count(3),layout_count()};}
+ void checked_delta(Counters before, Counters after, int runs, bool on) {
+     const unsigned n=unsigned(runs);
+     const Counters expected={0,0,n,n,on?n:0u};
+     for (size_t i=0;i<before.size();++i)
+-        require(after[i]-before[i]==expected[i],"physical row, pair, acknowledgment or byte-offset dispatch mismatch");
++        require(after[i]-before[i]==expected[i],"physical row, pair, acknowledgment or block layout dispatch mismatch");
+ }
+ void load_counter() {
+     void * h=dlopen("/runtime/libggml-cuda.so",RTLD_NOLOAD|RTLD_NOW);
+     require(h,"candidate DSO not mapped");
+     count=reinterpret_cast<Count>(dlsym(h,"ggml_cuda_occamy_q2_counter"));
+     read_ids=reinterpret_cast<ReadIds>(dlsym(h,"ggml_cuda_occamy_q2_router"));
+-    offsets_count=reinterpret_cast<OffsetsCount>(dlsym(h,"ggml_cuda_occamy_q2_offsets_count"));
++    layout_count=reinterpret_cast<LayoutCount>(dlsym(h,"ggml_cuda_occamy_q2_layout_count"));
++    read_map=reinterpret_cast<ReadMap>(dlsym(h,"ggml_cuda_occamy_q2_layout_map"));
+     Dl_info info{};
+-    require(offsets_count && dladdr(reinterpret_cast<void*>(offsets_count),&info) && info.dli_fname &&
+-            std::strcmp(info.dli_fname,"/runtime/libggml-cuda.so")==0,"unexpected byte-offset counter provider");
++    require(read_map && dladdr(reinterpret_cast<void*>(read_map),&info) && info.dli_fname &&
++            std::strcmp(info.dli_fname,"/runtime/libggml-cuda.so")==0,"unexpected map provider");
++    require(layout_count && dladdr(reinterpret_cast<void*>(layout_count),&info) && info.dli_fname &&
++            std::strcmp(info.dli_fname,"/runtime/libggml-cuda.so")==0,"unexpected block layout counter provider");
+     require(count && read_ids && dladdr(reinterpret_cast<void*>(count),&info) && info.dli_fname &&
+             std::strcmp(info.dli_fname,"/runtime/libggml-cuda.so")==0,"unexpected counter provider");
+     char exe[256]{};
+@@ -297,7 +302,7 @@
+ }
+ void set_mode(bool on,bool diag=false) {
+     require(setenv("GGML_CUDA_OCCAMY_MOE_Q2_COHORTS","1",1)==0 &&
+-            setenv("GGML_CUDA_OCCAMY_MOE_Q2_OFFSETS",on?"1":"0",1)==0 &&
++            setenv("GGML_CUDA_OCCAMY_MOE_Q2_LAYOUT",on?"1":"0",1)==0 &&
+             setenv("GGML_CUDA_OCCAMY_MOE_Q2_READ_IDS",diag?"1":"0",1)==0,"cannot select typed mode");
+ }
+ void compare(ggml_backend_t cuda,Graph & graph,Graph & router,const Fixture & f) {
+@@ -315,7 +320,7 @@
+         {
+             Ids ids{};read_ids(ids.data());require(ids==f.ids,"physical Q2 candidate expert choices differ from CPU");
+             for(int r=0;r<width;r++) {
+-                std::fprintf(stderr,"Q2_PAIR ROUTES %s mode=%s row=%d ids=",f.name,on?"offsets":"cohorts",r);
++                std::fprintf(stderr,"Q2_PAIR ROUTES %s mode=%s row=%d ids=",f.name,on?"layout":"cohorts",r);
+                 for(int k=0;k<ranks;k++) std::fprintf(stderr,"%s%d",k?",":"",ids[r*ranks+k]);
+                 std::fprintf(stderr,"\n");
+             }
+@@ -334,6 +339,36 @@
+                      f.name,row,finite,different,repeat_diff,peak);
+         require(finite==hidden && different==0 && repeat_diff==0,"nonfinite or nonidentical row");
+     }
++    // Replay mapped kernels separately. The arithmetic reference above uses the actual untapped paths.
++    require(setenv("GGML_CUDA_OCCAMY_MOE_Q2_LAYOUT_MAP","1",1)==0,"enable placement measurement");
++    for (int sample=0;sample<2;++sample) {
++        for (bool major : {false,true}) {
++            set_mode(major,true);
++            graph.use(f);
++            const auto before=snapshot();
++            graph.run(cuda);
++            checked_delta(before,snapshot(),1,major);
++            Output mapped{};
++            ggml_backend_tensor_get(graph.output,mapped.data(),0,sizeof(mapped));
++            require(std::memcmp(mapped.data(),base.data(),sizeof(mapped))==0,"map witness changed output");
++            Ids ids{}; read_ids(ids.data());
++            require(ids==f.ids,"map witness changed routes");
++            std::array<float,2*24*5> records{};
++            read_map(records.data());
++            for (int row=0;row<2;++row) {
++                for (int local=0;local<24;++local) {
++                    const float * t=records.data()+(row*24+local)*5;
++                    const int physical=major ? row*24+local : 2*local+row;
++                    require(t[0]==physical%24 && t[1]==physical/24 && t[2]==row && t[3]==local &&
++                            std::isfinite(t[4]) && t[4]>=0 && t[4]<65536 && t[4]==std::floor(t[4]),
++                            "invalid or missing placement record");
++                    std::fprintf(stderr,"Q2_LAYOUT_MAP fixture=%s sample=%d major=%d x=%d y=%d row=%d local=%d sm=%d\n",
++                                 f.name,sample,int(major),int(t[0]),int(t[1]),row,local,int(t[4]));
++                }
++            }
++        }
++    }
++    require(unsetenv("GGML_CUDA_OCCAMY_MOE_Q2_LAYOUT_MAP")==0,"disable placement measurement");
+     set_mode(false);
+ }
+ void perf(ggml_backend_t cuda,Graph & graph,const Fixture & f) {
+@@ -346,8 +381,8 @@
+         Output v{};ggml_backend_tensor_get(graph.input,v.data(),0,sizeof(v));
+         require(std::memcmp(v.data(),f.input.data(),sizeof(v))==0,"measured graph mutated input");
+         const double us=std::chrono::duration<double,std::micro>(end-start).count()/n;
+-        std::fprintf(stderr,"Q2_PAIR TIME %s mode=%s reps=%d row0=%llu row1=%llu pair=%llu skip=%llu offsets=%llu us=%.6f\n",
+-                     f.name,on?"offsets":"cohorts",n,after[0]-before[0],after[1]-before[1],after[2]-before[2],after[3]-before[3],after[4]-before[4],us);
++        std::fprintf(stderr,"Q2_PAIR TIME %s mode=%s reps=%d row0=%llu row1=%llu pair=%llu skip=%llu layout=%llu us=%.6f\n",
++                     f.name,on?"layout":"cohorts",n,after[0]-before[0],after[1]-before[1],after[2]-before[2],after[3]-before[3],after[4]-before[4],us);
+     };
+     batch(false,8);batch(true,8);
+     const bool first=std::strcmp(f.name,"partial")==0;
+@@ -393,6 +428,6 @@
+         }
+     }
+     const auto done=snapshot();
+-    std::fprintf(stderr,"Q2_PAIR FINISH row0=%llu row1=%llu pair=%llu skip=%llu offsets=%llu\n",done[0],done[1],done[2],done[3],done[4]);
++    std::fprintf(stderr,"Q2_PAIR FINISH row0=%llu row1=%llu pair=%llu skip=%llu layout=%llu\n",done[0],done[1],done[2],done[3],done[4]);
+     ggml_backend_free(cuda);
+ }

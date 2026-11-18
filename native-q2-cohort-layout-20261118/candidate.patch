@@ -1,0 +1,440 @@
+--- a/occamy-fused.cu
++++ b/occamy-fused.cu
+@@ -711,6 +711,380 @@
+         __syncwarp();
+     }
+ }
++__global__ void __launch_bounds__(NT3, 2) moe_q2_major(Params P, bool capture_ids) {
++    const int row=int(blockIdx.y), local_block=int(blockIdx.x);
++    P.h+=row*H; P.out+=row*H; P.s+=row;
++    extern __shared__ float smem[];
++    __shared__ int sel[TOPK];
++    __shared__ float selw[TOPK];
++    __shared__ float red[NW];
++    float * xs = smem;
++    float2 * sums = (float2 *)(smem + (TOPK * FF + FFS) / 64 * CH);
++    const int warp = threadIdx.x >> 5, lane = threadIdx.x & 31;
++    unsigned * stg = (unsigned *)(smem + SMEM_FLOATS) + warp * STW3;
++    uint4 * stg4 = (uint4 *)stg;
++    const int gw = local_block * NW3 + warp, W = gridDim.x * NW3;
++    Scratch * s = P.s;
++    const Layer & L = P.L;
++
++    // A: rmsnorm + router logits / shexp-gate quarter-row partials (per task identical to moe_v2)
++    {
++        float4 cw[4];
++        int t = gw;
++        if (t < NTA) ldA(L, t, lane, cw);
++        load_norm3(xs, sums, P.h, P.norm, red, P.eps);
++        for (; t < NTA; t += W) {
++            const int row = t >> 2, q = t & 3;
++            float a = 0.f;
++#pragma unroll
++            for (int i = 0; i < 4; ++i) {
++                const int e = q * (QK / 4) + lane + 32 * i;
++                const float4 xv = *(const float4 *)(xs + ((4 * e) >> 6) * CH + ((4 * e) & 63));
++                a = fmaf(cw[i].x, xv.x, a); a = fmaf(cw[i].y, xv.y, a); a = fmaf(cw[i].z, xv.z, a); a = fmaf(cw[i].w, xv.w, a);
++            }
++            a = wsum(a);
++            if (lane == 0) { if (row < NE) s->lpart[q][row] = a; else s->gpart[q] = a; }
++            if (t + W < NTA) ldA(L, t + W, lane, cw);
++        }
++    }
++    grid_barrier(s);
++    // B: route; gate row chunk, then up row chunk, per row
++    {
++        uint4 cv[3];
++        bool have = false;
++        const uint8_t * g, * u;
++        if (gw < FFS) { rowB(L, sel, gw, g, u); ld72(g, lane, cv); have = true; }
++        if (warp == 0) route(s, lane, sel, selw);
++        __syncthreads();
++        if (capture_ids && local_block==0 && threadIdx.x<TOPK) s->logits[threadIdx.x]=float(sel[threadIdx.x]);
++        const float * xc = xs + lane * CH; const float2 sx = sums[lane];
++        for (int t = gw; t < NTB; t += W) {
++            if (!have) { rowB(L, sel, t, g, u); ld72(g, lane, cv); }
++            st72(stg4, lane, cv);
++            __syncwarp();
++            ld72(u, lane, cv);
++            const float gg = wsum(dot2c<true>(lds9(stg + lane * 9), xc, sx));
++            __syncwarp();
++            st72(stg4, lane, cv);
++            __syncwarp();
++            const int tn = t + W; have = tn < NTB;
++            if (have) { rowB(L, sel, tn, g, u); ld72(g, lane, cv); }
++            const float uu = wsum(dot2c<true>(lds9(stg + lane * 9), xc, sx));
++            if (lane == 0) { if (t < FFS) s->h_sh[t] = silu(gg) * uu; else s->h_exp[t - FFS] = silu(gg) * uu; }
++            __syncwarp();
++        }
++    }
++    // C: down. First chunk of each warp's first row and the shexp gate logit are issued before barrier 2 (as DOWNH=2).
++    int r = warp * gridDim.x + local_block;   // warp-major rows: the partial last wave is spread over every block
++    uint4 cv[3];
++    if (r < H) ldD(L, sel, r, 0, lane, cv);
++    float gl = 0.f;
++    {
++        float gp[NQ];
++#pragma unroll
++        for (int q = 0; q < NQ; ++q) gp[q] = __ldcg(&s->gpart[q]);
++#pragma unroll
++        for (int q = 0; q < NQ; ++q) gl += gp[q];
++    }
++    grid_barrier(s);
++    {
++        constexpr int NX = (TOPK * FF + FFS) / NT3, NXE = TOPK * FF / NT3;
++        float hv[NX];
++#pragma unroll
++        for (int j = 0; j < NX; ++j) {
++            const int i = threadIdx.x + NT3 * j;
++            hv[j] = j < NXE ? __ldcg(&s->h_exp[i]) : __ldcg(&s->h_sh[i - TOPK * FF]);
++        }
++        // thread (warp, lane) slot j holds element 512j + 32warp + lane = 32-element group 16j + warp
++#pragma unroll
++        for (int j = 0; j < NX; ++j) {
++            const int i = threadIdx.x + NT3 * j;
++            xs[(i >> 6) * CH + (i & 63)] = hv[j];
++            const float sm = wsum(hv[j]);
++            if (lane == 0) ((float *)sums)[NW3 * j + warp] = sm;
++        }
++        __syncthreads();
++    }
++    const float gs = 1.f / (1.f + expf(-gl));
++    const float w0 = selw[lane >> 3], w1 = selw[(lane >> 3) + 4];
++    for (; r < H; r += W) {
++        st72(stg4, lane, cv);
++        __syncwarp();
++        ldD(L, sel, r, 1, lane, cv);
++        const float dA = dot2c<true, true>(lds9(stg + lane * 9), xs + lane * CH, sums[lane]);
++        __syncwarp();
++        st72(stg4, lane, cv);
++        __syncwarp();
++        ldD(L, sel, r, 2, lane, cv);
++        const float dB = dot2c<true, true>(lds9(stg + lane * 9), xs + (lane + 32) * CH, sums[lane + 32]);
++        __syncwarp();
++        if (lane < 18) stg4[lane] = cv[0];
++        __syncwarp();
++        if (r + W < H) ldD(L, sel, r + W, 0, lane, cv);
++        float acc = __fmaf_rn(w0, dA, __fmul_rn(w1, dB));
++        if (lane < 8) acc = __fmaf_rn(gs, dot2c<true, true>(lds9(stg + lane * 9), xs + (lane + 64) * CH, sums[lane + 64]), acc);
++        acc = wsum(acc);
++        if (lane == 0) P.out[r] = P.h[r] + acc;
++        __syncwarp();
++    }
++}
++__global__ void __launch_bounds__(NT3, 2) moe_q2_map_old(Params P, bool capture_ids) {
++    const int physical=blockIdx.y*gridDim.x+blockIdx.x;
++    const int row=physical%2, local_block=physical/2;
++    P.h+=row*H; P.out+=row*H; P.s+=row;
++    if (threadIdx.x == 0) {
++        unsigned sm;
++        asm volatile("mov.u32 %0, %%smid;" : "=r"(sm));
++        float * record = P.s->logits + TOPK + 5 * local_block;
++        record[0] = float(blockIdx.x);
++        record[1] = float(blockIdx.y);
++        record[2] = float(row);
++        record[3] = float(local_block);
++        record[4] = float(sm);
++    }
++
++    extern __shared__ float smem[];
++    __shared__ int sel[TOPK];
++    __shared__ float selw[TOPK];
++    __shared__ float red[NW];
++    float * xs = smem;
++    float2 * sums = (float2 *)(smem + (TOPK * FF + FFS) / 64 * CH);
++    const int warp = threadIdx.x >> 5, lane = threadIdx.x & 31;
++    unsigned * stg = (unsigned *)(smem + SMEM_FLOATS) + warp * STW3;
++    uint4 * stg4 = (uint4 *)stg;
++    const int gw = local_block * NW3 + warp, W = gridDim.x * NW3;
++    Scratch * s = P.s;
++    const Layer & L = P.L;
++
++    // A: rmsnorm + router logits / shexp-gate quarter-row partials (per task identical to moe_v2)
++    {
++        float4 cw[4];
++        int t = gw;
++        if (t < NTA) ldA(L, t, lane, cw);
++        load_norm3(xs, sums, P.h, P.norm, red, P.eps);
++        for (; t < NTA; t += W) {
++            const int row = t >> 2, q = t & 3;
++            float a = 0.f;
++#pragma unroll
++            for (int i = 0; i < 4; ++i) {
++                const int e = q * (QK / 4) + lane + 32 * i;
++                const float4 xv = *(const float4 *)(xs + ((4 * e) >> 6) * CH + ((4 * e) & 63));
++                a = fmaf(cw[i].x, xv.x, a); a = fmaf(cw[i].y, xv.y, a); a = fmaf(cw[i].z, xv.z, a); a = fmaf(cw[i].w, xv.w, a);
++            }
++            a = wsum(a);
++            if (lane == 0) { if (row < NE) s->lpart[q][row] = a; else s->gpart[q] = a; }
++            if (t + W < NTA) ldA(L, t + W, lane, cw);
++        }
++    }
++    grid_barrier(s);
++    // B: route; gate row chunk, then up row chunk, per row
++    {
++        uint4 cv[3];
++        bool have = false;
++        const uint8_t * g, * u;
++        if (gw < FFS) { rowB(L, sel, gw, g, u); ld72(g, lane, cv); have = true; }
++        if (warp == 0) route(s, lane, sel, selw);
++        __syncthreads();
++        if (capture_ids && local_block==0 && threadIdx.x<TOPK) s->logits[threadIdx.x]=float(sel[threadIdx.x]);
++        const float * xc = xs + lane * CH; const float2 sx = sums[lane];
++        for (int t = gw; t < NTB; t += W) {
++            if (!have) { rowB(L, sel, t, g, u); ld72(g, lane, cv); }
++            st72(stg4, lane, cv);
++            __syncwarp();
++            ld72(u, lane, cv);
++            const float gg = wsum(dot2c<true>(lds9(stg + lane * 9), xc, sx));
++            __syncwarp();
++            st72(stg4, lane, cv);
++            __syncwarp();
++            const int tn = t + W; have = tn < NTB;
++            if (have) { rowB(L, sel, tn, g, u); ld72(g, lane, cv); }
++            const float uu = wsum(dot2c<true>(lds9(stg + lane * 9), xc, sx));
++            if (lane == 0) { if (t < FFS) s->h_sh[t] = silu(gg) * uu; else s->h_exp[t - FFS] = silu(gg) * uu; }
++            __syncwarp();
++        }
++    }
++    // C: down. First chunk of each warp's first row and the shexp gate logit are issued before barrier 2 (as DOWNH=2).
++    int r = warp * gridDim.x + local_block;   // warp-major rows: the partial last wave is spread over every block
++    uint4 cv[3];
++    if (r < H) ldD(L, sel, r, 0, lane, cv);
++    float gl = 0.f;
++    {
++        float gp[NQ];
++#pragma unroll
++        for (int q = 0; q < NQ; ++q) gp[q] = __ldcg(&s->gpart[q]);
++#pragma unroll
++        for (int q = 0; q < NQ; ++q) gl += gp[q];
++    }
++    grid_barrier(s);
++    {
++        constexpr int NX = (TOPK * FF + FFS) / NT3, NXE = TOPK * FF / NT3;
++        float hv[NX];
++#pragma unroll
++        for (int j = 0; j < NX; ++j) {
++            const int i = threadIdx.x + NT3 * j;
++            hv[j] = j < NXE ? __ldcg(&s->h_exp[i]) : __ldcg(&s->h_sh[i - TOPK * FF]);
++        }
++        // thread (warp, lane) slot j holds element 512j + 32warp + lane = 32-element group 16j + warp
++#pragma unroll
++        for (int j = 0; j < NX; ++j) {
++            const int i = threadIdx.x + NT3 * j;
++            xs[(i >> 6) * CH + (i & 63)] = hv[j];
++            const float sm = wsum(hv[j]);
++            if (lane == 0) ((float *)sums)[NW3 * j + warp] = sm;
++        }
++        __syncthreads();
++    }
++    const float gs = 1.f / (1.f + expf(-gl));
++    const float w0 = selw[lane >> 3], w1 = selw[(lane >> 3) + 4];
++    for (; r < H; r += W) {
++        st72(stg4, lane, cv);
++        __syncwarp();
++        ldD(L, sel, r, 1, lane, cv);
++        const float dA = dot2c<true, true>(lds9(stg + lane * 9), xs + lane * CH, sums[lane]);
++        __syncwarp();
++        st72(stg4, lane, cv);
++        __syncwarp();
++        ldD(L, sel, r, 2, lane, cv);
++        const float dB = dot2c<true, true>(lds9(stg + lane * 9), xs + (lane + 32) * CH, sums[lane + 32]);
++        __syncwarp();
++        if (lane < 18) stg4[lane] = cv[0];
++        __syncwarp();
++        if (r + W < H) ldD(L, sel, r + W, 0, lane, cv);
++        float acc = __fmaf_rn(w0, dA, __fmul_rn(w1, dB));
++        if (lane < 8) acc = __fmaf_rn(gs, dot2c<true, true>(lds9(stg + lane * 9), xs + (lane + 64) * CH, sums[lane + 64]), acc);
++        acc = wsum(acc);
++        if (lane == 0) P.out[r] = P.h[r] + acc;
++        __syncwarp();
++    }
++}
++__global__ void __launch_bounds__(NT3, 2) moe_q2_map_major(Params P, bool capture_ids) {
++    const int row=int(blockIdx.y), local_block=int(blockIdx.x);
++    P.h+=row*H; P.out+=row*H; P.s+=row;
++    if (threadIdx.x == 0) {
++        unsigned sm;
++        asm volatile("mov.u32 %0, %%smid;" : "=r"(sm));
++        float * record = P.s->logits + TOPK + 5 * local_block;
++        record[0] = float(blockIdx.x);
++        record[1] = float(blockIdx.y);
++        record[2] = float(row);
++        record[3] = float(local_block);
++        record[4] = float(sm);
++    }
++
++    extern __shared__ float smem[];
++    __shared__ int sel[TOPK];
++    __shared__ float selw[TOPK];
++    __shared__ float red[NW];
++    float * xs = smem;
++    float2 * sums = (float2 *)(smem + (TOPK * FF + FFS) / 64 * CH);
++    const int warp = threadIdx.x >> 5, lane = threadIdx.x & 31;
++    unsigned * stg = (unsigned *)(smem + SMEM_FLOATS) + warp * STW3;
++    uint4 * stg4 = (uint4 *)stg;
++    const int gw = local_block * NW3 + warp, W = gridDim.x * NW3;
++    Scratch * s = P.s;
++    const Layer & L = P.L;
++
++    // A: rmsnorm + router logits / shexp-gate quarter-row partials (per task identical to moe_v2)
++    {
++        float4 cw[4];
++        int t = gw;
++        if (t < NTA) ldA(L, t, lane, cw);
++        load_norm3(xs, sums, P.h, P.norm, red, P.eps);
++        for (; t < NTA; t += W) {
++            const int row = t >> 2, q = t & 3;
++            float a = 0.f;
++#pragma unroll
++            for (int i = 0; i < 4; ++i) {
++                const int e = q * (QK / 4) + lane + 32 * i;
++                const float4 xv = *(const float4 *)(xs + ((4 * e) >> 6) * CH + ((4 * e) & 63));
++                a = fmaf(cw[i].x, xv.x, a); a = fmaf(cw[i].y, xv.y, a); a = fmaf(cw[i].z, xv.z, a); a = fmaf(cw[i].w, xv.w, a);
++            }
++            a = wsum(a);
++            if (lane == 0) { if (row < NE) s->lpart[q][row] = a; else s->gpart[q] = a; }
++            if (t + W < NTA) ldA(L, t + W, lane, cw);
++        }
++    }
++    grid_barrier(s);
++    // B: route; gate row chunk, then up row chunk, per row
++    {
++        uint4 cv[3];
++        bool have = false;
++        const uint8_t * g, * u;
++        if (gw < FFS) { rowB(L, sel, gw, g, u); ld72(g, lane, cv); have = true; }
++        if (warp == 0) route(s, lane, sel, selw);
++        __syncthreads();
++        if (capture_ids && local_block==0 && threadIdx.x<TOPK) s->logits[threadIdx.x]=float(sel[threadIdx.x]);
++        const float * xc = xs + lane * CH; const float2 sx = sums[lane];
++        for (int t = gw; t < NTB; t += W) {
++            if (!have) { rowB(L, sel, t, g, u); ld72(g, lane, cv); }
++            st72(stg4, lane, cv);
++            __syncwarp();
++            ld72(u, lane, cv);
++            const float gg = wsum(dot2c<true>(lds9(stg + lane * 9), xc, sx));
++            __syncwarp();
++            st72(stg4, lane, cv);
++            __syncwarp();
++            const int tn = t + W; have = tn < NTB;
++            if (have) { rowB(L, sel, tn, g, u); ld72(g, lane, cv); }
++            const float uu = wsum(dot2c<true>(lds9(stg + lane * 9), xc, sx));
++            if (lane == 0) { if (t < FFS) s->h_sh[t] = silu(gg) * uu; else s->h_exp[t - FFS] = silu(gg) * uu; }
++            __syncwarp();
++        }
++    }
++    // C: down. First chunk of each warp's first row and the shexp gate logit are issued before barrier 2 (as DOWNH=2).
++    int r = warp * gridDim.x + local_block;   // warp-major rows: the partial last wave is spread over every block
++    uint4 cv[3];
++    if (r < H) ldD(L, sel, r, 0, lane, cv);
++    float gl = 0.f;
++    {
++        float gp[NQ];
++#pragma unroll
++        for (int q = 0; q < NQ; ++q) gp[q] = __ldcg(&s->gpart[q]);
++#pragma unroll
++        for (int q = 0; q < NQ; ++q) gl += gp[q];
++    }
++    grid_barrier(s);
++    {
++        constexpr int NX = (TOPK * FF + FFS) / NT3, NXE = TOPK * FF / NT3;
++        float hv[NX];
++#pragma unroll
++        for (int j = 0; j < NX; ++j) {
++            const int i = threadIdx.x + NT3 * j;
++            hv[j] = j < NXE ? __ldcg(&s->h_exp[i]) : __ldcg(&s->h_sh[i - TOPK * FF]);
++        }
++        // thread (warp, lane) slot j holds element 512j + 32warp + lane = 32-element group 16j + warp
++#pragma unroll
++        for (int j = 0; j < NX; ++j) {
++            const int i = threadIdx.x + NT3 * j;
++            xs[(i >> 6) * CH + (i & 63)] = hv[j];
++            const float sm = wsum(hv[j]);
++            if (lane == 0) ((float *)sums)[NW3 * j + warp] = sm;
++        }
++        __syncthreads();
++    }
++    const float gs = 1.f / (1.f + expf(-gl));
++    const float w0 = selw[lane >> 3], w1 = selw[(lane >> 3) + 4];
++    for (; r < H; r += W) {
++        st72(stg4, lane, cv);
++        __syncwarp();
++        ldD(L, sel, r, 1, lane, cv);
++        const float dA = dot2c<true, true>(lds9(stg + lane * 9), xs + lane * CH, sums[lane]);
++        __syncwarp();
++        st72(stg4, lane, cv);
++        __syncwarp();
++        ldD(L, sel, r, 2, lane, cv);
++        const float dB = dot2c<true, true>(lds9(stg + lane * 9), xs + (lane + 32) * CH, sums[lane + 32]);
++        __syncwarp();
++        if (lane < 18) stg4[lane] = cv[0];
++        __syncwarp();
++        if (r + W < H) ldD(L, sel, r + W, 0, lane, cv);
++        float acc = __fmaf_rn(w0, dA, __fmul_rn(w1, dB));
++        if (lane < 8) acc = __fmaf_rn(gs, dot2c<true, true>(lds9(stg + lane * 9), xs + (lane + 64) * CH, sums[lane + 64]), acc);
++        acc = wsum(acc);
++        if (lane == 0) P.out[r] = P.h[r] + acc;
++        __syncwarp();
++    }
++}
+ __global__ void moe_v3_cmp(const float * a, const float * b, unsigned * res) {
+     for (int i = threadIdx.x; i < H; i += blockDim.x) {
+         const unsigned x = __float_as_uint(a[i]), y = __float_as_uint(b[i]);
+@@ -741,6 +1115,30 @@
+ 
+ static std::atomic<unsigned long long> q2_calls{0}, q2_rows[2]{}, q2_skips{0};
+ static thread_local int observed_ids[2*TOPK];
++static std::atomic<unsigned long long> layout_calls{0};
++static thread_local float last_layout_map[2*24*5];
++extern "C" __attribute__((visibility("default"))) unsigned long long ggml_cuda_occamy_q2_layout_count();
++extern "C" unsigned long long ggml_cuda_occamy_q2_layout_count() { return layout_calls.load(std::memory_order_relaxed); }
++extern "C" __attribute__((visibility("default"))) void ggml_cuda_occamy_q2_layout_map(float * out);
++extern "C" void ggml_cuda_occamy_q2_layout_map(float * out) { std::copy_n(last_layout_map,2*24*5,out); }
++
++static bool admit_layout(int d,int kind) {
++    static std::once_flag once[GGML_CUDA_MAX_DEVICES][3];
++    static bool ready[GGML_CUDA_MAX_DEVICES][3]{};
++    std::call_once(once[d][kind],[d,kind] {
++        ggml_cuda_set_device(d);
++        const void * kernel = kind==0 ? (const void *)moe_q2_major :
++            (kind==1 ? (const void *)moe_q2_map_old : (const void *)moe_q2_map_major);
++        int sm=0,per=0; cudaFuncAttributes attr{};
++        CUDA_CHECK(cudaDeviceGetAttribute(&sm,cudaDevAttrMultiProcessorCount,d));
++        CUDA_CHECK(cudaFuncGetAttributes(&attr,kernel));
++        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per,kernel,NT3,SMEM3_FLOATS*sizeof(float)));
++        ready[d][kind]=sm==24 && per>=2 && attr.numRegs<=64 && attr.localSizeBytes==0;
++        fprintf(stderr,"Q2_LAYOUT residency kind=%d device=%d sm=%d active=%d regs=%d static=%zu dynamic=%zu local=%zu ready=%d\n",
++                kind,d,sm,per,attr.numRegs,attr.sharedSizeBytes,SMEM3_FLOATS*sizeof(float),attr.localSizeBytes,int(ready[d][kind]));
++    });
++    return ready[d][kind];
++}
+ static bool admit_q2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_moe_match & m) {
+     if (!env_flag("GGML_CUDA_OCCAMY_MOE_Q2_COHORTS") || ctx.curr_stream_no!=0 ||
+             !ctx.stream_context().concurrent_events.empty() || ggml_cuda_info().devices[ctx.device].cc!=520 ||
+@@ -1056,7 +1454,24 @@
+              (const uint8_t*)m.gate_sh->data,(const uint8_t*)m.up_sh->data,(const uint8_t*)m.down_sh->data};
+         p.h=(const float*)m.h->data;p.norm=(const float*)m.norm_w->data;p.out=(float*)m.out->data;p.s=work.get();p.eps=m.eps;
+         const bool diag=env_flag("GGML_CUDA_OCCAMY_MOE_Q2_READ_IDS");
+-        moe_q2_cohorts<<<dim3(24,2),NT3,SMEM3_FLOATS*sizeof(float),ctx.stream()>>>(p,diag);
++        const bool major=env_flag("GGML_CUDA_OCCAMY_MOE_Q2_LAYOUT");
++        const bool map=diag && env_flag("GGML_CUDA_OCCAMY_MOE_Q2_LAYOUT_MAP");
++        const int kind=map ? (major ? 2 : 1) : 0;
++        const bool selected=(major || map) && admit_layout(ctx.device,kind);
++        if (selected && map) {
++            static_assert(TOPK+24*5<=NE);
++            CUDA_CHECK(cudaMemset2DAsync((char *)work.get()+offsetof(Scratch,logits)+TOPK*sizeof(float),
++                sizeof(Scratch),0xff,24*5*sizeof(float),2,ctx.stream()));
++            if (major) moe_q2_map_major<<<dim3(24,2),NT3,SMEM3_FLOATS*sizeof(float),ctx.stream()>>>(p,diag);
++            else moe_q2_map_old<<<dim3(24,2),NT3,SMEM3_FLOATS*sizeof(float),ctx.stream()>>>(p,diag);
++        } else if (selected) moe_q2_major<<<dim3(24,2),NT3,SMEM3_FLOATS*sizeof(float),ctx.stream()>>>(p,diag);
++        else moe_q2_cohorts<<<dim3(24,2),NT3,SMEM3_FLOATS*sizeof(float),ctx.stream()>>>(p,diag);
++        if (selected && major) layout_calls.fetch_add(1,std::memory_order_relaxed);
++        if (selected && map) {
++            CUDA_CHECK(cudaGetLastError());
++            CUDA_CHECK(cudaMemcpy2DAsync(last_layout_map,24*5*sizeof(float),(char *)work.get()+offsetof(Scratch,logits)+TOPK*sizeof(float),
++                sizeof(Scratch),24*5*sizeof(float),2,cudaMemcpyDeviceToHost,ctx.stream()));
++        }
+         CUDA_CHECK(cudaGetLastError());
+         if (diag) {
+             float values[2*TOPK];

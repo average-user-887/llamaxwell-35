@@ -1,0 +1,16 @@
+{
+  "build.sh": {
+    "portable_sha256": "d3902d670edb0ded215c0eff789dfa1bc5fe7c509ff26d410d8dea4518ce1e56",
+    "observed_source_sha256": "592535d1dc2c785308489df335f9fe380b03cf5fc4e034df2aae23c85ec5330c",
+    "private_input_keys": [
+      "BUILD_SOURCE"
+    ]
+  },
+  "compile.sh": {
+    "portable_sha256": "e9e415f89aaa92c25a48946e95953fef995b145e6fc2add9a87d941fdd8522d8",
+    "observed_source_sha256": "3737504d892da963cece24c230b66041a0a38567f8e5e61d5985b4bef19391b2",
+    "private_input_keys": [
+      "BUILD_SOURCE"
+    ]
+  }
+}

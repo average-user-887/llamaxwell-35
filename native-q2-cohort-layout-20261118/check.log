@@ -1,0 +1,434 @@
+1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc  /runtime/libggml.so.0.26.0
+678cf75e5ef5b1f92460eb0f816d3bbe755ee9710fd04606c31ec24dcd41fa06  /runtime/libggml-base.so.0.26.0
+b64efa6ed191baf3782a82b69487dbde4b46dcb9d460f9ef3acdbb322b88cd08  /runtime/libggml-cuda.so
+e601cc2dd0c53e978ecda5a8ce7380632f1020d021bb3948fcfc1e549b185e4a  /operator
+Q2_COHORT FIXTURE_IDS independent row=0 ids=128,215,73,136,110,167,197,112
+Q2_COHORT FIXTURE_IDS independent row=1 ids=85,222,184,46,216,151,64,219
+Q2_COHORT FIXTURE independent overlap=0 min_margin=0.00021109628
+Q2_COHORT FIXTURE_IDS partial row=0 ids=128,215,73,136,110,167,197,112
+Q2_COHORT FIXTURE_IDS partial row=1 ids=110,73,64,128,215,96,197,82
+Q2_COHORT FIXTURE partial overlap=5 min_margin=0.0011513497
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 24463 MiB):
+  Device 0: Quadro M6000 24GB, compute capability 5.2, VMM: yes, VRAM: 24463 MiB
+load_backend: loaded CUDA backend from /runtime/libggml-cuda.so
+N104 MAP /runtime/libggml.so.0.26.0
+N104 MAP /runtime/libggml-base.so.0.26.0
+N104 MAP /runtime/libggml-cuda.so
+Q2_COHORT MAP /operator /runtime/libggml-cuda.so
+ggml_cuda_hg_try_defer: GGML_CUDA_OCCAMY_HOSTGAP engaged on device 0
+ggml_cuda_graph_set_enabled: disabling CUDA graphs due to GPU architecture
+occamy-fused: window rejected: no residual ADD within 128 nodes
+ggml_cuda_graph_set_enabled: disabling CUDA graphs due to GPU architecture
+occamy-fused: device 0: 24 SMs x 2 blocks/SM -> grid 48, smem 41728 B
+occamy-fused: device 0: DOWNX variant 2 blocks/SM -> grid 48
+occamy-fused: device 0: TAILBAL variant 2 blocks/SM -> grid 48
+occamy-fused: device 0: MOE_V3 variant 2 blocks/SM x 512 thr -> grid 48, smem 39424 B
+occamy-fused: device 0: DOWNH=1 variant 2 blocks/SM -> grid 48
+occamy-fused: device 0: DOWNH=2 variant 2 blocks/SM -> grid 48
+occamy-fused: fused MoE window 0..42 (43 nodes) node_0 -> cohort_native_n2split
+Q2_COHORT residency device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1
+Q2_PAIR ROUTES independent mode=cohorts row=0 ids=128,215,73,136,110,167,197,112
+Q2_PAIR ROUTES independent mode=cohorts row=1 ids=85,222,184,46,216,151,64,219
+Q2_LAYOUT residency kind=0 device=0 sm=24 active=2 regs=64 static=96 dynamic=39424 local=0 ready=1
+Q2_PAIR ROUTES independent mode=layout row=0 ids=128,215,73,136,110,167,197,112
+Q2_PAIR ROUTES independent mode=layout row=1 ids=85,222,184,46,216,151,64,219
+Q2_PAIR ROUTES independent mode=layout row=0 ids=128,215,73,136,110,167,197,112
+Q2_PAIR ROUTES independent mode=layout row=1 ids=85,222,184,46,216,151,64,219
+Q2_COHORT ROW independent row=0 finite=2048 different=0 repeat_different=0 max_abs=0
+Q2_COHORT ROW independent row=1 finite=2048 different=0 repeat_different=0 max_abs=0
+Q2_LAYOUT residency kind=1 device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=0 y=0 row=0 local=0 sm=0
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=2 y=0 row=0 local=1 sm=2
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=4 y=0 row=0 local=2 sm=4
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=6 y=0 row=0 local=3 sm=6
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=8 y=0 row=0 local=4 sm=8
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=10 y=0 row=0 local=5 sm=10
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=12 y=0 row=0 local=6 sm=12
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=14 y=0 row=0 local=7 sm=14
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=16 y=0 row=0 local=8 sm=16
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=18 y=0 row=0 local=9 sm=18
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=20 y=0 row=0 local=10 sm=20
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=22 y=0 row=0 local=11 sm=22
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=0 y=1 row=0 local=12 sm=0
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=2 y=1 row=0 local=13 sm=2
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=4 y=1 row=0 local=14 sm=4
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=6 y=1 row=0 local=15 sm=6
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=8 y=1 row=0 local=16 sm=8
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=10 y=1 row=0 local=17 sm=10
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=12 y=1 row=0 local=18 sm=12
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=14 y=1 row=0 local=19 sm=14
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=16 y=1 row=0 local=20 sm=16
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=18 y=1 row=0 local=21 sm=18
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=20 y=1 row=0 local=22 sm=20
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=22 y=1 row=0 local=23 sm=22
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=1 y=0 row=1 local=0 sm=1
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=3 y=0 row=1 local=1 sm=3
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=5 y=0 row=1 local=2 sm=5
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=7 y=0 row=1 local=3 sm=7
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=9 y=0 row=1 local=4 sm=9
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=11 y=0 row=1 local=5 sm=11
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=13 y=0 row=1 local=6 sm=13
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=15 y=0 row=1 local=7 sm=15
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=17 y=0 row=1 local=8 sm=17
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=19 y=0 row=1 local=9 sm=19
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=21 y=0 row=1 local=10 sm=21
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=23 y=0 row=1 local=11 sm=23
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=1 y=1 row=1 local=12 sm=1
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=3 y=1 row=1 local=13 sm=3
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=5 y=1 row=1 local=14 sm=5
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=7 y=1 row=1 local=15 sm=7
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=9 y=1 row=1 local=16 sm=9
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=11 y=1 row=1 local=17 sm=11
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=13 y=1 row=1 local=18 sm=13
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=15 y=1 row=1 local=19 sm=15
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=17 y=1 row=1 local=20 sm=17
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=19 y=1 row=1 local=21 sm=19
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=21 y=1 row=1 local=22 sm=21
+Q2_LAYOUT_MAP fixture=independent sample=0 major=0 x=23 y=1 row=1 local=23 sm=23
+Q2_LAYOUT residency kind=2 device=0 sm=24 active=2 regs=64 static=96 dynamic=39424 local=0 ready=1
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=0 y=0 row=0 local=0 sm=0
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=1 y=0 row=0 local=1 sm=1
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=2 y=0 row=0 local=2 sm=2
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=3 y=0 row=0 local=3 sm=3
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=4 y=0 row=0 local=4 sm=4
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=5 y=0 row=0 local=5 sm=5
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=6 y=0 row=0 local=6 sm=6
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=7 y=0 row=0 local=7 sm=7
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=8 y=0 row=0 local=8 sm=8
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=9 y=0 row=0 local=9 sm=9
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=10 y=0 row=0 local=10 sm=10
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=11 y=0 row=0 local=11 sm=11
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=12 y=0 row=0 local=12 sm=12
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=13 y=0 row=0 local=13 sm=13
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=14 y=0 row=0 local=14 sm=14
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=15 y=0 row=0 local=15 sm=15
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=16 y=0 row=0 local=16 sm=16
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=17 y=0 row=0 local=17 sm=17
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=18 y=0 row=0 local=18 sm=18
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=19 y=0 row=0 local=19 sm=19
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=20 y=0 row=0 local=20 sm=20
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=21 y=0 row=0 local=21 sm=21
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=22 y=0 row=0 local=22 sm=22
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=23 y=0 row=0 local=23 sm=23
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=0 y=1 row=1 local=0 sm=0
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=1 y=1 row=1 local=1 sm=1
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=2 y=1 row=1 local=2 sm=2
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=3 y=1 row=1 local=3 sm=3
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=4 y=1 row=1 local=4 sm=4
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=5 y=1 row=1 local=5 sm=5
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=6 y=1 row=1 local=6 sm=6
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=7 y=1 row=1 local=7 sm=7
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=8 y=1 row=1 local=8 sm=8
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=9 y=1 row=1 local=9 sm=9
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=10 y=1 row=1 local=10 sm=10
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=11 y=1 row=1 local=11 sm=11
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=12 y=1 row=1 local=12 sm=12
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=13 y=1 row=1 local=13 sm=13
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=14 y=1 row=1 local=14 sm=14
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=15 y=1 row=1 local=15 sm=15
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=16 y=1 row=1 local=16 sm=16
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=17 y=1 row=1 local=17 sm=17
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=18 y=1 row=1 local=18 sm=18
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=19 y=1 row=1 local=19 sm=19
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=20 y=1 row=1 local=20 sm=20
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=21 y=1 row=1 local=21 sm=21
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=22 y=1 row=1 local=22 sm=22
+Q2_LAYOUT_MAP fixture=independent sample=0 major=1 x=23 y=1 row=1 local=23 sm=23
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=0 y=0 row=0 local=0 sm=0
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=2 y=0 row=0 local=1 sm=2
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=4 y=0 row=0 local=2 sm=4
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=6 y=0 row=0 local=3 sm=6
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=8 y=0 row=0 local=4 sm=8
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=10 y=0 row=0 local=5 sm=10
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=12 y=0 row=0 local=6 sm=12
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=14 y=0 row=0 local=7 sm=14
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=16 y=0 row=0 local=8 sm=16
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=18 y=0 row=0 local=9 sm=18
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=20 y=0 row=0 local=10 sm=20
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=22 y=0 row=0 local=11 sm=22
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=0 y=1 row=0 local=12 sm=0
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=2 y=1 row=0 local=13 sm=2
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=4 y=1 row=0 local=14 sm=4
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=6 y=1 row=0 local=15 sm=6
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=8 y=1 row=0 local=16 sm=8
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=10 y=1 row=0 local=17 sm=10
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=12 y=1 row=0 local=18 sm=12
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=14 y=1 row=0 local=19 sm=14
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=16 y=1 row=0 local=20 sm=16
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=18 y=1 row=0 local=21 sm=18
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=20 y=1 row=0 local=22 sm=20
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=22 y=1 row=0 local=23 sm=22
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=1 y=0 row=1 local=0 sm=1
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=3 y=0 row=1 local=1 sm=3
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=5 y=0 row=1 local=2 sm=5
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=7 y=0 row=1 local=3 sm=7
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=9 y=0 row=1 local=4 sm=9
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=11 y=0 row=1 local=5 sm=11
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=13 y=0 row=1 local=6 sm=13
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=15 y=0 row=1 local=7 sm=15
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=17 y=0 row=1 local=8 sm=17
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=19 y=0 row=1 local=9 sm=19
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=21 y=0 row=1 local=10 sm=21
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=23 y=0 row=1 local=11 sm=23
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=1 y=1 row=1 local=12 sm=1
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=3 y=1 row=1 local=13 sm=3
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=5 y=1 row=1 local=14 sm=5
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=7 y=1 row=1 local=15 sm=7
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=9 y=1 row=1 local=16 sm=9
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=11 y=1 row=1 local=17 sm=11
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=13 y=1 row=1 local=18 sm=13
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=15 y=1 row=1 local=19 sm=15
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=17 y=1 row=1 local=20 sm=17
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=19 y=1 row=1 local=21 sm=19
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=21 y=1 row=1 local=22 sm=21
+Q2_LAYOUT_MAP fixture=independent sample=1 major=0 x=23 y=1 row=1 local=23 sm=23
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=0 y=0 row=0 local=0 sm=0
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=1 y=0 row=0 local=1 sm=1
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=2 y=0 row=0 local=2 sm=2
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=3 y=0 row=0 local=3 sm=3
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=4 y=0 row=0 local=4 sm=4
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=5 y=0 row=0 local=5 sm=5
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=6 y=0 row=0 local=6 sm=6
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=7 y=0 row=0 local=7 sm=7
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=8 y=0 row=0 local=8 sm=8
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=9 y=0 row=0 local=9 sm=9
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=10 y=0 row=0 local=10 sm=10
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=11 y=0 row=0 local=11 sm=11
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=12 y=0 row=0 local=12 sm=12
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=13 y=0 row=0 local=13 sm=13
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=14 y=0 row=0 local=14 sm=14
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=15 y=0 row=0 local=15 sm=15
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=16 y=0 row=0 local=16 sm=16
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=17 y=0 row=0 local=17 sm=17
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=18 y=0 row=0 local=18 sm=18
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=19 y=0 row=0 local=19 sm=19
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=20 y=0 row=0 local=20 sm=20
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=21 y=0 row=0 local=21 sm=21
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=22 y=0 row=0 local=22 sm=22
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=23 y=0 row=0 local=23 sm=23
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=0 y=1 row=1 local=0 sm=0
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=1 y=1 row=1 local=1 sm=1
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=2 y=1 row=1 local=2 sm=2
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=3 y=1 row=1 local=3 sm=3
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=4 y=1 row=1 local=4 sm=4
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=5 y=1 row=1 local=5 sm=5
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=6 y=1 row=1 local=6 sm=6
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=7 y=1 row=1 local=7 sm=7
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=8 y=1 row=1 local=8 sm=8
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=9 y=1 row=1 local=9 sm=9
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=10 y=1 row=1 local=10 sm=10
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=11 y=1 row=1 local=11 sm=11
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=12 y=1 row=1 local=12 sm=12
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=13 y=1 row=1 local=13 sm=13
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=14 y=1 row=1 local=14 sm=14
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=15 y=1 row=1 local=15 sm=15
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=16 y=1 row=1 local=16 sm=16
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=17 y=1 row=1 local=17 sm=17
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=18 y=1 row=1 local=18 sm=18
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=19 y=1 row=1 local=19 sm=19
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=20 y=1 row=1 local=20 sm=20
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=21 y=1 row=1 local=21 sm=21
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=22 y=1 row=1 local=22 sm=22
+Q2_LAYOUT_MAP fixture=independent sample=1 major=1 x=23 y=1 row=1 local=23 sm=23
+Q2_PAIR ROUTES partial mode=cohorts row=0 ids=128,215,73,136,110,167,197,112
+Q2_PAIR ROUTES partial mode=cohorts row=1 ids=110,73,64,128,215,96,197,82
+Q2_PAIR ROUTES partial mode=layout row=0 ids=128,215,73,136,110,167,197,112
+Q2_PAIR ROUTES partial mode=layout row=1 ids=110,73,64,128,215,96,197,82
+Q2_PAIR ROUTES partial mode=layout row=0 ids=128,215,73,136,110,167,197,112
+Q2_PAIR ROUTES partial mode=layout row=1 ids=110,73,64,128,215,96,197,82
+Q2_COHORT ROW partial row=0 finite=2048 different=0 repeat_different=0 max_abs=0
+Q2_COHORT ROW partial row=1 finite=2048 different=0 repeat_different=0 max_abs=0
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=0 y=0 row=0 local=0 sm=0
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=2 y=0 row=0 local=1 sm=2
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=4 y=0 row=0 local=2 sm=4
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=6 y=0 row=0 local=3 sm=6
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=8 y=0 row=0 local=4 sm=8
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=10 y=0 row=0 local=5 sm=10
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=12 y=0 row=0 local=6 sm=12
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=14 y=0 row=0 local=7 sm=14
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=16 y=0 row=0 local=8 sm=16
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=18 y=0 row=0 local=9 sm=18
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=20 y=0 row=0 local=10 sm=20
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=22 y=0 row=0 local=11 sm=22
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=0 y=1 row=0 local=12 sm=0
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=2 y=1 row=0 local=13 sm=2
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=4 y=1 row=0 local=14 sm=4
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=6 y=1 row=0 local=15 sm=6
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=8 y=1 row=0 local=16 sm=8
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=10 y=1 row=0 local=17 sm=10
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=12 y=1 row=0 local=18 sm=12
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=14 y=1 row=0 local=19 sm=14
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=16 y=1 row=0 local=20 sm=16
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=18 y=1 row=0 local=21 sm=18
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=20 y=1 row=0 local=22 sm=20
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=22 y=1 row=0 local=23 sm=22
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=1 y=0 row=1 local=0 sm=1
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=3 y=0 row=1 local=1 sm=3
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=5 y=0 row=1 local=2 sm=5
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=7 y=0 row=1 local=3 sm=7
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=9 y=0 row=1 local=4 sm=9
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=11 y=0 row=1 local=5 sm=11
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=13 y=0 row=1 local=6 sm=13
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=15 y=0 row=1 local=7 sm=15
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=17 y=0 row=1 local=8 sm=17
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=19 y=0 row=1 local=9 sm=19
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=21 y=0 row=1 local=10 sm=21
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=23 y=0 row=1 local=11 sm=23
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=1 y=1 row=1 local=12 sm=1
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=3 y=1 row=1 local=13 sm=3
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=5 y=1 row=1 local=14 sm=5
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=7 y=1 row=1 local=15 sm=7
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=9 y=1 row=1 local=16 sm=9
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=11 y=1 row=1 local=17 sm=11
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=13 y=1 row=1 local=18 sm=13
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=15 y=1 row=1 local=19 sm=15
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=17 y=1 row=1 local=20 sm=17
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=19 y=1 row=1 local=21 sm=19
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=21 y=1 row=1 local=22 sm=21
+Q2_LAYOUT_MAP fixture=partial sample=0 major=0 x=23 y=1 row=1 local=23 sm=23
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=0 y=0 row=0 local=0 sm=0
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=1 y=0 row=0 local=1 sm=1
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=2 y=0 row=0 local=2 sm=2
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=3 y=0 row=0 local=3 sm=3
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=4 y=0 row=0 local=4 sm=4
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=5 y=0 row=0 local=5 sm=5
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=6 y=0 row=0 local=6 sm=6
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=7 y=0 row=0 local=7 sm=7
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=8 y=0 row=0 local=8 sm=8
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=9 y=0 row=0 local=9 sm=9
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=10 y=0 row=0 local=10 sm=10
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=11 y=0 row=0 local=11 sm=11
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=12 y=0 row=0 local=12 sm=12
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=13 y=0 row=0 local=13 sm=13
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=14 y=0 row=0 local=14 sm=14
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=15 y=0 row=0 local=15 sm=15
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=16 y=0 row=0 local=16 sm=16
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=17 y=0 row=0 local=17 sm=17
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=18 y=0 row=0 local=18 sm=18
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=19 y=0 row=0 local=19 sm=19
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=20 y=0 row=0 local=20 sm=20
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=21 y=0 row=0 local=21 sm=21
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=22 y=0 row=0 local=22 sm=22
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=23 y=0 row=0 local=23 sm=23
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=0 y=1 row=1 local=0 sm=0
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=1 y=1 row=1 local=1 sm=1
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=2 y=1 row=1 local=2 sm=2
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=3 y=1 row=1 local=3 sm=3
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=4 y=1 row=1 local=4 sm=4
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=5 y=1 row=1 local=5 sm=5
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=6 y=1 row=1 local=6 sm=6
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=7 y=1 row=1 local=7 sm=7
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=8 y=1 row=1 local=8 sm=8
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=9 y=1 row=1 local=9 sm=9
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=10 y=1 row=1 local=10 sm=10
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=11 y=1 row=1 local=11 sm=11
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=12 y=1 row=1 local=12 sm=12
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=13 y=1 row=1 local=13 sm=13
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=14 y=1 row=1 local=14 sm=14
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=15 y=1 row=1 local=15 sm=15
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=16 y=1 row=1 local=16 sm=16
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=17 y=1 row=1 local=17 sm=17
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=18 y=1 row=1 local=18 sm=18
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=19 y=1 row=1 local=19 sm=19
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=20 y=1 row=1 local=20 sm=20
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=21 y=1 row=1 local=21 sm=21
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=22 y=1 row=1 local=22 sm=22
+Q2_LAYOUT_MAP fixture=partial sample=0 major=1 x=23 y=1 row=1 local=23 sm=23
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=0 y=0 row=0 local=0 sm=0
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=2 y=0 row=0 local=1 sm=2
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=4 y=0 row=0 local=2 sm=4
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=6 y=0 row=0 local=3 sm=6
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=8 y=0 row=0 local=4 sm=8
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=10 y=0 row=0 local=5 sm=10
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=12 y=0 row=0 local=6 sm=12
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=14 y=0 row=0 local=7 sm=14
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=16 y=0 row=0 local=8 sm=16
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=18 y=0 row=0 local=9 sm=18
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=20 y=0 row=0 local=10 sm=20
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=22 y=0 row=0 local=11 sm=22
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=0 y=1 row=0 local=12 sm=0
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=2 y=1 row=0 local=13 sm=2
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=4 y=1 row=0 local=14 sm=4
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=6 y=1 row=0 local=15 sm=6
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=8 y=1 row=0 local=16 sm=8
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=10 y=1 row=0 local=17 sm=10
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=12 y=1 row=0 local=18 sm=12
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=14 y=1 row=0 local=19 sm=14
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=16 y=1 row=0 local=20 sm=16
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=18 y=1 row=0 local=21 sm=18
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=20 y=1 row=0 local=22 sm=20
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=22 y=1 row=0 local=23 sm=22
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=1 y=0 row=1 local=0 sm=1
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=3 y=0 row=1 local=1 sm=3
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=5 y=0 row=1 local=2 sm=5
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=7 y=0 row=1 local=3 sm=7
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=9 y=0 row=1 local=4 sm=9
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=11 y=0 row=1 local=5 sm=11
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=13 y=0 row=1 local=6 sm=13
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=15 y=0 row=1 local=7 sm=15
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=17 y=0 row=1 local=8 sm=17
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=19 y=0 row=1 local=9 sm=19
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=21 y=0 row=1 local=10 sm=21
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=23 y=0 row=1 local=11 sm=23
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=1 y=1 row=1 local=12 sm=1
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=3 y=1 row=1 local=13 sm=3
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=5 y=1 row=1 local=14 sm=5
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=7 y=1 row=1 local=15 sm=7
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=9 y=1 row=1 local=16 sm=9
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=11 y=1 row=1 local=17 sm=11
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=13 y=1 row=1 local=18 sm=13
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=15 y=1 row=1 local=19 sm=15
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=17 y=1 row=1 local=20 sm=17
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=19 y=1 row=1 local=21 sm=19
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=21 y=1 row=1 local=22 sm=21
+Q2_LAYOUT_MAP fixture=partial sample=1 major=0 x=23 y=1 row=1 local=23 sm=23
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=0 y=0 row=0 local=0 sm=0
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=1 y=0 row=0 local=1 sm=1
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=2 y=0 row=0 local=2 sm=2
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=3 y=0 row=0 local=3 sm=3
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=4 y=0 row=0 local=4 sm=4
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=5 y=0 row=0 local=5 sm=5
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=6 y=0 row=0 local=6 sm=6
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=7 y=0 row=0 local=7 sm=7
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=8 y=0 row=0 local=8 sm=8
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=9 y=0 row=0 local=9 sm=9
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=10 y=0 row=0 local=10 sm=10
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=11 y=0 row=0 local=11 sm=11
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=12 y=0 row=0 local=12 sm=12
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=13 y=0 row=0 local=13 sm=13
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=14 y=0 row=0 local=14 sm=14
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=15 y=0 row=0 local=15 sm=15
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=16 y=0 row=0 local=16 sm=16
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=17 y=0 row=0 local=17 sm=17
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=18 y=0 row=0 local=18 sm=18
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=19 y=0 row=0 local=19 sm=19
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=20 y=0 row=0 local=20 sm=20
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=21 y=0 row=0 local=21 sm=21
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=22 y=0 row=0 local=22 sm=22
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=23 y=0 row=0 local=23 sm=23
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=0 y=1 row=1 local=0 sm=0
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=1 y=1 row=1 local=1 sm=1
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=2 y=1 row=1 local=2 sm=2
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=3 y=1 row=1 local=3 sm=3
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=4 y=1 row=1 local=4 sm=4
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=5 y=1 row=1 local=5 sm=5
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=6 y=1 row=1 local=6 sm=6
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=7 y=1 row=1 local=7 sm=7
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=8 y=1 row=1 local=8 sm=8
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=9 y=1 row=1 local=9 sm=9
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=10 y=1 row=1 local=10 sm=10
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=11 y=1 row=1 local=11 sm=11
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=12 y=1 row=1 local=12 sm=12
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=13 y=1 row=1 local=13 sm=13
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=14 y=1 row=1 local=14 sm=14
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=15 y=1 row=1 local=15 sm=15
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=16 y=1 row=1 local=16 sm=16
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=17 y=1 row=1 local=17 sm=17
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=18 y=1 row=1 local=18 sm=18
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=19 y=1 row=1 local=19 sm=19
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=20 y=1 row=1 local=20 sm=20
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=21 y=1 row=1 local=21 sm=21
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=22 y=1 row=1 local=22 sm=22
+Q2_LAYOUT_MAP fixture=partial sample=1 major=1 x=23 y=1 row=1 local=23 sm=23
+Q2_PAIR FINISH row0=0 row1=0 pair=14 skip=14 layout=8
+ggml_cuda_hostgap: deferred=16 flushes=16
