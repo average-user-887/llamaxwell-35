@@ -1,0 +1,320 @@
+{
+  "schema_version": 1,
+  "published_branch_parent": "7f6bd99b57bdf9f4c8e151f28517c83834511e04",
+  "hardware": "NVIDIA Quadro M6000",
+  "published_segmented_source": {
+    "commit": "2c32420080d5d151d34191743041bc1e7a1379cb",
+    "patch_sha256": "771a6b2da0a9e5dd272033841d4ca5170c6a63a1cf7e96da694fb972f6d4bd09"
+  },
+  "fixture": {
+    "prompt_n": 80000,
+    "prompt_sha256": "ecaf44e84a706416e24f9892fc436724041b453eadc56b16d4f085d5f4a97d90",
+    "template_sha256": "87d092e24cad4905a309e561eeffe217c69163fb12c30a7ad2d948b0ede66749",
+    "source_commit": "e2eb39e81cbd43ff95dfc46bddb5155b582ccdfd",
+    "source_blob": "324e3858e368245e39d2a2e5d5d9ebba6719ac57",
+    "source_repository": "ggml-org/llama.cpp",
+    "source_sha256": "b0b0441a890c6573ac8d4ff32c27eeca4f7922893ed894b1631d30835dfa0bed"
+  },
+  "configuration": {
+    "common_model_independent_server_argv": [
+      "--alias",
+      "qwen36-moe",
+      "--override-kv",
+      "tokenizer.ggml.pre=str:qwen35",
+      "-ngl",
+      "999",
+      "--fit",
+      "off",
+      "-np",
+      "1",
+      "-c",
+      "84224",
+      "-b",
+      "2048",
+      "--mixed-batch-size",
+      "1024",
+      "--prefill-single-stream",
+      "--checkpoint-min-step",
+      "2048",
+      "--no-context-shift",
+      "-fa",
+      "on",
+      "--cache-type-k",
+      "f16",
+      "--cache-type-v",
+      "f16",
+      "--jinja",
+      "--metrics",
+      "-lv",
+      "4",
+      "-ub",
+      "1024",
+      "--cache-ram",
+      "12288",
+      "--ctx-checkpoints",
+      "2"
+    ],
+    "common_numeric_environment": {
+      "GGML_CUDA_MOE_DOWNX": "1",
+      "GGML_CUDA_MOE_DOWNH": "2",
+      "GGML_CUDA_OCCAMY_GDN_QKREUSE": "1",
+      "GGML_CUDA_OCCAMY_GDN_PCSHARE": "1",
+      "GGML_CUDA_MMVQ_SM52": "1",
+      "GGML_CUDA_RMS_WARP": "0",
+      "GGML_CUDA_HEAD_ROWPACK_SM52": "1",
+      "GGML_CUDA_MMQ_COMPACT_SM52": "1",
+      "GGML_CUDA_Q8_REUSE": "1",
+      "GGML_CUDA_NORM_Q8": "1",
+      "GGML_CUDA_CONCAT_T": "1",
+      "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": "1",
+      "GGML_CUDA_GATE_COPY": "1",
+      "GGML_CUDA_OCCAMY_GDN": "1",
+      "GGML_CUDA_MMQ_XMAD_SM52": "1",
+      "GGML_CUDA_GDN_COLS": "2,4",
+      "GGML_CUDA_OCCAMY_FA": "1",
+      "GGML_CUDA_OCCAMY_FUSED": "1",
+      "GGML_CUDA_OCCAMY_FA_PIPE": "3",
+      "GGML_CUDA_MOE_LOP3": "1",
+      "GGML_CUDA_MOE_TAILBAL": "1",
+      "GGML_CUDA_OCCAMY_GDN_PREF": "1",
+      "GGML_CUDA_OCCAMY_HOSTGAP": "1",
+      "GGML_CUDA_OCCAMY_SMALLFUSE": "2",
+      "GGML_CUDA_MMQ_TAIL_SM52": "1",
+      "GGML_CUDA_OCCAMY_GDN_REPACK": "1",
+      "GGML_CUDA_OCCAMY_N2SPLIT": "1",
+      "GGML_CUDA_OCCAMY_FA_ADDR": "1",
+      "GGML_CUDA_OCCAMY_N2GDN": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM": "1",
+      "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": "1",
+      "GGML_CUDA_MOE_V3": "1",
+      "GGML_CUDA_OCCAMY_GDN_T2": "1",
+      "GGML_CUDA_OCCAMY_FA_MROW": "3",
+      "GGML_CUDA_OCCAMY_FA2_NU": "4",
+      "LLAMA_TRACE": "1"
+    },
+    "serial_spec_argv": [
+      "--spec-type",
+      "none"
+    ],
+    "lookup_spec_argv": [
+      "--spec-type",
+      "ngram-simple",
+      "--spec-ngram-simple-size-n",
+      "16",
+      "--spec-ngram-simple-size-m",
+      "255",
+      "--spec-ngram-simple-min-hits",
+      "1"
+    ],
+    "request_parameters": {
+      "id_slot": 0,
+      "n_predict": 3072,
+      "temperature": 0,
+      "seed": 7,
+      "cache_prompt": true,
+      "ignore_eos": false,
+      "return_tokens": true,
+      "stream": false
+    }
+  },
+  "same_runtime_sha256": {
+    "llama-server": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+    "libggml-cuda.so": "6f37baad23c4ffbe2bcb8d5363d76b71df0af3b0ae7b2b65917104728379e058",
+    "libllama-common.so.0.6.0": "c3131627c17f77f0e2d0800470bda5f77b93fc7e753328ade3bbf01ec5efc8f6",
+    "libllama-server-impl.so": "5750804e00d18aef90b4f9336969b13c537f67d331442e2cf197ce5068a3ad0a",
+    "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117"
+  },
+  "scope": "one 80K exact code revision; six requests in two same-build and single-slot processes",
+  "lookup_process_order": [
+    "single-cold",
+    "single-warm-a",
+    "segments-warm",
+    "single-warm-b"
+  ],
+  "serial_process_order": [
+    "cold",
+    "warm"
+  ],
+  "runs": {
+    "lookup_process": {
+      "steps": {
+        "single-cold": {
+          "request_wall_s": 276.21390691399574,
+          "decode_s": 14.712618,
+          "decode_toks_s": 117.04239177554939,
+          "server_first_token_s": 261.47618900000003,
+          "token_count_including_eos": 1722,
+          "cache_reused": 0,
+          "prompt_tokens_evaluated": 80000,
+          "same_exact_source_text_ast_and_output_tokens_through_eos": true,
+          "truncated": false,
+          "verifier_widths": [
+            256,
+            101,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            53
+          ],
+          "draft_accepted": 1681,
+          "draft_proposed": 1837,
+          "restores_logged": 1,
+          "verifier_calls_logged": 9,
+          "q101_replays_confirmed": 1
+        },
+        "single-warm-a": {
+          "request_wall_s": 14.659804758965038,
+          "decode_s": 14.53053,
+          "decode_toks_s": 118.50909774110097,
+          "server_first_token_s": 0.106421,
+          "token_count_including_eos": 1722,
+          "cache_reused": 79996,
+          "prompt_tokens_evaluated": 4,
+          "same_exact_source_text_ast_and_output_tokens_through_eos": true,
+          "truncated": false,
+          "verifier_widths": [
+            256,
+            101,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            53
+          ],
+          "draft_accepted": 1681,
+          "draft_proposed": 1837,
+          "restores_logged": 1,
+          "verifier_calls_logged": 9,
+          "q101_replays_confirmed": 1
+        },
+        "segments-warm": {
+          "request_wall_s": 12.981045724009164,
+          "decode_s": 12.854049999999999,
+          "decode_toks_s": 133.96555949292247,
+          "server_first_token_s": 0.10649800000000001,
+          "token_count_including_eos": 1722,
+          "cache_reused": 79996,
+          "prompt_tokens_evaluated": 4,
+          "same_exact_source_text_ast_and_output_tokens_through_eos": true,
+          "truncated": false,
+          "inferred_single_row_steps": 40,
+          "verifier_widths": [
+            98,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            47
+          ],
+          "draft_accepted": 1673,
+          "draft_proposed": 1673,
+          "restores_logged": 0,
+          "verifier_calls_logged": 8,
+          "q101_replays_confirmed": 0
+        },
+        "single-warm-b": {
+          "request_wall_s": 14.630084225093015,
+          "decode_s": 14.499742,
+          "decode_toks_s": 118.76073381167747,
+          "server_first_token_s": 0.108758,
+          "token_count_including_eos": 1722,
+          "cache_reused": 79996,
+          "prompt_tokens_evaluated": 4,
+          "same_exact_source_text_ast_and_output_tokens_through_eos": true,
+          "truncated": false,
+          "verifier_widths": [
+            256,
+            101,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            53
+          ],
+          "draft_accepted": 1681,
+          "draft_proposed": 1837,
+          "restores_logged": 1,
+          "verifier_calls_logged": 9,
+          "q101_replays_confirmed": 1
+        }
+      },
+      "runner_exit": 0,
+      "cleanup_exit": 0,
+      "private_aggregate_receipt_sha256": "da8f542814d937f7aa3a7c5b5a1fa5ccff0792faeb5940a90b189aee702feb13"
+    },
+    "serial_process": {
+      "steps": {
+        "cold": {
+          "request_wall_s": 292.20631770894397,
+          "decode_s": 29.615353,
+          "decode_toks_s": 58.14551661768138,
+          "server_first_token_s": 262.563858,
+          "token_count_including_eos": 1722,
+          "cache_reused": 0,
+          "prompt_tokens_evaluated": 80000,
+          "same_exact_source_text_ast_and_output_tokens_through_eos": true,
+          "truncated": false,
+          "draft_accepted": null,
+          "draft_proposed": null,
+          "restores_logged": 0,
+          "verifier_calls_logged": 0,
+          "q101_replays_confirmed": 0
+        },
+        "warm": {
+          "request_wall_s": 29.753164220950566,
+          "decode_s": 29.623113,
+          "decode_toks_s": 58.13028495688484,
+          "server_first_token_s": 0.107223,
+          "token_count_including_eos": 1722,
+          "cache_reused": 79996,
+          "prompt_tokens_evaluated": 4,
+          "same_exact_source_text_ast_and_output_tokens_through_eos": true,
+          "truncated": false,
+          "draft_accepted": null,
+          "draft_proposed": null,
+          "restores_logged": 0,
+          "verifier_calls_logged": 0,
+          "q101_replays_confirmed": 0
+        }
+      },
+      "runner_exit": 0,
+      "cleanup_exit": 0,
+      "private_aggregate_receipt_sha256": "260a99549c082ac18e135c418cf0b1239c16951893d1c3e45e5831850e61a3a7"
+    }
+  },
+  "valid_lookup_source_range_count_by_arm": {
+    "single_span": 1,
+    "segmented": 2
+  },
+  "warm_comparison": {
+    "warm_cache": [
+      79996,
+      4
+    ],
+    "serial_over_segmented_decode": 2.3045742781457985,
+    "serial_over_segmented_wall": 2.2920467929575534,
+    "single_span_warm_median": {
+      "request_wall_s": 14.644944492029026,
+      "decode_s": 14.515136,
+      "decode_toks_s": 118.63491577638922
+    }
+  },
+  "relative_to_same_slot_single_span_controls": {
+    "segmented_over_same_build_control_request_wall_s": 0.8863840850386635,
+    "segmented_over_same_build_control_decode_s": 0.8855618025211751,
+    "segmented_over_same_build_control_decode_toks_s": 1.1292253938581576
+  },
+  "verified_http_400_case_count": 8,
+  "serial_relative_cold_segmented_available": false,
+  "comparison_receipt_sha256": "894a3680626aa20686da47141e33de8cc080340c81f43c664bd9bfb5e5f5aa44",
+  "rate_definition": "emitted tokens including EOS divided by server decode duration"
+}
