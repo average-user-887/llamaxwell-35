@@ -1,0 +1,31 @@
+{
+  "publication_parent": "804349dc98991765af2f3cce80e4554fc60335a2",
+  "source_checkout": "da7ba0e49dd43c69f9ee5a219ea3124f7acda0c8",
+  "build_image_sha256": "747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed",
+  "runtime_image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "compiler": "/usr/bin/g++-14",
+  "compile_flags": {
+    "CXX_DEFINES": "-DGGML_BACKEND_DL -DGGML_SHARED -DLLAMA_SHARED -DLLAMA_SUBPROCESS",
+    "CXX_INCLUDES": "-I${CMAKE_SOURCE_ROOT}/tools/server -I/b/tools/server -I${CMAKE_SOURCE_ROOT}/tools/server/../mtmd -I${CMAKE_SOURCE_ROOT} -I${CMAKE_SOURCE_ROOT}/common/. -I${CMAKE_SOURCE_ROOT}/vendor/nlohmann/.. -I${CMAKE_SOURCE_ROOT}/vendor/sheredom/.. -I${CMAKE_SOURCE_ROOT}/src/../include -I${CMAKE_SOURCE_ROOT}/ggml/src/../include -I${CMAKE_SOURCE_ROOT}/tools/mtmd/.",
+    "CXX_FLAGS": "-O3 -DNDEBUG -fPIC -Wmissing-declarations -Wmissing-noreturn -Wall -Wextra -Wpedantic -Wcast-qual -Wno-unused-function -Wno-array-bounds -Wextra-semi"
+  },
+  "compile_output_sha256": {
+    "server_context_preimage": "1e20f71d8f202245db9e347a3aa97390890b41f0ec32f2de5d8a91ffb18be5da",
+    "server_context_instrumented": "1123466115489f3aa2b8985d04771e0bdf924c2676c7bf05595208c3347d89b1",
+    "server_context_instrumented_object": "5537220be5fc3d27fc52671285ddddddea072a90ee46b087fa80aebd4362c48c",
+    "original_server_context_archive": "51aace280d3ab606ed0ce8b5b471cf4e976b55dca4a56cab9e22935c32cd9d1b",
+    "instrumented_server_context_archive": "75e91b6a4943c11423c039d8935d10b08f1bcd2e29c22829969cc8cb513f1b58",
+    "candidate_server_impl": "6644d1683750aab2b8f881e0cd9dde07307896ec6026a913dc85ba3991e0bd3e",
+    "original_server_impl_relink": "1138515898887c6ec6be01a210cfb59bb8e1338ccf6eeef1d032ffd4fdb22b65",
+    "source_patch": "4f5088fe8e72ef816af98516d9605678485d1ca9e0b0306e76806ea899ff4965",
+    "runtime_report_converter": "2e33c032aa36c6ebd0c7b98ce62ff0e54ac47c82dc8b991c1145dad62ee4e6ed",
+    "trace_v2_converter": "6f22f204d8009f49203360812b2a677469a1c8a6c15c96f382cad579808be127"
+  },
+  "mapped_runtime_sha256": {
+    "libggml-cuda.so": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+    "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+    "libllama-server-impl.so": "6644d1683750aab2b8f881e0cd9dde07307896ec6026a913dc85ba3991e0bd3e",
+    "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+  }
+}

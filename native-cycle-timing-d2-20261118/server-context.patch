@@ -1,0 +1,310 @@
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -96,6 +96,121 @@
+     }
+ };
+ static mv1_host_t g_mv1;
++
++// Diagnostic-only one-slot timing. Host call boundaries only. No extra backend wait.
++namespace {
++
++enum class native_stage {
++    draft, target_decode, target_output_wait, cache_process, sample, checkpoint_save,
++    target_trim, draft_trim, target_load, draft_load, sampler_restore, count
++};
++
++struct native_cycle_timing {
++    struct stage {
++        long long first = -1, last = -1, total = 0, calls = 0;
++    };
++    FILE * file = nullptr;
++    long long origin = -1, begin = -1, previous_end = -1, gap = -1, cycle = 0, request = 0;
++    int task = -1;
++    size_t offered = 0, accepted = 0, emitted = 0;
++    bool replay = false, checkpoint = false, verified = false, timer_active = false;
++    stage costs[static_cast<int>(native_stage::count)] = {};
++
++    native_cycle_timing() {
++        const char * path = getenv("LLAMA_NATIVE_CYCLE_TIMING");
++        if (!path || !path[0]) { return; }
++        file = fopen(path, "w");
++        GGML_ASSERT(file);
++        fprintf(file, "cycle\trequest\tbegin_us\tspan_us\tgap_us\treplay\tverified\toffered\taccepted\temitted\tcheckpoint");
++        const char * names[] = {"draft", "target_decode", "target_output_wait", "cache_process", "sample",
++                                "checkpoint_save", "target_trim", "draft_trim", "target_load", "draft_load",
++                                "sampler_restore"};
++        static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(native_stage::count));
++        for (const char * name : names) {
++            fprintf(file, "\t%s_first_us\t%s_last_us\t%s_us\t%s_calls", name, name, name, name);
++        }
++        fprintf(file, "\tother_us\n");
++        fflush(file);
++    }
++
++    ~native_cycle_timing() {
++        if (file) { fclose(file); }
++    }
++
++    void start(int task_id, bool is_replay) {
++        GGML_ASSERT(begin < 0);
++        begin = ggml_time_us();
++        if (origin < 0) { origin = begin; }
++        if (task != task_id) {
++            task = task_id;
++            ++request;
++            previous_end = -1;
++        }
++        gap = previous_end >= 0 ? begin - previous_end : -1;
++        offered = accepted = emitted = 0;
++        replay = is_replay;
++        checkpoint = verified = false;
++        for (auto & value : costs) { value = {}; }
++    }
++
++    void add(native_stage kind, long long first, long long last) {
++        auto & value = costs[static_cast<int>(kind)];
++        if (!value.calls) { value.first = first - begin; }
++        value.last = last - begin;
++        value.total += last - first;
++        ++value.calls;
++    }
++
++    void finish() {
++        if (begin < 0) { return; }
++        GGML_ASSERT(!timer_active);
++        const long long end = ggml_time_us();
++        previous_end = end;
++        const long long span = end - begin;
++        fprintf(file, "%lld\t%lld\t%lld\t%lld\t%lld\t%d\t%d\t%zu\t%zu\t%zu\t%d",
++                ++cycle, request, begin - origin, span, gap, replay, verified, offered, accepted, emitted, checkpoint);
++        long long subtotal = 0;
++        for (const auto & value : costs) {
++            fprintf(file, "\t%lld\t%lld\t%lld\t%lld", value.first, value.last, value.total, value.calls);
++            subtotal += value.total;
++        }
++        GGML_ASSERT(span >= subtotal);
++        fprintf(file, "\t%lld\n", span - subtotal);
++        if ((cycle & 127) == 0) { fflush(file); }
++        begin = -1;
++    }
++};
++
++static native_cycle_timing g_native_cycle;
++
++struct native_stage_timer {
++    native_stage kind;
++    long long start;
++    explicit native_stage_timer(native_stage which) : kind(which), start(g_native_cycle.begin >= 0 ? ggml_time_us() : -1) {
++        if (start >= 0) {
++            GGML_ASSERT(!g_native_cycle.timer_active);
++            g_native_cycle.timer_active = true;
++        }
++    }
++    ~native_stage_timer() {
++        if (start >= 0) {
++            g_native_cycle.add(kind, start, ggml_time_us());
++            g_native_cycle.timer_active = false;
++        }
++    }
++};
++
++struct native_iteration_end {
++    ~native_iteration_end() { g_native_cycle.finish(); }
++};
++
++template <typename Function>
++static decltype(auto) native_timed(native_stage which, Function && function) {
++    native_stage_timer timer(which);
++    return function();
++}
++
++} // namespace
+ 
+ // MV2 top-8 dump (LLAMA_MV2_DUMP=<file>, LLAMA_MV2_DUMP_LO/HI = n_decoded range, default 0..64; off when unset)
+ struct mv2_dump_t {
+@@ -2651,7 +2766,7 @@
+     static constexpr uint32_t SLOT_CKPT_MAGIC   = 0x504b4353; // "SCKP"
+     static constexpr uint32_t SLOT_CKPT_VERSION = 1;
+ 
+-    static bool ckpt_read(std::ifstream & ifs, void * dst, size_t size, size_t & n_read) {
++    [[gnu::used]] static bool ckpt_read(std::ifstream & ifs, void * dst, size_t size, size_t & n_read) {
+         if (!ifs.read((char *) dst, size)) {
+             return false;
+         }
+@@ -3210,6 +3325,7 @@
+ #endif
+ 
+     void update_slots() {
++        native_iteration_end native_end;
+ #ifdef DEBUG_TIMINGS
+         static int64_t t_prev = 0;
+         int64_t t_start = ggml_time_us();
+@@ -3421,6 +3537,10 @@
+                 const int n_draft_max = slot.get_n_draft_max();
+ 
+                 if (n_draft_max > 0) {
++                    if (g_native_cycle.file) {
++                        GGML_ASSERT(slots.size() == 1);
++                        g_native_cycle.start(slot.task->id, slot.spec_is_replay);
++                    }
+                     GGML_ASSERT(slot.can_speculate());
+ 
+                     // stale candidates: a replay never reads them, a new draft refills them
+@@ -3440,7 +3560,7 @@
+                                 llama_memory_seq_pos_max(llama_get_memory(ctx_tgt), slot.id));
+ 
+                         if (use_ckpt_dft) {
+-                            slot.spec_ckpt.update_dft(ctx_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY);
++                            native_timed(native_stage::checkpoint_save, [&]() { return slot.spec_ckpt.update_dft(ctx_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY); });
+                         }
+ 
+                         slot.spec_prompt = slot.prompt.tokens.get_text_tokens();
+@@ -3469,7 +3589,7 @@
+         if (!drafting.empty()) {
+             queue_tasks.yield_to_queue([&]() {
+                 mv1_scope _mv1(0);
+-                common_speculative_draft(spec.get());
++                native_timed(native_stage::draft, [&]() { return common_speculative_draft(spec.get()); });
+             });
+         }
+ 
+@@ -3485,10 +3605,10 @@
+ 
+             if (ctx_dft) {
+                 if (use_ckpt_dft) {
+-                    GGML_ASSERT(ckpt.load_dft(ctx_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY));
+-                }
+-
+-                if (!llama_memory_seq_rm(llama_get_memory(ctx_dft), slot.id, ckpt.pos_max + 1, -1)) {
++                    GGML_ASSERT(native_timed(native_stage::draft_load, [&]() { return ckpt.load_dft(ctx_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY); }));
++                }
++
++                if (!native_timed(native_stage::draft_trim, [&]() { return llama_memory_seq_rm(llama_get_memory(ctx_dft), slot.id, ckpt.pos_max + 1, -1); })) {
+                     GGML_ABORT("failed to remove sequence %d\n", slot.id);
+                 }
+             }
+@@ -3504,7 +3624,7 @@
+                 if (use_ckpt_tgt) {
+                     //const int64_t t_start = ggml_time_us();
+ 
+-                    ckpt.update_tgt(ctx_tgt, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY);
++                    native_timed(native_stage::checkpoint_save, [&]() { return ckpt.update_tgt(ctx_tgt, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY); });
+ 
+                     //const int64_t t_total = ggml_time_us() - t_start;
+                     //printf("checkpoint total: %f ms\n", t_total / 1000.0);
+@@ -3516,7 +3636,7 @@
+                 }
+ 
+                 if (use_ckpt_dft) {
+-                    ckpt.update_dft(ctx_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY);
++                    native_timed(native_stage::checkpoint_save, [&]() { return ckpt.update_dft(ctx_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY); });
+                 }
+             }
+         });
+@@ -4271,9 +4391,9 @@
+         int ret = 0;
+         queue_tasks.yield_to_queue([&]() {
+             mv1_scope _mv1(1);
+-            ret = llama_process(ctx_tgt, LLAMA_PROCESS_TYPE_DECODE, batch.view.get());
++            ret = native_timed(native_stage::target_decode, [&]() { return llama_process(ctx_tgt, LLAMA_PROCESS_TYPE_DECODE, batch.view.get()); });
+             if (ret == 0 && has_output) {
+-                llama_synchronize(ctx_tgt);
++                native_timed(native_stage::target_output_wait, [&]() { return llama_synchronize(ctx_tgt); });
+             }
+         });
+ 
+@@ -4337,7 +4457,7 @@
+             bool ok = true;
+             queue_tasks.yield_to_queue([&]() {
+                 mv1_scope _mv1(2);
+-                ok = common_speculative_process(spec.get(), batch.view);
++                ok = native_timed(native_stage::cache_process, [&]() { return common_speculative_process(spec.get(), batch.view); });
+             });
+ 
+             if (!ok) {
+@@ -4536,17 +4656,20 @@
+                 const std::vector<int32_t> mv2_idx = mv2_on ? slot.spec_i_batch : std::vector<int32_t>();
+                 std::vector<llama_token> accepted;
+                 mv1_scope _mv1_sa(3);
+-                if (!synth_probs.empty()) {
+-                    // synthetic acceptance replaces verification entirely, so it comes first
+-                    accepted = server_sample_and_accept_synth(
+-                            slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft,
+-                            synth_probs, slot.spec_synth_rng, slot.spec_is_replay);
+-                } else if (slot.spec_is_replay && slot.use_spec_rejection()) {
+-                    accepted = server_accept_replay(slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft);
+-                } else if (use_rejection) {
+-                    accepted = common_sampler_sample_and_accept_n_rejection(slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft, slot.spec_draft_q);
+-                } else {
+-                    accepted = common_sampler_sample_and_accept_n(slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft);
++                {
++                    native_stage_timer timer(native_stage::sample);
++                    if (!synth_probs.empty()) {
++                        // synthetic acceptance replaces verification entirely, so it comes first
++                        accepted = server_sample_and_accept_synth(
++                                slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft,
++                                synth_probs, slot.spec_synth_rng, slot.spec_is_replay);
++                    } else if (slot.spec_is_replay && slot.use_spec_rejection()) {
++                        accepted = server_accept_replay(slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft);
++                    } else if (use_rejection) {
++                        accepted = common_sampler_sample_and_accept_n_rejection(slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft, slot.spec_draft_q);
++                    } else {
++                        accepted = common_sampler_sample_and_accept_n(slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft);
++                    }
+                 }
+                 slot.spec_i_batch.clear();
+ 
+@@ -4567,6 +4690,13 @@
+                     ctx_tgt_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_FULL ||
+                     (ctx_tgt_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_RS && n_rollback > llama_n_rs_seq(ctx_tgt));
+ 
++                if (g_native_cycle.begin >= 0) {
++                    g_native_cycle.verified = true;
++                    g_native_cycle.offered = n_draft;
++                    g_native_cycle.accepted = accepted.size() - 1;
++                    g_native_cycle.checkpoint = n_rollback > 0 && use_ckpt_tgt;
++                }
++
+                 // check for partial draft acceptance
+                 if (n_rollback > 0) {
+                     if (use_ckpt_tgt) {
+@@ -4583,16 +4713,16 @@
+                         SLT_DBG(slot, "restoring speculative checkpoint (pos_min = %d, pos_max = %d, size = %zu)\n", ckpt.pos_min, ckpt.pos_max, ckpt.size());
+ 
+                         g_mv1.restore++;
+-                        GGML_ASSERT(ckpt.load_tgt(slot.ctx_tgt, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY));
++                        GGML_ASSERT(native_timed(native_stage::target_load, [&]() { return ckpt.load_tgt(slot.ctx_tgt, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY); }));
+ 
+                         if (slot.ctx_dft) {
+-                            GGML_ASSERT(ckpt.load_dft(slot.ctx_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY));
++                            GGML_ASSERT(native_timed(native_stage::draft_load, [&]() { return ckpt.load_dft(slot.ctx_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY); }));
+                         }
+ 
+-                        slot.mem.seq_rm(slot.id, ckpt.pos_max + 1, -1);
++                        native_timed(native_stage::target_trim, [&]() { return slot.mem.seq_rm(slot.id, ckpt.pos_max + 1, -1); });
+ 
+                         slot.prompt.tokens.keep_first(ckpt.n_tokens);
+-                        common_sampler_copy(smpl_save.get(), slot.smpl.get());
++                        native_timed(native_stage::sampler_restore, [&]() { return common_sampler_copy(smpl_save.get(), slot.smpl.get()); });
+ 
+                         return;
+                     }
+@@ -4641,7 +4771,7 @@
+             slot.sampled = ids.back(); // last accepted token
+             SLT_DBG(slot, "add accepted tokens: sampled=%d, ids.size=%zu, n_draft=%zu\n", slot.sampled, ids.size(), n_draft);
+ 
+-            slot.mem.seq_rm(slot.id, slot.prompt.tokens.pos_next(), -1);
++            native_timed(native_stage::target_trim, [&]() { return slot.mem.seq_rm(slot.id, slot.prompt.tokens.pos_next(), -1); });
+ 
+             for (size_t i = 0; i < ids.size(); ++i) {
+                 completion_token_output result;
+@@ -4653,6 +4783,9 @@
+                 // TODO: set result.probs
+ 
+                 slot.stats.n_gen += 1;
++                if (g_native_cycle.begin >= 0) {
++                    ++g_native_cycle.emitted;
++                }
+ 
+                 if (!process_token(result, slot)) {
+                     slot.print_timings();

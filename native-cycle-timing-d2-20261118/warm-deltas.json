@@ -1,0 +1,55 @@
+{
+  "scope": "Intercepted monotonic acceptance log clocks plus actual cumulative host scope deltas. Residual includes untimed state handling, output and a scope-boundary offset.",
+  "arms": [
+    {
+      "mode": "depth1",
+      "outer_accept_log_clock_ms_per_round": 22.72513655172412,
+      "full_request_decode_ms_per_round": 22.73712708204812,
+      "host_scope_ms_per_round": {
+        "draft": 2.3610765517241377,
+        "tgt_decode": 19.344300689655157,
+        "spec_process": 0.18988137931034574,
+        "sample_accept": 0.3726172413793104
+      },
+      "unattributed_clock_residual_ms_per_round": 0.4572606896551683,
+      "anchor_absolute_rounds": [
+        125,
+        1575
+      ],
+      "anchor_warm_accept_indexes": [
+        23,
+        1473
+      ],
+      "anchor_round_span": 1450,
+      "observed_checkpoint_restore_delta": 0,
+      "rollback_cost_ms_per_round": null,
+      "complete_warm_periodic_snapshots": 43,
+      "warm_host_snapshot_line_markers": 65
+    },
+    {
+      "mode": "depth2",
+      "outer_accept_log_clock_ms_per_round": 35.79443199999998,
+      "full_request_decode_ms_per_round": 35.79904274937133,
+      "host_scope_ms_per_round": {
+        "draft": 4.522058666666666,
+        "tgt_decode": 30.08794133333334,
+        "spec_process": 0.2093795555555585,
+        "sample_accept": 0.4732675555555556
+      },
+      "unattributed_clock_residual_ms_per_round": 0.5017848888888565,
+      "anchor_absolute_rounds": [
+        125,
+        1250
+      ],
+      "anchor_warm_accept_indexes": [
+        50,
+        1175
+      ],
+      "anchor_round_span": 1125,
+      "observed_checkpoint_restore_delta": 0,
+      "rollback_cost_ms_per_round": null,
+      "complete_warm_periodic_snapshots": 31,
+      "warm_host_snapshot_line_markers": 49
+    }
+  ]
+}
