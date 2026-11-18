@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+base=$(dirname -- "$here")/night-cache-only
+source_mount="@OWNER_SERVER_SOURCE_MOUNT@"
+image=sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed
+python3 -B - "$base" "$here" <<'PY'
+import hashlib
+import sys
+from pathlib import Path
+base, here = map(Path, sys.argv[1:])
+raw = (base / 'src/common/sampling.cpp').read_bytes()
+assert hashlib.sha256(raw).hexdigest() == '32f8cf1b487cdb2720dee65650d785ddea4ea3d89c2a8186d830933e6facb233'
+source = raw.decode()
+(here / 'sampler-layout.inc').write_text(source[:source.index('std::string common_params_sampling::print()')])
+PY
+timeout -k 3s 60s docker run --rm --pull never --runtime runc --network none --cpuset-cpus 2   --name "nmmoon-finish33-sampler-screen-$$" --tmpfs /tmp:rw,size=512m   -u "$(id -u):$(id -g)" -e NVIDIA_VISIBLE_DEVICES=void   -v "$base/src:$source_mount:ro" -v "$base/build:/b:ro"   -v "$here:/work" -w /b/common --entrypoint /bin/bash "$image" -euc '
+    test "$(sha256sum /b/bin/libllama-common.so.0.6.0 | cut -d" " -f1)" = bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf
+    flags=CMakeFiles/llama-common.dir/flags.make
+    read -ra defines <<< "$(sed -n "s/^CXX_DEFINES = //p" "$flags")"
+    read -ra includes <<< "$(sed -n "s/^CXX_INCLUDES = //p" "$flags")"
+    /usr/bin/g++-14 "${defines[@]}" "${includes[@]}" -O3 -DNDEBUG /work/clone-screen.cpp \
+      -L/b/bin -Wl,-rpath,/b/bin -l:libllama-common.so.0.6.0 -l:libllama.so.0.6.0 -ldl -o /work/clone-screen
+    for repeat in 1 2 3; do /work/clone-screen; done
+  '

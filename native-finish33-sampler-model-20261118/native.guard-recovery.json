@@ -1,0 +1,11 @@
+{
+  "raw_runner_exit": 1,
+  "raw_cleanup_exit": 0,
+  "raw_reason": "malformed snapshot witness",
+  "validation_disposition": "passed_r1_timestamp_only_revalidation_of_preserved_r0_refusal",
+  "literal_counter_lines": {
+    "cold": "sampler_snapshot: elided=101 elided_rejected=12 kept=0 restored=0",
+    "warm": "5.56.268.056 I sampler_snapshot: elided=1743 elided_rejected=225 kept=0 restored=0"
+  },
+  "raw_receipt_file_hashes_reverified": true
+}

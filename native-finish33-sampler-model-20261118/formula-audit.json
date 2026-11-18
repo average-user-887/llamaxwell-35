@@ -1,0 +1,41 @@
+{
+  "source": "raw response token counts and server predicted_ms; 1.25 multiplied by fresh same-build serial throughput",
+  "phases": {
+    "cold": {
+      "serial_output_count": 192,
+      "native_output_count": 192,
+      "serial_decode_ms": 2582.864,
+      "native_decode_ms": 2006.064,
+      "serial_decode_tok_s": 74.33608583340045,
+      "native_decode_tok_s": 95.70980786256071,
+      "same_build_speedup_pct": 28.752821445377606,
+      "native_offered": 101,
+      "native_accepted": 89,
+      "native_output_per_offer": 1.900990099009901,
+      "native_decode_ms_per_offer": 19.8620198019802,
+      "required_native_tok_s": 92.92010729175055,
+      "required_ms_per_offer": 20.458328712871285,
+      "remaining_ms_per_offer": 0.0,
+      "margin_ms_per_offer": 0.5963089108910857,
+      "matches_25_percent_requirement": true
+    },
+    "warm": {
+      "serial_output_count": 3072,
+      "native_output_count": 3072,
+      "serial_decode_ms": 40106.475,
+      "native_decode_ms": 31883.217,
+      "serial_decode_tok_s": 76.59611072775655,
+      "native_decode_tok_s": 96.35163227098445,
+      "same_build_speedup_pct": 25.791807646010124,
+      "native_offered": 1642,
+      "native_accepted": 1429,
+      "native_output_per_offer": 1.8708891595615103,
+      "native_decode_ms_per_offer": 19.417306333739344,
+      "required_native_tok_s": 95.7451384096957,
+      "required_ms_per_offer": 19.540304506699144,
+      "remaining_ms_per_offer": 0.0,
+      "margin_ms_per_offer": 0.1229981729598002,
+      "matches_25_percent_requirement": true
+    }
+  }
+}

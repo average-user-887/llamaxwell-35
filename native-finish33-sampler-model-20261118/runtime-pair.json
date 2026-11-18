@@ -1,0 +1,31 @@
+{
+  "same_observed_environment_vector": true,
+  "only_child_argv_difference_is_speculation": true,
+  "same_observed_server_software": {
+    "libggml-cuda.so": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+    "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+    "libllama-server-impl.so": "4a0ff82df62550ccb27927bd98a39d036148b4666abc819bec18f14686efcc64",
+    "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+  },
+  "observed_enabled_treatment_flags": [
+    "GGML_CUDA_OCCAMY_FA_Q2_R2_PROBE4=1",
+    "GGML_CUDA_OCCAMY_FA_Q2_R2_STRIDE=1",
+    "GGML_CUDA_OCCAMY_FA_Q2_R2_TOP16=1",
+    "LLAMA_SPEC_RS_SAMPLER_SNAPSHOT_ELIDE=1"
+  ],
+  "serial_speculation_args": [
+    "--spec-type",
+    "none"
+  ],
+  "native_speculation_args": [
+    "--spec-type",
+    "draft-mtp",
+    "--spec-draft-n-max",
+    "1",
+    "--spec-draft-type-k",
+    "f16",
+    "--spec-draft-type-v",
+    "f16"
+  ]
+}

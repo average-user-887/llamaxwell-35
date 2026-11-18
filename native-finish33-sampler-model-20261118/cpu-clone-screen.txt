@@ -1,0 +1,12 @@
+linked_common=/b/bin/libllama-common.so.0 vocab=248320 token_data_bytes=12
+clone_screen empty samples=600 token_bytes=0 clone mean_us=0.482 p50_us=0.471 p90_us=0.491 free mean_us=0.185 p50_us=0.181 p90_us=0.191 end_to_end mean_us=0.667 p50_us=0.661 p90_us=0.671
+clone_screen full_warm samples=600 token_bytes=2979840 clone mean_us=52.061 p50_us=51.659 p90_us=52.220 free mean_us=0.410 p50_us=0.411 p90_us=0.421 end_to_end mean_us=52.472 p50_us=52.069 p90_us=52.631
+clone_screen full_after_64MiB_sweep samples=600 token_bytes=2979840 clone mean_us=198.684 p50_us=195.352 p90_us=217.414 free mean_us=1.331 p50_us=1.213 p90_us=1.924 end_to_end mean_us=200.015 p50_us=196.525 p90_us=219.107
+linked_common=/b/bin/libllama-common.so.0 vocab=248320 token_data_bytes=12
+clone_screen empty samples=600 token_bytes=0 clone mean_us=0.496 p50_us=0.491 p90_us=0.521 free mean_us=0.184 p50_us=0.181 p90_us=0.191 end_to_end mean_us=0.680 p50_us=0.672 p90_us=0.711
+clone_screen full_warm samples=600 token_bytes=2979840 clone mean_us=54.432 p50_us=52.820 p90_us=57.229 free mean_us=0.441 p50_us=0.421 p90_us=0.461 end_to_end mean_us=54.872 p50_us=53.312 p90_us=57.680
+clone_screen full_after_64MiB_sweep samples=600 token_bytes=2979840 clone mean_us=195.010 p50_us=191.113 p90_us=212.635 free mean_us=1.392 p50_us=1.263 p90_us=2.044 end_to_end mean_us=196.402 p50_us=192.727 p90_us=213.978
+linked_common=/b/bin/libllama-common.so.0 vocab=248320 token_data_bytes=12
+clone_screen empty samples=600 token_bytes=0 clone mean_us=0.490 p50_us=0.481 p90_us=0.511 free mean_us=0.185 p50_us=0.181 p90_us=0.191 end_to_end mean_us=0.675 p50_us=0.671 p90_us=0.701
+clone_screen full_warm samples=600 token_bytes=2979840 clone mean_us=52.181 p50_us=51.819 p90_us=52.450 free mean_us=0.417 p50_us=0.420 p90_us=0.430 end_to_end mean_us=52.599 p50_us=52.239 p90_us=52.870
+clone_screen full_after_64MiB_sweep samples=600 token_bytes=2979840 clone mean_us=196.655 p50_us=192.567 p90_us=218.546 free mean_us=1.313 p50_us=1.152 p90_us=2.114 end_to_end mean_us=197.969 p50_us=193.789 p90_us=220.670

@@ -1,0 +1,47 @@
+{
+  "serial": {
+    "file": "serial.trace-v2.jsonl",
+    "trace_sha256": "13879a38091d0304e9b6e8fa178b061ded2e3886fd1a7272ce9cd81ee0de6e0c",
+    "events": {
+      "cycle": 3264,
+      "observed_response_metrics": 2,
+      "offload_observed": 1,
+      "output_boundary": 2,
+      "owned_run_outcome": 1,
+      "physical_counter_boundary": 3,
+      "q2_moe_residency": 1,
+      "recurrent_rollback_rows": 1,
+      "request_begin": 2,
+      "runtime_state_marker": 1,
+      "sampler_snapshot_completion": 2,
+      "slot_release": 2,
+      "sparse_attention_dispatch_sample": 35,
+      "sse_clock_checkpoint": 7,
+      "trace_metadata": 1
+    }
+  },
+  "native": {
+    "file": "native.trace-v2.jsonl",
+    "trace_sha256": "2cbe97f858f5f39a857174eb401816863f3bdfbe710b8685a91c3cae184439fc",
+    "events": {
+      "fast_selector_first_dispatch": 1,
+      "fixed_stride_first_dispatch": 1,
+      "host_counter_snapshot": 70,
+      "observed_response_metrics": 2,
+      "offload_observed": 1,
+      "output_boundary": 2,
+      "owned_run_outcome": 1,
+      "physical_counter_boundary": 3,
+      "q2_moe_residency": 1,
+      "recurrent_rollback_rows": 2,
+      "request_begin": 2,
+      "runtime_state_marker": 1,
+      "sampler_snapshot_completion": 2,
+      "slot_release": 2,
+      "sparse_attention_dispatch_sample": 24,
+      "sse_clock_checkpoint": 7,
+      "tiled_probe_first_dispatch": 1,
+      "trace_metadata": 1
+    }
+  }
+}

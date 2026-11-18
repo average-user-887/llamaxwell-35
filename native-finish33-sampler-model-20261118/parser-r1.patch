@@ -1,0 +1,11 @@
+--- original/model.py
++++ r1/model.py
+@@ -32,7 +32,7 @@
+ 
+ SNAPSHOT_OPTION = "LLAMA_SPEC_RS_SAMPLER_SNAPSHOT_ELIDE"
+ SNAPSHOT = re.compile(
+-    r"^sampler_snapshot: elided=(\d+) elided_rejected=(\d+) kept=(\d+) restored=(\d+)$",
++    r"^(?:\d+\.\d{2}\.\d{3}\.\d{3} I )?sampler_snapshot: elided=(\d+) elided_rejected=(\d+) kept=(\d+) restored=(\d+)$",
+     re.M,
+ )
+ 

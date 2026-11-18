@@ -1,0 +1,42 @@
+{
+  "matched_snapshots": 66,
+  "window_available": true,
+  "first_round": 125,
+  "last_round": 1743,
+  "matched_rounds": 1618,
+  "matched_cumulative_acceptance_histograms": true,
+  "host_components": {
+    "draft": {
+      "prior_total_ms": 3812.1000000000004,
+      "candidate_total_ms": 3811.3869999999997,
+      "saved_ms_per_offered_round": 0.00044066749072969565,
+      "prior_calls": 1618,
+      "candidate_calls": 1618
+    },
+    "tgt_decode": {
+      "prior_total_ms": 26796.908000000025,
+      "candidate_total_ms": 26290.264999999985,
+      "saved_ms_per_offered_round": 0.31312917181708283,
+      "prior_calls": 1618,
+      "candidate_calls": 1618
+    },
+    "spec_process": {
+      "prior_total_ms": 279.83699999999953,
+      "candidate_total_ms": 287.03199999999924,
+      "saved_ms_per_offered_round": -0.004446847960444814,
+      "prior_calls": 1618,
+      "candidate_calls": 1618
+    },
+    "sample_accept": {
+      "prior_total_ms": 555.943,
+      "candidate_total_ms": 619.506,
+      "saved_ms_per_offered_round": -0.03928491965389369,
+      "prior_calls": 1618,
+      "candidate_calls": 1618
+    }
+  },
+  "complete_decode_saved_ms_per_offered_round": 0.4543471376370256,
+  "sum_matched_host_scope_savings_ms_per_offered_round": 0.269838071693474,
+  "complete_minus_matched_host_savings_ms_per_offered_round": 0.1845090659435516,
+  "scope": "Cumulative host phase time covers all work in each scope and has no exclusive CUDA kernel attribution. The complete-minus-matched value compares different windows. It is not an isolated phase or sampler clone duration."
+}

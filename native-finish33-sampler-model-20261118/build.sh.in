@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+base=$(dirname -- "$here")/night-cache-only
+source_mount="@OWNER_SERVER_SOURCE_MOUNT@"
+image=sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed
+python3 -B "$here/prepare.py"
+timeout -k 5s 260s taskset -c 2-3 nice -n 19 docker run --rm --pull never --runtime runc --network none \
+  --cpuset-cpus 2-3 --name "nmmoon-finish33-sampler-build-$$" --tmpfs /tmp:rw,size=512m \
+  -u "$(id -u):$(id -g)" -e NVIDIA_VISIBLE_DEVICES=void -e TMPDIR=/tmp \
+  -v "$base/src:$source_mount:ro" -v "$base/build:/b:ro" \
+  -v "$here:/work" -w /b/tools/server --entrypoint /bin/bash "$image" -euc '
+    flags=CMakeFiles/server-context.dir/flags.make
+    original="1138515898887c6ec6be01a210cfb59bb8e1338ccf6eeef1d032ffd4fdb22b65"
+    test "$(sha256sum /b/bin/libllama-server-impl.so | cut -d" " -f1)" = "$original"
+    sed "s|-o ../../bin/libllama-server-impl.so|-o /work/original-relink.so|" \
+      CMakeFiles/llama-server-impl.dir/link.txt >/work/original-link.sh
+    nice -n 19 bash -ex /work/original-link.sh
+    test "$(sha256sum /work/original-relink.so | cut -d" " -f1)" = "$original"
+    read -ra defines <<< "$(sed -n "s/^CXX_DEFINES = //p" "$flags")"
+    read -ra includes <<< "$(sed -n "s/^CXX_INCLUDES = //p" "$flags")"
+    read -ra cxxflags <<< "$(sed -n "s/^CXX_FLAGS = //p" "$flags")"
+    set -x
+    nice -n 19 /usr/bin/g++-14 "${defines[@]}" "${includes[@]}" "${cxxflags[@]}" \
+      -o /work/server-context.cpp.o -c /work/server-context.cpp
+    cp libserver-context.a /work/libserver-context.a
+    /usr/bin/ar r /work/libserver-context.a /work/server-context.cpp.o
+    /usr/bin/ranlib /work/libserver-context.a
+    sed "s|-o /work/original-relink.so|-o /work/libllama-server-impl.so|;s| libserver-context.a | /work/libserver-context.a |" \
+      /work/original-link.sh >/work/candidate-link.sh
+    nice -n 19 bash -ex /work/candidate-link.sh
+  ' > "$here/build.log" 2>&1
+sha256sum "$here/libllama-server-impl.so" "$here/server-context.patch"

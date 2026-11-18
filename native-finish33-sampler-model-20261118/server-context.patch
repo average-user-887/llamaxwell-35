@@ -1,0 +1,84 @@
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -96,6 +96,26 @@
+     }
+ };
+ static mv1_host_t g_mv1;
++
++static bool sampler_snapshot_elision_enabled() {
++    static const bool enabled = [] {
++        const char * flag = getenv("LLAMA_SPEC_RS_SAMPLER_SNAPSHOT_ELIDE");
++        return flag != nullptr && strcmp(flag, "1") == 0;
++    }();
++    return enabled;
++}
++
++// A bounded recurrent checkpoint can rewind at most one row per rejected draft
++// token. Replay and every other sequence-removal mode keep the original snapshot.
++static constexpr bool may_elide_sampler_snapshot(bool enabled, bool replay, common_context_seq_rm_type mode,
++                                                  size_t n_draft, uint32_t n_rs_seq) {
++    return enabled && !replay && mode == COMMON_CONTEXT_SEQ_RM_TYPE_RS && n_draft > 0 && n_draft <= n_rs_seq;
++}
++
++// Accessed only by the server worker. Log snapshots at completion boundaries.
++static struct {
++    unsigned long long elided = 0, elided_rejected = 0, kept = 0, restored = 0;
++} g_sampler_snapshot;
+ 
+ // MV2 top-8 dump (LLAMA_MV2_DUMP=<file>, LLAMA_MV2_DUMP_LO/HI = n_decoded range, default 0..64; off when unset)
+ struct mv2_dump_t {
+@@ -2281,6 +2301,11 @@
+     }
+ 
+     void send_final_response(server_slot & slot) {
++        if (sampler_snapshot_elision_enabled()) {
++            fprintf(stderr, "sampler_snapshot: elided=%llu elided_rejected=%llu kept=%llu restored=%llu\n",
++                    g_sampler_snapshot.elided, g_sampler_snapshot.elided_rejected,
++                    g_sampler_snapshot.kept, g_sampler_snapshot.restored);
++        }
+         auto res = std::make_unique<server_task_result_cmpl_final>();
+ 
+         res->id      = slot.task->id;
+@@ -4523,7 +4548,18 @@
+ 
+             // verify and try to accept the draft
+             {
+-                common_sampler_ptr smpl_save(common_sampler_clone(slot.smpl.get()));
++                const bool snapshot_opt_in = sampler_snapshot_elision_enabled();
++                const bool elide_snapshot = snapshot_opt_in && may_elide_sampler_snapshot(
++                    snapshot_opt_in, slot.spec_is_replay, ctx_tgt_seq_rm_type, n_draft, llama_n_rs_seq(ctx_tgt));
++                common_sampler_ptr smpl_save;
++                if (elide_snapshot) {
++                    ++g_sampler_snapshot.elided;
++                } else {
++                    smpl_save.reset(common_sampler_clone(slot.smpl.get()));
++                    if (snapshot_opt_in) {
++                        ++g_sampler_snapshot.kept;
++                    }
++                }
+ 
+                 GGML_ASSERT(slot.spec_i_batch.size() == n_draft + 1);
+                 GGML_ASSERT(slot.spec_draft_q.empty() || (slot.spec_draft_q.size() == slot.spec_draft.size()));
+@@ -4567,6 +4603,10 @@
+                     ctx_tgt_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_FULL ||
+                     (ctx_tgt_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_RS && n_rollback > llama_n_rs_seq(ctx_tgt));
+ 
++                if (elide_snapshot && n_rollback > 0) {
++                    ++g_sampler_snapshot.elided_rejected;
++                }
++
+                 // check for partial draft acceptance
+                 if (n_rollback > 0) {
+                     if (use_ckpt_tgt) {
+@@ -4592,7 +4632,11 @@
+                         slot.mem.seq_rm(slot.id, ckpt.pos_max + 1, -1);
+ 
+                         slot.prompt.tokens.keep_first(ckpt.n_tokens);
++                        GGML_ASSERT(smpl_save != nullptr);
+                         common_sampler_copy(smpl_save.get(), slot.smpl.get());
++                        if (snapshot_opt_in) {
++                            ++g_sampler_snapshot.restored;
++                        }
+ 
+                         return;
+                     }

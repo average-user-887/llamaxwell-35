@@ -1,0 +1,185 @@
+{
+  "candidate_cuda_sha256": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+  "prior_cuda_sha256": "9e999bcaf04397f267548abdfa3e326b65bee122fb1e24f92be55529f40a335e",
+  "candidate_server_impl_sha256": "4a0ff82df62550ccb27927bd98a39d036148b4666abc819bec18f14686efcc64",
+  "technical_pass": true,
+  "semantic_score": null,
+  "exact_output_ids_same_mode_each": 3264,
+  "warm_same_build_25_percent_gate": true,
+  "measurements": {
+    "cold": {
+      "serial": {
+        "n_out": 192,
+        "decode_toks_s": 74.33608583340045,
+        "request_wall_s": 265.5420135939494,
+        "ttft_s": 262.9543350680033,
+        "decode_s": 2.582864,
+        "cache_n": 0,
+        "evaluated_prompt_n": 80000,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "decode_ms_per_round": null,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "native": {
+        "n_out": 192,
+        "decode_toks_s": 95.70980786256071,
+        "request_wall_s": 268.38011008000467,
+        "ttft_s": 266.36521461000666,
+        "decode_s": 2.0060640000000003,
+        "cache_n": 0,
+        "evaluated_prompt_n": 80000,
+        "draft_n": 101,
+        "draft_n_accepted": 89,
+        "decode_ms_per_round": 19.8620198019802,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "serial_decode_toks_s": 74.33608583340045,
+      "native_decode_toks_s": 95.70980786256071,
+      "same_build_native_over_serial_ratio": 1.287528214453776,
+      "same_build_native_over_serial_pct": 28.752821445377606,
+      "native_minus_prior_selector_decode_toks_s": 1.905256485270499,
+      "serial_minus_prior_selector_decode_toks_s": 0.10498663706808031,
+      "native_saved_ms_per_round_vs_prior_selector": 0.403415841584156,
+      "same_build_native_vs_serial_first_id_difference": 170,
+      "same_build_native_vs_serial_full_text_equal": false,
+      "native_selector_witness": {
+        "aggregate_q2_sparse_calls": 1010,
+        "offered_drafts": 101,
+        "sampled_dispatch_count": 4,
+        "sampled_key_widths": [
+          80128,
+          80384
+        ]
+      },
+      "serial_selector_witness": {
+        "aggregate_q2_sparse_calls": 0,
+        "offered_drafts": 0,
+        "sampled_dispatch_count": 0,
+        "sampled_key_widths": []
+      },
+      "native_stride_dispatches": {
+        "actual_stride_dispatches": 1010,
+        "expected_stride_dispatches": 1010
+      },
+      "native_first_kv_pitch_bytes": 1024,
+      "serial_stride_dispatches": {
+        "actual_stride_dispatches": 0,
+        "expected_stride_dispatches": 0
+      },
+      "native_sampler_snapshots": {
+        "elided": 101,
+        "elided_rejected": 12,
+        "kept": 0,
+        "restored": 0
+      },
+      "serial_sampler_snapshots": {
+        "elided": 0,
+        "elided_rejected": 0,
+        "kept": 0,
+        "restored": 0
+      }
+    },
+    "warm": {
+      "serial": {
+        "n_out": 3072,
+        "decode_toks_s": 76.59611072775655,
+        "request_wall_s": 40.23385740898084,
+        "ttft_s": 0.1224537679227069,
+        "decode_s": 40.106474999999996,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "decode_ms_per_round": null,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "native": {
+        "n_out": 3072,
+        "decode_toks_s": 96.35163227098445,
+        "request_wall_s": 32.15159585303627,
+        "ttft_s": 0.26314608100801706,
+        "decode_s": 31.883217000000002,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "draft_n": 1642,
+        "draft_n_accepted": 1429,
+        "decode_ms_per_round": 19.417306333739344,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "serial_decode_toks_s": 76.59611072775655,
+      "native_decode_toks_s": 96.35163227098445,
+      "same_build_native_over_serial_ratio": 1.2579180764601012,
+      "same_build_native_over_serial_pct": 25.791807646010124,
+      "native_minus_prior_selector_decode_toks_s": 2.2029917335281084,
+      "serial_minus_prior_selector_decode_toks_s": 0.014093780794382837,
+      "native_saved_ms_per_round_vs_prior_selector": 0.4543471376370256,
+      "same_build_native_vs_serial_first_id_difference": 170,
+      "same_build_native_vs_serial_full_text_equal": false,
+      "native_selector_witness": {
+        "aggregate_q2_sparse_calls": 16420,
+        "offered_drafts": 1642,
+        "sampled_dispatch_count": 16,
+        "sampled_key_widths": [
+          80384,
+          80640,
+          80896,
+          81152,
+          81408,
+          81664,
+          81920,
+          82176,
+          82432,
+          82688,
+          82944,
+          83200
+        ]
+      },
+      "serial_selector_witness": {
+        "aggregate_q2_sparse_calls": 0,
+        "offered_drafts": 0,
+        "sampled_dispatch_count": 0,
+        "sampled_key_widths": []
+      },
+      "native_stride_dispatches": {
+        "actual_stride_dispatches": 16420,
+        "expected_stride_dispatches": 16420
+      },
+      "native_first_kv_pitch_bytes": 1024,
+      "serial_stride_dispatches": {
+        "actual_stride_dispatches": 0,
+        "expected_stride_dispatches": 0
+      },
+      "native_sampler_snapshots": {
+        "elided": 1642,
+        "elided_rejected": 213,
+        "kept": 0,
+        "restored": 0
+      },
+      "serial_sampler_snapshots": {
+        "elided": 0,
+        "elided_rejected": 0,
+        "kept": 0,
+        "restored": 0
+      }
+    }
+  },
+  "terminal_validation": {
+    "serial": {
+      "raw_runner_exit": 0,
+      "raw_cleanup_exit": 0,
+      "raw_refusal": null,
+      "validation_disposition": "passed_original_terminal_validator"
+    },
+    "native": {
+      "raw_runner_exit": 1,
+      "raw_cleanup_exit": 0,
+      "raw_refusal": "malformed snapshot witness",
+      "validation_disposition": "passed_r1_timestamp_only_revalidation_of_preserved_r0_refusal"
+    }
+  }
+}

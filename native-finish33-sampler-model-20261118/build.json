@@ -1,0 +1,66 @@
+{
+  "scope": "exact original relink and equal dynamic symbol type/name list, NEEDED, SONAME and RUNPATH",
+  "original_relink_sha256": "1138515898887c6ec6be01a210cfb59bb8e1338ccf6eeef1d032ffd4fdb22b65",
+  "candidate_server_impl_sha256": "4a0ff82df62550ccb27927bd98a39d036148b4666abc819bec18f14686efcc64",
+  "source_patch_sha256": "f47f5ef18e813b54ef2c001a79c086157e7a82c20fc314d3756f42fd3f95de33",
+  "dynamic_exports": 3081,
+  "dynamic_export_list_sha256": "1f664d66907c01640419e266ab4b0715876f2ea2455b9c754312fe7e550cd67c",
+  "dynamic_dependencies": [
+    [
+      "NEEDED",
+      "libllama-common.so.0"
+    ],
+    [
+      "NEEDED",
+      "libmtmd.so.0"
+    ],
+    [
+      "NEEDED",
+      "libllama.so.0"
+    ],
+    [
+      "NEEDED",
+      "libggml.so.0"
+    ],
+    [
+      "NEEDED",
+      "libggml-base.so.0"
+    ],
+    [
+      "NEEDED",
+      "libssl.so.3"
+    ],
+    [
+      "NEEDED",
+      "libcrypto.so.3"
+    ],
+    [
+      "NEEDED",
+      "libstdc++.so.6"
+    ],
+    [
+      "NEEDED",
+      "libm.so.6"
+    ],
+    [
+      "NEEDED",
+      "libgcc_s.so.1"
+    ],
+    [
+      "NEEDED",
+      "libc.so.6"
+    ],
+    [
+      "NEEDED",
+      "ld-linux-x86-64.so.2"
+    ],
+    [
+      "SONAME",
+      "libllama-server-impl.so"
+    ],
+    [
+      "RUNPATH",
+      "/b/bin:"
+    ]
+  ]
+}
