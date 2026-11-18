@@ -1,0 +1,35 @@
+{
+  "existing_device_functions_words_exact": 37,
+  "added_device_functions": [
+    "_Z15ofa_sparse_initILi4EEv10ofa_paramsP15ofa_sparse_plan",
+    "_Z16ofa_sparse_probeILi4EEv10ofa_paramsP15ofa_sparse_planPfi",
+    "_Z20ofa_sparse_attentionILi4ELi1EEv10ofa_paramsP15ofa_sparse_plan",
+    "_Z20ofa_sparse_attentionILi4ELi2EEv10ofa_paramsP15ofa_sparse_plan",
+    "_Z24ofa_sparse_scan_probe_r2ILi4EEv10ofa_paramsP15ofa_sparse_metaPfi"
+  ],
+  "c973_and_original_relink_sha256": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+  "candidate_dso_sha256": "fd436e975b2729c6ccd96abf51ef3f5f054e73c734ce1efdc4141b996b245b6c",
+  "benchmark_executable_sha256": "d7869680028af9c72851f63f71ad399efa2b288f97fa45207dd180c6750ff7cf",
+  "q4_compiled_resources": {
+    "1": {
+      "cta_threads": 256,
+      "registers_per_thread": 122,
+      "barriers": 1,
+      "static_shared_bytes": 9088,
+      "rounded_registers_per_cta": 32768,
+      "local_stack_bytes": 0,
+      "spill_load_bytes": 0,
+      "spill_store_bytes": 0
+    },
+    "2": {
+      "cta_threads": 512,
+      "registers_per_thread": 120,
+      "barriers": 1,
+      "static_shared_bytes": 18176,
+      "rounded_registers_per_cta": 61440,
+      "local_stack_bytes": 0,
+      "spill_load_bytes": 0,
+      "spill_store_bytes": 0
+    }
+  }
+}

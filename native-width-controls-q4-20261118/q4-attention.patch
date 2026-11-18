@@ -1,0 +1,135 @@
+--- a/ggml/src/ggml-cuda/fattn-occamy-sparse.cuh
++++ b/ggml/src/ggml-cuda/fattn-occamy-sparse.cuh
+@@ -313,6 +313,13 @@
+             return enable && strcmp(enable, "1") == 0 && revision && strcmp(revision, "1") == 0;
+         }();
+         if (!q3 || !ggml_is_contiguous(dst)) return false;
++    } else if (q->ne[1] == 4) {
++        static const bool q4 = [] {
++            const char * enable = getenv("GGML_CUDA_OCCAMY_FA_Q4_R2");
++            const char * revision = getenv("GGML_CUDA_OCCAMY_FA_SPARSE_R2");
++            return enable && strcmp(enable, "1") == 0 && revision && strcmp(revision, "1") == 0;
++        }();
++        if (!q4 || !ggml_is_contiguous(dst)) return false;
+     } else if (q->ne[1] != 1 && q->ne[1] != 2) return false;
+     if (q->ne[3] != 1) return false;
+     if (!mask || mask->ne[1] < q->ne[1] || mask->ne[3] != 1 || mask->nb[0] != sizeof(half)) return false;
+@@ -495,20 +502,21 @@
+     }
+ }
+ 
+-static std::atomic<long long> ofa_sparse_calls[4];
+-
+-template <int NQ>
++static std::atomic<long long> ofa_sparse_calls[5];
++
++template <int NQ, int NU = (NQ == 3 ? 2 : 4)>
+ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
+     const ggml_tensor * q = dst->src[0], * k = dst->src[1], * v = dst->src[2], * mask = dst->src[3];
+     const int nkvh = (int) k->ne[2], n_kv = (int) k->ne[1];
+     const int nplans = NQ*nkvh;
+     static const bool revision2 = []() { const char * s = getenv("GGML_CUDA_OCCAMY_FA_SPARSE_R2"); return s && strcmp(s, "1") == 0; }();
+     static const bool selector_check = []() { const char * s = getenv("GGML_CUDA_OCCAMY_FA_SPARSE_R2_CHECK"); return s && strcmp(s, "1") == 0; }();
+-    constexpr int NU = NQ == 3 ? 2 : 4, NG = 2*NQ, NT = 32*NU*NG;
++    constexpr int NG = 2*NQ, NT = 32*NU*NG;
+     const int id = ggml_cuda_get_device();
+     static const int blocks_per_sm = []() {
+         int n = 0;
+         CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&n, ofa_sparse_attention<NQ, NU>, NT, 0));
++        if constexpr (NQ == 4) GGML_ASSERT(n > 0);
+         return std::max(1, n);
+     }();
+     const int resident = blocks_per_sm*ggml_cuda_info().devices[id].nsm;
+@@ -533,6 +541,12 @@
+     p.nbv1 = v->nb[1]; p.nbv2 = v->nb[2]; p.nbv3 = v->nb[3];
+     p.nbm1 = mask->nb[1]; p.nbm3 = mask->nb[3];
+     const long long nc = ++ofa_sparse_calls[NQ];
++    if constexpr (NQ == 4) {
++        if (nc == 1) {
++            fprintf(stderr, "q4_r2_geometry nu=%d threads=%d nsplit=%d blocks_per_sm=%d n_kv=%d nkvh=%d\n",
++                    NU, NT, nsplit, blocks_per_sm, n_kv, nkvh);
++        }
++    }
+     static const bool profile_enabled = []() {
+         const char * s = getenv("GGML_CUDA_OCCAMY_FA_SPARSE_PROFILE");
+         return s && strcmp(s, "1") == 0;
+@@ -665,7 +679,68 @@
+     }
+ }
+ 
++// Check against two independent q2 launches with original Q and mask strides.
++static void ofa_sparse_check_four_rows(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
++    GGML_ASSERT(ggml_is_contiguous(dst));
++    const size_t count = (size_t) ggml_nelements(dst);
++    const size_t row_values = count / 4;
++    ggml_cuda_pool_alloc<float> scratch(ctx.pool(), count);
++    for (int first : {0, 2}) {
++        ggml_tensor view = *dst, query = *dst->src[0], mask = *dst->src[3];
++        query.data = (char *) query.data + first * query.nb[1];
++        mask.data = (char *) mask.data + first * mask.nb[1];
++        view.data = scratch.get() + first * row_values;
++        query.ne[1] = mask.ne[1] = view.ne[2] = 2;
++        view.src[0] = &query;
++        view.src[3] = &mask;
++        ofa_sparse_launch<2>(ctx, &view);
++    }
++
++    std::vector<float> actual(count), reference(count);
++    cudaStream_t stream = ctx.stream();
++    CUDA_CHECK(cudaMemcpyAsync(actual.data(), dst->data, count * sizeof(float), cudaMemcpyDeviceToHost, stream));
++    CUDA_CHECK(cudaMemcpyAsync(reference.data(), scratch.get(), count * sizeof(float), cudaMemcpyDeviceToHost, stream));
++    CUDA_CHECK(cudaStreamSynchronize(stream));
++    for (int row = 0; row < 4; ++row) {
++        float max_abs = 0.0f, max_ref = 0.0f;
++        size_t nonfinite = 0, failed = 0, word_diff = 0;
++        for (size_t col = 0; col < row_values; ++col) {
++            const size_t i = row * row_values + col;
++            const float a = actual[i], b = reference[i];
++            if (!std::isfinite(a) || !std::isfinite(b)) {
++                ++nonfinite;
++                continue;
++            }
++            const float delta = fabsf(a - b);
++            if (delta > 2e-5f * (1.0f + fabsf(b))) ++failed;
++            if (memcmp(&actual[i], &reference[i], sizeof(float)) != 0) ++word_diff;
++            max_abs = std::max(max_abs, delta);
++            max_ref = std::max(max_ref, fabsf(b));
++        }
++        fprintf(stderr, "q4_r2_check row=%d count=%zu nonfinite=%zu failed=%zu word_diff=%zu max_abs=%.9g max_ref=%.9g q_stride=%zu mask_stride=%zu out_stride=%zu\n",
++                row, row_values, nonfinite, failed, word_diff, max_abs, max_ref, dst->src[0]->nb[1], dst->src[3]->nb[1], dst->nb[2]);
++        GGML_ASSERT(nonfinite == 0 && failed == 0);
++    }
++}
++
+ void ggml_cuda_occamy_fa_sparse(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
++    if (dst->src[0]->ne[1] == 4) {
++        static const bool nu1 = [] {
++            const char * value = getenv("GGML_CUDA_OCCAMY_FA_Q4_R2_NU");
++            return value && strcmp(value, "1") == 0;
++        }();
++        if (nu1) ofa_sparse_launch<4, 1>(ctx, dst);
++        else ofa_sparse_launch<4, 2>(ctx, dst);
++        static const bool check = [] {
++            const char * value = getenv("GGML_CUDA_OCCAMY_FA_Q4_R2_CHECK");
++            return value && strcmp(value, "1") == 0;
++        }();
++        if (check) {
++            static std::atomic<unsigned> checked{0};
++            if (checked.fetch_add(1) < 2) ofa_sparse_check_four_rows(ctx, dst);
++        }
++        return;
++    }
+     if (dst->src[0]->ne[1] == 3) {
+         ofa_sparse_launch<3>(ctx, dst);
+         static const bool check = [] {
+--- a/tests/test-backend-ops.cpp
++++ b/tests/test-backend-ops.cpp
+@@ -12238,7 +12238,7 @@
+     }
+ 
+     // The unprobed distant key deliberately exposes block selection's recall loss.
+-    for (int64_t nq : {1, 2, 3}) {
++    for (int64_t nq : {1, 2, 3, 4}) {
+         test_cases.emplace_back(new test_flash_attn_ext_sparse(81920, nq, true));
+         test_cases.emplace_back(new test_flash_attn_ext_sparse(81920, nq, false));
+         test_cases.emplace_back(new test_flash_attn_ext_sparse( 8196, nq, true));

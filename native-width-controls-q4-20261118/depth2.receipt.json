@@ -1,0 +1,438 @@
+{
+  "format_version": 1,
+  "mode": "depth2",
+  "cap_seconds": 430,
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+  "image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "gpu_requested": "Quadro M6000 24GB",
+  "fleet_admitted_cap_w": 250,
+  "native_q3_cuda_sha256": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+  "runtime_maps": {
+    "libggml-cuda.so": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+    "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+    "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+  },
+  "configured_argv": [
+    "-m",
+    "/models/occamy-1.0-Q4_0-headq40b-mtp.gguf",
+    "--alias",
+    "qwen36-moe",
+    "--override-kv",
+    "tokenizer.ggml.pre=str:qwen35",
+    "-ngl",
+    "999",
+    "-np",
+    "1",
+    "-c",
+    "84224",
+    "--no-context-shift",
+    "-b",
+    "2048",
+    "--mixed-batch-size",
+    "1024",
+    "--prefill-single-stream",
+    "--checkpoint-min-step",
+    "2048",
+    "-fa",
+    "on",
+    "--host",
+    "0.0.0.0",
+    "--port",
+    "8080",
+    "--jinja",
+    "--metrics",
+    "-lv",
+    "4",
+    "-ub",
+    "1024",
+    "--cache-ram",
+    "12288",
+    "--ctx-checkpoints",
+    "2",
+    "--spec-type",
+    "draft-mtp",
+    "--spec-draft-n-max",
+    "2",
+    "--spec-draft-type-k",
+    "f16",
+    "--spec-draft-type-v",
+    "f16"
+  ],
+  "configured_environment": [
+    "GGML_CUDA_MOE_DOWNX=1",
+    "GGML_CUDA_MOE_DOWNH=2",
+    "GGML_CUDA_OCCAMY_GDN_QKREUSE=1",
+    "GGML_CUDA_OCCAMY_GDN_PCSHARE=1",
+    "GGML_CUDA_MMVQ_SM52=1",
+    "GGML_CUDA_RMS_WARP=0",
+    "GGML_CUDA_HEAD_ROWPACK_SM52=1",
+    "GGML_CUDA_MMQ_COMPACT_SM52=1",
+    "GGML_CUDA_Q8_REUSE=1",
+    "GGML_CUDA_NORM_Q8=1",
+    "GGML_CUDA_CONCAT_T=1",
+    "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT=1",
+    "GGML_CUDA_GATE_COPY=1",
+    "GGML_CUDA_OCCAMY_GDN=1",
+    "GGML_CUDA_MMQ_XMAD_SM52=1",
+    "GGML_CUDA_GDN_COLS=2,4",
+    "GGML_CUDA_OCCAMY_FA=1",
+    "GGML_CUDA_OCCAMY_FUSED=1",
+    "GGML_CUDA_OCCAMY_FA_PIPE=3",
+    "GGML_CUDA_MOE_LOP3=1",
+    "GGML_CUDA_MOE_TAILBAL=1",
+    "GGML_CUDA_OCCAMY_GDN_PREF=1",
+    "GGML_CUDA_OCCAMY_HOSTGAP=1",
+    "GGML_CUDA_OCCAMY_SMALLFUSE=2",
+    "GGML_CUDA_MMQ_TAIL_SM52=1",
+    "GGML_CUDA_OCCAMY_GDN_REPACK=1",
+    "GGML_CUDA_OCCAMY_N2SPLIT=1",
+    "GGML_CUDA_OCCAMY_FA_ADDR=1",
+    "GGML_CUDA_OCCAMY_N2GDN=1",
+    "GGML_CUDA_FA_MAXWELL_GEMM=1",
+    "GGML_CUDA_FA_MAXWELL_GEMM_FUSED=1",
+    "GGML_CUDA_MOE_V3=1",
+    "LD_LIBRARY_PATH=/candidate",
+    "LLAMA_MV1_TRACE=1",
+    "GGML_CUDA_OCCAMY_FA_SPARSE=1",
+    "GGML_CUDA_OCCAMY_FA_SPARSE_R2=1",
+    "GGML_CUDA_OCCAMY_GDN_T2=1",
+    "GGML_CUDA_OCCAMY_FA_MROW=3",
+    "GGML_CUDA_OCCAMY_FA2_NU=4",
+    "LLAMA_MTP_MERGE_REEVAL=0",
+    "LLAMA_MTP_CACHE_ONLY=1",
+    "LLAMA_TRACE=1",
+    "GGML_CUDA_OCCAMY_FA_Q3_R2=1"
+  ],
+  "provenance_sha256": "628debdb97ed28770d1e112227e8e95551536ca6c421f5cfae26479ead6d3145",
+  "archived_measured_n100_receipt_sha256": "5bfa6b9074e98d9f400e1a281e8158b243a3af41720abcd5df77bd0cc468df1a",
+  "profile_instrumented": false,
+  "status": {
+    "runner_exit": 0,
+    "cleanup_exit": 0,
+    "bounded_wall_s": 320,
+    "technical_pass": true
+  },
+  "observed_requests": {
+    "cold": {
+      "n_out": 192,
+      "completed_request": true,
+      "ttft_s": 265.74818118999247,
+      "wall_s": 268.4223533530021,
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "prompt_ms": 265728.225,
+        "prompt_per_token_ms": 3.3216028124999997,
+        "prompt_per_second": 301.0594753342442,
+        "predicted_n": 192,
+        "predicted_ms": 2670.528,
+        "predicted_per_token_ms": 13.981821989528795,
+        "predicted_per_second": 71.52143695928297,
+        "draft_n": 148,
+        "draft_n_accepted": 117
+      },
+      "unassigned_serial_outputs": 1
+    },
+    "warm": {
+      "n_out": 3072,
+      "completed_request": true,
+      "ttft_s": 0.2637173430994153,
+      "wall_s": 42.97689917800017,
+      "timings": {
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "prompt_ms": 247.138,
+        "prompt_per_token_ms": 61.7845,
+        "prompt_per_second": 16.185289190654615,
+        "predicted_n": 3072,
+        "predicted_ms": 42708.258,
+        "predicted_per_token_ms": 13.906954737870402,
+        "predicted_per_second": 71.90646829940945,
+        "draft_n": 2386,
+        "draft_n_accepted": 1878
+      },
+      "unassigned_serial_outputs": 1
+    }
+  },
+  "speculative_trace_marker_count": 1267,
+  "cycle_rows_sha256": "289ba2613451f52754d6036fd0f5dc91da014a0a450ad80673ecae9f6e082c0a",
+  "validated_report": {
+    "mode": "depth2",
+    "depth": 2,
+    "technical_pass": true,
+    "profile": false,
+    "metrics": {
+      "cold": {
+        "prompt_n": 80000,
+        "cache_n": 0,
+        "evaluated_prompt_n": 80000,
+        "n_out": 192,
+        "ttft_s": 265.74818118999247,
+        "request_wall_s": 268.4223533530021,
+        "decode_s": 2.670528,
+        "decode_toks_s": 71.8958947444101,
+        "draft_n": 148,
+        "draft_n_accepted": 117,
+        "draft_acceptance_fraction": 0.7905405405405406,
+        "prior_n6_decode_toks_s": 71.56771312082196,
+        "same_prior_n6_first_192": true,
+        "same_prior_n6_first_191": true,
+        "first_prior_n6_mismatch_token_1_based": null,
+        "rounds": 74,
+        "proposal_width_counts": {
+          "2": 74
+        },
+        "accepted_prefix_histogram": [
+          10,
+          11,
+          53
+        ],
+        "prefix_probability": [
+          0.8648648648648649,
+          0.7162162162162162
+        ],
+        "yield_including_one_correction_or_bonus": 2.581081081081081,
+        "checkpoint_restore_events": 0,
+        "native_rejected_suffix_rounds": 21,
+        "decode_ms_per_native_cycle": 36.08821621621621,
+        "prompt_eval_s": 265.72822499999995,
+        "unassigned_serial_outputs": 1,
+        "structure": {
+          "characters": 690,
+          "nonempty_lines": 18,
+          "distinct_nonempty_lines": 17,
+          "repeated_line_occurrences": 1,
+          "largest_identical_line_count": 2,
+          "markdown_fence_lines": 0
+        },
+        "draft_n_rejected": 31,
+        "prompt_checkpoint_marker_count": 0,
+        "speculative_checkpoint_marker_count": 0
+      },
+      "warm": {
+        "prompt_n": 80000,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "n_out": 3072,
+        "ttft_s": 0.2637173430994153,
+        "request_wall_s": 42.97689917800017,
+        "decode_s": 42.708258,
+        "decode_toks_s": 71.929882974857,
+        "draft_n": 2386,
+        "draft_n_accepted": 1878,
+        "draft_n_rejected": 508,
+        "draft_acceptance_fraction": 0.7870913663034367,
+        "sse_checkpoints": [
+          {
+            "output_token": 1,
+            "elapsed_s": 0.2637173430994153,
+            "event_first_token": 1,
+            "event_last_token": 1
+          },
+          {
+            "output_token": 512,
+            "elapsed_s": 6.8556719810003415,
+            "event_first_token": 512,
+            "event_last_token": 512
+          },
+          {
+            "output_token": 1024,
+            "elapsed_s": 14.204384446027689,
+            "event_first_token": 1024,
+            "event_last_token": 1024
+          },
+          {
+            "output_token": 1536,
+            "elapsed_s": 20.82082635909319,
+            "event_first_token": 1536,
+            "event_last_token": 1536
+          },
+          {
+            "output_token": 2048,
+            "elapsed_s": 27.98608061799314,
+            "event_first_token": 2048,
+            "event_last_token": 2048
+          },
+          {
+            "output_token": 2560,
+            "elapsed_s": 35.60769856709521,
+            "event_first_token": 2560,
+            "event_last_token": 2560
+          },
+          {
+            "output_token": 3072,
+            "elapsed_s": 42.97229165001772,
+            "event_first_token": 3072,
+            "event_last_token": 3072
+          }
+        ],
+        "sse_segments": [
+          {
+            "after_output_token": 1,
+            "through_output_token": 512,
+            "elapsed_s": 6.591954637900926,
+            "stream_decode_toks_s": 77.51873731987901
+          },
+          {
+            "after_output_token": 512,
+            "through_output_token": 1024,
+            "elapsed_s": 7.348712465027347,
+            "stream_decode_toks_s": 69.67206873811121
+          },
+          {
+            "after_output_token": 1024,
+            "through_output_token": 1536,
+            "elapsed_s": 6.616441913065501,
+            "stream_decode_toks_s": 77.38298117436089
+          },
+          {
+            "after_output_token": 1536,
+            "through_output_token": 2048,
+            "elapsed_s": 7.1652542588999495,
+            "stream_decode_toks_s": 71.45594301333351
+          },
+          {
+            "after_output_token": 2048,
+            "through_output_token": 2560,
+            "elapsed_s": 7.621617949102074,
+            "stream_decode_toks_s": 67.17733733430187
+          },
+          {
+            "after_output_token": 2560,
+            "through_output_token": 3072,
+            "elapsed_s": 7.364593082922511,
+            "stream_decode_toks_s": 69.52183158459336
+          }
+        ],
+        "rounds": 1193,
+        "proposal_width_counts": {
+          "2": 1193
+        },
+        "accepted_prefix_histogram": [
+          172,
+          164,
+          857
+        ],
+        "prefix_probability": [
+          0.8558256496227996,
+          0.7183570829840737
+        ],
+        "yield_including_one_correction_or_bonus": 2.5741827326068734,
+        "checkpoint_restore_events": 0,
+        "native_rejected_suffix_rounds": 336,
+        "decode_ms_per_native_cycle": 35.79904274937133,
+        "prompt_eval_s": 0.247138,
+        "unassigned_serial_outputs": 1,
+        "structure": {
+          "characters": 12371,
+          "nonempty_lines": 293,
+          "distinct_nonempty_lines": 186,
+          "repeated_line_occurrences": 107,
+          "largest_identical_line_count": 22,
+          "markdown_fence_lines": 0
+        },
+        "prompt_checkpoint_marker_count": 1,
+        "speculative_checkpoint_marker_count": 0
+      }
+    },
+    "host_rounds_restores": [
+      1267,
+      0
+    ],
+    "warm_dispatch_samples": [
+      {
+        "kind": "sparse-r2",
+        "q": 3,
+        "calls": 1000,
+        "n_kv": 80128
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 3,
+        "calls": 2000,
+        "n_kv": 80384
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 3,
+        "calls": 3000,
+        "n_kv": 80640
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 3,
+        "calls": 4000,
+        "n_kv": 80896
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 1000,
+        "n_kv": 81152
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 3,
+        "calls": 5000,
+        "n_kv": 81152
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 3,
+        "calls": 6000,
+        "n_kv": 81408
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 3,
+        "calls": 7000,
+        "n_kv": 81664
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 3,
+        "calls": 8000,
+        "n_kv": 82176
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 3,
+        "calls": 9000,
+        "n_kv": 82432
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 2000,
+        "n_kv": 82432
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 3,
+        "calls": 10000,
+        "n_kv": 82432
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 3,
+        "calls": 11000,
+        "n_kv": 82688
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 3,
+        "calls": 12000,
+        "n_kv": 82944
+      }
+    ],
+    "semantic_score": null,
+    "instrumented_phase_summary": null,
+    "mapped_objects": {
+      "libggml-cuda.so": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+      "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+      "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+      "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+    }
+  }
+}

@@ -1,0 +1,452 @@
+{
+  "format_version": 1,
+  "mode": "depth1",
+  "cap_seconds": 430,
+  "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+  "image_sha256": "3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "gpu_requested": "Quadro M6000 24GB",
+  "fleet_admitted_cap_w": 250,
+  "native_q3_cuda_sha256": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+  "runtime_maps": {
+    "libggml-cuda.so": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+    "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+    "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+  },
+  "configured_argv": [
+    "-m",
+    "/models/occamy-1.0-Q4_0-headq40b-mtp.gguf",
+    "--alias",
+    "qwen36-moe",
+    "--override-kv",
+    "tokenizer.ggml.pre=str:qwen35",
+    "-ngl",
+    "999",
+    "-np",
+    "1",
+    "-c",
+    "84224",
+    "--no-context-shift",
+    "-b",
+    "2048",
+    "--mixed-batch-size",
+    "1024",
+    "--prefill-single-stream",
+    "--checkpoint-min-step",
+    "2048",
+    "-fa",
+    "on",
+    "--host",
+    "0.0.0.0",
+    "--port",
+    "8080",
+    "--jinja",
+    "--metrics",
+    "-lv",
+    "4",
+    "-ub",
+    "1024",
+    "--cache-ram",
+    "12288",
+    "--ctx-checkpoints",
+    "2",
+    "--spec-type",
+    "draft-mtp",
+    "--spec-draft-n-max",
+    "1",
+    "--spec-draft-type-k",
+    "f16",
+    "--spec-draft-type-v",
+    "f16"
+  ],
+  "configured_environment": [
+    "GGML_CUDA_MOE_DOWNX=1",
+    "GGML_CUDA_MOE_DOWNH=2",
+    "GGML_CUDA_OCCAMY_GDN_QKREUSE=1",
+    "GGML_CUDA_OCCAMY_GDN_PCSHARE=1",
+    "GGML_CUDA_MMVQ_SM52=1",
+    "GGML_CUDA_RMS_WARP=0",
+    "GGML_CUDA_HEAD_ROWPACK_SM52=1",
+    "GGML_CUDA_MMQ_COMPACT_SM52=1",
+    "GGML_CUDA_Q8_REUSE=1",
+    "GGML_CUDA_NORM_Q8=1",
+    "GGML_CUDA_CONCAT_T=1",
+    "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT=1",
+    "GGML_CUDA_GATE_COPY=1",
+    "GGML_CUDA_OCCAMY_GDN=1",
+    "GGML_CUDA_MMQ_XMAD_SM52=1",
+    "GGML_CUDA_GDN_COLS=2,4",
+    "GGML_CUDA_OCCAMY_FA=1",
+    "GGML_CUDA_OCCAMY_FUSED=1",
+    "GGML_CUDA_OCCAMY_FA_PIPE=3",
+    "GGML_CUDA_MOE_LOP3=1",
+    "GGML_CUDA_MOE_TAILBAL=1",
+    "GGML_CUDA_OCCAMY_GDN_PREF=1",
+    "GGML_CUDA_OCCAMY_HOSTGAP=1",
+    "GGML_CUDA_OCCAMY_SMALLFUSE=2",
+    "GGML_CUDA_MMQ_TAIL_SM52=1",
+    "GGML_CUDA_OCCAMY_GDN_REPACK=1",
+    "GGML_CUDA_OCCAMY_N2SPLIT=1",
+    "GGML_CUDA_OCCAMY_FA_ADDR=1",
+    "GGML_CUDA_OCCAMY_N2GDN=1",
+    "GGML_CUDA_FA_MAXWELL_GEMM=1",
+    "GGML_CUDA_FA_MAXWELL_GEMM_FUSED=1",
+    "GGML_CUDA_MOE_V3=1",
+    "LD_LIBRARY_PATH=/candidate",
+    "LLAMA_MV1_TRACE=1",
+    "GGML_CUDA_OCCAMY_FA_SPARSE=1",
+    "GGML_CUDA_OCCAMY_FA_SPARSE_R2=1",
+    "GGML_CUDA_OCCAMY_GDN_T2=1",
+    "GGML_CUDA_OCCAMY_FA_MROW=3",
+    "GGML_CUDA_OCCAMY_FA2_NU=4",
+    "LLAMA_MTP_MERGE_REEVAL=0",
+    "LLAMA_MTP_CACHE_ONLY=1",
+    "LLAMA_TRACE=1",
+    "GGML_CUDA_OCCAMY_FA_Q3_R2=1"
+  ],
+  "provenance_sha256": "628debdb97ed28770d1e112227e8e95551536ca6c421f5cfae26479ead6d3145",
+  "archived_measured_n100_receipt_sha256": "5bfa6b9074e98d9f400e1a281e8158b243a3af41720abcd5df77bd0cc468df1a",
+  "profile_instrumented": false,
+  "status": {
+    "runner_exit": 0,
+    "cleanup_exit": 0,
+    "bounded_wall_s": 342,
+    "technical_pass": true
+  },
+  "observed_requests": {
+    "cold": {
+      "n_out": 192,
+      "completed_request": true,
+      "ttft_s": 266.80189570307266,
+      "wall_s": 269.1401362090837,
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "prompt_ms": 266782.885,
+        "prompt_per_token_ms": 3.3347860625,
+        "prompt_per_second": 299.8693113315721,
+        "predicted_n": 192,
+        "predicted_ms": 2333.114,
+        "predicted_per_token_ms": 12.215256544502617,
+        "predicted_per_second": 81.86483815192913,
+        "draft_n": 101,
+        "draft_n_accepted": 89
+      },
+      "unassigned_serial_outputs": 2
+    },
+    "warm": {
+      "n_out": 3072,
+      "completed_request": true,
+      "ttft_s": 0.2727751659695059,
+      "wall_s": 37.134604642982595,
+      "timings": {
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "prompt_ms": 254.468,
+        "prompt_per_token_ms": 63.617,
+        "prompt_per_second": 15.719068802364148,
+        "predicted_n": 3072,
+        "predicted_ms": 36856.883,
+        "predicted_per_token_ms": 12.001590035818952,
+        "predicted_per_second": 83.32229288081686,
+        "draft_n": 1621,
+        "draft_n_accepted": 1449
+      },
+      "unassigned_serial_outputs": 2
+    }
+  },
+  "speculative_trace_marker_count": 1722,
+  "cycle_rows_sha256": "2f1dc99f79bf956930ac7d20af4b93fd503b39212e8339609affce40c12a6da1",
+  "validated_report": {
+    "mode": "depth1",
+    "depth": 1,
+    "technical_pass": true,
+    "profile": false,
+    "metrics": {
+      "cold": {
+        "prompt_n": 80000,
+        "cache_n": 0,
+        "evaluated_prompt_n": 80000,
+        "n_out": 192,
+        "ttft_s": 266.80189570307266,
+        "request_wall_s": 269.1401362090837,
+        "decode_s": 2.333114,
+        "decode_toks_s": 82.29344987000206,
+        "draft_n": 101,
+        "draft_n_accepted": 89,
+        "draft_acceptance_fraction": 0.8811881188118812,
+        "prior_n6_decode_toks_s": 71.56771312082196,
+        "same_prior_n6_first_192": false,
+        "same_prior_n6_first_191": false,
+        "first_prior_n6_mismatch_token_1_based": 27,
+        "rounds": 101,
+        "proposal_width_counts": {
+          "1": 101
+        },
+        "accepted_prefix_histogram": [
+          12,
+          89
+        ],
+        "prefix_probability": [
+          0.8811881188118812
+        ],
+        "yield_including_one_correction_or_bonus": 1.881188118811881,
+        "checkpoint_restore_events": 0,
+        "native_rejected_suffix_rounds": 12,
+        "decode_ms_per_native_cycle": 23.100138613861386,
+        "prompt_eval_s": 266.782885,
+        "unassigned_serial_outputs": 2,
+        "structure": {
+          "characters": 661,
+          "nonempty_lines": 15,
+          "distinct_nonempty_lines": 15,
+          "repeated_line_occurrences": 0,
+          "largest_identical_line_count": 1,
+          "markdown_fence_lines": 0
+        },
+        "draft_n_rejected": 12,
+        "prompt_checkpoint_marker_count": 0,
+        "speculative_checkpoint_marker_count": 0
+      },
+      "warm": {
+        "prompt_n": 80000,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "n_out": 3072,
+        "ttft_s": 0.2727751659695059,
+        "request_wall_s": 37.134604642982595,
+        "decode_s": 36.856883,
+        "decode_toks_s": 83.34942485505353,
+        "draft_n": 1621,
+        "draft_n_accepted": 1449,
+        "draft_n_rejected": 172,
+        "draft_acceptance_fraction": 0.8938926588525602,
+        "sse_checkpoints": [
+          {
+            "output_token": 1,
+            "elapsed_s": 0.2727751659695059,
+            "event_first_token": 1,
+            "event_last_token": 1
+          },
+          {
+            "output_token": 512,
+            "elapsed_s": 6.353476659976877,
+            "event_first_token": 512,
+            "event_last_token": 512
+          },
+          {
+            "output_token": 1024,
+            "elapsed_s": 12.604510248056613,
+            "event_first_token": 1024,
+            "event_last_token": 1024
+          },
+          {
+            "output_token": 1536,
+            "elapsed_s": 18.575116859050468,
+            "event_first_token": 1536,
+            "event_last_token": 1536
+          },
+          {
+            "output_token": 2048,
+            "elapsed_s": 24.692583255004138,
+            "event_first_token": 2048,
+            "event_last_token": 2048
+          },
+          {
+            "output_token": 2560,
+            "elapsed_s": 31.02814851596486,
+            "event_first_token": 2560,
+            "event_last_token": 2560
+          },
+          {
+            "output_token": 3072,
+            "elapsed_s": 37.12963881797623,
+            "event_first_token": 3072,
+            "event_last_token": 3072
+          }
+        ],
+        "sse_segments": [
+          {
+            "after_output_token": 1,
+            "through_output_token": 512,
+            "elapsed_s": 6.080701494007371,
+            "stream_decode_toks_s": 84.03635674331304
+          },
+          {
+            "after_output_token": 512,
+            "through_output_token": 1024,
+            "elapsed_s": 6.251033588079736,
+            "stream_decode_toks_s": 81.90645479434738
+          },
+          {
+            "after_output_token": 1024,
+            "through_output_token": 1536,
+            "elapsed_s": 5.970606610993855,
+            "stream_decode_toks_s": 85.75343065765533
+          },
+          {
+            "after_output_token": 1536,
+            "through_output_token": 2048,
+            "elapsed_s": 6.11746639595367,
+            "stream_decode_toks_s": 83.69477931887891
+          },
+          {
+            "after_output_token": 2048,
+            "through_output_token": 2560,
+            "elapsed_s": 6.3355652609607205,
+            "stream_decode_toks_s": 80.8136257635772
+          },
+          {
+            "after_output_token": 2560,
+            "through_output_token": 3072,
+            "elapsed_s": 6.101490302011371,
+            "stream_decode_toks_s": 83.91392506699847
+          }
+        ],
+        "rounds": 1621,
+        "proposal_width_counts": {
+          "1": 1621
+        },
+        "accepted_prefix_histogram": [
+          172,
+          1449
+        ],
+        "prefix_probability": [
+          0.8938926588525602
+        ],
+        "yield_including_one_correction_or_bonus": 1.8938926588525602,
+        "checkpoint_restore_events": 0,
+        "native_rejected_suffix_rounds": 172,
+        "decode_ms_per_native_cycle": 22.73712708204812,
+        "prompt_eval_s": 0.25446799999999997,
+        "unassigned_serial_outputs": 2,
+        "structure": {
+          "characters": 12144,
+          "nonempty_lines": 293,
+          "distinct_nonempty_lines": 185,
+          "repeated_line_occurrences": 108,
+          "largest_identical_line_count": 13,
+          "markdown_fence_lines": 0
+        },
+        "prompt_checkpoint_marker_count": 1,
+        "speculative_checkpoint_marker_count": 0
+      }
+    },
+    "host_rounds_restores": [
+      1722,
+      0
+    ],
+    "warm_dispatch_samples": [
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 2000,
+        "n_kv": 80384
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 3000,
+        "n_kv": 80384
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 4000,
+        "n_kv": 80640
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 5000,
+        "n_kv": 80896
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 6000,
+        "n_kv": 81152
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 7000,
+        "n_kv": 81152
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 8000,
+        "n_kv": 81408
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 9000,
+        "n_kv": 81664
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 1,
+        "calls": 1000,
+        "n_kv": 81920
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 10000,
+        "n_kv": 81920
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 11000,
+        "n_kv": 81920
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 12000,
+        "n_kv": 82176
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 13000,
+        "n_kv": 82432
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 14000,
+        "n_kv": 82688
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 15000,
+        "n_kv": 82688
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 16000,
+        "n_kv": 82944
+      },
+      {
+        "kind": "sparse-r2",
+        "q": 2,
+        "calls": 17000,
+        "n_kv": 83200
+      }
+    ],
+    "semantic_score": null,
+    "instrumented_phase_summary": null,
+    "mapped_objects": {
+      "libggml-cuda.so": "c973955667f1bb7e21a33447da488f182aa6fee0437d1e275180ea5b9d3cb9c5",
+      "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+      "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+      "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+    }
+  }
+}
