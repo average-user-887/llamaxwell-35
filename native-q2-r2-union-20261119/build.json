@@ -1,0 +1,52 @@
+{
+  "control_sha256": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+  "control_object": "c2a805af82cf2060c84a105c44167e66631dfa30ab1cc8807c1b010188b0160a",
+  "candidate_sha256": "a77c19d2714978f3ce05420f14e3465f9e10d7e72268c9c24ff9a6267a873e2b",
+  "candidate_object": "4905f893a0f0f6061a10593f9e67993d46237526390084a094d2acaf77b5e4c0",
+  "harness_sha256": "ec83ac1cb7c995f2d4a7f5401433510e4209713ed1e133922d996b0f43db1c60",
+  "preserved_functions": 37,
+  "preserved_words": 55480,
+  "resources": {
+    "_Z17ofa_union_combinePKfPK6float2PcPK15ofa_sparse_planiiimmm": {
+      "regs": 32,
+      "stack": 0,
+      "spill_store": 0,
+      "spill_load": 0,
+      "shared_bytes": 4,
+      "static_barrier_slots": 1
+    },
+    "_Z19ofa_sparse_union_q2ILj1024EEv10ofa_paramsP15ofa_sparse_plan": {
+      "regs": 128,
+      "stack": 0,
+      "spill_store": 0,
+      "spill_load": 0,
+      "shared_bytes": 17884,
+      "static_barrier_slots": 1
+    },
+    "_Z19ofa_sparse_union_q2ILj2048EEv10ofa_paramsP15ofa_sparse_plan": {
+      "regs": 128,
+      "stack": 0,
+      "spill_store": 0,
+      "spill_load": 0,
+      "shared_bytes": 17884,
+      "static_barrier_slots": 1
+    },
+    "_Z25ofa_sparse_union_fallbackILj1024EEv10ofa_paramsP15ofa_sparse_plan": {
+      "regs": 118,
+      "stack": 0,
+      "spill_store": 0,
+      "spill_load": 0,
+      "shared_bytes": 34576,
+      "static_barrier_slots": 1
+    },
+    "_Z25ofa_sparse_union_fallbackILj2048EEv10ofa_paramsP15ofa_sparse_plan": {
+      "regs": 118,
+      "stack": 0,
+      "spill_store": 0,
+      "spill_load": 0,
+      "shared_bytes": 34576,
+      "static_barrier_slots": 1
+    }
+  },
+  "scope": "CPU build and device code audit; physical outputs and timing pending"
+}

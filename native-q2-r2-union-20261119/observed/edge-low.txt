@@ -1,0 +1,39 @@
+a77c19d2714978f3ce05420f14e3465f9e10d7e72268c9c24ff9a6267a873e2b  /candidate/libggml-cuda.so
+ec83ac1cb7c995f2d4a7f5401433510e4209713ed1e133922d996b0f43db1c60  /candidate/test-backend-ops
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 24463 MiB):
+  Device 0: Quadro M6000 24GB, compute capability 5.2, VMM: yes, VRAM: 24463 MiB
+load_backend: loaded CUDA backend from /candidate/libggml-cuda.so
+load_backend: loaded CPU backend from /candidate/libggml-cpu-haswell.so
+ggml_cuda_graph_set_enabled: disabling CUDA graphs due to GPU architecture
+q2_r2_probe4_dispatch width=80128 plans=4 blocks=313 tiles=79
+q2_r2_top16_dispatch n_q=2 n_kv=80128 nkvh=2 plans=4
+q2_union_dispatch calls=1 width=80128 pitch=1024 split=24 threads=128 tile=16 fallback_split=12
+q2_r2_probe4_meta entries=1252 exact=1
+q2_r2_top16_check n_kv=80128 plans=4 scores=1252 outputs=8192 plan_diff=0 score_diff=0 output_diff=7698 nonfinite=0
+q2_union_check width=80128 pitch=1024 plans=4 scores=1252 outputs=8192 nonfinite=0 outside=0 max_abs=1.3038516e-08 nrmse=4.52679434e-07
+q2_union_fallback width=80128 pitch=1024 invalid_plans=1 old_head_words=4096 exact=1 all_finite=1
+q2_r2_probe4_edge entries=1252 mask_bad=12 score_bad=12 exact=1
+occamy_sparse_plan call=1 n_q=2 row=0 kvh=0 n_kv=80128 ok=1 invalid=0 fallback=0 engaged_warps=96 full_warps=0 expected_warps=96 selected=8443 omitted=71424 padded=261 recent_begin=75520 visible_end=79867 old_blocks=16 units=2111 block_ids=1,18,33,47,62,66,73,106,151,156,166,175,226,237,248,250
+occamy_sparse_plan call=1 n_q=2 row=0 kvh=1 n_kv=80128 ok=1 invalid=0 fallback=0 engaged_warps=96 full_warps=0 expected_warps=96 selected=8443 omitted=71424 padded=261 recent_begin=75520 visible_end=79867 old_blocks=16 units=2111 block_ids=11,49,56,61,75,107,113,116,127,142,186,192,197,222,253,277
+occamy_sparse_plan call=1 n_q=2 row=1 kvh=0 n_kv=80128 ok=1 invalid=0 fallback=0 engaged_warps=96 full_warps=0 expected_warps=96 selected=8444 omitted=71424 padded=260 recent_begin=75520 visible_end=79868 old_blocks=16 units=2111 block_ids=10,14,25,34,36,74,101,105,106,107,213,242,252,270,279,290
+occamy_sparse_plan call=1 n_q=2 row=1 kvh=1 n_kv=80128 ok=1 invalid=0 fallback=0 engaged_warps=96 full_warps=0 expected_warps=96 selected=8444 omitted=71424 padded=260 recent_begin=75520 visible_end=79868 old_blocks=16 units=2111 block_ids=25,32,51,68,92,109,127,144,150,185,202,210,219,235,262,286
+ggml_cuda: occamy_sparse_probe dispatch calls=1 n_q=2 n_kv=80128 nkvh=2 nsplit=12 blocks_per_sm=1 approximate=1 keep_old_blocks=16 recent=4096 revision=2
+ggml_cuda: occamy_sparse_probe dispatch calls=10 n_q=2 n_kv=80128 nkvh=2 nsplit=12 blocks_per_sm=1 approximate=1 keep_old_blocks=16 recent=4096 revision=2
+ggml_cuda: occamy_sparse_probe dispatch calls=100 n_q=2 n_kv=80128 nkvh=2 nsplit=12 blocks_per_sm=1 approximate=1 keep_old_blocks=16 recent=4096 revision=2
+q2_union_dispatch calls=1000 width=80128 pitch=1024 split=24 threads=128 tile=16 fallback_split=12
+ggml_cuda: occamy_sparse_probe dispatch calls=1000 n_q=2 n_kv=80128 nkvh=2 nsplit=12 blocks_per_sm=1 approximate=1 keep_old_blocks=16 recent=4096 revision=2
+q2_union_dispatch calls=2000 width=80128 pitch=1024 split=24 threads=128 tile=16 fallback_split=12
+ggml_cuda: occamy_sparse_probe dispatch calls=2000 n_q=2 n_kv=80128 nkvh=2 nsplit=12 blocks_per_sm=1 approximate=1 keep_old_blocks=16 recent=4096 revision=2
+Testing 2 devices
+
+Backend 1/2: CUDA0
+  Device description: Quadro M6000 24GB
+  Device memory: 24463 MB (24344 MB free)
+
+  FLASH_ATTN_EXT(hsk=256,hsv=256,nh=2,nr23=[8,1],kv=80128,nb=2,mask=1,sinks=0,max_bias=0.000000,logit_softcap=0.000000,prec=f32,type_K=f16,type_V=f16,permute=[0,2,1,3],kv_view=0,v_is_view_of_k=0,n_kv_max=0,mask=mrow_causal,tail=260):               2379 runs -   421.27 us/run -   2.63 GFLOP/run -   6.23 TFLOPS
+ggml_cuda_hostgap: deferred=0 flushes=0
+  Backend CUDA0: OK
+Backend 2/2: CPU
+  Skipping
+2/2 backends passed
+OK

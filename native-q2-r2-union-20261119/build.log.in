@@ -1,0 +1,220 @@
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+@SOURCE_MOUNT@/ggml/src/ggml-cuda/fattn-occamy.cu(97): warning #177-D: variable "hl" was declared but never referenced
+      const int hl = lane & 7;
+                ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+ptxas info    : 26792 bytes gmem, 88 bytes cmem[4]
+ptxas info    : Compiling entry function '_Z16ofa_sparse_probeILi2EEv10ofa_paramsP15ofa_sparse_planPfi' for 'sm_52'
+ptxas info    : Function properties for _Z16ofa_sparse_probeILi2EEv10ofa_paramsP15ofa_sparse_planPfi
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 32 registers, used 1 barriers, 16 bytes smem, 500 bytes cmem[0]
+ptxas info    : Compile time = 12.812 ms
+ptxas info    : Compiling entry function '_Z15ofa_sparse_initILi2EEv10ofa_paramsP15ofa_sparse_plan' for 'sm_52'
+ptxas info    : Function properties for _Z15ofa_sparse_initILi2EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 18 registers, used 1 barriers, 32 bytes smem, 488 bytes cmem[0]
+ptxas info    : Compile time = 2.644 ms
+ptxas info    : Compiling entry function '_Z24ofa_sparse_scan_probe_r2ILi2EEv10ofa_paramsP15ofa_sparse_metaPfi' for 'sm_52'
+ptxas info    : Function properties for _Z24ofa_sparse_scan_probe_r2ILi2EEv10ofa_paramsP15ofa_sparse_metaPfi
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 47 registers, used 1 barriers, 64 bytes smem, 500 bytes cmem[0]
+ptxas info    : Compile time = 13.841 ms
+ptxas info    : Compiling entry function '_Z20ofa_sparse_attentionILi2ELi4EEv10ofa_paramsP15ofa_sparse_plan' for 'sm_52'
+ptxas info    : Function properties for _Z20ofa_sparse_attentionILi2ELi4EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 117 registers, used 1 barriers, 34560 bytes smem, 488 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 35.628 ms
+ptxas info    : Compiling entry function '_Z16ofa_sparse_probeILi1EEv10ofa_paramsP15ofa_sparse_planPfi' for 'sm_52'
+ptxas info    : Function properties for _Z16ofa_sparse_probeILi1EEv10ofa_paramsP15ofa_sparse_planPfi
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 32 registers, used 1 barriers, 16 bytes smem, 500 bytes cmem[0]
+ptxas info    : Compile time = 11.577 ms
+ptxas info    : Compiling entry function '_Z15ofa_sparse_initILi1EEv10ofa_paramsP15ofa_sparse_plan' for 'sm_52'
+ptxas info    : Function properties for _Z15ofa_sparse_initILi1EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 18 registers, used 1 barriers, 32 bytes smem, 488 bytes cmem[0]
+ptxas info    : Compile time = 2.741 ms
+ptxas info    : Compiling entry function '_Z24ofa_sparse_scan_probe_r2ILi1EEv10ofa_paramsP15ofa_sparse_metaPfi' for 'sm_52'
+ptxas info    : Function properties for _Z24ofa_sparse_scan_probe_r2ILi1EEv10ofa_paramsP15ofa_sparse_metaPfi
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 47 registers, used 1 barriers, 64 bytes smem, 500 bytes cmem[0]
+ptxas info    : Compile time = 12.773 ms
+ptxas info    : Compiling entry function '_Z20ofa_sparse_attentionILi1ELi4EEv10ofa_paramsP15ofa_sparse_plan' for 'sm_52'
+ptxas info    : Function properties for _Z20ofa_sparse_attentionILi1ELi4EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 117 registers, used 1 barriers, 33664 bytes smem, 488 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 33.160 ms
+ptxas info    : Compiling entry function '_Z30ofa_sparse_attention_q2_strideILj2048EEv10ofa_paramsP15ofa_sparse_plan' for 'sm_52'
+ptxas info    : Function properties for _Z30ofa_sparse_attention_q2_strideILj2048EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 118 registers, used 1 barriers, 34560 bytes smem, 488 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 24.309 ms
+ptxas info    : Compiling entry function '_Z30ofa_sparse_attention_q2_strideILj1024EEv10ofa_paramsP15ofa_sparse_plan' for 'sm_52'
+ptxas info    : Function properties for _Z30ofa_sparse_attention_q2_strideILj1024EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 118 registers, used 1 barriers, 34560 bytes smem, 488 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 24.693 ms
+ptxas info    : Compiling entry function '_Z25ofa_sparse_compare_kernelPKfS0_iPj' for 'sm_52'
+ptxas info    : Function properties for _Z25ofa_sparse_compare_kernelPKfS0_iPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 13 registers, used 0 barriers, 352 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 1.685 ms
+ptxas info    : Compiling entry function '_Z25ofa_sparse_union_fallbackILj2048EEv10ofa_paramsP15ofa_sparse_plan' for 'sm_52'
+ptxas info    : Function properties for _Z25ofa_sparse_union_fallbackILj2048EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 118 registers, used 1 barriers, 34576 bytes smem, 488 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 28.150 ms
+ptxas info    : Compiling entry function '_Z19ofa_sparse_union_q2ILj2048EEv10ofa_paramsP15ofa_sparse_plan' for 'sm_52'
+ptxas info    : Function properties for _Z19ofa_sparse_union_q2ILj2048EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 128 registers, used 1 barriers, 17884 bytes smem, 488 bytes cmem[0], 12 bytes cmem[2]
+ptxas info    : Compile time = 103.955 ms
+ptxas info    : Compiling entry function '_Z25ofa_sparse_union_fallbackILj1024EEv10ofa_paramsP15ofa_sparse_plan' for 'sm_52'
+ptxas info    : Function properties for _Z25ofa_sparse_union_fallbackILj1024EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 118 registers, used 1 barriers, 34576 bytes smem, 488 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 26.933 ms
+ptxas info    : Compiling entry function '_Z19ofa_sparse_union_q2ILj1024EEv10ofa_paramsP15ofa_sparse_plan' for 'sm_52'
+ptxas info    : Function properties for _Z19ofa_sparse_union_q2ILj1024EEv10ofa_paramsP15ofa_sparse_plan
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 128 registers, used 1 barriers, 17884 bytes smem, 488 bytes cmem[0], 12 bytes cmem[2]
+ptxas info    : Compile time = 93.584 ms
+ptxas info    : Compiling entry function '_Z17ofa_union_combinePKfPK6float2PcPK15ofa_sparse_planiiimmm' for 'sm_52'
+ptxas info    : Function properties for _Z17ofa_union_combinePKfPK6float2PcPK15ofa_sparse_planiiimmm
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 32 registers, used 1 barriers, 4 bytes smem, 392 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 15.048 ms
+ptxas info    : Compiling entry function '_Z26ofa_sparse_select_r2_top16P15ofa_sparse_planPKfPK15ofa_sparse_metai' for 'sm_52'
+ptxas info    : Function properties for _Z26ofa_sparse_select_r2_top16P15ofa_sparse_planPKfPK15ofa_sparse_metai
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 17 registers, used 1 barriers, 3136 bytes smem, 348 bytes cmem[0], 12 bytes cmem[2]
+ptxas info    : Compile time = 8.494 ms
+ptxas info    : Compiling entry function '_Z20ofa_sparse_select_r2P15ofa_sparse_planPKfPK15ofa_sparse_metai' for 'sm_52'
+ptxas info    : Function properties for _Z20ofa_sparse_select_r2P15ofa_sparse_planPKfPK15ofa_sparse_metai
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 22 registers, used 1 barriers, 2112 bytes smem, 348 bytes cmem[0]
+ptxas info    : Compile time = 7.696 ms
+ptxas info    : Compiling entry function '_Z17ofa_sparse_selectP15ofa_sparse_planPKfi' for 'sm_52'
+ptxas info    : Function properties for _Z17ofa_sparse_selectP15ofa_sparse_planPKfi
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 20 registers, used 1 barriers, 2080 bytes smem, 340 bytes cmem[0]
+ptxas info    : Compile time = 5.116 ms
+ptxas info    : Compiling entry function '_Z22ofa_sparse_probe_tile410ofa_paramsP15ofa_sparse_metaPfi' for 'sm_52'
+ptxas info    : Function properties for _Z22ofa_sparse_probe_tile410ofa_paramsP15ofa_sparse_metaPfi
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 96 registers, used 1 barriers, 256 bytes smem, 500 bytes cmem[0]
+ptxas info    : Compile time = 29.656 ms
+ptxas info    : Compiling entry function '_Z14ofa_fa2_kernelILi2EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z14ofa_fa2_kernelILi2EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 115 registers, used 1 barriers, 17280 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 33.490 ms
+ptxas info    : Compiling entry function '_Z14ofa_fa2_kernelILi4EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z14ofa_fa2_kernelILi4EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 116 registers, used 1 barriers, 34560 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 31.133 ms
+ptxas info    : Compiling entry function '_Z14ofa_fa3_kernelILi2ELi2EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z14ofa_fa3_kernelILi2ELi2EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 212 registers, used 1 barriers, 17024 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 43.532 ms
+ptxas info    : Compiling entry function '_Z14ofa_fa3_kernelILi4ELi1EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z14ofa_fa3_kernelILi4ELi1EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 215 registers, used 1 barriers, 34048 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 39.992 ms
+ptxas info    : Compiling entry function '_Z15ofa_mrow_kernelILi4ELb0EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z15ofa_mrow_kernelILi4ELb0EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 128 registers, used 1 barriers, 17024 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 31.132 ms
+ptxas info    : Compiling entry function '_Z15ofa_mrow_kernelILi4ELb1EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z15ofa_mrow_kernelILi4ELb1EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 128 registers, used 1 barriers, 17024 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 32.864 ms
+ptxas info    : Compiling entry function '_Z15ofa_mrow_kernelILi3ELb0EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z15ofa_mrow_kernelILi3ELb0EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 140 registers, used 1 barriers, 16864 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 36.768 ms
+ptxas info    : Compiling entry function '_Z15ofa_mrow_kernelILi3ELb1EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z15ofa_mrow_kernelILi3ELb1EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 141 registers, used 1 barriers, 16864 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 36.737 ms
+ptxas info    : Compiling entry function '_Z15ofa_mrow_kernelILi2ELb0EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z15ofa_mrow_kernelILi2ELb0EEv10ofa_params
+    8 bytes stack frame, 4 bytes spill stores, 8 bytes spill loads
+ptxas info    : Used 128 registers, used 1 barriers, 8 bytes cumulative stack size, 16704 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 38.090 ms
+ptxas info    : Compiling entry function '_Z15ofa_mrow_kernelILi2ELb1EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z15ofa_mrow_kernelILi2ELb1EEv10ofa_params
+    24 bytes stack frame, 40 bytes spill stores, 32 bytes spill loads
+ptxas info    : Used 128 registers, used 1 barriers, 24 bytes cumulative stack size, 16704 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 38.859 ms
+ptxas info    : Compiling entry function '_Z23ofa_mrow_combine_kernelPKfPK6float2Pciiimmm' for 'sm_52'
+ptxas info    : Function properties for _Z23ofa_mrow_combine_kernelPKfPK6float2Pciiimmm
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 32 registers, used 0 barriers, 384 bytes cmem[0]
+ptxas info    : Compile time = 12.012 ms
+ptxas info    : Compiling entry function '_Z26ofa_decode_hs_ar_q8_kernelILb0ELb1EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z26ofa_decode_hs_ar_q8_kernelILb0ELb1EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 118 registers, used 1 barriers, 33664 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 34.892 ms
+ptxas info    : Compiling entry function '_Z26ofa_decode_hs_ar_q8_kernelILb1ELb0EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z26ofa_decode_hs_ar_q8_kernelILb1ELb0EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 121 registers, used 1 barriers, 33664 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 33.190 ms
+ptxas info    : Compiling entry function '_Z26ofa_decode_hs_ar_q8_kernelILb1ELb1EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z26ofa_decode_hs_ar_q8_kernelILb1ELb1EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 127 registers, used 1 barriers, 33664 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 35.684 ms
+ptxas info    : Compiling entry function '_Z20ofa_decode_hs_kernelILb1EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z20ofa_decode_hs_kernelILb1EEv10ofa_params
+    16 bytes stack frame, 28 bytes spill stores, 28 bytes spill loads
+ptxas info    : Used 128 registers, used 1 barriers, 16 bytes cumulative stack size, 33664 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 36.633 ms
+ptxas info    : Compiling entry function '_Z20ofa_decode_hs_kernelILb0EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z20ofa_decode_hs_kernelILb0EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 124 registers, used 1 barriers, 33664 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 32.560 ms
+ptxas info    : Compiling entry function '_Z17ofa_decode_kernelILi2EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z17ofa_decode_kernelILi2EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 228 registers, used 1 barriers, 33664 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 57.420 ms
+ptxas info    : Compiling entry function '_Z17ofa_decode_kernelILi1EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z17ofa_decode_kernelILi1EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 255 registers, used 1 barriers, 33664 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 62.708 ms
+ptxas info    : Compiling entry function '_Z17ofa_decode_kernelILi0EEv10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z17ofa_decode_kernelILi0EEv10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 200 registers, used 1 barriers, 33664 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 52.104 ms
+ptxas info    : Compiling entry function '_Z18ofa_compare_kernelPKfS0_iPj' for 'sm_52'
+ptxas info    : Function properties for _Z18ofa_compare_kernelPKfS0_iPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 13 registers, used 0 barriers, 352 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 1.854 ms
+ptxas info    : Compiling entry function '_Z18ofa_combine_kernelPKfPK6float2Pciimm' for 'sm_52'
+ptxas info    : Function properties for _Z18ofa_combine_kernelPKfPK6float2Pciimm
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 32 registers, used 0 barriers, 368 bytes cmem[0]
+ptxas info    : Compile time = 9.116 ms
+ptxas info    : Compiling entry function '_Z23ofa_decode_hs_ar_kernel10ofa_params' for 'sm_52'
+ptxas info    : Function properties for _Z23ofa_decode_hs_ar_kernel10ofa_params
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 118 registers, used 1 barriers, 33664 bytes smem, 480 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 30.642 ms
+@SOURCE_MOUNT@/ggml/src/ggml-cuda/fattn-occamy-kvq8.cuh:58: warning: ignoring '#pragma unroll ' [-Wunknown-pragmas]
+   58 |     for (int i = 0; i < 4; ++i) {

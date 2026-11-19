@@ -1,0 +1,169 @@
+{
+  "unique_logical_head_tokens": {
+    "a-control": 24568,
+    "a-candidate": 24568,
+    "b-candidate": 24568,
+    "b-control": 24568,
+    "edge-low": 24568,
+    "edge-high": 24568,
+    "padded": 24568
+  },
+  "technical_pass": true,
+  "build": {
+    "control_sha256": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+    "control_object": "c2a805af82cf2060c84a105c44167e66631dfa30ab1cc8807c1b010188b0160a",
+    "candidate_sha256": "a77c19d2714978f3ce05420f14e3465f9e10d7e72268c9c24ff9a6267a873e2b",
+    "candidate_object": "4905f893a0f0f6061a10593f9e67993d46237526390084a094d2acaf77b5e4c0",
+    "harness_sha256": "ec83ac1cb7c995f2d4a7f5401433510e4209713ed1e133922d996b0f43db1c60",
+    "preserved_functions": 37,
+    "preserved_words": 55480,
+    "resources": {
+      "_Z17ofa_union_combinePKfPK6float2PcPK15ofa_sparse_planiiimmm": {
+        "regs": 32,
+        "stack": 0,
+        "spill_store": 0,
+        "spill_load": 0,
+        "shared_bytes": 4,
+        "static_barrier_slots": 1
+      },
+      "_Z19ofa_sparse_union_q2ILj1024EEv10ofa_paramsP15ofa_sparse_plan": {
+        "regs": 128,
+        "stack": 0,
+        "spill_store": 0,
+        "spill_load": 0,
+        "shared_bytes": 17884,
+        "static_barrier_slots": 1
+      },
+      "_Z19ofa_sparse_union_q2ILj2048EEv10ofa_paramsP15ofa_sparse_plan": {
+        "regs": 128,
+        "stack": 0,
+        "spill_store": 0,
+        "spill_load": 0,
+        "shared_bytes": 17884,
+        "static_barrier_slots": 1
+      },
+      "_Z25ofa_sparse_union_fallbackILj1024EEv10ofa_paramsP15ofa_sparse_plan": {
+        "regs": 118,
+        "stack": 0,
+        "spill_store": 0,
+        "spill_load": 0,
+        "shared_bytes": 34576,
+        "static_barrier_slots": 1
+      },
+      "_Z25ofa_sparse_union_fallbackILj2048EEv10ofa_paramsP15ofa_sparse_plan": {
+        "regs": 118,
+        "stack": 0,
+        "spill_store": 0,
+        "spill_load": 0,
+        "shared_bytes": 34576,
+        "static_barrier_slots": 1
+      }
+    },
+    "scope": "CPU build and device code audit; physical outputs and timing pending"
+  },
+  "performance": {
+    "a-control": {
+      "width": 81920,
+      "pitch": 1024,
+      "runs": 5700,
+      "whole_operator_us": 175.93
+    },
+    "a-candidate": {
+      "width": 81920,
+      "pitch": 1024,
+      "runs": 2394,
+      "whole_operator_us": 420.84
+    },
+    "b-candidate": {
+      "width": 81920,
+      "pitch": 1024,
+      "runs": 2394,
+      "whole_operator_us": 420.88
+    },
+    "b-control": {
+      "width": 81920,
+      "pitch": 1024,
+      "runs": 5700,
+      "whole_operator_us": 176.2
+    },
+    "edge-low": {
+      "width": 80128,
+      "pitch": 1024,
+      "runs": 2379,
+      "whole_operator_us": 421.27
+    },
+    "edge-high": {
+      "width": 83200,
+      "pitch": 1024,
+      "runs": 2405,
+      "whole_operator_us": 421.54
+    },
+    "padded": {
+      "width": 81920,
+      "pitch": 2048,
+      "runs": 2394,
+      "whole_operator_us": 421.26
+    }
+  },
+  "diagnostics": {
+    "a-candidate": {
+      "width": 81920,
+      "pitch": 1024,
+      "scores": 1280,
+      "max_abs": 1.3038516e-08,
+      "nrmse": 4.5099775e-07,
+      "mixed_fallback_exact_words": 4096
+    },
+    "b-candidate": {
+      "width": 81920,
+      "pitch": 1024,
+      "scores": 1280,
+      "max_abs": 1.3038516e-08,
+      "nrmse": 4.5099775e-07,
+      "mixed_fallback_exact_words": 4096
+    },
+    "edge-low": {
+      "width": 80128,
+      "pitch": 1024,
+      "scores": 1252,
+      "max_abs": 1.3038516e-08,
+      "nrmse": 4.52679434e-07,
+      "mixed_fallback_exact_words": 4096
+    },
+    "edge-high": {
+      "width": 83200,
+      "pitch": 1024,
+      "scores": 1300,
+      "max_abs": 1.12922862e-08,
+      "nrmse": 4.45156703e-07,
+      "mixed_fallback_exact_words": 4096
+    },
+    "padded": {
+      "width": 81920,
+      "pitch": 2048,
+      "scores": 1280,
+      "max_abs": 1.3038516e-08,
+      "nrmse": 4.5099775e-07,
+      "mixed_fallback_exact_words": 4096
+    }
+  },
+  "dense_81920_order": [
+    "a-control",
+    "a-candidate",
+    "b-candidate",
+    "b-control"
+  ],
+  "dense_81920_saved_us": {
+    "a": -244.91,
+    "b": -244.68
+  },
+  "solo_70us_each": false,
+  "compound_50us_operator_screen_only": false,
+  "independently_qualified_companion_ms": null,
+  "compound_promotion": false,
+  "local_array_equality": {
+    "control_mirrors": true,
+    "candidate_mirrors_and_padded": true,
+    "dense_control_matches_canonical_synthetic_fixture": true
+  }
+}

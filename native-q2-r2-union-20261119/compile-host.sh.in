@@ -1,0 +1,4 @@
+set -eu
+cd /b/tests
+/usr/bin/g++-14 -DGGML_BACKEND_DL -DGGML_SHARED -DLLAMA_SHARED -DLLAMA_SUBPROCESS -I@SOURCE_MOUNT@/src/../include -I@SOURCE_MOUNT@/ggml/src/../include -I@SOURCE_MOUNT@/common/. -I@SOURCE_MOUNT@/vendor/nlohmann/.. -I@SOURCE_MOUNT@/vendor/sheredom/.. -O3 -DNDEBUG -Wmissing-declarations -Wmissing-noreturn -Wall -Wextra -Wpedantic -Wcast-qual -Wno-unused-function -Wno-array-bounds -Wextra-semi -o /work/test-backend-ops.cpp.o -c @SOURCE_MOUNT@/tests/test-backend-ops.cpp
+/usr/bin/g++-14 -O3 -DNDEBUG -Wl,--allow-shlib-undefined /work/test-backend-ops.cpp.o -o /work/test-backend-ops -Wl,-rpath,/b/bin: ../bin/libllama-common.so.0.6.0 ../bin/libllama.so.0.6.0 ../bin/libggml.so.0.26.0 ../bin/libggml-base.so.0.26.0 ../common/libllama-common-base.a
