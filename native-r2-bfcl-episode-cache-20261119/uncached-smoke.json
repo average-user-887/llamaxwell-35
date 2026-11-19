@@ -1,0 +1,91 @@
+{
+  "arms": {
+    "native": {
+      "cases": {
+        "multi_turn_base_135": {
+          "score": 0,
+          "status": "scored"
+        },
+        "multi_turn_long_context_7": {
+          "score": 1,
+          "status": "scored"
+        },
+        "multi_turn_miss_func_24": {
+          "score": 0,
+          "status": "scored"
+        },
+        "multi_turn_miss_param_14": {
+          "score": 1,
+          "status": "scored"
+        }
+      },
+      "cleanup_exit": 0,
+      "evaluator_exit": 0,
+      "evaluator_wall_s": 461,
+      "pass_count": 2,
+      "runner_exit": 1,
+      "server_timings": {
+        "eval time": {
+          "reported_ms": 53212.96,
+          "tokens": 5887
+        },
+        "prompt eval time": {
+          "reported_ms": 399828.93,
+          "tokens": 182490
+        },
+        "total time": {
+          "reported_ms": 453041.91,
+          "tokens": 188377
+        }
+      },
+      "total_case_wall_s": 455.364
+    },
+    "serial": {
+      "cases": {
+        "multi_turn_base_135": {
+          "score": 1,
+          "status": "scored"
+        },
+        "multi_turn_long_context_7": {
+          "score": 1,
+          "status": "scored"
+        },
+        "multi_turn_miss_func_24": {
+          "score": 0,
+          "status": "scored"
+        },
+        "multi_turn_miss_param_14": {
+          "score": 1,
+          "status": "scored"
+        }
+      },
+      "cleanup_exit": 0,
+      "evaluator_exit": 0,
+      "evaluator_wall_s": 506,
+      "pass_count": 3,
+      "runner_exit": 0,
+      "server_timings": {
+        "eval time": {
+          "reported_ms": 74325.52,
+          "tokens": 6379
+        },
+        "prompt eval time": {
+          "reported_ms": 424800.25,
+          "tokens": 200075
+        },
+        "total time": {
+          "reported_ms": 499125.74,
+          "tokens": 206454
+        }
+      },
+      "total_case_wall_s": 500.981
+    }
+  },
+  "date": "2026-11-19",
+  "native_vs_serial_score": {
+    "losses": 1,
+    "ties": 3,
+    "wins": 0
+  },
+  "stage": "smoke"
+}
