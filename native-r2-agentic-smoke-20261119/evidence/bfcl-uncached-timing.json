@@ -1,0 +1,82 @@
+{
+  "native": {
+    "cases": [
+      {
+        "id": "multi_turn_base_135",
+        "wall_s": 80.172,
+        "working_s": 80.066
+      },
+      {
+        "id": "multi_turn_long_context_7",
+        "wall_s": 99.544,
+        "working_s": 99.487
+      },
+      {
+        "id": "multi_turn_miss_func_24",
+        "wall_s": 132.03,
+        "working_s": 131.929
+      },
+      {
+        "id": "multi_turn_miss_param_14",
+        "wall_s": 143.618,
+        "working_s": 143.38
+      }
+    ],
+    "evaluator_elapsed_s": 461,
+    "server_timings": {
+      "eval time": {
+        "reported_ms": 53212.96,
+        "tokens": 5887
+      },
+      "prompt eval time": {
+        "reported_ms": 399828.93,
+        "tokens": 182490
+      },
+      "total time": {
+        "reported_ms": 453041.91,
+        "tokens": 188377
+      }
+    },
+    "total_case_wall_s": 455.364
+  },
+  "serial": {
+    "cases": [
+      {
+        "id": "multi_turn_base_135",
+        "wall_s": 89.857,
+        "working_s": 89.743
+      },
+      {
+        "id": "multi_turn_long_context_7",
+        "wall_s": 134.902,
+        "working_s": 134.83
+      },
+      {
+        "id": "multi_turn_miss_func_24",
+        "wall_s": 131.743,
+        "working_s": 131.666
+      },
+      {
+        "id": "multi_turn_miss_param_14",
+        "wall_s": 144.479,
+        "working_s": 144.39
+      }
+    ],
+    "evaluator_elapsed_s": 506,
+    "server_timings": {
+      "eval time": {
+        "reported_ms": 74325.52,
+        "tokens": 6379
+      },
+      "prompt eval time": {
+        "reported_ms": 424800.25,
+        "tokens": 200075
+      },
+      "total time": {
+        "reported_ms": 499125.74,
+        "tokens": 206454
+      }
+    },
+    "total_case_wall_s": 500.981
+  }
+}

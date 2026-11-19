@@ -1,0 +1,52 @@
+{
+  "native": {
+    "cdi_startup_attested": 1,
+    "cleanup_exit": 0,
+    "evaluator_exit": 0,
+    "evaluator_wall_s": 23,
+    "preflight": {
+      "instruction_counts": {
+        "full": 834,
+        "smoke": 12
+      },
+      "smoke_ids": [
+        3131,
+        1535,
+        3035,
+        2139,
+        2100,
+        1436
+      ],
+      "stages": {
+        "full": 541,
+        "smoke": 6
+      }
+    },
+    "runner_exit": 0
+  },
+  "serial": {
+    "cdi_startup_attested": 1,
+    "cleanup_exit": 0,
+    "evaluator_exit": 0,
+    "evaluator_wall_s": 25,
+    "preflight": {
+      "instruction_counts": {
+        "full": 834,
+        "smoke": 12
+      },
+      "smoke_ids": [
+        3131,
+        1535,
+        3035,
+        2139,
+        2100,
+        1436
+      ],
+      "stages": {
+        "full": 541,
+        "smoke": 6
+      }
+    },
+    "runner_exit": 0
+  }
+}

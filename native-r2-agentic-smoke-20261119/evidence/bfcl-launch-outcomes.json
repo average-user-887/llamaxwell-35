@@ -1,0 +1,25 @@
+{
+  "native": {
+    "cleanup_exit": 0,
+    "evaluator_exit": 0,
+    "evaluator_wall_s": 461,
+    "original_wrapper_refusal": "malformed or truncated compact_guard: witness",
+    "runner_exit": 1
+  },
+  "r1_preinference_attempt": {
+    "cleanup_exit": 0,
+    "reason": "unexpected additional Docker GPU requests",
+    "runner_exit": 1
+  },
+  "original_preinference_attempt": {
+    "cleanup_exit": 0,
+    "reason": "container has an unexpected CDI device selection",
+    "runner_exit": 1
+  },
+  "serial": {
+    "cleanup_exit": 0,
+    "evaluator_exit": 0,
+    "evaluator_wall_s": 506,
+    "runner_exit": 0
+  }
+}

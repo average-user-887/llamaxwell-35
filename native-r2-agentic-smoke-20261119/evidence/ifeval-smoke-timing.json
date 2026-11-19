@@ -1,0 +1,108 @@
+{
+  "native": {
+    "cases": [
+      {
+        "completion_tokens": 527,
+        "finish_reason": "stop",
+        "id": 3131,
+        "prompt_tokens": 68,
+        "status": "scored",
+        "wall_s": 6.364
+      },
+      {
+        "completion_tokens": 83,
+        "finish_reason": "stop",
+        "id": 1535,
+        "prompt_tokens": 51,
+        "status": "scored",
+        "wall_s": 1.714
+      },
+      {
+        "completion_tokens": 85,
+        "finish_reason": "stop",
+        "id": 3035,
+        "prompt_tokens": 42,
+        "status": "scored",
+        "wall_s": 1.297
+      },
+      {
+        "completion_tokens": 267,
+        "finish_reason": "stop",
+        "id": 2139,
+        "prompt_tokens": 53,
+        "status": "scored",
+        "wall_s": 3.449
+      },
+      {
+        "completion_tokens": 69,
+        "finish_reason": "stop",
+        "id": 2100,
+        "prompt_tokens": 60,
+        "status": "scored",
+        "wall_s": 1.505
+      },
+      {
+        "completion_tokens": 495,
+        "finish_reason": "stop",
+        "id": 1436,
+        "prompt_tokens": 62,
+        "status": "scored",
+        "wall_s": 5.814
+      }
+    ],
+    "max_case_wall_s": 6.364
+  },
+  "serial": {
+    "cases": [
+      {
+        "completion_tokens": 529,
+        "finish_reason": "stop",
+        "id": 3131,
+        "prompt_tokens": 68,
+        "status": "scored",
+        "wall_s": 6.885
+      },
+      {
+        "completion_tokens": 91,
+        "finish_reason": "stop",
+        "id": 1535,
+        "prompt_tokens": 51,
+        "status": "scored",
+        "wall_s": 2.019
+      },
+      {
+        "completion_tokens": 201,
+        "finish_reason": "stop",
+        "id": 3035,
+        "prompt_tokens": 42,
+        "status": "scored",
+        "wall_s": 2.842
+      },
+      {
+        "completion_tokens": 230,
+        "finish_reason": "stop",
+        "id": 2139,
+        "prompt_tokens": 53,
+        "status": "scored",
+        "wall_s": 3.293
+      },
+      {
+        "completion_tokens": 95,
+        "finish_reason": "stop",
+        "id": 2100,
+        "prompt_tokens": 60,
+        "status": "scored",
+        "wall_s": 1.843
+      },
+      {
+        "completion_tokens": 400,
+        "finish_reason": "stop",
+        "id": 1436,
+        "prompt_tokens": 62,
+        "status": "scored",
+        "wall_s": 5.275
+      }
+    ],
+    "max_case_wall_s": 6.885
+  }
+}

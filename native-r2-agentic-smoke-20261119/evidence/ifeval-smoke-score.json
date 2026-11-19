@@ -1,0 +1,607 @@
+{
+  "arm_case_counts": {
+    "off": {
+      "absent": 0,
+      "model_cap": 0,
+      "request_error": 0,
+      "scored": 6,
+      "scoring_error": 0
+    },
+    "on": {
+      "absent": 0,
+      "model_cap": 0,
+      "request_error": 0,
+      "scored": 6,
+      "scoring_error": 0
+    }
+  },
+  "arm_run_status": {
+    "off": "finished",
+    "on": "finished"
+  },
+  "arms": {
+    "native": {
+      "cases": {
+        "1436": {
+          "loose": [
+            true,
+            false
+          ],
+          "status": "scored",
+          "strict": [
+            true,
+            false
+          ]
+        },
+        "1535": {
+          "loose": [
+            true,
+            false
+          ],
+          "status": "scored",
+          "strict": [
+            true,
+            false
+          ]
+        },
+        "2100": {
+          "loose": [
+            true,
+            true
+          ],
+          "status": "scored",
+          "strict": [
+            true,
+            true
+          ]
+        },
+        "2139": {
+          "loose": [
+            true,
+            true
+          ],
+          "status": "scored",
+          "strict": [
+            true,
+            true
+          ]
+        },
+        "3035": {
+          "loose": [
+            true,
+            true
+          ],
+          "status": "scored",
+          "strict": [
+            true,
+            true
+          ]
+        },
+        "3131": {
+          "loose": [
+            true,
+            true
+          ],
+          "status": "scored",
+          "strict": [
+            true,
+            true
+          ]
+        }
+      },
+      "physical": {
+        "compact": {
+          "ambiguous": 0,
+          "compact_bytes": 0,
+          "compact_only": 0,
+          "launched": 0,
+          "raw_bytes": 0,
+          "requested": 0,
+          "shadow_mismatches": 0,
+          "shadow_rows": 0,
+          "unsupported": 0
+        },
+        "compact_guard": {
+          "draft": 0,
+          "mask": 0,
+          "model": 0,
+          "observer": 0,
+          "ready": 0,
+          "rollback": 0,
+          "sampler": 901,
+          "shape": 0,
+          "types": 0
+        },
+        "down4_launches": 36040,
+        "down4_matches_40_times_guard_offers": true,
+        "mode": "native",
+        "observed_fallback_proposals": 901,
+        "physical_counters": {
+          "combined": 36040,
+          "down4": 36040,
+          "q2_sparse": 0,
+          "q2_stride": 0,
+          "row0": 0,
+          "row1": 0,
+          "skip": 36040
+        }
+      }
+    },
+    "serial": {
+      "cases": {
+        "1436": {
+          "loose": [
+            true,
+            true
+          ],
+          "status": "scored",
+          "strict": [
+            true,
+            true
+          ]
+        },
+        "1535": {
+          "loose": [
+            true,
+            false
+          ],
+          "status": "scored",
+          "strict": [
+            true,
+            false
+          ]
+        },
+        "2100": {
+          "loose": [
+            true,
+            true
+          ],
+          "status": "scored",
+          "strict": [
+            true,
+            true
+          ]
+        },
+        "2139": {
+          "loose": [
+            true,
+            true
+          ],
+          "status": "scored",
+          "strict": [
+            true,
+            true
+          ]
+        },
+        "3035": {
+          "loose": [
+            true,
+            true
+          ],
+          "status": "scored",
+          "strict": [
+            true,
+            true
+          ]
+        },
+        "3131": {
+          "loose": [
+            true,
+            true
+          ],
+          "status": "scored",
+          "strict": [
+            true,
+            true
+          ]
+        }
+      },
+      "physical": {
+        "compact": {
+          "ambiguous": 0,
+          "compact_bytes": 0,
+          "compact_only": 0,
+          "launched": 0,
+          "raw_bytes": 0,
+          "requested": 0,
+          "shadow_mismatches": 0,
+          "shadow_rows": 0,
+          "unsupported": 0
+        },
+        "compact_guard": {
+          "draft": 0,
+          "mask": 0,
+          "model": 0,
+          "observer": 0,
+          "ready": 0,
+          "rollback": 0,
+          "sampler": 0,
+          "shape": 0,
+          "types": 0
+        },
+        "down4_launches": 0,
+        "down4_matches_40_times_guard_offers": true,
+        "mode": "serial",
+        "observed_fallback_proposals": 0,
+        "physical_counters": {
+          "combined": 0,
+          "down4": 0,
+          "q2_sparse": 0,
+          "q2_stride": 0,
+          "row0": 0,
+          "row1": 0,
+          "skip": 0
+        }
+      }
+    }
+  },
+  "dataset": "google/IFEval",
+  "metrics": {
+    "loose": {
+      "by_instruction": {
+        "change_case:english_lowercase": {
+          "both_fail": 0,
+          "both_pass": 4,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 4,
+          "off_resolved": 4,
+          "on_accuracy": 1.0,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 4,
+          "on_resolved": 4,
+          "planned": 4
+        },
+        "detectable_content:number_placeholders": {
+          "both_fail": 0,
+          "both_pass": 1,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 1,
+          "off_resolved": 1,
+          "on_accuracy": 1.0,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 1,
+          "on_resolved": 1,
+          "planned": 1
+        },
+        "detectable_content:postscript": {
+          "both_fail": 0,
+          "both_pass": 1,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 1,
+          "off_resolved": 1,
+          "on_accuracy": 1.0,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 1,
+          "on_resolved": 1,
+          "planned": 1
+        },
+        "detectable_format:number_bullet_lists": {
+          "both_fail": 0,
+          "both_pass": 1,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 1,
+          "off_resolved": 1,
+          "on_accuracy": 1.0,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 1,
+          "on_resolved": 1,
+          "planned": 1
+        },
+        "detectable_format:title": {
+          "both_fail": 0,
+          "both_pass": 1,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 1,
+          "off_resolved": 1,
+          "on_accuracy": 1.0,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 1,
+          "on_resolved": 1,
+          "planned": 1
+        },
+        "keywords:existence": {
+          "both_fail": 0,
+          "both_pass": 1,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 1,
+          "off_resolved": 1,
+          "on_accuracy": 1.0,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 1,
+          "on_resolved": 1,
+          "planned": 1
+        },
+        "keywords:forbidden_words": {
+          "both_fail": 0,
+          "both_pass": 0,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 1,
+          "off_pass": 1,
+          "off_resolved": 1,
+          "on_accuracy": 0.0,
+          "on_minus_off": -1.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 0,
+          "on_resolved": 1,
+          "planned": 1
+        },
+        "length_constraints:number_sentences": {
+          "both_fail": 1,
+          "both_pass": 1,
+          "missing": 0,
+          "off_accuracy": 0.5,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 1,
+          "off_resolved": 2,
+          "on_accuracy": 0.5,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 1,
+          "on_resolved": 2,
+          "planned": 2
+        }
+      },
+      "instruction": {
+        "both_fail": 1,
+        "both_pass": 10,
+        "missing": 0,
+        "off_accuracy": 0.9166666666666666,
+        "off_missing": 0,
+        "off_only": 1,
+        "off_pass": 11,
+        "off_resolved": 12,
+        "on_accuracy": 0.8333333333333334,
+        "on_minus_off": -0.08333333333333333,
+        "on_missing": 0,
+        "on_only": 0,
+        "on_pass": 10,
+        "on_resolved": 12,
+        "planned": 12
+      },
+      "prompt": {
+        "both_fail": 1,
+        "both_pass": 4,
+        "missing": 0,
+        "off_accuracy": 0.8333333333333334,
+        "off_missing": 0,
+        "off_only": 1,
+        "off_pass": 5,
+        "off_resolved": 6,
+        "on_accuracy": 0.6666666666666666,
+        "on_minus_off": -0.16666666666666666,
+        "on_missing": 0,
+        "on_only": 0,
+        "on_pass": 4,
+        "on_resolved": 6,
+        "planned": 6
+      }
+    },
+    "strict": {
+      "by_instruction": {
+        "change_case:english_lowercase": {
+          "both_fail": 0,
+          "both_pass": 4,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 4,
+          "off_resolved": 4,
+          "on_accuracy": 1.0,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 4,
+          "on_resolved": 4,
+          "planned": 4
+        },
+        "detectable_content:number_placeholders": {
+          "both_fail": 0,
+          "both_pass": 1,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 1,
+          "off_resolved": 1,
+          "on_accuracy": 1.0,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 1,
+          "on_resolved": 1,
+          "planned": 1
+        },
+        "detectable_content:postscript": {
+          "both_fail": 0,
+          "both_pass": 1,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 1,
+          "off_resolved": 1,
+          "on_accuracy": 1.0,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 1,
+          "on_resolved": 1,
+          "planned": 1
+        },
+        "detectable_format:number_bullet_lists": {
+          "both_fail": 0,
+          "both_pass": 1,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 1,
+          "off_resolved": 1,
+          "on_accuracy": 1.0,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 1,
+          "on_resolved": 1,
+          "planned": 1
+        },
+        "detectable_format:title": {
+          "both_fail": 0,
+          "both_pass": 1,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 1,
+          "off_resolved": 1,
+          "on_accuracy": 1.0,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 1,
+          "on_resolved": 1,
+          "planned": 1
+        },
+        "keywords:existence": {
+          "both_fail": 0,
+          "both_pass": 1,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 1,
+          "off_resolved": 1,
+          "on_accuracy": 1.0,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 1,
+          "on_resolved": 1,
+          "planned": 1
+        },
+        "keywords:forbidden_words": {
+          "both_fail": 0,
+          "both_pass": 0,
+          "missing": 0,
+          "off_accuracy": 1.0,
+          "off_missing": 0,
+          "off_only": 1,
+          "off_pass": 1,
+          "off_resolved": 1,
+          "on_accuracy": 0.0,
+          "on_minus_off": -1.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 0,
+          "on_resolved": 1,
+          "planned": 1
+        },
+        "length_constraints:number_sentences": {
+          "both_fail": 1,
+          "both_pass": 1,
+          "missing": 0,
+          "off_accuracy": 0.5,
+          "off_missing": 0,
+          "off_only": 0,
+          "off_pass": 1,
+          "off_resolved": 2,
+          "on_accuracy": 0.5,
+          "on_minus_off": 0.0,
+          "on_missing": 0,
+          "on_only": 0,
+          "on_pass": 1,
+          "on_resolved": 2,
+          "planned": 2
+        }
+      },
+      "instruction": {
+        "both_fail": 1,
+        "both_pass": 10,
+        "missing": 0,
+        "off_accuracy": 0.9166666666666666,
+        "off_missing": 0,
+        "off_only": 1,
+        "off_pass": 11,
+        "off_resolved": 12,
+        "on_accuracy": 0.8333333333333334,
+        "on_minus_off": -0.08333333333333333,
+        "on_missing": 0,
+        "on_only": 0,
+        "on_pass": 10,
+        "on_resolved": 12,
+        "planned": 12
+      },
+      "prompt": {
+        "both_fail": 1,
+        "both_pass": 4,
+        "missing": 0,
+        "off_accuracy": 0.8333333333333334,
+        "off_missing": 0,
+        "off_only": 1,
+        "off_pass": 5,
+        "off_resolved": 6,
+        "on_accuracy": 0.6666666666666666,
+        "on_minus_off": -0.16666666666666666,
+        "on_missing": 0,
+        "on_only": 0,
+        "on_pass": 4,
+        "on_resolved": 6,
+        "planned": 6
+      }
+    }
+  },
+  "public_ids": [
+    3131,
+    1535,
+    3035,
+    2139,
+    2100,
+    1436
+  ],
+  "revision": "966cd89545d6b6acfd7638bc708b98261ca58e84",
+  "same_build_checks": {
+    "benchmark_freeze": true,
+    "build": true,
+    "effective_template": true,
+    "profile_pair": true,
+    "weights": true,
+    "worker": true
+  },
+  "stage": "smoke"
+}

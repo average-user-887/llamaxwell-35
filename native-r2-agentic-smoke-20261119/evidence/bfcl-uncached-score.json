@@ -1,0 +1,223 @@
+{
+  "arms": {
+    "native": {
+      "assistant_tool_calls": 25,
+      "cases": [
+        {
+          "assistant_tool_calls": 6,
+          "id": "multi_turn_base_135",
+          "infra_error": false,
+          "limit": null,
+          "loss_type": "response_mismatch",
+          "model_turns": 9,
+          "passed": false,
+          "tool_event_error_kinds": {},
+          "tool_message_error_kinds": {},
+          "tool_messages": 6
+        },
+        {
+          "assistant_tool_calls": 5,
+          "id": "multi_turn_long_context_7",
+          "infra_error": false,
+          "limit": null,
+          "loss_type": null,
+          "model_turns": 7,
+          "passed": true,
+          "tool_event_error_kinds": {},
+          "tool_message_error_kinds": {},
+          "tool_messages": 5
+        },
+        {
+          "assistant_tool_calls": 6,
+          "id": "multi_turn_miss_func_24",
+          "infra_error": false,
+          "limit": null,
+          "loss_type": "state_mismatch",
+          "model_turns": 10,
+          "passed": false,
+          "tool_event_error_kinds": {},
+          "tool_message_error_kinds": {},
+          "tool_messages": 6
+        },
+        {
+          "assistant_tool_calls": 8,
+          "id": "multi_turn_miss_param_14",
+          "infra_error": false,
+          "limit": null,
+          "loss_type": null,
+          "model_turns": 11,
+          "passed": true,
+          "tool_event_error_kinds": {},
+          "tool_message_error_kinds": {},
+          "tool_messages": 8
+        }
+      ],
+      "model_turns": 37,
+      "pass_count": 2,
+      "physical": {
+        "compact": {
+          "ambiguous": 0,
+          "compact_bytes": 0,
+          "compact_only": 0,
+          "launched": 0,
+          "raw_bytes": 0,
+          "requested": 0,
+          "shadow_mismatches": 0,
+          "shadow_rows": 0,
+          "unsupported": 0
+        },
+        "compact_guard": {
+          "draft": 0,
+          "mask": 0,
+          "model": 0,
+          "observer": 0,
+          "ready": 0,
+          "rollback": 0,
+          "sampler": 3039,
+          "shape": 0,
+          "types": 0
+        },
+        "down4_launches": 121560,
+        "down4_matches_40_times_guard_offers": true,
+        "mode": "native",
+        "observed_fallback_proposals": 3039,
+        "physical_counters": {
+          "combined": 121560,
+          "down4": 121560,
+          "q2_sparse": 0,
+          "q2_stride": 0,
+          "row0": 0,
+          "row1": 0,
+          "skip": 121560
+        }
+      },
+      "tool_messages": 25
+    },
+    "serial": {
+      "assistant_tool_calls": 27,
+      "cases": [
+        {
+          "assistant_tool_calls": 7,
+          "id": "multi_turn_base_135",
+          "infra_error": false,
+          "limit": null,
+          "loss_type": null,
+          "model_turns": 10,
+          "passed": true,
+          "tool_event_error_kinds": {},
+          "tool_message_error_kinds": {},
+          "tool_messages": 7
+        },
+        {
+          "assistant_tool_calls": 6,
+          "id": "multi_turn_long_context_7",
+          "infra_error": false,
+          "limit": null,
+          "loss_type": null,
+          "model_turns": 9,
+          "passed": true,
+          "tool_event_error_kinds": {},
+          "tool_message_error_kinds": {},
+          "tool_messages": 6
+        },
+        {
+          "assistant_tool_calls": 6,
+          "id": "multi_turn_miss_func_24",
+          "infra_error": false,
+          "limit": null,
+          "loss_type": "state_mismatch",
+          "model_turns": 10,
+          "passed": false,
+          "tool_event_error_kinds": {},
+          "tool_message_error_kinds": {},
+          "tool_messages": 6
+        },
+        {
+          "assistant_tool_calls": 8,
+          "id": "multi_turn_miss_param_14",
+          "infra_error": false,
+          "limit": null,
+          "loss_type": null,
+          "model_turns": 11,
+          "passed": true,
+          "tool_event_error_kinds": {},
+          "tool_message_error_kinds": {},
+          "tool_messages": 8
+        }
+      ],
+      "model_turns": 40,
+      "pass_count": 3,
+      "physical": {
+        "compact": {
+          "ambiguous": 0,
+          "compact_bytes": 0,
+          "compact_only": 0,
+          "launched": 0,
+          "raw_bytes": 0,
+          "requested": 0,
+          "shadow_mismatches": 0,
+          "shadow_rows": 0,
+          "unsupported": 0
+        },
+        "compact_guard": {
+          "draft": 0,
+          "mask": 0,
+          "model": 0,
+          "observer": 0,
+          "ready": 0,
+          "rollback": 0,
+          "sampler": 0,
+          "shape": 0,
+          "types": 0
+        },
+        "down4_launches": 0,
+        "down4_matches_40_times_guard_offers": true,
+        "mode": "serial",
+        "observed_fallback_proposals": 0,
+        "physical_counters": {
+          "combined": 0,
+          "down4": 0,
+          "q2_sparse": 0,
+          "q2_stride": 0,
+          "row0": 0,
+          "row1": 0,
+          "skip": 0
+        }
+      },
+      "tool_messages": 27
+    }
+  },
+  "compact_formats": {
+    "compact_guard": {
+      "bare": 25,
+      "corrected": 37,
+      "inherited": 29,
+      "timestamp_info": 4,
+      "timestamp_only": 8,
+      "total": 37
+    },
+    "compact_readback": {
+      "bare": 37,
+      "corrected": 37,
+      "inherited": 37,
+      "total": 37
+    }
+  },
+  "native_wrapper_refusal_preserved": true,
+  "paired": {
+    "native_losses": 1,
+    "native_wins": 0,
+    "ties": 3
+  },
+  "protocol": "uncached four-case R2 BFCL smoke",
+  "quality_gate": "descriptive smoke only",
+  "same_build_checks": {
+    "benchmark_freeze": true,
+    "build": true,
+    "effective_template": true,
+    "profile_pair": true,
+    "weights": true,
+    "worker": true
+  },
+  "schema": 1
+}
