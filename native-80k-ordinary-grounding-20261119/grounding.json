@@ -1,0 +1,12 @@
+{
+  "dataset": "InfiniteBench longbook_choice_eng adapted rationale task",
+  "public_item_ids": [150, 151, 152, 153],
+  "unique_books": 1,
+  "modes_blinded_until_after_grading": true,
+  "unique_responses_reviewed": 2,
+  "native": {"exact_mode_text_repeat": true, "correct_choices": 4, "relevant_book_fact": 4, "choice_driving_contradictions": 0, "grades": ["partly_supported", "supported", "partly_supported", "partly_supported"]},
+  "serial": {"exact_mode_text_repeat": true, "correct_choices": 4, "relevant_book_fact": 4, "choice_driving_contradictions": 0, "grades": ["partly_supported", "partly_supported", "partly_supported", "partly_supported"]},
+  "benign_rationale_review": true,
+  "official_infinitebench_score": null,
+  "agentic_task_score": null
+}
