@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+cd -- "$(dirname -- "$0")"
+here=$(pwd -P)
+parent=$(dirname -- "$here")
+base=$parent/sparse/r2
+source=<EXACT_SOURCE_MOUNT>
+image=sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed
+python3 -B prepare.py
+python3 -B commands.py
+timeout -k 3s 240s taskset -c 0-1 nice -n 19 docker run --rm --pull never --runtime runc --network none   --cpuset-cpus 0-1 --tmpfs /tmp:rw,size=256m --user "$(id -u):$(id -g)" -e NVIDIA_VISIBLE_DEVICES=void -e TMPDIR=/tmp   -v "$base/src:$source:ro" -v "$here/occamy-gdn.cu:$source/ggml/src/ggml-cuda/occamy-gdn.cu:ro"   -v "$base/build:/b:ro" -v "$parent/night-gdn-t2-q8-fast/occamy-gdn.cu.o:/q8/occamy-gdn.cu.o:ro"   -v "$parent/resume-q2-moe-cohorts/occamy-fused.cu.o:/q2/occamy-fused.cu.o:ro"   -v "$parent/finish33-r2-stride/fattn-occamy.cu.o:/stride/fattn-occamy.cu.o:ro"   -v "$here:/work" -w /b/ggml/src/ggml-cuda --entrypoint /bin/bash "$image" /work/compile.sh > build.log 2>&1
+cmp control-relinked.so "$parent/finish33-r2-stride/libggml-cuda.so"
+python3 -B verify.py > build.json

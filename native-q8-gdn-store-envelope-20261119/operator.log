@@ -1,0 +1,62 @@
+678cf75e5ef5b1f92460eb0f816d3bbe755ee9710fd04606c31ec24dcd41fa06  /runtime/libggml-base.so.0.26.0
+50cdab271dc3411e4135539f27371b453314b14162e96cc9744efa8f2a994e7d  /candidate/libggml-cuda.so
+8574cf44b9beaee9640dceb69e8ce6b1266023b34447219a2ec3a567df5afefb  /candidate/probe.py
+GDN_RESIDENCY mode=control sm=52 sms=24 active=3 grid=72 threads=256 registers=80 local=0 shared=27392
+GDN_RESIDENCY mode=elided sm=52 sms=24 active=3 grid=72 threads=256 registers=80 local=0 shared=27392
+GDN_COMPARE_SCOPE fixture=0 mode=1
+GDN_COMPARE fixture=0 field=residual_both words=4096 finite=4096 differing=0
+GDN_COMPARE fixture=0 field=convolution_both words=49152 finite=49152 differing=0
+GDN_COMPARE fixture=0 field=final_state words=524288 finite=524288 differing=0
+GDN_COMPARE fixture=0 field=intermediate_state words=524288 finite=524288 differing=0
+GDN_COMPARE_SCOPE fixture=0 mode=2
+GDN_COMPARE fixture=0 field=residual_both words=4096 finite=4096 differing=0
+GDN_COMPARE fixture=0 field=convolution_both words=49152 finite=49152 differing=0
+GDN_COMPARE fixture=0 field=final_state words=524288 finite=524288 differing=0
+GDN_COMPARE fixture=0 field=missing_intermediate words=524288 finite=524288 differing=0
+GDN_CONTROL_SNAPSHOT fixture=0 finite_changed=524288 expected=524288
+GDN_COMPARE_SCOPE fixture=1 mode=1
+GDN_COMPARE fixture=1 field=residual_both words=4096 finite=4096 differing=0
+GDN_COMPARE fixture=1 field=convolution_both words=49152 finite=49152 differing=0
+GDN_COMPARE fixture=1 field=final_state words=524288 finite=524288 differing=0
+GDN_COMPARE fixture=1 field=intermediate_state words=524288 finite=524288 differing=0
+GDN_COMPARE_SCOPE fixture=1 mode=2
+GDN_COMPARE fixture=1 field=residual_both words=4096 finite=4096 differing=0
+GDN_COMPARE fixture=1 field=convolution_both words=49152 finite=49152 differing=0
+GDN_COMPARE fixture=1 field=final_state words=524288 finite=524288 differing=0
+GDN_COMPARE fixture=1 field=missing_intermediate words=524288 finite=524288 differing=0
+GDN_CONTROL_SNAPSHOT fixture=1 finite_changed=524288 expected=524288
+GDN_COMPARE_SCOPE fixture=2 mode=1
+GDN_COMPARE fixture=2 field=residual_both words=4096 finite=4096 differing=0
+GDN_COMPARE fixture=2 field=convolution_both words=49152 finite=49152 differing=0
+GDN_COMPARE fixture=2 field=final_state words=524288 finite=524288 differing=0
+GDN_COMPARE fixture=2 field=intermediate_state words=524288 finite=524288 differing=0
+GDN_COMPARE_SCOPE fixture=2 mode=2
+GDN_COMPARE fixture=2 field=residual_both words=4096 finite=4096 differing=0
+GDN_COMPARE fixture=2 field=convolution_both words=49152 finite=49152 differing=0
+GDN_COMPARE fixture=2 field=final_state words=524288 finite=524288 differing=0
+GDN_COMPARE fixture=2 field=missing_intermediate words=524288 finite=524288 differing=0
+GDN_CONTROL_SNAPSHOT fixture=2 finite_changed=524288 expected=524288
+GDN_COMPARE_SCOPE fixture=3 mode=1
+GDN_COMPARE fixture=3 field=residual_both words=4096 finite=4096 differing=0
+GDN_COMPARE fixture=3 field=convolution_both words=49152 finite=49152 differing=0
+GDN_COMPARE fixture=3 field=final_state words=524288 finite=524288 differing=0
+GDN_COMPARE fixture=3 field=intermediate_state words=524288 finite=524288 differing=0
+GDN_COMPARE_SCOPE fixture=3 mode=2
+GDN_COMPARE fixture=3 field=residual_both words=4096 finite=4096 differing=0
+GDN_COMPARE fixture=3 field=convolution_both words=49152 finite=49152 differing=0
+GDN_COMPARE fixture=3 field=final_state words=524288 finite=524288 differing=0
+GDN_COMPARE fixture=3 field=missing_intermediate words=524288 finite=524288 differing=0
+GDN_CONTROL_SNAPSHOT fixture=3 finite_changed=524288 expected=524288
+GDN_INTERVAL order=0 mode=original reps=128 mean_us=143.508002
+GDN_INTERVAL order=1 mode=full reps=128 mean_us=143.556744
+GDN_INTERVAL order=2 mode=elided reps=128 mean_us=142.464995
+GDN_INTERVAL order=3 mode=elided reps=128 mean_us=138.967246
+GDN_INTERVAL order=4 mode=full reps=128 mean_us=144.189253
+GDN_INTERVAL order=5 mode=original reps=128 mean_us=144.069746
+GDN_INTERVAL order=6 mode=elided reps=128 mean_us=138.974994
+GDN_INTERVAL order=7 mode=full reps=128 mean_us=144.297495
+GDN_INTERVAL order=8 mode=original reps=128 mean_us=144.130498
+GDN_INTERVAL order=9 mode=original reps=128 mean_us=144.105494
+GDN_INTERVAL order=10 mode=full reps=128 mean_us=144.160002
+GDN_INTERVAL order=11 mode=elided reps=128 mean_us=138.768747
+GDN_ENVELOPE_OK rollback_intermediate_deliberately_missing

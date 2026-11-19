@@ -1,0 +1,100 @@
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+<EXACT_SOURCE_MOUNT>/ggml/src/ggml-cuda/occamy-gdn.cu(1110): warning #177-D: variable "so1" was declared but never referenced
+              float4 * so1 = (float4 *)(so_1 + toff) + lane;
+                       ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+ptxas info    : 26792 bytes gmem, 88 bytes cmem[4]
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi2ELi0ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi2ELi0ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 1120 bytes smem, 496 bytes cmem[0]
+ptxas info    : Compile time = 45.885 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi2ELi0ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi2ELi0ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0]
+ptxas info    : Compile time = 14.220 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi3ELi0ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi3ELi0ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 128 bytes smem, 496 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 20.314 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi2ELi1ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi2ELi1ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 1120 bytes smem, 496 bytes cmem[0]
+ptxas info    : Compile time = 13.509 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi3ELi0ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi3ELi0ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 496 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 21.345 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi2ELi1ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi2ELi1ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0]
+ptxas info    : Compile time = 18.180 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi1ELi0ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi1ELi0ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 48 registers, used 1 barriers, 32 bytes smem, 496 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 11.779 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn10gdn_fused2ILi1EEEvNS_7Params2E' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn10gdn_fused2ILi1EEEvNS_7Params2E
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 80 registers, used 1 barriers, 2512 bytes smem, 672 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 107.278 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn10gdn_fused2ILi0EEEvNS_7Params2E' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn10gdn_fused2ILi0EEEvNS_7Params2E
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 80 registers, used 1 barriers, 1392 bytes smem, 672 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 107.621 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi1EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi1EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 62 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 48.716 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi0ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi0ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 40.816 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi1ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 1248 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 51.488 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi1ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi1ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 80 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 65.520 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi1ELi1ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 1392 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 61.336 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn9gdn_fusedILi0ELi0ELi0ELi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn9gdn_fusedILi0ELi0ELi0ELi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 1248 bytes smem, 496 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 40.712 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn7rp_packEPKjPj' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn7rp_packEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 6 registers, used 0 barriers, 336 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 1.097 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn10gdn_fused2ILi2EEEvNS_7Params2E' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn10gdn_fused2ILi2EEEvNS_7Params2E
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 80 registers, used 1 barriers, 2512 bytes smem, 672 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 97.638 ms
+ptxas info    : Compiling entry function '_ZN10occamy_gdn18gdn_store_envelopeENS_7Params2E' for 'sm_52'
+ptxas info    : Function properties for _ZN10occamy_gdn18gdn_store_envelopeENS_7Params2E
+    8 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads
+ptxas info    : Used 80 registers, used 1 barriers, 8 bytes cumulative stack size, 2512 bytes smem, 672 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 96.807 ms
+<EXACT_SOURCE_MOUNT>/ggml/src/ggml-cuda/occamy-gdn.cu:2069: warning: ignoring '#pragma unroll ' [-Wunknown-pragmas]
+ 2069 |         for (int k = 0; k < 2; ++k) {

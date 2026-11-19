@@ -1,0 +1,50 @@
+{
+  "technical_pass": true,
+  "rollback_intermediate_deliberately_missing": true,
+  "scope": "synthetic full GDN kernel, distinct private buffers, four fixtures, no model dispatch",
+  "resident_ctas_per_sm": 3,
+  "grid": 72,
+  "intervals_us": [
+    {
+      "original": 143.508002,
+      "full": 143.556744,
+      "elided": 142.464995
+    },
+    {
+      "elided": 138.967246,
+      "full": 144.189253,
+      "original": 144.069746
+    },
+    {
+      "elided": 138.974994,
+      "full": 144.297495,
+      "original": 144.130498
+    },
+    {
+      "original": 144.105494,
+      "full": 144.160002,
+      "elided": 138.768747
+    }
+  ],
+  "same_binary_saved_us_per_layer": [
+    1.0917490000000214,
+    5.222007000000019,
+    5.322500999999988,
+    5.391255000000001
+  ],
+  "original_control_saved_us_per_layer": [
+    1.0430070000000171,
+    5.1025000000000205,
+    5.155503999999979,
+    5.336747000000003
+  ],
+  "predicate_control_overhead_us_per_layer": [
+    0.04874200000000428,
+    0.1195069999999987,
+    0.16699700000000917,
+    0.05450799999999845
+  ],
+  "conservative_observed_min_us_per_layer": 1.0430070000000171,
+  "necessary_solo_23us": false,
+  "necessary_companion_6_4us": false
+}

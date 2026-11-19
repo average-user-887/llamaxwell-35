@@ -1,0 +1,607 @@
+--- a/occamy-gdn.cu
++++ b/occamy-gdn.cu
+@@ -1,3 +1,6 @@
++#include <numeric>
++#include <functional>
++#include <cmath>
+ // native-occamy Track G (13 Oct 2026): fused qwen35moe GDN layer DECODE segment (batch 1, one sequence), sm_52.
+ // Kernel = native-occamy/decode/gdn_fused.cu gdn_fused<PHASE, V=1> (d2 staged uint4 row loads), adapted to the
+ // ggml graph: the recurrent states are read from the get_rows source row (s_copy[0]) and written to the cpy
+@@ -957,6 +960,597 @@
+     }
+ }
+ 
++__global__ void __launch_bounds__(NT, 3) gdn_store_envelope(const Params2 PP) {
++    constexpr int T2 = 2;
++    extern __shared__ float smem[];
++    __shared__ float qn[SD], kn[SD], vv[CGC], red[NW];
++    __shared__ float qn2[T2 ? SD : 1], kn2[T2 ? SD : 1], vv2[T2 ? CGC : 1], red2[T2 ? NW : 1];
++    __shared__ unsigned hc[NVH], fin[NVH + 1];
++    float * xs = smem;
++    float2 * sums = (float2 *)(smem + DI / 64 * CH);
++    unsigned * stg = (unsigned *)(smem + SMEM_FLOATS) + (threadIdx.x >> 5) * STW_RP; uint4 * stg4 = (uint4 *)stg;
++    const int warp = threadIdx.x >> 5, lane = threadIdx.x & 31;
++    const int gw = blockIdx.x * NW + warp, W = gridDim.x * NW;
++    const Layer & L = PP.p[0].L;
++    Scratch * const s0 = PP.p[0].s, * const s1 = PP.p[1].s;
++
++    if constexpr (T2 == 2) {   // ---- phase A ----
++        uint4 * packed = reinterpret_cast<uint4 *>(smem);
++        float2 * scales = reinterpret_cast<float2 *>(packed + 2*8*32);
++        float * partial = reinterpret_cast<float *>(scales + 2*64);
++        static_assert(2*8*32*4 + 2*64*2 + 2*32 <= SMEM_FLOATS, "phase A scratch");
++        q8a_prepare(PP, packed, scales, partial);
++        uint4 first[8];
++#pragma unroll
++        for (int j = 0; j < 4; ++j) { first[j] = packed[j*32+lane]; first[4+j] = packed[(8+j)*32+lane]; }
++        uint4 c0, c1, c2;
++        int t = gw;
++        if (t < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, t); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
++        for (; t < NROWS_A; t += W) {
++            stg4[lane] = c0; stg4[lane + 32] = c1; if (lane < 8) stg4[lane + 64] = c2;
++            __syncwarp();
++            const int tn = t + W;
++            if (tn < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, tn); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
++            const unsigned * w = stg + lane * 9;
++            float a0, a1;
++            q8a_dot(w, packed, scales, first, lane, a0, a1);
++            a0 = warp_sum(a0); a1 = warp_sum(a1);
++            if (lane == 0) {
++                float * d0 = t < NQKV ? &s0->qkv[t] : t < NQKV + DI ? &s0->z[t - NQKV] : &s0->ab[t - NQKV - DI];
++                float * d1 = t < NQKV ? &s1->qkv[t] : t < NQKV + DI ? &s1->z[t - NQKV] : &s1->ab[t - NQKV - DI];
++                *d0 = a0; *d1 = a1;
++            }
++            __syncwarp();
++        }
++    } else {   // ---- phase A ----
++#pragma unroll
++        for (int k = 0; k < 2; ++k) {
++            const float * hk = PP.p[k].h; float * xk = xs + k * XS_HALF;
++            float ss = 0.f;
++            for (int i = threadIdx.x; i < H; i += NT) { float v = hk[i]; xk[(i >> 6) * CH + (i & 63)] = v; ss += v * v; }
++            ss = warp_sum(ss);
++            if (lane == 0) red[warp] = ss;
++            __syncthreads();
++            float tot = 0.f;
++#pragma unroll
++            for (int i = 0; i < NW; ++i) tot += red[i];
++            const float sc = rsqrtf(tot / H + PP.p[k].eps_attn);
++            for (int i = threadIdx.x; i < H; i += NT) xk[(i >> 6) * CH + (i & 63)] *= sc * __ldg(L.attn_norm + i);
++            __syncthreads();
++            block_sums(xk, sums + 32 * k, H);
++        }
++        const float * xc0 = xs + lane * CH, * xc1 = xs + XS_HALF + lane * CH;
++        const float2 sx0 = sums[lane], sx1 = sums[32 + lane];
++        uint4 c0, c1, c2;
++        int t = gw;
++        if (t < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, t); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
++        for (; t < NROWS_A; t += W) {
++            stg4[lane] = c0; stg4[lane + 32] = c1; if (lane < 8) stg4[lane + 64] = c2;
++            __syncwarp();
++            const int tn = t + W;
++            if (tn < NROWS_A) { const uint4 * p = (const uint4 *)rowA(L, tn); c0 = __ldg(p + lane); c1 = __ldg(p + lane + 32); if (lane < 8) c2 = __ldg(p + lane + 64); }
++            const unsigned * w = stg + lane * 9;
++            float a0, a1;
++            dot2v2(w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], xc0, sx0, xc1, sx1, a0, a1);
++            a0 = warp_sum(a0); a1 = warp_sum(a1);
++            if (lane == 0) {
++                float * d0 = t < NQKV ? &s0->qkv[t] : t < NQKV + DI ? &s0->z[t - NQKV] : &s0->ab[t - NQKV - DI];
++                float * d1 = t < NQKV ? &s1->qkv[t] : t < NQKV + DI ? &s1->z[t - NQKV] : &s1->ab[t - NQKV - DI];
++                *d0 = a0; *d1 = a1;
++            }
++            __syncwarp();
++        }
++    }
++    grid_barrier(s0);
++    if constexpr (T2) {   // ---- phase B (RQK + PCS), GDN2: both tokens per item ----
++        const Params & P = PP.p[0];
++        const int row = __ldg(P.s_copy);
++        const float * conv_in = P.conv_base + (size_t)row * P.conv_stride;
++        const float * S_in    = P.ssm_base  + (size_t)row * P.ssm_stride;
++        float * const co_1 = PP.p[0].conv_out, * const co_2 = PP.p[1].conv_out;
++        float * const so_1 = PP.p[0].S_out,    * const so_2 = PP.p[1].S_out;
++        if (threadIdx.x < NVH) { hc[threadIdx.x] = 0; if (threadIdx.x == 0) fin[NVH] = 0; }
++        const int it_lo = (int)(((long long)blockIdx.x * (NVH * NCG)) / gridDim.x);
++        const int it_hi = (int)(((long long)(blockIdx.x + 1) * (NVH * NCG)) / gridDim.x);
++        int kh_c = -1, hv_c = -1;
++        float qs = 0.f, ks = 0.f, qs2 = 0.f, ks2 = 0.f, gexp = 0.f, beta = 0.f, gexp2 = 0.f, beta2 = 0.f;
++        for (int it = it_lo; it < it_hi; ++it) {
++            const int hv = it / (2 * NCG) + NKH * ((it / NCG) & 1);
++            const int cg = it % NCG, kh = hv % NKH;
++            const bool need_qk = kh != kh_c;
++            {
++                const int t = threadIdx.x;
++                if (need_qk) {
++                const int c = t < SD ? kh * SD + t : H + kh * SD + (t - SD);
++                const float * ci = conv_in + c * 3; const float * w = L.conv_w + c * 4;
++                const float x1 = __ldcg(&s0->qkv[c]), x2 = __ldcg(&s1->qkv[c]);
++                const float i0 = ci[0], i1 = ci[1], i2 = ci[2];
++                float y  = i0 * w[0] + i1 * w[1] + i2 * w[2] + x1 * w[3];
++                float y2 = i1 * w[0] + i2 * w[1] + x1 * w[2] + x2 * w[3];
++                y = silu(y); y2 = silu(y2);
++                const float sq = warp_sum(y * y), sq2 = warp_sum(y2 * y2);
++                if (lane == 0) { red[warp] = sq; red2[warp] = sq2; }
++                if (t < SD) { qn[t] = y; qn2[t] = y2; } else { kn[t - SD] = y; kn2[t - SD] = y2; }
++                }
++                if (t < CGC) {
++                    const int cv = 2 * H + hv * SD + cg * CGC + t;   // unique owner: read all, then write both planes
++                    const float * cvi = conv_in + cv * 3; const float * wv = L.conv_w + cv * 4;
++                    const float xv1 = __ldcg(&s0->qkv[cv]), xv2 = __ldcg(&s1->qkv[cv]);
++                    const float i0 = cvi[0], i1 = cvi[1], i2 = cvi[2];
++                    const float yv  = i0 * wv[0] + i1 * wv[1] + i2 * wv[2] + xv1 * wv[3];
++                    const float yv2 = i1 * wv[0] + i2 * wv[1] + xv1 * wv[2] + xv2 * wv[3];
++                    vv[t] = silu(yv); vv2[t] = silu(yv2);
++                    float * o1 = co_1 + cv * 3; o1[0] = i1; o1[1] = i2;  o1[2] = xv1;
++                    float * o2 = co_2 + cv * 3; o2[0] = i2; o2[1] = xv1; o2[2] = xv2;
++                }
++            }
++            __syncthreads();
++            if (need_qk) {
++            qs  = rsqrtf((red[0] + red[1] + red[2] + red[3]) / SD + P.eps_l2) * P.scale_l2;
++            ks  = rsqrtf((red[4] + red[5] + red[6] + red[7]) / SD + P.eps_l2) * P.scale_l2;
++            qs2 = rsqrtf((red2[0] + red2[1] + red2[2] + red2[3]) / SD + P.eps_l2) * P.scale_l2;
++            ks2 = rsqrtf((red2[4] + red2[5] + red2[6] + red2[7]) / SD + P.eps_l2) * P.scale_l2;
++            kh_c = kh;
++            }
++            if (hv != hv_c) {
++            const float dtb = __ldg(L.dt_bias + hv), sa = __ldg(L.ssm_a + hv);
++            const float al = __ldcg(&s0->ab[hv]) + dtb;
++            const float sp = al > 20.f ? al : logf(1.f + expf(al));
++            gexp = expf(sp * sa);
++            beta = 1.f / (1.f + expf(-__ldcg(&s0->ab[NVH + hv])));
++            const float al2 = __ldcg(&s1->ab[hv]) + dtb;
++            const float sp2 = al2 > 20.f ? al2 : logf(1.f + expf(al2));
++            gexp2 = expf(sp2 * sa);
++            beta2 = 1.f / (1.f + expf(-__ldcg(&s1->ab[NVH + hv])));
++            hv_c = hv;
++            }
++            const int col0 = cg * CGC + warp * 2;
++            const size_t toff = ((size_t)hv * SD + col0) * SD;
++            const float4 * si = (const float4 *)(S_in + toff) + lane;
++            float4 * so1 = (float4 *)((uintptr_t)so_1 + toff * sizeof(float) + lane * sizeof(float4));
++            float4 * so2 = (float4 *)(so_2 + toff) + lane;
++            float4 st[2];
++            st[0] = si[0]; st[1] = si[SD / 4];   // read the whole tile before any store (so2 may alias si)
++            float ssq = 0.f, ssq2 = 0.f;
++#pragma unroll
++            for (int j = 0; j < 2; ++j) {
++                float4 a = st[j];
++                {   // token 1
++                const float4 q4 = *(const float4 *)(qn + 4 * lane), k4r = *(const float4 *)(kn + 4 * lane);
++                const float4 qv = make_float4(q4.x * qs, q4.y * qs, q4.z * qs, q4.w * qs);
++                const float4 kv4 = make_float4(k4r.x * ks, k4r.y * ks, k4r.z * ks, k4r.w * ks);
++                float kvd = warp_sum(a.x * kv4.x + a.y * kv4.y + a.z * kv4.z + a.w * kv4.w);
++                float delta = (vv[warp * 2 + j] - gexp * kvd) * beta;
++                a.x = gexp * a.x + kv4.x * delta; a.y = gexp * a.y + kv4.y * delta;
++                a.z = gexp * a.z + kv4.z * delta; a.w = gexp * a.w + kv4.w * delta;
++                float att = warp_sum(a.x * qv.x + a.y * qv.y + a.z * qv.z + a.w * qv.w) * rsqrtf((float)SD);
++                if (PP.p[0].S_out) { so1[j * SD / 4] = a; }
++                if (lane == 0) s0->attn[hv * SD + col0 + j] = att;
++                ssq += att * att;
++                }
++                {   // token 2, from token 1's state
++                const float4 q4 = *(const float4 *)(qn2 + 4 * lane), k4r = *(const float4 *)(kn2 + 4 * lane);
++                const float4 qv = make_float4(q4.x * qs2, q4.y * qs2, q4.z * qs2, q4.w * qs2);
++                const float4 kv4 = make_float4(k4r.x * ks2, k4r.y * ks2, k4r.z * ks2, k4r.w * ks2);
++                float kvd = warp_sum(a.x * kv4.x + a.y * kv4.y + a.z * kv4.z + a.w * kv4.w);
++                float delta = (vv2[warp * 2 + j] - gexp2 * kvd) * beta2;
++                a.x = gexp2 * a.x + kv4.x * delta; a.y = gexp2 * a.y + kv4.y * delta;
++                a.z = gexp2 * a.z + kv4.z * delta; a.w = gexp2 * a.w + kv4.w * delta;
++                float att = warp_sum(a.x * qv.x + a.y * qv.y + a.z * qv.z + a.w * qv.w) * rsqrtf((float)SD);
++                so2[j * SD / 4] = a;
++                if (lane == 0) s1->attn[hv * SD + col0 + j] = att;
++                ssq2 += att * att;
++                }
++            }
++            __syncthreads();
++            if (lane == 0) { red[warp] = ssq; red2[warp] = ssq2; }
++            __syncthreads();
++            if (threadIdx.x == 0) {
++                float t = 0.f, t2 = 0.f;
++                for (int i = 0; i < NW; ++i) { t += red[i]; t2 += red2[i]; }
++                s0->ssq[hv * NCG + cg] = t; s1->ssq[hv * NCG + cg] = t2; hc[hv]++;
++            }
++            __syncthreads();
++        }
++        __threadfence();
++        __syncthreads();
++        if (threadIdx.x < NVH && hc[threadIdx.x] != 0) {
++            const unsigned c = hc[threadIdx.x];
++            const unsigned old = atomicAdd(&s0->hcnt[threadIdx.x], c);
++            if ((old % NCG) + c == NCG) { fin[atomicAdd(&fin[NVH], 1u)] = threadIdx.x; }
++        }
++        __syncthreads();
++        const unsigned nf = fin[NVH];
++        if (nf) {
++            __threadfence();
++            for (unsigned f = threadIdx.x >> 7; f < nf; f += NT / SD) {
++                const int hv = fin[f], t = threadIdx.x & (SD - 1), i = hv * SD + t;
++#pragma unroll
++                for (int k = 0; k < 2; ++k) {
++                    Scratch * s = k ? s1 : s0;
++                    float tt = 0.f;
++#pragma unroll
++                    for (int q = 0; q < NCG; ++q) tt += __ldcg(&s->ssq[hv * NCG + q]);
++                    const float fh = rsqrtf(tt / SD + P.eps_gated);
++                    const float v = __ldcg(&s->attn[i]) * fh * __ldg(L.ssm_norm + t) * silu(__ldcg(&s->z[i]));
++                    s->xg[i] = v;
++                    const float bs = warp_sum(v);
++                    if (lane == 0) s->sg[i >> 5] = bs;
++                }
++            }
++        }
++    } else
++#pragma unroll
++    for (int k = 0; k < 2; ++k) {   // ---- phase B (RQK + PCS), one sequence at a time ----
++        const Params & P = PP.p[k];
++        Scratch * s = P.s;
++        const int row = __ldg(P.s_copy);
++        const float * conv_in = P.conv_base + (size_t)row * P.conv_stride;
++        const float * S_in    = P.ssm_base  + (size_t)row * P.ssm_stride;
++        if (k) __syncthreads();   // sequence 0's fin/hc/red readers are done
++        if (threadIdx.x < NVH) { hc[threadIdx.x] = 0; if (threadIdx.x == 0) fin[NVH] = 0; }
++        const int it_lo = (int)(((long long)blockIdx.x * (NVH * NCG)) / gridDim.x);
++        const int it_hi = (int)(((long long)(blockIdx.x + 1) * (NVH * NCG)) / gridDim.x);
++        int kh_c = -1, hv_c = -1;
++        float qs = 0.f, ks = 0.f, gexp = 0.f, beta = 0.f;
++        for (int it = it_lo; it < it_hi; ++it) {
++            const int hv = it / (2 * NCG) + NKH * ((it / NCG) & 1);
++            const int cg = it % NCG, kh = hv % NKH;
++            const bool need_qk = kh != kh_c;
++            {
++                const int t = threadIdx.x;
++                if (need_qk) {
++                const int c = t < SD ? kh * SD + t : H + kh * SD + (t - SD);
++                const float * ci = conv_in + c * 3; const float * w = L.conv_w + c * 4;
++                float xnew = __ldcg(&s->qkv[c]);
++                float y = ci[0] * w[0] + ci[1] * w[1] + ci[2] * w[2] + xnew * w[3];
++                y = silu(y);
++                float sq = warp_sum(y * y);
++                if (lane == 0) red[warp] = sq;
++                if (t < SD) qn[t] = y; else kn[t - SD] = y;
++                }
++                if (t < CGC) {
++                    const int cv = 2 * H + hv * SD + cg * CGC + t;
++                    const float * cvi = conv_in + cv * 3; const float * wv = L.conv_w + cv * 4;
++                    float xv = __ldcg(&s->qkv[cv]);
++                    float c1 = cvi[1], c2 = cvi[2];
++                    float yv = cvi[0] * wv[0] + c1 * wv[1] + c2 * wv[2] + xv * wv[3];
++                    vv[t] = silu(yv);
++                    float * co = P.conv_out + cv * 3; co[0] = c1; co[1] = c2; co[2] = xv;
++                }
++            }
++            __syncthreads();
++            if (need_qk) {
++            qs = rsqrtf((red[0] + red[1] + red[2] + red[3]) / SD + P.eps_l2) * P.scale_l2;
++            ks = rsqrtf((red[4] + red[5] + red[6] + red[7]) / SD + P.eps_l2) * P.scale_l2;
++            kh_c = kh;
++            }
++            if (hv != hv_c) {
++            const float al = __ldcg(&s->ab[hv]) + __ldg(L.dt_bias + hv);
++            const float sp = al > 20.f ? al : logf(1.f + expf(al));
++            gexp = expf(sp * __ldg(L.ssm_a + hv));
++            beta = 1.f / (1.f + expf(-__ldcg(&s->ab[NVH + hv])));
++            hv_c = hv;
++            }
++            const float4 q4 = *(const float4 *)(qn + 4 * lane), k4r = *(const float4 *)(kn + 4 * lane);
++            const float4 qv = make_float4(q4.x * qs, q4.y * qs, q4.z * qs, q4.w * qs);
++            const float4 kv4 = make_float4(k4r.x * ks, k4r.y * ks, k4r.z * ks, k4r.w * ks);
++            const int col0 = cg * CGC + warp * 2;
++            const float4 * si = (const float4 *)(S_in + ((size_t)hv * SD + col0) * SD) + lane;
++            float4 * so = (float4 *)(P.S_out + ((size_t)hv * SD + col0) * SD) + lane;
++            float4 st[2];
++            st[0] = si[0]; st[1] = si[SD / 4];
++            float ssq = 0.f;
++#pragma unroll
++            for (int j = 0; j < 2; ++j) {
++                float4 a = st[j];
++                float kvd = warp_sum(a.x * kv4.x + a.y * kv4.y + a.z * kv4.z + a.w * kv4.w);
++                float delta = (vv[warp * 2 + j] - gexp * kvd) * beta;
++                a.x = gexp * a.x + kv4.x * delta; a.y = gexp * a.y + kv4.y * delta;
++                a.z = gexp * a.z + kv4.z * delta; a.w = gexp * a.w + kv4.w * delta;
++                float att = warp_sum(a.x * qv.x + a.y * qv.y + a.z * qv.z + a.w * qv.w) * rsqrtf((float)SD);
++                so[j * SD / 4] = a;
++                if (lane == 0) s->attn[hv * SD + col0 + j] = att;
++                ssq += att * att;
++            }
++            __syncthreads();
++            if (lane == 0) red[warp] = ssq;
++            __syncthreads();
++            if (threadIdx.x == 0) { float t = 0.f; for (int i = 0; i < NW; ++i) t += red[i]; s->ssq[hv * NCG + cg] = t; hc[hv]++; }
++            __syncthreads();
++        }
++        __threadfence();
++        __syncthreads();
++        if (threadIdx.x < NVH && hc[threadIdx.x] != 0) {
++            const unsigned c = hc[threadIdx.x];
++            const unsigned old = atomicAdd(&s->hcnt[threadIdx.x], c);
++            if ((old % NCG) + c == NCG) { fin[atomicAdd(&fin[NVH], 1u)] = threadIdx.x; }
++        }
++        __syncthreads();
++        const unsigned nf = fin[NVH];
++        if (nf) {
++            __threadfence();
++            for (unsigned f = threadIdx.x >> 7; f < nf; f += NT / SD) {
++                const int hv = fin[f], t = threadIdx.x & (SD - 1), i = hv * SD + t;
++                float tt = 0.f;
++#pragma unroll
++                for (int q = 0; q < NCG; ++q) tt += __ldcg(&s->ssq[hv * NCG + q]);
++                const float fh = rsqrtf(tt / SD + P.eps_gated);
++                const float v = __ldcg(&s->attn[i]) * fh * __ldg(L.ssm_norm + t) * silu(__ldcg(&s->z[i]));
++                s->xg[i] = v;
++                const float bs = warp_sum(v);
++                if (lane == 0) s->sg[i >> 5] = bs;
++            }
++        }
++    }
++    grid_barrier(s0);
++    {   // ---- phase C ----
++        if constexpr (T2) {   // q/k conv state of both snapshot planes from the one source row
++            const Params & P = PP.p[0];
++            const int row = __ldg(P.s_copy);
++            const float * conv_in = P.conv_base + (size_t)row * P.conv_stride;
++            float * const co_1 = PP.p[0].conv_out, * const co_2 = PP.p[1].conv_out;
++            for (int c = blockIdx.x * NT + threadIdx.x; c < 2 * H; c += gridDim.x * NT) {
++                const float * ci = conv_in + c * 3;
++                const float a = ci[1], b = ci[2];   // read before the plane-0 store (may alias ci)
++                const float x1 = __ldcg(&s0->qkv[c]), x2 = __ldcg(&s1->qkv[c]);
++                float * o1 = co_1 + c * 3; o1[0] = a; o1[1] = b;  o1[2] = x1;
++                float * o2 = co_2 + c * 3; o2[0] = b; o2[1] = x1; o2[2] = x2;
++            }
++        } else
++#pragma unroll
++        for (int k = 0; k < 2; ++k) {
++            const Params & P = PP.p[k];
++            const int row = __ldg(P.s_copy);
++            const float * conv_in = P.conv_base + (size_t)row * P.conv_stride;
++            for (int c = blockIdx.x * NT + threadIdx.x; c < 2 * H; c += gridDim.x * NT) {
++                const float * ci = conv_in + c * 3; float * co = P.conv_out + c * 3;
++                const float a = ci[1], b = ci[2];
++                co[0] = a; co[1] = b; co[2] = __ldcg(&P.s->qkv[c]);
++            }
++        }
++        // pass 1: chunks 0..31 (words 0..8 of each lane) of every row of this warp, both sequences; partials -> smem
++        const uint4 * const rp0 = (const uint4 *)(L.out + (size_t)gw * ROW_O);
++        const size_t rstep = (size_t)W * (ROW_O / 16);   // uint4 per W rows
++        float * const pa = (float *)stg + lane;          // [ri][seq][lane] in the warp's phase-C-idle stage words
++        uint4 c0, c1, c2;
++        if (gw < H) { c0 = __ldg(rp0 + lane); c1 = __ldg(rp0 + 32 + lane); c2 = __ldg(rp0 + 64 + lane); }
++#pragma unroll
++        for (int k = 0; k < 2; ++k) {
++            const Scratch * s = PP.p[k].s;
++            for (int i = 4 * threadIdx.x; i < H; i += 4 * NT)
++                *(float4 *)(xs + k * XS_HALF + (i >> 6) * CH + (i & 63)) = __ldcg((const float4 *)(s->xg + i));
++        }
++        if (threadIdx.x < 32) ((float4 *)(sums + 32 * (threadIdx.x >> 4)))[threadIdx.x & 15] = __ldcg((const float4 *)(((threadIdx.x >> 4) ? s1 : s0)->sg) + (threadIdx.x & 15));
++        __syncthreads();
++        {
++            const uint4 * p = rp0;
++#pragma unroll 1
++            for (int r = gw, ri = 0; r < H; r += W, ++ri, p += rstep) {
++                const uint4 a0 = c0, a1 = c1, a2 = c2;
++                if (r + W < H)
++                { c0 = __ldg(p + rstep + lane); c1 = __ldg(p + rstep + 32 + lane); c2 = __ldg(p + rstep + 64 + lane); }
++                float v0, v1;
++                dot2v2(a0.x, a0.y, a0.z, a0.w, a1.x, a1.y, a1.z, a1.w, a2.x, xs + lane * CH, sums[lane], xs + XS_HALF + lane * CH, sums[32 + lane], v0, v1);
++                pa[ri * 64] = v0; pa[ri * 64 + 32] = v1;
++            }
++        }
++        // pass 2: chunks 32..63 (words 9..17): word-group 2 is re-read (9..11), then 3 and the tail
++        __syncthreads();   // every warp is done with the first-half inputs
++#pragma unroll
++        for (int k = 0; k < 2; ++k) {
++            const Scratch * s = PP.p[k].s;
++            for (int i = 4 * threadIdx.x; i < H; i += 4 * NT)
++                *(float4 *)(xs + k * XS_HALF + (i >> 6) * CH + (i & 63)) = __ldcg((const float4 *)(s->xg + H + i));
++        }
++        if (threadIdx.x < 32) ((float4 *)(sums + 32 * (threadIdx.x >> 4)))[threadIdx.x & 15] = __ldcg((const float4 *)(((threadIdx.x >> 4) ? s1 : s0)->sg) + 16 + (threadIdx.x & 15));
++        __syncthreads();
++        {
++            const uint4 * p = rp0;
++#pragma unroll 1
++            for (int r = gw, ri = 0; r < H; r += W, ++ri, p += rstep) {
++                // no prefetch here: one extra row in flight costs 16 B of spills at the 80-register cap (3 blocks/SM)
++                const uint4 b2 = __ldg(p + 64 + lane), b3 = __ldg(p + 96 + lane); const uint2 bt = __ldg((const uint2 *)(p + 128) + lane);
++                float v0, v1;
++                dot2v2(b2.y, b2.z, b2.w, b3.x, b3.y, b3.z, b3.w, bt.x, bt.y, xs + lane * CH, sums[lane], xs + XS_HALF + lane * CH, sums[32 + lane], v0, v1);
++                float acc0 = pa[ri * 64] + v0;
++                float acc1 = pa[ri * 64 + 32] + v1;
++                acc0 = warp_sum(acc0);
++                acc1 = warp_sum(acc1);
++                if (lane == 0) { PP.p[0].out[r] = PP.p[0].h[r] + acc0; PP.p[1].out[r] = PP.p[1].h[r] + acc1; }
++            }
++        }
++    }
++}
++
++// Standalone synthetic diagnostic, deliberately unreachable from the GGML graph matcher.
++namespace store_probe {
++template <class T> struct Buffer {
++    T * data = nullptr;
++    explicit Buffer(size_t n) { CUDA_CHECK(cudaMalloc((void **)&data, n * sizeof(T))); }
++    Buffer(const Buffer &) = delete;
++    Buffer & operator=(const Buffer &) = delete;
++    ~Buffer() { CUDA_CHECK(cudaFree(data)); }
++};
++
++struct Fixture {
++    Buffer<float> h{2 * H}, norm{H}, cw{4 * NQKV}, alpha{NVH}, beta{NVH}, out_norm{SD};
++    Buffer<uint8_t> w{NROWS_A * ROW_H}, out_w{H * ROW_O};
++    Buffer<float> source{SSM_N}, conv{CONV_N};
++    Buffer<int32_t> row{1};
++    Buffer<float> snapshot{SSM_N}, final_state{SSM_N}, conv_out{2 * CONV_N}, residual{2 * H};
++    Buffer<Scratch> scratch{2};
++
++    static uint32_t next(uint32_t & seed) {
++        seed ^= seed << 13; seed ^= seed >> 17; seed ^= seed << 5;
++        return seed;
++    }
++    static void fill(float * dst, size_t n, uint32_t & seed, float center, float amp) {
++        std::vector<float> data(n);
++        for (float & value : data) value = center + amp * float(int(next(seed) % 1025) - 512) / 512.f;
++        CUDA_CHECK(cudaMemcpy(dst, data.data(), n * sizeof(float), cudaMemcpyHostToDevice));
++    }
++    static void fill_q4(uint8_t * dst, size_t n, uint32_t & seed, bool packed) {
++        std::vector<uint8_t> data(n);
++        for (size_t i = 0; i < n; i += QB) {
++            data[i] = uint8_t(next(seed));
++            data[i + 1] = 0x20 + uint8_t(next(seed) & 3);
++            for (int j = 2; j < QB; ++j) data[i + j] = uint8_t(next(seed));
++        }
++        if (packed) {
++            std::vector<uint8_t> reordered(n);
++            for (size_t offset = 0; offset < n; offset += ROW_O) {
++                for (int word = 0; word < ROW_O / 4; ++word) {
++                    std::memcpy(reordered.data() + offset + 4 * word, data.data() + offset + 4 * rp_src(word), 4);
++                }
++            }
++            data.swap(reordered);
++        }
++        CUDA_CHECK(cudaMemcpy(dst, data.data(), n, cudaMemcpyHostToDevice));
++    }
++    explicit Fixture(uint32_t seed) {
++        fill(h.data, 2 * H, seed, 0.f, 0.25f);
++        fill(norm.data, H, seed, 1.f, 0.1f);
++        fill(cw.data, 4 * NQKV, seed, 0.f, 0.2f);
++        fill(alpha.data, NVH, seed, -0.25f, 0.1f);
++        fill(beta.data, NVH, seed, 0.2f, 0.1f);
++        fill(out_norm.data, SD, seed, 1.f, 0.1f);
++        fill(source.data, SSM_N, seed, 0.f, 0.1f);
++        fill(conv.data, CONV_N, seed, 0.f, 0.1f);
++        fill_q4(w.data, NROWS_A * ROW_H, seed, false);
++        fill_q4(out_w.data, H * ROW_O, seed, true);
++        CUDA_CHECK(cudaMemset(row.data, 0, sizeof(int32_t)));
++        CUDA_CHECK(cudaMemset(scratch.data, 0, 2 * sizeof(Scratch)));
++    }
++    Params2 params() const {
++        const Layer layer{norm.data, cw.data, alpha.data, beta.data, out_norm.data, w.data,
++                          w.data + NQKV * ROW_H, w.data + (NQKV + DI) * ROW_H,
++                          w.data + (NQKV + DI + NVH) * ROW_H, out_w.data};
++        return Params2{{
++            {layer, h.data, residual.data, row.data, conv.data, CONV_N, conv_out.data,
++             source.data, SSM_N, snapshot.data, scratch.data, 1.e-6f, 1.e-6f, 1.f, 1.e-6f},
++            {layer, h.data + H, residual.data + H, row.data, conv.data, CONV_N, conv_out.data + CONV_N,
++             source.data, SSM_N, final_state.data, scratch.data + 1, 1.e-6f, 1.e-6f, 1.f, 1.e-6f}
++        }};
++    }
++    // 0 is original control, 1 is the common diagnostic binary with both stores,
++    // 2 is the same diagnostic binary with the intermediate store suppressed.
++    void launch(int mode, cudaStream_t stream) const {
++        constexpr size_t bytes = SMEM3_FLOATS * sizeof(float);
++        auto p = params();
++        if (mode == 2) p.p[0].S_out = nullptr;
++        if (mode == 0) gdn_fused2<2><<<72, NT, bytes, stream>>>(p);
++        else gdn_store_envelope<<<72, NT, bytes, stream>>>(p);
++        CUDA_CHECK(cudaGetLastError());
++    }
++    void clear_outputs(const std::vector<float> & poison) const {
++        CUDA_CHECK(cudaMemset(residual.data, 255, 2 * H * sizeof(float)));
++        CUDA_CHECK(cudaMemset(conv_out.data, 255, 2 * CONV_N * sizeof(float)));
++        CUDA_CHECK(cudaMemset(final_state.data, 255, SSM_N * sizeof(float)));
++        CUDA_CHECK(cudaMemcpy(snapshot.data, poison.data(), SSM_N * sizeof(float), cudaMemcpyHostToDevice));
++        CUDA_CHECK(cudaDeviceSynchronize());
++    }
++};
++
++static std::vector<float> download(const float * src, size_t n) {
++    std::vector<float> ret(n);
++    CUDA_CHECK(cudaMemcpy(ret.data(), src, n * sizeof(float), cudaMemcpyDeviceToHost));
++    return ret;
++}
++
++static bool equal_finite(const std::vector<float> & control, const float * src, const char * label, int fixture) {
++    const auto other = download(src, control.size());
++    const size_t different = std::inner_product(control.begin(), control.end(), other.begin(), size_t(0),
++        std::plus<size_t>{}, [](float a, float b) { return std::memcmp(&a, &b, sizeof(float)) != 0; });
++    const size_t finite = std::count_if(other.begin(), other.end(), [](float v) { return std::isfinite(v); });
++    std::printf("GDN_COMPARE fixture=%d field=%s words=%zu finite=%zu differing=%zu\n",
++                fixture, label, other.size(), finite, different);
++    return !different && finite == other.size();
++}
++
++static bool occupancy(const void * function, const char * mode) {
++    cudaFuncAttributes attr{};
++    int blocks = 0, sms = 0, major = 0, minor = 0, device = -1;
++    CUDA_CHECK(cudaGetDevice(&device));
++    CUDA_CHECK(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, device));
++    CUDA_CHECK(cudaDeviceGetAttribute(&major, cudaDevAttrComputeCapabilityMajor, device));
++    CUDA_CHECK(cudaDeviceGetAttribute(&minor, cudaDevAttrComputeCapabilityMinor, device));
++    CUDA_CHECK(cudaFuncGetAttributes(&attr, function));
++    CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocks, function, NT, SMEM3_FLOATS * sizeof(float)));
++    std::printf("GDN_RESIDENCY mode=%s sm=%d%d sms=%d active=%d grid=72 threads=%d registers=%d local=%zu shared=%zu\n",
++                mode, major, minor, sms, blocks, NT, attr.numRegs, attr.localSizeBytes, SMEM3_FLOATS * sizeof(float));
++    return major == 5 && minor == 2 && sms == 24 && blocks >= 3 && attr.localSizeBytes == 0;
++}
++}
++
++extern "C" __attribute__((visibility("default"))) int ggml_cuda_occamy_store_envelope();
++extern "C" int ggml_cuda_occamy_store_envelope() {
++    using namespace store_probe;
++    if (!occupancy((const void *)gdn_fused2<2>, "control") ||
++        !occupancy((const void *)gdn_store_envelope, "elided")) return 2;
++    cudaStream_t stream;
++    CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
++    Fixture fixtures[] = {Fixture(0x91ca8881), Fixture(0x52c083fd), Fixture(0x309f0c15), Fixture(0x4e8071d0)};
++    bool valid = true;
++    int index = 0;
++    for (const auto & f : fixtures) {
++        constexpr float sentinel = -128.f;
++        const std::vector<float> poison(SSM_N, sentinel);
++        f.clear_outputs(poison);
++        f.launch(0, stream);
++        CUDA_CHECK(cudaStreamSynchronize(stream));
++        const auto residual = download(f.residual.data, 2 * H);
++        const auto conv = download(f.conv_out.data, 2 * CONV_N);
++        const auto final_state = download(f.final_state.data, SSM_N);
++        const auto snapshot = download(f.snapshot.data, SSM_N);
++        const size_t written = std::count_if(snapshot.begin(), snapshot.end(), [sentinel](float v) {
++            return std::isfinite(v) && v != sentinel;
++        });
++        for (const int mode : {1, 2}) {
++            f.clear_outputs(poison);
++            f.launch(mode, stream);
++            CUDA_CHECK(cudaStreamSynchronize(stream));
++            std::printf("GDN_COMPARE_SCOPE fixture=%d mode=%d\n", index, mode);
++            valid &= equal_finite(residual, f.residual.data, "residual_both", index);
++            valid &= equal_finite(conv, f.conv_out.data, "convolution_both", index);
++            valid &= equal_finite(final_state, f.final_state.data, "final_state", index);
++            valid &= equal_finite(mode == 1 ? snapshot : poison, f.snapshot.data,
++                                  mode == 1 ? "intermediate_state" : "missing_intermediate", index);
++        }
++        std::printf("GDN_CONTROL_SNAPSHOT fixture=%d finite_changed=%zu expected=%d\n", index, written, SSM_N);
++        valid &= written == SSM_N;
++        ++index;
++    }
++    if (valid) {
++        cudaEvent_t begin, end;
++        CUDA_CHECK(cudaEventCreate(&begin));
++        CUDA_CHECK(cudaEventCreate(&end));
++        for (const int mode : {0, 1, 2}) {
++            for (int i = 0; i < 16; ++i) fixtures[i % 4].launch(mode, stream);
++        }
++        CUDA_CHECK(cudaStreamSynchronize(stream));
++        constexpr int reps = 128;
++        constexpr int modes[] = {0, 1, 2, 2, 1, 0, 2, 1, 0, 0, 1, 2};
++        int order = 0;
++        for (const int mode : modes) {
++            CUDA_CHECK(cudaEventRecord(begin, stream));
++            for (int i = 0; i < reps; ++i) fixtures[i % 4].launch(mode, stream);
++            CUDA_CHECK(cudaEventRecord(end, stream));
++            CUDA_CHECK(cudaEventSynchronize(end));
++            float ms;
++            CUDA_CHECK(cudaEventElapsedTime(&ms, begin, end));
++            std::printf("GDN_INTERVAL order=%d mode=%s reps=%d mean_us=%.6f\n", order++,
++                        (mode == 0 ? "original" : mode == 1 ? "full" : "elided"), reps, 1000. * ms / reps);
++        }
++        CUDA_CHECK(cudaEventDestroy(begin));
++        CUDA_CHECK(cudaEventDestroy(end));
++    }
++    CUDA_CHECK(cudaStreamDestroy(stream));
++    std::puts(valid ? "GDN_ENVELOPE_OK rollback_intermediate_deliberately_missing" : "GDN_ENVELOPE_INVALID");
++    std::fflush(stdout);
++    return valid ? 0 : 3;
++}
++
+ struct DevState {
+     Scratch * scratch = nullptr;
+     int grid = 0;

@@ -1,0 +1,38 @@
+{
+  "INPUTS.sha256": {
+    "../night-gdn-t2-q8-fast/occamy-gdn.cu": "cdab6a823ca92a648f83dadf35379151347bdafac564949d0c759d36827728e9",
+    "../night-gdn-t2-q8-fast/occamy-gdn.cu.o": "bcd063306ea65f5e8143a8d6501960dbfeda359f5b3a261d5d91d612c786eac0",
+    "../resume-q2-moe-cohorts/occamy-fused.cu.o": "bbea6f5c611282090050592a6e49f2c15238c104eb1b1420cb23e562220176eb",
+    "../finish33-r2-stride/fattn-occamy.cu.o": "c2a805af82cf2060c84a105c44167e66631dfa30ab1cc8807c1b010188b0160a",
+    "../finish33-r2-stride/libggml-cuda.so": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+    "../last-ms-q8-gdn-diag/commands.sh": "56e17636db076c9876143cc3991d58c95ffcf3faf6b8bbb7a717b3f6ad559c55",
+    "../hundred-q2-cohort-layout/compile.sh": "3737504d892da963cece24c230b66041a0a38567f8e5e61d5985b4bef19391b2",
+    "../runner/night_trial_runtime.sh": "6c0171cf760490920d66de2cc0f7c43a170f3095a396808c9ce033186d644a52",
+    "../sparse/r2/libs/libggml-base.so.0.26.0": "678cf75e5ef5b1f92460eb0f816d3bbe755ee9710fd04606c31ec24dcd41fa06"
+  },
+  "FROZEN.sha256": {
+    "prepare.py": "cba96789a8028cb79f18f881ff4ebed660d4ec4e403e7540255ea64f19083309",
+    "commands.py": "22b987698713ecc25d60728e452618ba010ad9a41d4068bf8e9c40a1bcf351a1",
+    "envelope.inc": "bb54c7ad6a2e6753e6a1311f1aabd70f8babaf556797769d067c1a289ea18f3b",
+    "probe.py": "8574cf44b9beaee9640dceb69e8ce6b1266023b34447219a2ec3a567df5afefb",
+    "report.py": "a11faa22545212a62498c7cc231720d6eb3fedb9b7a16e28895f32465cf942d8",
+    "verify.py": "8ba2dcc2e684b03f09584dc0a32876ad2432203e1564554148b3a2a30091c6e9",
+    "build.sh": "b5e190cab8049fb82a65c3791f9bf27be46cbb5d1a085c456ecf455ac1045ffb",
+    "compile.sh": "9221fe2f61d1338ec1d9f58e2d39cf20c36f596f27b5dd4a7e7b70504d223809",
+    "release.sh": "5f70a3c1621f39829bbeddd8921e33e182627a95b183a43653092ccf9298c1e2",
+    "RELEASE.md": "de898d7f40101e8b74f893499d3b1f31c1631cbe87c6fe728e94b81ab9cf4d42",
+    "build.json": "51c386ad68b56725953c5d8abbbdeeb9d71bf1079565720d5129c4e0cf62be7a",
+    "build.log": "45d8841070747ca19243f156cee52cadbf5c56ec76e86849f9cdc7352b9f7cec",
+    "candidate.patch": "13f7075991935bc3b4d6bcf7d67b72b07651dafcc07f8a56c1d02658137bec81",
+    "control.sass": "f36a3b16318372fd22b4cf89988b69fef4ed3e0d3da2c5cf8497d29e2078daa2",
+    "candidate.sass": "be79bb26751b4ebcd06c488ecd968794dda717e169b946937e07717fc98af887",
+    "occamy-gdn.cu": "baa3fd539fe73f4394ea680b1ae87b0b427b504b668bab8bd39d1c20b8855cc3",
+    "occamy-gdn.cu.o": "3a8f02398500867ee577906374e4ee01ad4cc851ab16a830bb394951bf55a848",
+    "libggml-cuda.so": "50cdab271dc3411e4135539f27371b453314b14162e96cc9744efa8f2a994e7d",
+    "control-relinked.so": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+    "first-elision-compile.log": "e5153f5073d873c438f014ffeb09a0dbcb200ef834aedce09429de2ec1f76168",
+    "peer-selector-spill.log": "2bd22ab14a5bbda642190e23900b497bdb8b6d6c11b7700b7e74db55068fbd60",
+    "intermediate-predicate-compile.log": "37993d269a7b912ee0e0106cd16b23f8965a11e7ed6dd902a55148e116b38162",
+    "loader-check.log": "2b3f41af8e2c7c8c1325f76a489d23a7fb39f723c5eeaca280824c107f71878e"
+  }
+}
