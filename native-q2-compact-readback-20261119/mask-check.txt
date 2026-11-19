@@ -1,0 +1,1 @@
+vocab=248320 model_suppress_count=0 model_eog_count=5 merged_count=5

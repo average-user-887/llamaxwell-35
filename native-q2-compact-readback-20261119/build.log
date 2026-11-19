@@ -1,0 +1,20 @@
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2025 NVIDIA Corporation
+Built on Fri_Feb_21_20:23:50_PST_2025
+Cuda compilation tools, release 12.8, V12.8.93
+Build cuda_12.8.r12.8/compiler.35583870_0
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+ptxas info    : 0 bytes gmem
+ptxas info    : Compiling entry function '_ZN44_GLOBAL__N__a2185e2d_11_readback_cu_9eac828811finish_rowsEPKNS_4PeakEPNS_6ChoiceE' for 'sm_52'
+ptxas info    : Function properties for _ZN44_GLOBAL__N__a2185e2d_11_readback_cu_9eac828811finish_rowsEPKNS_4PeakEPNS_6ChoiceE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 13 registers, used 1 barriers, 96 bytes smem, 336 bytes cmem[0]
+ptxas info    : Compile time = 41.471 ms
+ptxas info    : Compiling entry function '_ZN44_GLOBAL__N__a2185e2d_11_readback_cu_9eac828810scan_tilesEPKfPKjPNS_4PeakE' for 'sm_52'
+ptxas info    : Function properties for _ZN44_GLOBAL__N__a2185e2d_11_readback_cu_9eac828810scan_tilesEPKfPKjPNS_4PeakE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 16 registers, used 1 barriers, 96 bytes smem, 344 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 11.183 ms
+ELF file    1: compact-readback.1.sm_52.cubin
+ELF file    2: compact-readback.2.sm_52.cubin
+cpu_check=pass raw_reads=240 compact_reads=240 fixtures=160 demo_ms=41.659

@@ -1,0 +1,17 @@
+1088044d770e2e1f7a302192180208049cff263c009ef4fe3815d584a0763131  /runtime/libllama-common.so.0.6.0
+46c4dd7075c5229598c8a9c7aadc3542ac03d5f928fb8078696c42a9c4bfd607  /runtime/libllama.so.0.6.0
+3f3967276ac50382d0f410e6c1c49793e7cebfef8ac54269a9d437684e74f3f3  /candidate/compact-readback
+edge_checks=7 all_masked_fixture_uses_forced_device_mask=1
+mirror=1 mask_case=0 rejected=0 samples=64 raw_us=493.186 compact_us=40.087 raw_copy_us=158.087 compact_copy_us=39.716 raw_cpu_us=335.159 compact_cpu_us=0.380 net_us=453.099
+mirror=1 mask_case=0 rejected=1 samples=64 raw_us=320.803 compact_us=31.620 raw_copy_us=158.237 compact_copy_us=31.400 raw_cpu_us=162.295 compact_cpu_us=0.221 net_us=289.182
+mirror=1 mask_case=0 weighted_net_us=431.836 gate_us=550.000 pass=0
+mirror=1 mask_case=1 rejected=0 samples=64 raw_us=492.399 compact_us=40.121 raw_copy_us=158.136 compact_copy_us=39.735 raw_cpu_us=333.677 compact_cpu_us=0.371 net_us=452.279
+mirror=1 mask_case=1 rejected=1 samples=64 raw_us=320.672 compact_us=31.630 raw_copy_us=158.257 compact_copy_us=31.410 raw_cpu_us=162.310 compact_cpu_us=0.220 net_us=289.042
+mirror=1 mask_case=1 weighted_net_us=431.103 gate_us=550.000 pass=0
+mirror=2 mask_case=0 rejected=0 samples=64 raw_us=493.407 compact_us=40.091 raw_copy_us=158.142 compact_copy_us=39.716 raw_cpu_us=335.155 compact_cpu_us=0.371 net_us=453.315
+mirror=2 mask_case=0 rejected=1 samples=64 raw_us=321.258 compact_us=31.620 raw_copy_us=158.237 compact_copy_us=31.405 raw_cpu_us=162.811 compact_cpu_us=0.211 net_us=289.637
+mirror=2 mask_case=0 weighted_net_us=432.083 gate_us=550.000 pass=0
+mirror=2 mask_case=1 rejected=0 samples=64 raw_us=493.743 compact_us=40.131 raw_copy_us=158.147 compact_copy_us=39.755 raw_cpu_us=335.360 compact_cpu_us=0.371 net_us=453.611
+mirror=2 mask_case=1 rejected=1 samples=64 raw_us=320.877 compact_us=31.630 raw_copy_us=158.292 compact_copy_us=31.405 raw_cpu_us=162.475 compact_cpu_us=0.215 net_us=289.247
+mirror=2 mask_case=1 weighted_net_us=432.290 gate_us=550.000 pass=0
+technical_pass=1 standalone_gate_pass=0 normal_raw_bytes=1986560 normal_compact_bytes=16 rolling_device_bytes=127139840 l2_bytes=3145728
