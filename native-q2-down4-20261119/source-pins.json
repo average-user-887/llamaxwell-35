@@ -1,0 +1,30 @@
+{
+  "build.sh": {
+    "portable_sha256": "d3902d670edb0ded215c0eff789dfa1bc5fe7c509ff26d410d8dea4518ce1e56",
+    "observed_source_sha256": "592535d1dc2c785308489df335f9fe380b03cf5fc4e034df2aae23c85ec5330c",
+    "private_input_keys": [
+      "BUILD_SOURCE"
+    ]
+  },
+  "compile.sh": {
+    "portable_sha256": "e9e415f89aaa92c25a48946e95953fef995b145e6fc2add9a87d941fdd8522d8",
+    "observed_source_sha256": "3737504d892da963cece24c230b66041a0a38567f8e5e61d5985b4bef19391b2",
+    "private_input_keys": [
+      "BUILD_SOURCE"
+    ]
+  },
+  "build.log": {
+    "portable_sha256": "1fe320cc31aaf966fb21b56008dce6d32d7b1d8e36421581c6f73289be3aa2fd",
+    "observed_source_sha256": "2bd3af59c41083b6b0e40c29b8602b5d2cac60bad0110b8123ceb65cd4439b3b",
+    "private_input_keys": [
+      "BUILD_SOURCE"
+    ]
+  },
+  "fleet-clock.py": {
+    "portable_sha256": "9e915b3861f592040875931fe0433b146fbbac865c540d04de7124de866cec5b",
+    "observed_source_sha256": "e4401ed7fb08faf3c042e969c3c9a467c024b719c6e453b230fff05de1b4eb3f",
+    "private_input_keys": [
+      "FLEET_URL"
+    ]
+  }
+}

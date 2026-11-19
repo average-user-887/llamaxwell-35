@@ -1,0 +1,11 @@
+{
+  "original_observations_manifest_sha256": "732d24761849bfc86760c60d19d770452e299cfb08e60ea071851642a9655bc5",
+  "full_local_clock_log_sha256": "6c3f5c90cc680e08e5cfd6b4413041d6533984e877baf1da4d904210d1b0d663",
+  "released_clock_log_sha256": "f4a7c2189de3cf2c2eeae0fbf6fe4c5557f7e306050883359fc58bd6162f2798",
+  "clock_rows": 10,
+  "released_clock_columns": [
+    "observed_at",
+    "clock_mhz",
+    "memory_clock_mhz"
+  ]
+}
