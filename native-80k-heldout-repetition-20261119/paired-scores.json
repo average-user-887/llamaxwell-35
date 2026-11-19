@@ -1,0 +1,367 @@
+{
+  "cases": {
+    "n32": {
+      "native": {
+        "actual_sampling": {
+          "dry_multiplier": 0.0,
+          "ignore_eos": false,
+          "min_p": 0.05000000074505806,
+          "n_predict": 3072,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "seed": 7,
+          "temperature": 0.0,
+          "top_k": 40,
+          "top_p": 0.949999988079071
+        },
+        "archive_parity": {
+          "all_ids_equal": true,
+          "first_differing_id_1_based": null,
+          "text_equal": true
+        },
+        "cached_prompt_tokens": 0,
+        "completion_tokens_including_eos": 1722,
+        "draft_accepted": 861,
+        "draft_offered": 861,
+        "end_epoch_ns": 1795088604769209101,
+        "expected_source_repetition": {
+          "duplicate_normalized_lines": 20,
+          "final_quarter_lines": 38,
+          "final_quarter_normalized_duplicates": 5,
+          "malformed_characters": 0,
+          "nonblank_lines": 149,
+          "python_keyword_led_lines": 55,
+          "repeated_24_word_windows": 0,
+          "trailing_comment_only_lines": 0,
+          "word_windows_24": 628
+        },
+        "fixture": "n32",
+        "prompt_tokens": 80000,
+        "quality": {
+          "eos": true,
+          "exact_expected_ast": true,
+          "exact_expected_text": true,
+          "semantic_pass": true,
+          "source_scorer": {
+            "content_tokens": 1721,
+            "exact_text_ignoring_outer_space_or_fence": true,
+            "markdown_fence": false,
+            "passed": true,
+            "python_syntax": true,
+            "requested_only_edit_ast": true,
+            "target_edit_applied": true
+          }
+        },
+        "repetition": {
+          "duplicate_normalized_lines": 20,
+          "final_quarter_lines": 38,
+          "final_quarter_normalized_duplicates": 5,
+          "malformed_characters": 0,
+          "nonblank_lines": 149,
+          "python_keyword_led_lines": 55,
+          "repeated_24_word_windows": 0,
+          "trailing_comment_only_lines": 0,
+          "word_windows_24": 628
+        },
+        "request_params": {
+          "cache_prompt": false,
+          "id_slot": 0,
+          "ignore_eos": false,
+          "n_predict": 3072,
+          "return_tokens": true,
+          "seed": 7,
+          "stream": false,
+          "temperature": 0
+        },
+        "server_decode_ms": 16651.746,
+        "server_prompt_ms": 266731.459,
+        "start_epoch_ns": 1795088321272667365,
+        "stop_type": "eos",
+        "wall_s": 283.4951837800909
+      },
+      "paired_parity": {
+        "all_ids_equal": true,
+        "first_differing_id_1_based": null,
+        "text_equal": true
+      },
+      "serial": {
+        "actual_sampling": {
+          "dry_multiplier": 0.0,
+          "ignore_eos": false,
+          "min_p": 0.05000000074505806,
+          "n_predict": 3072,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "seed": 7,
+          "temperature": 0.0,
+          "top_k": 40,
+          "top_p": 0.949999988079071
+        },
+        "archive_parity": {
+          "all_ids_equal": true,
+          "first_differing_id_1_based": null,
+          "text_equal": true
+        },
+        "cached_prompt_tokens": 0,
+        "completion_tokens_including_eos": 1722,
+        "draft_accepted": 0,
+        "draft_offered": 0,
+        "end_epoch_ns": 1795088152875420215,
+        "expected_source_repetition": {
+          "duplicate_normalized_lines": 20,
+          "final_quarter_lines": 38,
+          "final_quarter_normalized_duplicates": 5,
+          "malformed_characters": 0,
+          "nonblank_lines": 149,
+          "python_keyword_led_lines": 55,
+          "repeated_24_word_windows": 0,
+          "trailing_comment_only_lines": 0,
+          "word_windows_24": 628
+        },
+        "fixture": "n32",
+        "prompt_tokens": 80000,
+        "quality": {
+          "eos": true,
+          "exact_expected_ast": true,
+          "exact_expected_text": true,
+          "semantic_pass": true,
+          "source_scorer": {
+            "content_tokens": 1721,
+            "exact_text_ignoring_outer_space_or_fence": true,
+            "markdown_fence": false,
+            "passed": true,
+            "python_syntax": true,
+            "requested_only_edit_ast": true,
+            "target_edit_applied": true
+          }
+        },
+        "repetition": {
+          "duplicate_normalized_lines": 20,
+          "final_quarter_lines": 38,
+          "final_quarter_normalized_duplicates": 5,
+          "malformed_characters": 0,
+          "nonblank_lines": 149,
+          "python_keyword_led_lines": 55,
+          "repeated_24_word_windows": 0,
+          "trailing_comment_only_lines": 0,
+          "word_windows_24": 628
+        },
+        "request_params": {
+          "cache_prompt": false,
+          "id_slot": 0,
+          "ignore_eos": false,
+          "n_predict": 3072,
+          "return_tokens": true,
+          "seed": 7,
+          "stream": false,
+          "temperature": 0
+        },
+        "server_decode_ms": 22598.178,
+        "server_prompt_ms": 261674.05,
+        "start_epoch_ns": 1795087868571080960,
+        "stop_type": "eos",
+        "wall_s": 284.30293960589916
+      }
+    },
+    "n72": {
+      "native": {
+        "actual_sampling": {
+          "dry_multiplier": 0.0,
+          "ignore_eos": false,
+          "min_p": 0.05000000074505806,
+          "n_predict": 3072,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "seed": 7,
+          "temperature": 0.0,
+          "top_k": 40,
+          "top_p": 0.949999988079071
+        },
+        "archive_parity": {
+          "all_ids_equal": true,
+          "first_differing_id_1_based": null,
+          "text_equal": true
+        },
+        "cached_prompt_tokens": 0,
+        "completion_tokens_including_eos": 1087,
+        "draft_accepted": 543,
+        "draft_offered": 543,
+        "end_epoch_ns": 1795088696286880124,
+        "expected_source_repetition": {
+          "duplicate_normalized_lines": 8,
+          "final_quarter_lines": 21,
+          "final_quarter_normalized_duplicates": 0,
+          "malformed_characters": 0,
+          "nonblank_lines": 81,
+          "python_keyword_led_lines": 19,
+          "repeated_24_word_windows": 0,
+          "trailing_comment_only_lines": 0,
+          "word_windows_24": 525
+        },
+        "fixture": "n72",
+        "prompt_tokens": 32768,
+        "quality": {
+          "eos": true,
+          "exact_expected_ast": true,
+          "exact_expected_text": true,
+          "semantic_pass": true,
+          "source_scorer": {
+            "exact_ast": true,
+            "exact_text": true,
+            "markdown_fence": false
+          }
+        },
+        "repetition": {
+          "duplicate_normalized_lines": 8,
+          "final_quarter_lines": 21,
+          "final_quarter_normalized_duplicates": 0,
+          "malformed_characters": 0,
+          "nonblank_lines": 81,
+          "python_keyword_led_lines": 19,
+          "repeated_24_word_windows": 0,
+          "trailing_comment_only_lines": 0,
+          "word_windows_24": 525
+        },
+        "request_params": {
+          "cache_prompt": false,
+          "id_slot": 0,
+          "ignore_eos": false,
+          "n_predict": 3072,
+          "return_tokens": true,
+          "seed": 7,
+          "stream": false,
+          "temperature": 0
+        },
+        "server_decode_ms": 10619.455,
+        "server_prompt_ms": 79129.214,
+        "start_epoch_ns": 1795088605217488339,
+        "stop_type": "eos",
+        "wall_s": 91.06857186392881
+      },
+      "paired_parity": {
+        "all_ids_equal": true,
+        "first_differing_id_1_based": null,
+        "text_equal": true
+      },
+      "serial": {
+        "actual_sampling": {
+          "dry_multiplier": 0.0,
+          "ignore_eos": false,
+          "min_p": 0.05000000074505806,
+          "n_predict": 3072,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "seed": 7,
+          "temperature": 0.0,
+          "top_k": 40,
+          "top_p": 0.949999988079071
+        },
+        "archive_parity": {
+          "all_ids_equal": true,
+          "first_differing_id_1_based": null,
+          "text_equal": true
+        },
+        "cached_prompt_tokens": 0,
+        "completion_tokens_including_eos": 1087,
+        "draft_accepted": 0,
+        "draft_offered": 0,
+        "end_epoch_ns": 1795088245983605922,
+        "expected_source_repetition": {
+          "duplicate_normalized_lines": 8,
+          "final_quarter_lines": 21,
+          "final_quarter_normalized_duplicates": 0,
+          "malformed_characters": 0,
+          "nonblank_lines": 81,
+          "python_keyword_led_lines": 19,
+          "repeated_24_word_windows": 0,
+          "trailing_comment_only_lines": 0,
+          "word_windows_24": 525
+        },
+        "fixture": "n72",
+        "prompt_tokens": 32768,
+        "quality": {
+          "eos": true,
+          "exact_expected_ast": true,
+          "exact_expected_text": true,
+          "semantic_pass": true,
+          "source_scorer": {
+            "exact_ast": true,
+            "exact_text": true,
+            "markdown_fence": false
+          }
+        },
+        "repetition": {
+          "duplicate_normalized_lines": 8,
+          "final_quarter_lines": 21,
+          "final_quarter_normalized_duplicates": 0,
+          "malformed_characters": 0,
+          "nonblank_lines": 81,
+          "python_keyword_led_lines": 19,
+          "repeated_24_word_windows": 0,
+          "trailing_comment_only_lines": 0,
+          "word_windows_24": 525
+        },
+        "request_params": {
+          "cache_prompt": false,
+          "id_slot": 0,
+          "ignore_eos": false,
+          "n_predict": 3072,
+          "return_tokens": true,
+          "seed": 7,
+          "stream": false,
+          "temperature": 0
+        },
+        "server_decode_ms": 13865.766,
+        "server_prompt_ms": 77607.053,
+        "start_epoch_ns": 1795088153279001390,
+        "stop_type": "eos",
+        "wall_s": 92.70389014785178
+      }
+    }
+  },
+  "technical_pass": true
+}

@@ -1,0 +1,336 @@
+#!/usr/bin/env python3
+"""Run and replay two independently scored source edits on the pinned hybrid runtime."""
+
+import importlib.util
+import json
+import math
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import time
+
+HERE = Path(__file__).resolve().parent
+CAMPAIGN = HERE.parent
+ORDER = ("n32", "n72")
+WITNESS_LABELS = ("start", "cold", "warm")
+FIXTURES = {
+    "n32": CAMPAIGN / "@N32_FIXTURE@",
+    "n72": CAMPAIGN / "@N72_FIXTURE@",
+}
+CONTEXT = {"n32": 80000, "n72": 32768}
+EXPECTED_OUTPUT = {"n32": 1722, "n72": 1087}
+TIMEOUT = {"n32": 355, "n72": 135}
+COUNTERS = ("row0", "row1", "combined", "skip", "q2_sparse", "q2_stride")
+NARROW_GRAPH = re.compile(
+    r"\bmtp_last_graph pos=(\d+) rows=([23]) outputs=1 type=5 kw=\2 vw=\2 "
+    r"qproj=1 q=1 nkv=(\d+) mask=1 ffn=1 ordered=1$",
+    re.M,
+)
+MODEL_SHA256 = "@MODEL_SHA256@"
+SAMPLER_FIELDS = ("seed", "temperature", "ignore_eos", "n_predict", "samplers", "dry_multiplier",
+                  "repeat_penalty", "repeat_last_n", "top_k", "top_p", "min_p")
+
+
+def load(name, relative):
+    spec = importlib.util.spec_from_file_location(name, CAMPAIGN / relative)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+serial = load("heldout_hybrid_serial", "moon100-hybrid-serial/model.py")
+native = serial.hybrid
+need = native.need
+n32 = load("heldout_n32", "night-online-donor80k/probe.py")
+n72 = load("heldout_n72", "night-lookup-heldout/n72_probe.py")
+n20 = n32.n20
+repetition = load("heldout_repetition", "night-github-package/native-q2-r2-selector-model-20261118/export.py").repetition
+read = n20.read_json
+
+
+def write(path, value):
+    path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+
+
+def saved(case):
+    if case == "n32":
+        prompt, _, _, meta = n32.fixture_proof(FIXTURES[case])
+    else:
+        (prompt, _, _, _), meta = n72.saved_fixture(FIXTURES[case])
+    return prompt, meta
+
+
+def expected(case):
+    return (n20.before_source().replace(n20.BEFORE, n20.AFTER) if case == "n32" else n72.source()[1]).strip()
+
+
+def settings(mode):
+    return (native if mode == "native" else serial).settings(mode)
+
+
+def params(case):
+    original = n32.REQUEST if case == "n32" else n72.REQUEST
+    return {**original, "cache_prompt": False}
+
+
+def raw_ids(mode, case, raw):
+    timing = raw["timings"]
+    ids = raw["tokens"]
+    cap = params(case)["n_predict"]
+    drafted, accepted = timing.get("draft_n"), timing.get("draft_n_accepted")
+    finite_timing = all(type(timing[k]) in (int, float) and math.isfinite(timing[k]) and timing[k] > 0
+                        for k in ("prompt_ms", "predicted_ms"))
+    need(raw["id_slot"] == 0 and raw["stop"] is True and raw["truncated"] is False
+         and raw["stop_type"] in {"eos", "limit"} and raw["tokens_evaluated"] == CONTEXT[case]
+         and type(timing["cache_n"]) is int and timing["cache_n"] == 0
+         and type(timing["prompt_n"]) is int and timing["prompt_n"] == CONTEXT[case]
+         and n20.is_ids(ids) and 1 <= len(ids) <= cap and timing["predicted_n"] == len(ids)
+         and (raw["stop_type"] != "limit" or len(ids) == cap) and finite_timing,
+         f"{case}: unexpected slot, cache accounting, completion or timing")
+    actual_sampler = raw["generation_settings"]
+    need(all(actual_sampler[k] == params(case)[k] for k in ("seed", "temperature", "ignore_eos", "n_predict")),
+         f"{case}: requested sampling fields differ from the actual server response")
+    zero_drafts = all(value is None or (type(value) is int and value == 0) for value in (drafted, accepted))
+    if mode == "native":
+        valid_drafts = type(drafted) is int and type(accepted) is int and 0 < drafted <= len(ids) and 0 <= accepted <= drafted
+        need(valid_drafts or (len(ids) <= 2 and zero_drafts), f"{case}: timed native draft counters invalid")
+    else:
+        need(zero_drafts, f"{case}: unexpected draft counters on a serial completion")
+    return ids
+
+
+def request(mode, case, port, out):
+    post = n20.post_to_server(port)
+    if case == "n32":
+        live = n32.prepare_80k(post)
+        need(live == n32.fixture_proof(FIXTURES[case]), f"{case}: live tokenizer or template differs")
+    else:
+        live = n72.prepare(post)
+        need(live == n72.saved_fixture(FIXTURES[case]), f"{case}: live tokenizer or template differs")
+    prompt, _ = saved(case)
+    payload = {**params(case), "prompt": prompt}
+    private = out / "private" / case
+    private.mkdir(parents=True, mode=0o700)
+    write(private / "request.json", payload)
+    wall_start = time.time_ns()
+    start = time.monotonic()
+    raw = post("/completion", payload, timeout=TIMEOUT[case])
+    wall = time.monotonic() - start
+    write(private / "response.json", raw)
+    write(private / "timing.json", {"start_epoch_ns": wall_start, "end_epoch_ns": time.time_ns(), "wall_s": wall})
+    ids = raw_ids(mode, case, raw)
+    answer_ids = ids[:-1] if raw["stop_type"] == "eos" else ids
+    answer = post("/detokenize", {"tokens": answer_ids})["content"]
+    need(isinstance(answer, str) and answer == raw["content"], f"{case}: emitted IDs and response text differ")
+    write(private / "answer.json", answer)
+    result = score_saved(mode, case, out)
+    write(out / f"{case}.json", result)
+    print(f"{case}: scored completion, semantic pass={result['quality']['semantic_pass']}, "
+          f"EOS={result['quality']['eos']}, output IDs={len(ids)}")
+
+
+def archive(case):
+    return read(FIXTURES[case] / "private/cold.completion.json")
+
+
+def parity(ids, text, raw):
+    target = raw["tokens"]
+    common = min(len(ids), len(target))
+    first = next((i for i in range(common) if ids[i] != target[i]),
+                 common if len(ids) != len(target) else None)
+    return {"all_ids_equal": first is None, "text_equal": text == raw["content"],
+            "first_differing_id_1_based": None if first is None else first + 1}
+
+
+def quality(case, answer, content_n, eos):
+    if case == "n32":
+        grade = n20.answer_quality(answer, content_n)
+        ast_exact = grade.get("requested_only_edit_ast", False)
+        text_exact = grade.get("exact_text_ignoring_outer_space_or_fence", False)
+        semantic_pass = eos and grade["passed"] and text_exact
+    else:
+        grade = n72.quality(answer)
+        ast_exact, text_exact = grade["exact_ast"], grade["exact_text"]
+        semantic_pass = eos and ast_exact and text_exact
+    return {"exact_expected_ast": ast_exact, "exact_expected_text": text_exact, "eos": eos,
+            "semantic_pass": semantic_pass, "source_scorer": grade}
+
+
+def score_saved(mode, case, out):
+    private = out / "private" / case
+    need(all(p.stat().st_mode & 0o077 == 0 for p in (out, private.parent, private, *private.iterdir())),
+         f"{case}: raw evidence must be owner-private")
+    prompt, fixture = saved(case)
+    need(read(private / "request.json") == {**params(case), "prompt": prompt},
+         f"{case}: saved request differs from frozen IDs or parameters")
+    raw = read(private / "response.json")
+    ids = raw_ids(mode, case, raw)
+    timing = raw["timings"]
+    clock = read(private / "timing.json")
+    need(0 < clock["start_epoch_ns"] < clock["end_epoch_ns"] and math.isfinite(clock["wall_s"])
+         and clock["wall_s"] > 0, f"{case}: invalid elapsed or epoch evidence")
+    answer = read(private / "answer.json")
+    need(isinstance(answer, str) and answer == raw["content"], f"{case}: saved detokenization mismatch")
+    eos = raw["stop_type"] == "eos"
+    return {
+        "fixture": case, "prompt_sha256": fixture["prompt_sha256"], "request_params": params(case),
+        "template_sha256": fixture["template_sha256" if case == "n32" else "request_template_sha256"],
+        "actual_sampling": {key: raw["generation_settings"][key] for key in SAMPLER_FIELDS},
+        "prompt_tokens": timing["prompt_n"], "cached_prompt_tokens": timing["cache_n"],
+        "completion_tokens_including_eos": len(ids), "stop_type": raw["stop_type"],
+        "draft_offered": timing.get("draft_n") or 0, "draft_accepted": timing.get("draft_n_accepted") or 0,
+        "server_prompt_ms": timing["prompt_ms"], "server_decode_ms": timing["predicted_ms"], **clock,
+        "quality": quality(case, answer, len(ids) - eos, eos),
+        "archive_parity": parity(ids, answer, archive(case)),
+        "repetition": repetition(answer), "expected_source_repetition": repetition(expected(case)),
+    }
+
+
+def ready(mode, out):
+    binary_maps = (native if mode == "native" else serial).ready(mode, out)
+    observed = {"exe" if p.startswith("/proc/") else Path(p).name: sha for p, sha in binary_maps.items()}
+    reference = read(serial.NATIVE / "result.json")["actual_server_software_sha256"]
+    need(observed == reference, "mapped software differs from the archived hybrid")
+    return observed
+
+
+def route(mode, out, cases):
+    raw_logs = [(out / f).read_text(errors="replace")
+                for f in ("server-start.log", "server-post-n32.log", "server.log")]
+    need(raw_logs[1].startswith(raw_logs[0]) and raw_logs[2].startswith(raw_logs[1]),
+         "measured server log boundaries are inconsistent")
+    full = raw_logs[-1]
+    need(not native.q2.n88.short.CUDA_ERROR.search(full) and not native.q2.n18.SHIFT.search(full)
+         and "using CPU sampler" not in full and "lookup_source_span: validated" not in full
+         and "lookup_source_spans: validated" not in full, "CPU fallback, context shift or lookup in held-out arm")
+    graph_matches = NARROW_GRAPH.findall(raw_logs[1][len(raw_logs[0]):])
+    merged_80k = None
+    if graph_matches:
+        need(len(graph_matches) == 1, "unexpected repeated first-graph witness")
+        pos, rows, width = map(int, graph_matches[0])
+        need(CONTEXT["n32"] <= pos < CONTEXT["n32"] + cases["n32"]["completion_tokens_including_eos"]
+             and pos < width <= 84224, "first merged graph geometry outside the 80K request")
+        merged_80k = {"position": pos, "kv_write_rows": rows, "key_width": width, "query_rows": 1}
+    if mode == "native" and cases["n32"]["completion_tokens_including_eos"] > 2:
+        need(merged_80k is not None and "mtp_last_graph" not in raw_logs[0], "actual merged 80K graph witness missing")
+    if mode == "serial":
+        need("mtp_last_graph" not in full and native.MERGE not in full, "serial ran a merged draft graph")
+
+    child = int((out / "witness/child.pid").read_text())
+    samples = [read(out / "witness" / f"{label}.json") for label in WITNESS_LABELS]
+    need(all(s["child"] == child and all(type(s[k]) is int and s[k] >= 0 for k in COUNTERS) for s in samples),
+         "counter sample child, field type or counter value incorrect")
+    by_case = {}
+    for case, earlier, later in zip(ORDER, samples, samples[1:]):
+        diff = {k: later[k] - earlier[k] for k in COUNTERS}
+        need(min(diff.values()) >= 0, f"{case}: a physical counter moved backwards")
+        if cases[case]["draft_offered"]:
+            need(diff["combined"] == diff["skip"] > 0, f"{case}: native two-row MoE dispatch missing")
+            if case == "n32":
+                need(diff["q2_sparse"] > 0 and diff["q2_stride"] > 0, f"{case}: physical sparse setup absent")
+        else:
+            need(not any(diff.values()), f"{case}: physical two-row counter changed without a draft")
+        by_case[case] = diff
+    return {"merged_80k_graph": merged_80k, "physical_deltas": by_case}
+
+
+def result(mode, out):
+    cases = {case: score_saved(mode, case, out) for case in ORDER}
+    need(all(cases[case] == read(out / f"{case}.json") for case in ORDER), "completion receipt changed since request")
+    return {"mode": mode, "technical_pass": True, "one_slot": True, "accepted_experts": 8,
+            "gpu_layers_offloaded": 42, "server_context_tokens": 84224, "request_order": list(ORDER),
+            "model_sha256": MODEL_SHA256, "tokenizer_pre_override": "qwen35",
+            "actual_server_software_sha256": ready(mode, out), "route": route(mode, out, cases), "cases": cases}
+
+
+def check():
+    native_env, native_args = settings("native")
+    serial_env, serial_args = settings("serial")
+    cut = native_args.index("--spec-type")
+    need(native_env == serial_env and serial_args == [*native_args[:cut], "--spec-type", "none"]
+         and native_args[cut:cut + 2] == ["--spec-type", "draft-mtp"], "runtime differs beyond speculation")
+    for mode, path in (("native", serial.NATIVE), ("serial", CAMPAIGN /
+                      "@HYBRID_SERIAL@")):
+        verified = ready(mode, path)
+        need(read(path / "result.json")["actual_server_software_sha256"] == verified, "archived build pin differs")
+    for case in ORDER:
+        prompt, _ = saved(case)
+        ref = archive(case)
+        ids = raw_ids("serial", case, ref)
+        need(len(prompt) == CONTEXT[case] and len(ids) == EXPECTED_OUTPUT[case]
+             and quality(case, ref["content"], len(ids) - 1, ref["stop_type"] == "eos")["semantic_pass"],
+             f"{case}: reference edit, full input or exact EOS witness changed")
+        wrong = quality(case, "# wrong edit", 1, True)
+        need(not wrong["semantic_pass"] and repetition(expected(case))["nonblank_lines"] > 0,
+             f"{case}: expected-score self-check failed")
+    print("PASS: exact mapped profiles, archived inputs and predeclared source AST/EOS scores")
+
+
+def finalize(mode, out, code, cleanup, elapsed):
+    safe = out / "sanitized"
+    safe.mkdir()
+    measurements = {case: read(out / f"{case}.json") for case in ORDER if (out / f"{case}.json").is_file()}
+    write(safe / "model-receipt.json", {
+        "mode": mode, "runner_exit": code, "cleanup_exit": cleanup, "bounded_wall_s": elapsed,
+        "measurements": measurements, "validated": read(out / "result.json") if code == cleanup == 0 else None,
+    })
+
+
+def finished(mode, out):
+    out = out.resolve()
+    need(out.parent == HERE / "receipts" and out.name.startswith(f"{mode}-"), "expected an owned terminal receipt")
+    subprocess.run(["sha256sum", "--check", "--strict", "--quiet", "observations.sha256"], cwd=out, check=True)
+    status = set((out / "status.txt").read_text().splitlines())
+    summary = read(out / "sanitized/model-receipt.json")
+    current = result(mode, out)
+    need({"cleanup_exit=0", "runner_exit=0"} <= status and summary["runner_exit"] == summary["cleanup_exit"] == 0
+         and current == read(out / "result.json") == summary["validated"], "owned result replay failed")
+    return current
+
+
+def compare(serial_out, native_out):
+    control = finished("serial", serial_out)
+    candidate = finished("native", native_out)
+    need(control["actual_server_software_sha256"] == candidate["actual_server_software_sha256"],
+         "pair did not use identical mapped software")
+    rows = {}
+    for case in ORDER:
+        a, b = (arm["cases"][case] for arm in (control, candidate))
+        need(all(a[k] == b[k] for k in ("prompt_sha256", "template_sha256", "request_params", "actual_sampling", "prompt_tokens",
+                                        "cached_prompt_tokens", "expected_source_repetition")), f"{case}: paired input or scoring method differs")
+        native_raw = read(native_out / "private" / case / "response.json")
+        serial_raw = read(serial_out / "private" / case / "response.json")
+        rows[case] = {"serial": a, "native": b, "paired_parity": parity(native_raw["tokens"], native_raw["content"], serial_raw)}
+    print(json.dumps({"technical_pass": True, "same_mapped_software": control["actual_server_software_sha256"],
+                      "cases": rows}, indent=2, allow_nan=False))
+
+
+def main():
+    command, *args = sys.argv[1:]
+    if command == "check" and not args:
+        check()
+    elif command in {"env", "args"}:
+        print("\n".join(settings(args[0])[command == "args"]))
+    elif command == "ready":
+        ready(args[0], Path(args[1]))
+    elif command == "request":
+        request(args[0], args[1], int(args[2]), Path(args[3]))
+    elif command == "verify":
+        out = Path(args[1])
+        write(out / "result.json", result(args[0], out))
+    elif command == "finalize":
+        finalize(args[0], Path(args[1]), *map(int, args[2:]))
+    elif command == "compare":
+        compare(*map(Path, args))
+    else:
+        raise ValueError("unknown held-out command")
+
+
+if __name__ == "__main__":
+    os.umask(0o077)
+    try:
+        main()
+    except (KeyError, OSError, ValueError, subprocess.CalledProcessError) as exc:
+        raise SystemExit(f"Held-out quality: {exc}") from None

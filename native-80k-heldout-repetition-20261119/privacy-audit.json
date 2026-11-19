@@ -1,0 +1,8 @@
+{
+  "fixture_prompt_output_material_and_fingerprints_excluded": true,
+  "live_model_and_runtime_source_rehydrated_byte_exact_against_owner_seal": true,
+  "owner_alias_values_and_receipt_identifiers_excluded": true,
+  "owner_mounts_device_identifiers_and_child_pids_excluded": true,
+  "payloads_scanned_before_audit_and_checksum": 11,
+  "policy": "Only typed summaries leave the owner archive. Output counts and equality are retained."
+}
