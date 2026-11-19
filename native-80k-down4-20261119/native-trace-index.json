@@ -1,0 +1,46 @@
+{
+  "completed_epoch": 1795090080,
+  "events": {
+    "down4_residency": 1,
+    "draft_final_query_first_dispatch": 1,
+    "fast_selector_first_dispatch": 1,
+    "fixed_stride_first_dispatch": 1,
+    "host_counter_snapshot": 70,
+    "merged_draft_catchup_enabled": 1,
+    "observed_response_metrics": 2,
+    "observed_stream_output_ordinal": 3264,
+    "offload_observed": 1,
+    "output_boundary": 2,
+    "owned_health_observed": 1,
+    "owned_run_begin": 1,
+    "owned_run_outcome": 1,
+    "physical_counter_boundary": 3,
+    "q2_moe_residency": 1,
+    "recurrent_rollback_rows": 2,
+    "request_begin": 2,
+    "runtime_state_marker": 1,
+    "sampler_snapshot_completion": 2,
+    "slot_release": 2,
+    "sparse_attention_dispatch_sample": 24,
+    "sse_clock_checkpoint": 7,
+    "tiled_probe_first_dispatch": 1,
+    "trace_metadata": 1
+  },
+  "file": "native.trace.jsonl",
+  "log_boundary_issue": null,
+  "response_phases_observed": [
+    "cold",
+    "warm"
+  ],
+  "start_epoch": 1795089745,
+  "terminal": {
+    "cleanup_exit": 0,
+    "cleanup_outcome": "passed",
+    "health_check_limit_s": null,
+    "owned_worker_ready_s": 31,
+    "runner_exit": 0,
+    "runner_failure_class": null,
+    "validation_disposition": "passed_original_terminal_validator"
+  },
+  "trace_sha256": "85b340ad2566b124d439c58e0577eca4fbc97b68e49eb71f22e605e5de72b68d"
+}

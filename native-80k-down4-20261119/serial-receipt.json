@@ -1,0 +1,147 @@
+{
+  "down4": {
+    "phases": {
+      "cold": {
+        "down4_launches": 0,
+        "expected": 0,
+        "ordered_full_experts": 8
+      },
+      "warm": {
+        "down4_launches": 0,
+        "expected": 0,
+        "ordered_full_experts": 8
+      }
+    },
+    "startup_launches_excluded": 78
+  },
+  "experts": 8,
+  "mode": "serial",
+  "numeric_child_feature_flags": {
+    "GGML_CUDA_CONCAT_T": 1,
+    "GGML_CUDA_FA_MAXWELL_GEMM": 1,
+    "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": 1,
+    "GGML_CUDA_GATE_COPY": 1,
+    "GGML_CUDA_HEAD_ROWPACK_SM52": 1,
+    "GGML_CUDA_MMQ_COMPACT_SM52": 1,
+    "GGML_CUDA_MMQ_TAIL_SM52": 1,
+    "GGML_CUDA_MMQ_XMAD_SM52": 1,
+    "GGML_CUDA_MMVQ_SM52": 1,
+    "GGML_CUDA_MOE_DOWNH": 2,
+    "GGML_CUDA_MOE_DOWNX": 1,
+    "GGML_CUDA_MOE_LOP3": 1,
+    "GGML_CUDA_MOE_TAILBAL": 1,
+    "GGML_CUDA_MOE_V3": 1,
+    "GGML_CUDA_NORM_Q8": 1,
+    "GGML_CUDA_OCCAMY_DEBUG": 1,
+    "GGML_CUDA_OCCAMY_FA": 1,
+    "GGML_CUDA_OCCAMY_FA2_NU": 4,
+    "GGML_CUDA_OCCAMY_FA_ADDR": 1,
+    "GGML_CUDA_OCCAMY_FA_MROW": 3,
+    "GGML_CUDA_OCCAMY_FA_PIPE": 3,
+    "GGML_CUDA_OCCAMY_FA_Q2_R2_PROBE4": 1,
+    "GGML_CUDA_OCCAMY_FA_Q2_R2_STRIDE": 1,
+    "GGML_CUDA_OCCAMY_FA_Q2_R2_TOP16": 1,
+    "GGML_CUDA_OCCAMY_FA_Q2_R2_TOP16_CHECK": 0,
+    "GGML_CUDA_OCCAMY_FA_SPARSE": 1,
+    "GGML_CUDA_OCCAMY_FA_SPARSE_R2": 1,
+    "GGML_CUDA_OCCAMY_FUSED": 1,
+    "GGML_CUDA_OCCAMY_GDN": 1,
+    "GGML_CUDA_OCCAMY_GDN_PCSHARE": 1,
+    "GGML_CUDA_OCCAMY_GDN_PREF": 1,
+    "GGML_CUDA_OCCAMY_GDN_QKREUSE": 1,
+    "GGML_CUDA_OCCAMY_GDN_REPACK": 1,
+    "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": 1,
+    "GGML_CUDA_OCCAMY_GDN_T2": 1,
+    "GGML_CUDA_OCCAMY_GDN_T2_Q8A": 1,
+    "GGML_CUDA_OCCAMY_GDN_T2_Q8A_EVENTS": 0,
+    "GGML_CUDA_OCCAMY_HOSTGAP": 1,
+    "GGML_CUDA_OCCAMY_MOE_Q2_COHORTS": 1,
+    "GGML_CUDA_OCCAMY_MOE_Q2_COUNT": 1,
+    "GGML_CUDA_OCCAMY_MOE_Q2_DOWN4": 1,
+    "GGML_CUDA_OCCAMY_MOE_Q2_READ_IDS": 0,
+    "GGML_CUDA_OCCAMY_N2GDN": 1,
+    "GGML_CUDA_OCCAMY_N2SPLIT": 1,
+    "GGML_CUDA_OCCAMY_SMALLFUSE": 2,
+    "GGML_CUDA_Q8_REUSE": 1,
+    "GGML_CUDA_RMS_WARP": 0,
+    "LLAMA_MTP_CACHE_ONLY": 1,
+    "LLAMA_MTP_LAST_QUERY": 1,
+    "LLAMA_MTP_MERGE_REEVAL": 1,
+    "LLAMA_MV1_TRACE": 1,
+    "LLAMA_SPEC_RS_SAMPLER_SNAPSHOT_ELIDE": 1
+  },
+  "phases": {
+    "cold": {
+      "delivered_tokens_per_s": 73.92095616756802,
+      "same_mode_archive": {
+        "cache_and_draft_totals_equal": true,
+        "exact_full_text": true,
+        "exact_ids": 192,
+        "repetition": {
+          "duplicate_normalized_lines": 0,
+          "final_quarter_lines": 4,
+          "final_quarter_normalized_duplicates": 0,
+          "malformed_characters": 0,
+          "nonblank_lines": 16,
+          "python_keyword_led_lines": 6,
+          "repeated_24_word_windows": 0,
+          "trailing_comment_only_lines": 0,
+          "word_windows_24": 56
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "predicted_ms": 2597.369,
+        "predicted_n": 192,
+        "predicted_per_second": 73.53595118752861,
+        "predicted_per_token_ms": 13.598790575916231,
+        "prompt_ms": 261656.576,
+        "prompt_n": 80000,
+        "prompt_per_second": 305.7442745104178,
+        "prompt_per_token_ms": 3.2707072
+      }
+    },
+    "warm": {
+      "delivered_tokens_per_s": 76.27737791746073,
+      "same_mode_archive": {
+        "cache_and_draft_totals_equal": true,
+        "exact_full_text": true,
+        "exact_ids": 3072,
+        "repetition": {
+          "duplicate_normalized_lines": 73,
+          "final_quarter_lines": 71,
+          "final_quarter_normalized_duplicates": 16,
+          "malformed_characters": 0,
+          "nonblank_lines": 283,
+          "python_keyword_led_lines": 170,
+          "repeated_24_word_windows": 46,
+          "trailing_comment_only_lines": 0,
+          "word_windows_24": 1318
+        }
+      },
+      "timings": {
+        "cache_n": 79996,
+        "predicted_ms": 40274.064,
+        "predicted_n": 3072,
+        "predicted_per_second": 76.25254804183656,
+        "predicted_per_token_ms": 13.114315858026702,
+        "prompt_ms": 107.223,
+        "prompt_n": 4,
+        "prompt_per_second": 37.30542887253667,
+        "prompt_per_token_ms": 26.80575
+      }
+    }
+  },
+  "semantic_score": null,
+  "software": {
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+    "libggml-cuda.so": "b71f011fbe1448687ec20c465ebc235f4190b401dc1f3603cf8f0211cfa5673f",
+    "libllama-common.so.0.6.0": "1088044d770e2e1f7a302192180208049cff263c009ef4fe3815d584a0763131",
+    "libllama-server-impl.so": "4a0ff82df62550ccb27927bd98a39d036148b4666abc819bec18f14686efcc64",
+    "libllama.so.0.6.0": "46c4dd7075c5229598c8a9c7aadc3542ac03d5f928fb8078696c42a9c4bfd607"
+  },
+  "speculation_arguments": [
+    "--spec-type",
+    "none"
+  ]
+}

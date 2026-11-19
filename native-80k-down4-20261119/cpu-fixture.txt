@@ -1,0 +1,3 @@
+native {'startup_launches_excluded': 39, 'phases': {'cold': {'down4_launches': 4040, 'expected': 4040, 'ordered_full_experts': 8}, 'warm': {'down4_launches': 65680, 'expected': 65680, 'ordered_full_experts': 8}}}
+serial {'startup_launches_excluded': 78, 'phases': {'cold': {'down4_launches': 0, 'expected': 0, 'ordered_full_experts': 8}, 'warm': {'down4_launches': 0, 'expected': 0, 'ordered_full_experts': 8}}}
+CPU_SYNTHETIC_ONLY both complete receipts and strict pair replayed; one missing candidate, serial leak and wrong mapped DSO refused

@@ -1,0 +1,136 @@
+"""Frozen down4 two-arm 80K verifier. Dispatch to the previously verified samplers."""
+from contextlib import contextmanager
+import importlib.util
+import json
+from pathlib import Path
+import re
+import sys
+from unittest.mock import patch
+
+HERE=Path(__file__).resolve().parent
+C=HERE.parent
+def module(path,name):
+    spec=importlib.util.spec_from_file_location(name,path)
+    result=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(result)
+    return result
+
+control=module(C/'moon100-hybrid-serial/model.py','exact_serial')
+hybrid=control.hybrid
+core,q2,need=hybrid.core,hybrid.q2,hybrid.need
+export=module(C/'night-github-package/native-hybrid-draft-80k-20261119/export-hybrid.py','archive_export')
+read=core.read
+profile=read(HERE/'profile.json')
+ARCHIVE={'native':control.NATIVE,'serial':C/'moon100-hybrid-serial/receipts/@PRIVATE_ARCHIVE_SERIAL@'}
+flag='GGML_CUDA_OCCAMY_MOE_Q2_DOWN4=1'
+phases=('cold','warm')
+
+def settings(mode):
+    func={'native':hybrid.settings,'serial':control.settings}[mode]
+    env,args=func(mode)
+    need(all('Q2_DOWN4' not in x for x in env),'original profile has candidate flag')
+    return [*env,'-e',flag],args
+
+@contextmanager
+def bindings(mode):
+    inherited=hybrid.candidate_bindings if mode=='native' else control.serial_bindings
+    with inherited(), patch.object(q2,'settings',settings), patch.object(q2,'DSO',profile['libggml-cuda.so']), patch.object(q2,'SUP',HERE/'supervise'):
+        yield
+
+def ready(mode,out):
+    with bindings(mode):
+        startup,actual=q2.ready(mode,out)
+    if mode=='native':
+        hybrid.confirm_merge(startup)
+    else:
+        need(hybrid.MERGE not in startup and 'mtp_last_graph' not in startup,'unexpected serial draft graph')
+    observed={'exe' if k.startswith('/proc/') else Path(k).name:v for k,v in actual.items()}
+    need(observed==profile,'actual mapped model software differs from frozen profile')
+    return startup,observed
+
+def probe(mode,out,metrics):
+    child=int((out/'witness/child.pid').read_text())
+    values=[read(out/'witness'/f'{part}.json') for part in ('start',*phases)]
+    for v in values:
+        need(v['child']==child and type(v['down4']) is int and 0<=v['down4']<=v['combined'],'invalid owned down4 issue counter')
+    log=(out/'server.log').read_text()
+    prefix='Q2_DOWN4 residency'
+    observed=re.findall(r'^Q2_DOWN4 residency device=0 sm=24 active=2 regs=62 static=96 dynamic=39424 local=0 ready=1$',log,re.M)
+    need(len(observed)==log.count(prefix) and len(observed)==int(values[-1]['down4']>0),'candidate residency mismatch')
+    record={}
+    for phase,a,b in zip(phases,values,values[1:]):
+        expected=40*int(metrics[phase].get('draft_n') or 0)
+        seen=b['down4']-a['down4']
+        need(seen==b['combined']-a['combined']==b['skip']-a['skip']==expected,'phase did not physically issue all down4 target calls')
+        need((mode=='native')==(seen>0),'mode-specific down4 count unexpected')
+        record[phase]={'down4_launches':seen,'expected':expected,'ordered_full_experts':8}
+    return {'startup_launches_excluded':values[0]['down4'],'phases':record}
+
+def collect(mode,out):
+    ready(mode,out)
+    with bindings(mode):
+        result=core.collect(mode,out)
+    if mode=='native':
+        result['draft_graph_witness']=hybrid.graph_witness(out)
+    else:
+        for name in ('server-pre-warm.log','server.log'):
+            log=(out/name).read_text()
+            need(hybrid.MERGE not in log and 'mtp_last_graph' not in log,'serial draft graph detected')
+    result['down4']=probe(mode,out,result['metrics'])
+    result['same_mode_archive']={}
+    for phase,n in zip(phases,(192,3072)):
+        current,ref=[read(p/f'{phase}.json') for p in (out,ARCHIVE[mode])]
+        need(all(current[k]==ref[k] for k in hybrid.INPUT_FIELDS),'input identity or decoding settings differ')
+        need(current['token_ids']==ref['token_ids'] and len(current['token_ids'])==n and current['text']==ref['text'],'same-mode output differs')
+        need(all(current['timings'].get(k)==ref['timings'].get(k) for k in ('draft_n','draft_n_accepted','cache_n','prompt_n')),'same-mode acceptance or cache counts differ')
+        result['same_mode_archive'][phase]={'exact_ids':n,'exact_full_text':True,'cache_and_draft_totals_equal':True,'repetition':export.base.repetition(current['text'])}
+    return result
+
+def finished(mode,out):
+    need(out.parent==HERE/'receipts' and out.name.startswith(mode+'-'),'wrong receipt owner or mode')
+    hybrid.validator.sha_check(out,'observations.sha256')
+    manifest=(out/'manifest.txt').read_text().splitlines()
+    need(manifest[0]=='stage='+mode and f'{q2.n9.hash_file(HERE/"FROZEN.sha256")}  {HERE}/FROZEN.sha256' in manifest,'arm used a different code/profile freeze')
+    need({'runner_exit=0','cleanup_exit=0'}<=set((out/'status.txt').read_text().splitlines()),'terminal run or cleanup failed')
+    result=collect(mode,out)
+    official=read(out/'sanitized/model-receipt.json')
+    need(official['mode']==mode and official['runner_exit']==official['cleanup_exit']==0 and official['refusal'] is None and result==official['validated']==read(out/'result.json'),'terminal result did not replay')
+    return result
+
+def compare(serial,native):
+    actual={m:finished(m,p) for m,p in [('serial',serial),('native',native)]}
+    need(actual['serial']['actual_server_software_sha256']==actual['native']['actual_server_software_sha256']==profile,'same-build identity differs')
+    need((serial/'child-selected-environment.txt').read_text().splitlines() and sorted((serial/'child-selected-environment.txt').read_text().splitlines())==sorted((native/'child-selected-environment.txt').read_text().splitlines()),'different child feature vectors')
+    a,b=[(p/'child-server.args').read_text().splitlines() for p in (serial,native)]
+    i=b.index('--spec-type')
+    need(a==b[:i]+['--spec-type','none'] and b[i:]==['--spec-type','draft-mtp','--spec-draft-n-max','1','--spec-draft-type-k','f16','--spec-draft-type-v','f16'],'difference exceeds speculation arguments')
+    result={'same_build':profile,'same_process_feature_flags':True,'semantic_score':None,'arms':{},'phases':{}}
+    for m,x in actual.items():
+        result['arms'][m]={'down4':x['down4'],'same_mode_archive':x['same_mode_archive'],'experts':x['accepted_experts']}
+    for phase in phases:
+        a,b=[actual[m]['metrics'][phase] for m in ('serial','native')]
+        ref=read(ARCHIVE['native']/'result.json')['metrics'][phase]
+        result['phases'][phase]={'serial':a,'native':b,'same_build_gain_pct':100*(b['decode_toks_s']/a['decode_toks_s']-1),'native_saved_ms_per_round_vs_369c':ref['decode_ms_per_round']-b['decode_ms_per_round'],'observed_100_tps':b['decode_toks_s']>=100}
+    return result
+
+def check():
+    need(hybrid.result_comparison(ARCHIVE['native'])['phases']['warm']['observed_warm_100_gate'] is False,'archived native cannot be replayed')
+    control.finished(ARCHIVE['serial'])
+    core_profile=read(ARCHIVE['serial']/'result.json')['actual_server_software_sha256']
+    need(profile=={**core_profile,'libggml-cuda.so':'b71f011fbe1448687ec20c465ebc235f4190b401dc1f3603cf8f0211cfa5673f'},'unapproved overlay')
+    for mode in ARCHIVE:settings(mode)
+    need(settings('native')[0]==settings('serial')[0],'feature vectors differ')
+
+if __name__=='__main__':
+    command,*args=sys.argv[1:]
+    try:
+        if command=='check':check()
+        elif command in ('env','args'):print('\n'.join(settings(args[0])[command=='args']))
+        elif command=='ready':ready(args[0],Path(args[1]))
+        elif command=='verify':core.n9.write_json(Path(args[1])/'result.json',collect(args[0],Path(args[1])))
+        elif command=='finalize':q2.finish(args[0],Path(args[1]),*map(int,args[2:]))
+        elif command=='probe':
+            mode,path=args;out=Path(path);print(json.dumps(probe(mode,out,{ph:read(out/f'{ph}.json')['timings'] for ph in phases}),indent=2))
+        elif command=='compare':print(json.dumps(compare(*[Path(p).resolve() for p in args]),indent=2,allow_nan=False))
+        else:raise ValueError('unexpected command')
+    except (ValueError,KeyError,OSError) as e:raise SystemExit('Q2 model: '+str(e)) from None

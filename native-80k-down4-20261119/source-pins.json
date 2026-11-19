@@ -1,0 +1,71 @@
+{
+  "model.py": {
+    "private_input_keys": [
+      "ARCHIVE_SERIAL"
+    ],
+    "portable_sha256": "78e77a628da81d48ceef479e24ac2c1bee9a84595da2979ae0ed9761277d8ec0",
+    "observed_source_sha256": "22a82edc7c1a172a0f09eae7028b60d3de43b71bc23c14e62ea78eacf01b03c9"
+  },
+  "release.sh": {
+    "private_input_keys": [
+      "MODEL_SHA256"
+    ],
+    "portable_sha256": "d9c17fbd755b614d9396fe630f5cfb39b963ba2d0fe002556036a339e9bf842b",
+    "observed_source_sha256": "66fc2c6c970ba0c9a0f201e369b76cc08f07c8761ba09db625ebea17ee90c025"
+  },
+  "build-probe.py": {
+    "private_input_keys": [],
+    "portable_sha256": "181c76310287c3bb74c80ff18472124f48714b1ec87f42c695adf02dc17d3a32",
+    "observed_source_sha256": "181c76310287c3bb74c80ff18472124f48714b1ec87f42c695adf02dc17d3a32"
+  },
+  "supervise.c": {
+    "private_input_keys": [],
+    "portable_sha256": "36da034926e0b172875f864b51d99f76d6d4366c625a2cb1f24df48502a8368c",
+    "observed_source_sha256": "36da034926e0b172875f864b51d99f76d6d4366c625a2cb1f24df48502a8368c"
+  },
+  "supervise.original.c": {
+    "private_input_keys": [],
+    "portable_sha256": "0892c851b09239ab83b36cf3c2ef0ba72cb5b7c0d87a81ad6455a83657845d26",
+    "observed_source_sha256": "0892c851b09239ab83b36cf3c2ef0ba72cb5b7c0d87a81ad6455a83657845d26"
+  },
+  "profile.json": {
+    "private_input_keys": [],
+    "portable_sha256": "1df36890fbb06414ada7431ff38de7641519d2727cde226178d55555988dc275",
+    "observed_source_sha256": "1df36890fbb06414ada7431ff38de7641519d2727cde226178d55555988dc275"
+  },
+  "FROZEN.sha256": {
+    "private_input_keys": [],
+    "portable_sha256": "c6fa94d3f59215749cf29139d2102bc79e09937bb9fafa5fefc2fab07ed8a13d",
+    "observed_source_sha256": "c6fa94d3f59215749cf29139d2102bc79e09937bb9fafa5fefc2fab07ed8a13d"
+  },
+  "INPUTS.sha256": {
+    "private_input_keys": [
+      "ARCHIVE_NATIVE",
+      "ARCHIVE_SERIAL",
+      "RECEIPT_MANIFEST_NATIVE",
+      "RECEIPT_MANIFEST_SERIAL"
+    ],
+    "portable_sha256": "96c5acf2e5fc65a0c803004161c6ac16a91502d6a6169341767494ba8960cb84",
+    "observed_source_sha256": "5367c2946f226b6182833ae5706d080b5887494e00e9436bfd6471a5c1bc0704"
+  },
+  "cpu-replay.py": {
+    "private_input_keys": [],
+    "portable_sha256": "447d3ad6450bf843b252283e071f2e20fd44cef9c84098786dc3bdc4f8c1b538",
+    "observed_source_sha256": "447d3ad6450bf843b252283e071f2e20fd44cef9c84098786dc3bdc4f8c1b538"
+  },
+  "probe-build.txt": {
+    "private_input_keys": [],
+    "portable_sha256": "2062e0b5928f5ed581adb500dce0029ad2cb8ad3ff2ca8d7ca77c07b5c301480",
+    "observed_source_sha256": "2062e0b5928f5ed581adb500dce0029ad2cb8ad3ff2ca8d7ca77c07b5c301480"
+  },
+  "RELEASE.md": {
+    "portable_sha256": "ce4ded2bcef1f0b02595129f909c7f89fad9df816f5471071ae8acd985d9fcf5",
+    "observed_source_sha256": "ce4ded2bcef1f0b02595129f909c7f89fad9df816f5471071ae8acd985d9fcf5",
+    "private_input_keys": []
+  },
+  "cpu-fixture.txt": {
+    "portable_sha256": "ae135304d1a766b27a7410fded60cde50b7ea25a23a3ca6bdbcb4fe73b5813f2",
+    "observed_source_sha256": "ae135304d1a766b27a7410fded60cde50b7ea25a23a3ca6bdbcb4fe73b5813f2",
+    "private_input_keys": []
+  }
+}

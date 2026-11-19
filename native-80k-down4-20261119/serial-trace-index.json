@@ -1,0 +1,40 @@
+{
+  "completed_epoch": 1795090454,
+  "events": {
+    "cycle": 3264,
+    "down4_residency": 1,
+    "observed_response_metrics": 2,
+    "offload_observed": 1,
+    "output_boundary": 2,
+    "owned_health_observed": 1,
+    "owned_run_begin": 1,
+    "owned_run_outcome": 1,
+    "physical_counter_boundary": 3,
+    "q2_moe_residency": 1,
+    "recurrent_rollback_rows": 1,
+    "request_begin": 2,
+    "runtime_state_marker": 1,
+    "sampler_snapshot_completion": 2,
+    "slot_release": 2,
+    "sparse_attention_dispatch_sample": 35,
+    "sse_clock_checkpoint": 7,
+    "trace_metadata": 1
+  },
+  "file": "serial.trace.jsonl",
+  "log_boundary_issue": null,
+  "response_phases_observed": [
+    "cold",
+    "warm"
+  ],
+  "start_epoch": 1795090121,
+  "terminal": {
+    "cleanup_exit": 0,
+    "cleanup_outcome": "passed",
+    "health_check_limit_s": null,
+    "owned_worker_ready_s": 23,
+    "runner_exit": 0,
+    "runner_failure_class": null,
+    "validation_disposition": "passed_original_terminal_validator"
+  },
+  "trace_sha256": "8bcabdcfb73332eecb0f1607a3359e765efbc1304b2595f629032d5ca7bb30c2"
+}
