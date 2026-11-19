@@ -1,0 +1,49 @@
+{
+  "same_mapped_runtime_as_r1": true,
+  "only_feature_delta": "GGML_CUDA_OCCAMY_MOE_Q2_DOWN4 from 0 to 1",
+  "request_context_tokens": 80000,
+  "slots": 1,
+  "effective_experts": 8,
+  "cap_seconds": 430,
+  "stages": {
+    "serial": {
+      "command_arguments_equal_to_r1": true,
+      "speculation_argument_suffix": [
+        "--spec-type",
+        "none"
+      ],
+      "down4_feature_value": 1,
+      "compact_feature_value": "1"
+    },
+    "native": {
+      "command_arguments_equal_to_r1": true,
+      "speculation_argument_suffix": [
+        "--spec-type",
+        "draft-mtp",
+        "--spec-draft-n-max",
+        "1",
+        "--spec-draft-type-k",
+        "f16",
+        "--spec-draft-type-v",
+        "f16"
+      ],
+      "down4_feature_value": 1,
+      "compact_feature_value": "1"
+    },
+    "shadow": {
+      "command_arguments_equal_to_r1": true,
+      "speculation_argument_suffix": [
+        "--spec-type",
+        "draft-mtp",
+        "--spec-draft-n-max",
+        "1",
+        "--spec-draft-type-k",
+        "f16",
+        "--spec-draft-type-v",
+        "f16"
+      ],
+      "down4_feature_value": 1,
+      "compact_feature_value": "shadow"
+    }
+  }
+}

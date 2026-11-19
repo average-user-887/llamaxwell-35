@@ -1,0 +1,21 @@
+{
+  "exact_composite_sources": {
+    "cpu-replay.log": "0c37def5899b578ca5f9806567644aea5c0dc7af3229d4977dfd806516c05e3f",
+    "cpu-replay.py": "e19dcf95656b0629de08597f6b55f3b439bd9d4f8d8d9a6872177185be496c83",
+    "model.py": "5fd2bc56e55a0dc4e45bc5c148c13aa315a5632d0ff50ae14d3b5655d9cf3f09",
+    "model.py.patch": "8214a401676efabebc1f3d69720ffc419f31a9008676a6427f16a0ba01dfe569",
+    "prepare.py": "f2e1998a9f3fcc20b1158569ffb420c44869d8a124ea13ee39ed4e8f23c10329",
+    "profile.json": "4d14dc73784ab601b356d3cb8f083d5ecf88f8c57cd5b0ede401be419ee7f0a6",
+    "release.sh": "3fd4f8e76547ef974c6b83aff3352338930ab7a7530dfe26aa57b02d9207f59a",
+    "release.sh.patch": "59d5109b24bc4a24f37ab7b56828f60cad2318c9420538444660cd57772d6dc3"
+  },
+  "owner_parent_r1_freeze_sha256": "8f5dd7ed774c947049177813b1347ad7f5fff4f2ec7bcc8a89f7887fbd2cfb60",
+  "owner_source_freeze_sha256": "c6145651466546584ada9f1ebd518b12dc0d614dac9cc3dd46dd633b53b3593a",
+  "rehydration": [],
+  "upstream_public_commits": {
+    "b71_down4_pair": "32be2864551de6fc0b230cdfeda1fb57ffae618d",
+    "first_composite_refusal": "a04b3c9e60cda23dce4bf3025366aacdbf3936d3",
+    "r1_pair": "ef15661db0598e4ed233ed4ca0940a93e2d1b2cb",
+    "r1_source_and_shadow": "68caf44b5f6e7ca331da88354111a6d89221484b"
+  }
+}

@@ -1,0 +1,55 @@
+--- a/model.py
++++ b/model.py
+@@ -31,7 +31,6 @@
+ def settings(stage):
+     env, args = parent.settings(mode(stage))
+     need(env.count(parent.flag)==1, 'original profile lacks the explicit down4 flag')
+-    env = [item.replace('GGML_CUDA_OCCAMY_MOE_Q2_DOWN4=1','GGML_CUDA_OCCAMY_MOE_Q2_DOWN4=0') if item==parent.flag else item for item in env]
+     flag = 'shadow' if stage == 'shadow' else '1'
+     need(not any('LLAMA_OCCAMY_COMPACT_READBACK' in one for one in env), 'unexpected inherited compact setting')
+     return [*env, '-e', f'LLAMA_OCCAMY_COMPACT_READBACK={flag}'], args
+@@ -106,26 +105,12 @@
+             for phase,old,new in zip(phases,snapshots,snapshots[1:])}
+ 
+ 
+-def disabled_down4(out, metrics):
+-    child=int((out/'witness/child.pid').read_text())
+-    snapshots=[read(out/'witness'/f'{p}.json') for p in ('start',*phases)]
+-    need(all(value['child']==child and type(value.get('down4')) is int and value['down4']==0 for value in snapshots),'down4 executed in compact-only profile')
+-    need('Q2_DOWN4 residency' not in (out/'server.log').read_text(), 'unexpected down4 CUDA launch marker')
+-    rows={}
+-    for phase,a,b in zip(phases,snapshots,snapshots[1:]):
+-        offers=int(metrics[phase].get('draft_n') or 0)
+-        cohorts=b['combined']-a['combined']
+-        need(cohorts==b['skip']-a['skip']==40*offers, 'ordinary cohort physical count differs')
+-        rows[phase]={'down4_launches':0,'expected':0,'ordinary_q2_launches':cohorts,'ordered_full_experts':8}
+-    return {'mode':'down4_disabled','startup_launches_excluded':0,'phases':rows}
+-
+-
+ def probe(stage, out, metrics):
+     guards=guard_probe(out)
+     for phase,detail in guards.items():
+         offers=int(metrics[phase].get('draft_n') or 0)
+         need(detail['ready']==offers and all(v==0 for k,v in detail.items() if k!='ready'), 'typed compact gate refused a measured offer')
+-    return {'down4':disabled_down4(out,metrics), 'compact':compact_probe(stage,out,metrics), 'compact_guard':guards}
++    return {'down4':parent.probe(mode(stage),out,metrics), 'compact':compact_probe(stage,out,metrics), 'compact_guard':guards}
+ 
+ 
+ def collect(stage, out):
+@@ -186,7 +171,15 @@
+ def check():
+     parent.check()
+     need(settings('native')[0] == settings('serial')[0] and settings('shadow')[1] == settings('native')[1], 'compact stage typed settings differ')
+-    need(all(profile[k] == parent.profile[k] for k in ('exe','libllama-common.so.0.6.0')), 'unrelated runtime changed')
++    r1_card=C/'break100-compact-model-r1'
++    r1=parent.module(r1_card/'model.py','compact_r1_exact')
++    need(profile == r1.profile, 'R2 runtime differs from R1')
++    for stage in STAGES:
++        old_env,old_args=r1.settings(stage)
++        new_env,new_args=settings(stage)
++        need(old_env.count('GGML_CUDA_OCCAMY_MOE_Q2_DOWN4=0')==1 and new_args==old_args and
++             new_env==['GGML_CUDA_OCCAMY_MOE_Q2_DOWN4=1' if value=='GGML_CUDA_OCCAMY_MOE_Q2_DOWN4=0' else value for value in old_env],
++             'R2 stage differs beyond the down4 flag')
+ 
+ 
+ if __name__ == '__main__':
