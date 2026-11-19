@@ -1,0 +1,21 @@
+# Exact direct down packets for the two-row Maxwell MoE verifier
+
+This isolated candidate changes only Phase C weight movement. It reads each compute lane's nine aligned 32-bit Q4_0 words directly through the read-only cache rather than loading uint4 chunks and transposing through warp shared memory. Both ordered top-eight expert lists, shared expert, all normalized activations, dot2c input order, explicit weighted FMA combine, butterfly order and residual add are retained. The original kernel and fallback remain byte-identical in this DSO. Phase A and B of the candidate are source-identical to the original cohort.
+
+The stock Phase C down loop is 774 static instructions; candidate is 689. Scalar LDS falls 33 to 2, STS.128 falls 7 to 0, and XMAD falls 35 to 15. Arithmetic opcode counts are unchanged: 203 FFMA, 204 PRMT, ten FMUL, six FP16 conversions, six FADD and five butterfly shuffles. The tradeoff is seven vector read-only loads becoming 27 scalar read-only loads. Logical down-weight payload stays 2,592 bytes per output row and token. Scalar scatter transactions and cache behavior may erase the instruction saving. No timing benefit is claimed offline.
+
+The added kernel compiled for sm_52 with 64 registers, 96 bytes static shared memory, 39,424 bytes dynamic shared memory, zero stack and zero spills. All seventeen original device functions retain 46,032 instruction/scheduling words. Both links share 146 of 147 objects, including the original Q8 GDN object. Control link reproduces CUDA19607daf exactly. Runtime separately checks candidate co-residency at two 512-thread blocks per each of 24 SMs; unsupported admission preserves the stock path. The compiler resource result does not itself prove physical occupancy.
+
+## Offline reproducibility
+
+Run `bash build.sh`, `bash build-host.sh`, `python3 -B verify-build.py > build.json`, then `bash release.sh --check`. Build uses the pinned local image, runc, no network and no GPU device, with CPU affinity 2–3. The harness `--fixture` only builds GGML graph metadata and CPU routes; it does not perform CPU model inference. `verify-build.py` verifies original binary identity, all prior instruction words, fixed packet mapping, source-identical Phase A/B, arithmetic opcode counts, no spills and full row coverage. Frozen manifests pin source, toolchain command, controls, runtime libraries and inputs.
+
+## Root-only physical card, 180 seconds maximum
+
+Only the GPU-owning root may run `bash release.sh --run`. It requires the normal runtime's `N3_GPU` identity and lock/admission checks; when supplied, `ROOT_GPU_DEADLINE_EPOCH` must contain the whole 180-second card. This worker has not run it. No model or production route is changed.
+
+The original and candidate run inside the same DSO on identical native two-row GGML graph and seeded weights. First, diagnostics require independent CPU and generic GPU route agreement, exact two-row route readbacks and bitwise identical finite residual outputs across all 4,096 words and a candidate repeat. Any identity, occupancy, dispatch, exactness or cleanup failure stops the card. Physical counters require the original paired launch and candidate direct-down launch to occur with correct handled second callbacks.
+
+Timing disables route diagnostics. Each of zero-common and five-common expert fixtures receives two eight-call warmups and four synchronous 96-call batches in mirrored order. Advance only if **every paired saving is at least 13.1 microseconds per complete MoE graph**, projecting to **0.524 ms over forty layers** and exceeding the current 0.521 ms/round 100 tok/s gap. This projection is a screen, not measured model speed. A win still requires incorporation into the current fast attention/draft build, exact 3,264-ID/acceptance comparison, 80K recall, then a matched 80K native/no-MTP pair using root's current gates. This standalone control DSO is CUDA19607daf and must not replace the newer whole-model attention/draft stack directly.
+
+Keep all failed timings and exactness receipts. Revert by clearing `GGML_CUDA_OCCAMY_MOE_Q2_DIRECT_DOWN`; normal per-path fallback remains in place. There are no shared source, Git, routing, model or GPU changes from this worker.

@@ -1,0 +1,34 @@
+{
+  "scope": "Descriptive operator comparison; not a model speed or controlled-clock ranking",
+  "source": "Coordinator-supplied comparison summary in this task; competitor source was not inspected by this worker",
+  "shared_control_cuda_sha256": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+  "sol61_directdown": {
+    "mirror_savings_us": [
+      6.072181,
+      21.791962,
+      -41.195057,
+      6.955166
+    ],
+    "gate_us": 13.1,
+    "all_pairs_pass": false,
+    "clock_pairs_observed": 0,
+    "graphics_clock_mhz": null,
+    "memory_clock_mhz": null
+  },
+  "astra": {
+    "mirror_count": 4,
+    "all_savings_positive": true,
+    "min_saving_us_rounded": 7.99,
+    "max_saving_us_rounded": 10.86,
+    "paired_clock_observations_known": 2,
+    "individual_savings_us": null,
+    "individual_clock_values": null,
+    "all_pairs_reach_13_1_us": false,
+    "public_packet_url": "https://github.com/average-user-887/llamaxwell-35/tree/a985719d70fd8b235b53c0fa3c6e6e199a72596c/native-q2-down4-20261119"
+  },
+  "limitations": [
+    "Different candidate mechanisms and clock evidence; do not infer a causal cross-card speed ranking.",
+    "Sol61 warm and measured intervals all retained, including slower intervals and the negative saving.",
+    "No full-model run, token-throughput measurement or semantic-quality evaluation in this operator card."
+  ]
+}

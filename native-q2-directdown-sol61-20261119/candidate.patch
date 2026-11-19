@@ -1,0 +1,175 @@
+--- a/occamy-fused.cu
++++ b/occamy-fused.cu
+@@ -711,6 +711,134 @@
+         __syncwarp();
+     }
+ }
++// Eight compute lanes consume 36 bytes each: two Q4_0 blocks per original dot2c.
++// Select the same nine aligned words without an inter-lane shared transpose.
++static_assert(ROW_D==288 && ROW_D%4==0);
++__device__ __forceinline__ Q9 read_q9(const uint8_t * bytes) {
++    const unsigned * p=reinterpret_cast<const unsigned *>(bytes);
++    Q9 q;
++#pragma unroll
++    for (int i=0;i<9;++i) q.w[i]=__ldg(p+i);
++    return q;
++}
++__device__ __forceinline__ Q9 load_down_q9(const Layer & L,const int * sel,int r,int lane,int c) {
++    const int expert=sel[c*4+(lane>>3)];
++    return read_q9(L.down_exps+((size_t)expert*H+r)*ROW_D+(lane&7)*36);
++}
++__device__ __forceinline__ Q9 load_shared_q9(const Layer & L,int r,int lane) {
++    return read_q9(L.down_sh+(size_t)r*ROW_D+lane*36);
++}
++__global__ void __launch_bounds__(NT3, 2) moe_q2_direct_down(Params P, bool capture_ids) {
++    const int physical=blockIdx.y*gridDim.x+blockIdx.x;
++    const int row=physical%2, local_block=physical/2;
++    P.h+=row*H; P.out+=row*H; P.s+=row;
++    extern __shared__ float smem[];
++    __shared__ int sel[TOPK];
++    __shared__ float selw[TOPK];
++    __shared__ float red[NW];
++    float * xs = smem;
++    float2 * sums = (float2 *)(smem + (TOPK * FF + FFS) / 64 * CH);
++    const int warp = threadIdx.x >> 5, lane = threadIdx.x & 31;
++    unsigned * stg = (unsigned *)(smem + SMEM_FLOATS) + warp * STW3;
++    uint4 * stg4 = (uint4 *)stg;
++    const int gw = local_block * NW3 + warp, W = gridDim.x * NW3;
++    Scratch * s = P.s;
++    const Layer & L = P.L;
++
++    // A: rmsnorm + router logits / shexp-gate quarter-row partials (per task identical to moe_v2)
++    {
++        float4 cw[4];
++        int t = gw;
++        if (t < NTA) ldA(L, t, lane, cw);
++        load_norm3(xs, sums, P.h, P.norm, red, P.eps);
++        for (; t < NTA; t += W) {
++            const int row = t >> 2, q = t & 3;
++            float a = 0.f;
++#pragma unroll
++            for (int i = 0; i < 4; ++i) {
++                const int e = q * (QK / 4) + lane + 32 * i;
++                const float4 xv = *(const float4 *)(xs + ((4 * e) >> 6) * CH + ((4 * e) & 63));
++                a = fmaf(cw[i].x, xv.x, a); a = fmaf(cw[i].y, xv.y, a); a = fmaf(cw[i].z, xv.z, a); a = fmaf(cw[i].w, xv.w, a);
++            }
++            a = wsum(a);
++            if (lane == 0) { if (row < NE) s->lpart[q][row] = a; else s->gpart[q] = a; }
++            if (t + W < NTA) ldA(L, t + W, lane, cw);
++        }
++    }
++    grid_barrier(s);
++    // B: route; gate row chunk, then up row chunk, per row
++    {
++        uint4 cv[3];
++        bool have = false;
++        const uint8_t * g, * u;
++        if (gw < FFS) { rowB(L, sel, gw, g, u); ld72(g, lane, cv); have = true; }
++        if (warp == 0) route(s, lane, sel, selw);
++        __syncthreads();
++        if (capture_ids && local_block==0 && threadIdx.x<TOPK) s->logits[threadIdx.x]=float(sel[threadIdx.x]);
++        const float * xc = xs + lane * CH; const float2 sx = sums[lane];
++        for (int t = gw; t < NTB; t += W) {
++            if (!have) { rowB(L, sel, t, g, u); ld72(g, lane, cv); }
++            st72(stg4, lane, cv);
++            __syncwarp();
++            ld72(u, lane, cv);
++            const float gg = wsum(dot2c<true>(lds9(stg + lane * 9), xc, sx));
++            __syncwarp();
++            st72(stg4, lane, cv);
++            __syncwarp();
++            const int tn = t + W; have = tn < NTB;
++            if (have) { rowB(L, sel, tn, g, u); ld72(g, lane, cv); }
++            const float uu = wsum(dot2c<true>(lds9(stg + lane * 9), xc, sx));
++            if (lane == 0) { if (t < FFS) s->h_sh[t] = silu(gg) * uu; else s->h_exp[t - FFS] = silu(gg) * uu; }
++            __syncwarp();
++        }
++    }
++    // Exact Phase C: direct 36-byte lane packets remove the shared transpose.
++    int r = warp * gridDim.x + local_block;
++    Q9 first{};
++    if (r < H) first=load_down_q9(L,sel,r,lane,0);
++    float gl = 0.f;
++    {
++        float gp[NQ];
++#pragma unroll
++        for (int q = 0; q < NQ; ++q) gp[q] = __ldcg(&s->gpart[q]);
++#pragma unroll
++        for (int q = 0; q < NQ; ++q) gl += gp[q];
++    }
++    grid_barrier(s);
++    {
++        constexpr int NX = (TOPK * FF + FFS) / NT3, NXE = TOPK * FF / NT3;
++        float hv[NX];
++#pragma unroll
++        for (int j = 0; j < NX; ++j) {
++            const int i = threadIdx.x + NT3 * j;
++            hv[j] = j < NXE ? __ldcg(&s->h_exp[i]) : __ldcg(&s->h_sh[i - TOPK * FF]);
++        }
++        // thread (warp, lane) slot j holds element 512j + 32warp + lane = 32-element group 16j + warp
++#pragma unroll
++        for (int j = 0; j < NX; ++j) {
++            const int i = threadIdx.x + NT3 * j;
++            xs[(i >> 6) * CH + (i & 63)] = hv[j];
++            const float sm = wsum(hv[j]);
++            if (lane == 0) ((float *)sums)[NW3 * j + warp] = sm;
++        }
++        __syncthreads();
++    }
++    const float gs = 1.f / (1.f + expf(-gl));
++    const float w0 = selw[lane >> 3], w1 = selw[(lane >> 3) + 4];
++    for (; r < H; r += W) {
++        const Q9 second=load_down_q9(L,sel,r,lane,1);
++        const float dA=dot2c<true,true>(first,xs+lane*CH,sums[lane]);
++        Q9 shared{};
++        if (lane<8) shared=load_shared_q9(L,r,lane);
++        const float dB=dot2c<true,true>(second,xs+(lane+32)*CH,sums[lane+32]);
++        if (r+W<H) first=load_down_q9(L,sel,r+W,lane,0);
++        float acc=__fmaf_rn(w0,dA,__fmul_rn(w1,dB));
++        if (lane<8) acc=__fmaf_rn(gs,dot2c<true,true>(shared,xs+(lane+64)*CH,sums[lane+64]),acc);
++        acc=wsum(acc);
++        if (lane==0) P.out[r]=P.h[r]+acc;
++        __syncwarp();
++    }
++}
+ __global__ void moe_v3_cmp(const float * a, const float * b, unsigned * res) {
+     for (int i = threadIdx.x; i < H; i += blockDim.x) {
+         const unsigned x = __float_as_uint(a[i]), y = __float_as_uint(b[i]);
+@@ -741,6 +869,25 @@
+ 
+ static std::atomic<unsigned long long> q2_calls{0}, q2_rows[2]{}, q2_skips{0};
+ static thread_local int observed_ids[2*TOPK];
++static std::atomic<unsigned long long> direct_down_calls{0};
++extern "C" __attribute__((visibility("default"))) unsigned long long ggml_cuda_occamy_q2_direct_down_count();
++extern "C" unsigned long long ggml_cuda_occamy_q2_direct_down_count() {return direct_down_calls.load(std::memory_order_relaxed);}
++static bool admit_direct_down(int d) {
++    if (!env_flag("GGML_CUDA_OCCAMY_MOE_Q2_DIRECT_DOWN")) return false;
++    static std::once_flag once[GGML_CUDA_MAX_DEVICES];
++    static bool ready[GGML_CUDA_MAX_DEVICES]{};
++    std::call_once(once[d],[d]{
++        ggml_cuda_set_device(d);
++        int sm=0, per=0; cudaFuncAttributes attr{};
++        CUDA_CHECK(cudaDeviceGetAttribute(&sm,cudaDevAttrMultiProcessorCount,d));
++        CUDA_CHECK(cudaFuncGetAttributes(&attr,moe_q2_direct_down));
++        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&per,moe_q2_direct_down,NT3,SMEM3_FLOATS*sizeof(float)));
++        ready[d]=sm==24 && per>=2 && attr.numRegs<=64 && attr.localSizeBytes==0;
++        fprintf(stderr,"Q2_DIRECTDOWN residency device=%d sm=%d active=%d regs=%d static=%zu dynamic=%zu local=%zu ready=%d\n",
++            d,sm,per,attr.numRegs,attr.sharedSizeBytes,SMEM3_FLOATS*sizeof(float),attr.localSizeBytes,int(ready[d]));
++    });
++    return ready[d];
++}
+ static bool admit_q2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_moe_match & m) {
+     if (!env_flag("GGML_CUDA_OCCAMY_MOE_Q2_COHORTS") || ctx.curr_stream_no!=0 ||
+             !ctx.stream_context().concurrent_events.empty() || ggml_cuda_info().devices[ctx.device].cc!=520 ||
+@@ -1056,7 +1203,10 @@
+              (const uint8_t*)m.gate_sh->data,(const uint8_t*)m.up_sh->data,(const uint8_t*)m.down_sh->data};
+         p.h=(const float*)m.h->data;p.norm=(const float*)m.norm_w->data;p.out=(float*)m.out->data;p.s=work.get();p.eps=m.eps;
+         const bool diag=env_flag("GGML_CUDA_OCCAMY_MOE_Q2_READ_IDS");
+-        moe_q2_cohorts<<<dim3(24,2),NT3,SMEM3_FLOATS*sizeof(float),ctx.stream()>>>(p,diag);
++        if (admit_direct_down(ctx.device)) {
++            moe_q2_direct_down<<<dim3(24,2),NT3,SMEM3_FLOATS*sizeof(float),ctx.stream()>>>(p,diag);
++            direct_down_calls.fetch_add(1,std::memory_order_relaxed);
++        } else moe_q2_cohorts<<<dim3(24,2),NT3,SMEM3_FLOATS*sizeof(float),ctx.stream()>>>(p,diag);
+         CUDA_CHECK(cudaGetLastError());
+         if (diag) {
+             float values[2*TOPK];

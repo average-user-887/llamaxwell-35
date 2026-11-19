@@ -1,0 +1,768 @@
+{
+  "status": {
+    "runner_exit": 0,
+    "cleanup_exit": 0,
+    "started_epoch": 1795088713,
+    "finished_epoch": 1795088763,
+    "cap_seconds": 180
+  },
+  "bounded_wall_s": 50,
+  "build": {
+    "native_q2_control_sha256": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+    "candidate_cuda_sha256": "0dc9fe44c8ed7b53ed89c7fb12e205f9757d654b5df386a38f56704446d3322e",
+    "operator_sha256": "581752b37b80716600f1fc370d150e89d4f099ec058e846d13d5aa0c52e021e2",
+    "q8_gdn_object_sha256": "bcd063306ea65f5e8143a8d6501960dbfeda359f5b3a261d5d91d612c786eac0",
+    "objects_in_each_link": 147,
+    "device_functions_preserved": 17,
+    "device_instruction_words_preserved": 46032,
+    "added_device_symbol": "_ZN6occamy18moe_q2_direct_downENS_6ParamsEb",
+    "candidate_static_device_words": 3144,
+    "phase_c_static_loop_opcodes": {
+      "cohorts": {
+        "instructions": 774,
+        "MOV32I": 16,
+        "STS.128": 7,
+        "SSY": 2,
+        "SHR": 9,
+        "NOP": 6,
+        "LDS.U.32": 33,
+        "SHL": 4,
+        "SHR.U32": 26,
+        "LDS.U.128": 48,
+        "ISCADD": 7,
+        "XMAD": 35,
+        "IADD.X": 21,
+        "XMAD.CHI": 7,
+        "IADD3.RS": 7,
+        "XMAD.PSL": 14,
+        "IADD": 22,
+        "LEA": 2,
+        "LEA.HI.X": 2,
+        "LDG.E.CI.128": 7,
+        "PRMT": 204,
+        "LOP3.LUT": 48,
+        "FFMA.FTZ": 203,
+        "F2F.F32.F16": 6,
+        "ISETP.GT.U32.AND": 1,
+        "LDS.U.64": 3,
+        "DEPBAR.LE": 1,
+        "FMUL.FTZ": 10,
+        "MOV": 2,
+        "ISETP.GT.AND": 1,
+        "SYNC": 4,
+        "SHFL.BFLY": 5,
+        "SHF.L.U64": 1,
+        "LDG.E": 1,
+        "ISETP.GE.AND": 1,
+        "FADD.FTZ": 6,
+        "STG.E": 1,
+        "BRA": 1
+      },
+      "directdown": {
+        "instructions": 689,
+        "SHR": 5,
+        "LDS.U.32": 2,
+        "MOV32I": 8,
+        "SSY": 3,
+        "LDS.U.128": 48,
+        "ISCADD": 3,
+        "XMAD": 15,
+        "IADD.X": 11,
+        "XMAD.CHI": 3,
+        "XMAD.PSL": 6,
+        "IADD3.RS": 3,
+        "IADD": 12,
+        "LDG.E.CI": 27,
+        "LOP3.LUT": 48,
+        "PRMT": 204,
+        "FFMA.FTZ": 203,
+        "SHR.U32": 24,
+        "DEPBAR.LE": 8,
+        "F2F.F32.F16": 6,
+        "LDS.U.64": 3,
+        "FMUL.FTZ": 10,
+        "MOV": 11,
+        "SYNC": 6,
+        "ISETP.GT.AND": 1,
+        "SHL": 2,
+        "SHF.L.U64": 1,
+        "SHFL.BFLY": 5,
+        "LDG.E": 1,
+        "ISETP.GE.AND": 1,
+        "FADD.FTZ": 6,
+        "STG.E": 1,
+        "NOP": 1,
+        "BRA": 1
+      }
+    },
+    "registers": 64,
+    "static_shared_bytes": 96,
+    "dynamic_shared_bytes": 39424,
+    "stack_bytes": 0,
+    "spill_load_bytes": 0,
+    "spill_store_bytes": 0,
+    "phase_ab_source_identical": true,
+    "aligned_lane_word_mappings_checked": 1180224,
+    "threads_per_cta": 512,
+    "ctas_per_row": 24,
+    "rows_per_grid": 2,
+    "runtime_occupancy_required": 48,
+    "physical_executed": false,
+    "control_stack": "finish33-r2-stride CUDA369c6b05",
+    "synchronized_calls_per_measured_window": 32768,
+    "timed_windows": 8,
+    "planned_timed_calls": 262144,
+    "clock_telemetry": {
+      "provider": "Fleetdash8090",
+      "observed": false,
+      "graphics_clock_mhz": null,
+      "memory_clock_mhz": null
+    }
+  },
+  "materiality_us": 13.1,
+  "clock_telemetry": {
+    "provider": "Fleetdash8090",
+    "observed": false,
+    "graphics_clock_mhz": null,
+    "memory_clock_mhz": null,
+    "reason": "No typed raw clock series acquired by this offline worker; no clock normalization claimed."
+  },
+  "scope": "Synchronized complete graph; original paired cohort vs direct down direct Phase C in a two-row cohort kernel. Forty-layer sums are projections.",
+  "check": {
+    "executed": true,
+    "observed_lines": [
+      "Q2_COHORT FIXTURE_IDS independent row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_COHORT FIXTURE_IDS independent row=1 ids=85,222,184,46,216,151,64,219",
+      "Q2_COHORT FIXTURE independent overlap=0 min_margin=0.00021109628",
+      "Q2_COHORT FIXTURE_IDS partial row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_COHORT FIXTURE_IDS partial row=1 ids=110,73,64,128,215,96,197,82",
+      "Q2_COHORT FIXTURE partial overlap=5 min_margin=0.0011513497",
+      "N104 MAP /runtime/libggml.so.0.26.0",
+      "N104 MAP /runtime/libggml-base.so.0.26.0",
+      "N104 MAP /runtime/libggml-cuda.so",
+      "Q2_COHORT MAP /operator /runtime/libggml-cuda.so",
+      "Q2_COHORT residency device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1",
+      "Q2_PAIR ROUTES independent mode=cohorts row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_PAIR ROUTES independent mode=cohorts row=1 ids=85,222,184,46,216,151,64,219",
+      "Q2_DIRECTDOWN residency device=0 sm=24 active=2 regs=64 static=96 dynamic=39424 local=0 ready=1",
+      "Q2_PAIR ROUTES independent mode=directdown row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_PAIR ROUTES independent mode=directdown row=1 ids=85,222,184,46,216,151,64,219",
+      "Q2_PAIR ROUTES independent mode=directdown row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_PAIR ROUTES independent mode=directdown row=1 ids=85,222,184,46,216,151,64,219",
+      "Q2_COHORT ROW independent row=0 finite=2048 different=0 repeat_different=0 max_abs=0",
+      "Q2_COHORT ROW independent row=1 finite=2048 different=0 repeat_different=0 max_abs=0",
+      "Q2_PAIR ROUTES partial mode=cohorts row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_PAIR ROUTES partial mode=cohorts row=1 ids=110,73,64,128,215,96,197,82",
+      "Q2_PAIR ROUTES partial mode=directdown row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_PAIR ROUTES partial mode=directdown row=1 ids=110,73,64,128,215,96,197,82",
+      "Q2_PAIR ROUTES partial mode=directdown row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_PAIR ROUTES partial mode=directdown row=1 ids=110,73,64,128,215,96,197,82",
+      "Q2_COHORT ROW partial row=0 finite=2048 different=0 repeat_different=0 max_abs=0",
+      "Q2_COHORT ROW partial row=1 finite=2048 different=0 repeat_different=0 max_abs=0",
+      "Q2_PAIR FINISH row0=0 row1=0 pair=6 skip=6 directdown=4"
+    ],
+    "validated": {
+      "residency": {
+        "sms": 24,
+        "active_per_sm": 2,
+        "grid_ctas": 48,
+        "ctas_per_cohort": 24,
+        "threads_per_cta": 512,
+        "control_registers": 63,
+        "registers": 64,
+        "static_shared_bytes": 96,
+        "dynamic_shared_bytes": 39424,
+        "local_bytes": 0
+      },
+      "results": {
+        "independent": {
+          "ordered_experts": [
+            [
+              128,
+              215,
+              73,
+              136,
+              110,
+              167,
+              197,
+              112
+            ],
+            [
+              85,
+              222,
+              184,
+              46,
+              216,
+              151,
+              64,
+              219
+            ]
+          ],
+          "expert_overlap": 0,
+          "candidate_router_repeats": 2,
+          "output_rows": [
+            {
+              "row": 0,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            },
+            {
+              "row": 1,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            }
+          ],
+          "stock_reference": "unchanged 369c6b05 two-row cohort instructions on the same native Q2 graph"
+        },
+        "partial": {
+          "ordered_experts": [
+            [
+              128,
+              215,
+              73,
+              136,
+              110,
+              167,
+              197,
+              112
+            ],
+            [
+              110,
+              73,
+              64,
+              128,
+              215,
+              96,
+              197,
+              82
+            ]
+          ],
+          "expert_overlap": 5,
+          "candidate_router_repeats": 2,
+          "output_rows": [
+            {
+              "row": 0,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            },
+            {
+              "row": 1,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            }
+          ],
+          "stock_reference": "unchanged 369c6b05 two-row cohort instructions on the same native Q2 graph"
+        }
+      }
+    }
+  },
+  "perf": {
+    "executed": true,
+    "observed_lines": [
+      "Q2_COHORT FIXTURE_IDS independent row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_COHORT FIXTURE_IDS independent row=1 ids=85,222,184,46,216,151,64,219",
+      "Q2_COHORT FIXTURE independent overlap=0 min_margin=0.00021109628",
+      "Q2_COHORT FIXTURE_IDS partial row=0 ids=128,215,73,136,110,167,197,112",
+      "Q2_COHORT FIXTURE_IDS partial row=1 ids=110,73,64,128,215,96,197,82",
+      "Q2_COHORT FIXTURE partial overlap=5 min_margin=0.0011513497",
+      "N104 MAP /runtime/libggml.so.0.26.0",
+      "N104 MAP /runtime/libggml-base.so.0.26.0",
+      "N104 MAP /runtime/libggml-cuda.so",
+      "Q2_COHORT MAP /operator /runtime/libggml-cuda.so",
+      "Q2_COHORT residency device=0 sm=24 active=2 regs=63 static=96 dynamic=39424 local=0 ready=1",
+      "Q2_PAIR TIME independent mode=cohorts reps=8 row0=0 row1=0 pair=8 skip=8 directdown=0 us=393.556875",
+      "Q2_DIRECTDOWN residency device=0 sm=24 active=2 regs=64 static=96 dynamic=39424 local=0 ready=1",
+      "Q2_PAIR TIME independent mode=directdown reps=8 row0=0 row1=0 pair=8 skip=8 directdown=8 us=164.206500",
+      "Q2_PAIR TIME independent mode=cohorts reps=32768 row0=0 row1=0 pair=32768 skip=32768 directdown=0 us=164.333862",
+      "Q2_PAIR TIME independent mode=directdown reps=32768 row0=0 row1=0 pair=32768 skip=32768 directdown=32768 us=158.261681",
+      "Q2_PAIR TIME independent mode=directdown reps=32768 row0=0 row1=0 pair=32768 skip=32768 directdown=32768 us=204.847690",
+      "Q2_PAIR TIME independent mode=cohorts reps=32768 row0=0 row1=0 pair=32768 skip=32768 directdown=0 us=226.639652",
+      "Q2_PAIR TIME partial mode=cohorts reps=8 row0=0 row1=0 pair=8 skip=8 directdown=0 us=162.046125",
+      "Q2_PAIR TIME partial mode=directdown reps=8 row0=0 row1=0 pair=8 skip=8 directdown=8 us=154.391500",
+      "Q2_PAIR TIME partial mode=directdown reps=32768 row0=0 row1=0 pair=32768 skip=32768 directdown=32768 us=202.506402",
+      "Q2_PAIR TIME partial mode=cohorts reps=32768 row0=0 row1=0 pair=32768 skip=32768 directdown=0 us=161.311345",
+      "Q2_PAIR TIME partial mode=cohorts reps=32768 row0=0 row1=0 pair=32768 skip=32768 directdown=0 us=160.892680",
+      "Q2_PAIR TIME partial mode=directdown reps=32768 row0=0 row1=0 pair=32768 skip=32768 directdown=32768 us=153.937514",
+      "Q2_PAIR FINISH row0=0 row1=0 pair=262176 skip=262176 directdown=131088"
+    ],
+    "validated": {
+      "residency": {
+        "sms": 24,
+        "active_per_sm": 2,
+        "grid_ctas": 48,
+        "ctas_per_cohort": 24,
+        "threads_per_cta": 512,
+        "control_registers": 63,
+        "registers": 64,
+        "static_shared_bytes": 96,
+        "dynamic_shared_bytes": 39424,
+        "local_bytes": 0
+      },
+      "results": {
+        "independent": {
+          "interval_columns": [
+            "mode",
+            "reps",
+            "old_row0",
+            "old_row1",
+            "combined_launches",
+            "second_callbacks_skipped",
+            "directdown_launches",
+            "mean_us"
+          ],
+          "all_intervals": [
+            [
+              "cohorts",
+              8,
+              0,
+              0,
+              8,
+              8,
+              0,
+              393.556875
+            ],
+            [
+              "directdown",
+              8,
+              0,
+              0,
+              8,
+              8,
+              8,
+              164.2065
+            ],
+            [
+              "cohorts",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              0,
+              164.333862
+            ],
+            [
+              "directdown",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              32768,
+              158.261681
+            ],
+            [
+              "directdown",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              32768,
+              204.84769
+            ],
+            [
+              "cohorts",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              0,
+              226.639652
+            ]
+          ],
+          "cohorts_minus_directdown_us": [
+            6.0721810000000005,
+            21.791962000000012
+          ],
+          "projected_ms_across_40_layers": [
+            0.24288724000000003,
+            0.8716784800000005
+          ],
+          "materiality_pass": false
+        },
+        "partial": {
+          "interval_columns": [
+            "mode",
+            "reps",
+            "old_row0",
+            "old_row1",
+            "combined_launches",
+            "second_callbacks_skipped",
+            "directdown_launches",
+            "mean_us"
+          ],
+          "all_intervals": [
+            [
+              "cohorts",
+              8,
+              0,
+              0,
+              8,
+              8,
+              0,
+              162.046125
+            ],
+            [
+              "directdown",
+              8,
+              0,
+              0,
+              8,
+              8,
+              8,
+              154.3915
+            ],
+            [
+              "directdown",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              32768,
+              202.506402
+            ],
+            [
+              "cohorts",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              0,
+              161.311345
+            ],
+            [
+              "cohorts",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              0,
+              160.89268
+            ],
+            [
+              "directdown",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              32768,
+              153.937514
+            ]
+          ],
+          "cohorts_minus_directdown_us": [
+            -41.19505700000002,
+            6.95516600000002
+          ],
+          "projected_ms_across_40_layers": [
+            -1.6478022800000007,
+            0.2782066400000008
+          ],
+          "materiality_pass": false
+        }
+      }
+    }
+  },
+  "complete_measurement": {
+    "technical_pass": true,
+    "materiality_pass": false,
+    "threshold_us_per_layer": 13.1,
+    "numeric": {
+      "residency": {
+        "sms": 24,
+        "active_per_sm": 2,
+        "grid_ctas": 48,
+        "ctas_per_cohort": 24,
+        "threads_per_cta": 512,
+        "control_registers": 63,
+        "registers": 64,
+        "static_shared_bytes": 96,
+        "dynamic_shared_bytes": 39424,
+        "local_bytes": 0
+      },
+      "results": {
+        "independent": {
+          "ordered_experts": [
+            [
+              128,
+              215,
+              73,
+              136,
+              110,
+              167,
+              197,
+              112
+            ],
+            [
+              85,
+              222,
+              184,
+              46,
+              216,
+              151,
+              64,
+              219
+            ]
+          ],
+          "expert_overlap": 0,
+          "candidate_router_repeats": 2,
+          "output_rows": [
+            {
+              "row": 0,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            },
+            {
+              "row": 1,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            }
+          ],
+          "stock_reference": "unchanged 369c6b05 two-row cohort instructions on the same native Q2 graph"
+        },
+        "partial": {
+          "ordered_experts": [
+            [
+              128,
+              215,
+              73,
+              136,
+              110,
+              167,
+              197,
+              112
+            ],
+            [
+              110,
+              73,
+              64,
+              128,
+              215,
+              96,
+              197,
+              82
+            ]
+          ],
+          "expert_overlap": 5,
+          "candidate_router_repeats": 2,
+          "output_rows": [
+            {
+              "row": 0,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            },
+            {
+              "row": 1,
+              "finite": 2048,
+              "different_words": 0,
+              "repeat_different_words": 0,
+              "max_abs": 0.0
+            }
+          ],
+          "stock_reference": "unchanged 369c6b05 two-row cohort instructions on the same native Q2 graph"
+        }
+      }
+    },
+    "timing": {
+      "residency": {
+        "sms": 24,
+        "active_per_sm": 2,
+        "grid_ctas": 48,
+        "ctas_per_cohort": 24,
+        "threads_per_cta": 512,
+        "control_registers": 63,
+        "registers": 64,
+        "static_shared_bytes": 96,
+        "dynamic_shared_bytes": 39424,
+        "local_bytes": 0
+      },
+      "results": {
+        "independent": {
+          "interval_columns": [
+            "mode",
+            "reps",
+            "old_row0",
+            "old_row1",
+            "combined_launches",
+            "second_callbacks_skipped",
+            "directdown_launches",
+            "mean_us"
+          ],
+          "all_intervals": [
+            [
+              "cohorts",
+              8,
+              0,
+              0,
+              8,
+              8,
+              0,
+              393.556875
+            ],
+            [
+              "directdown",
+              8,
+              0,
+              0,
+              8,
+              8,
+              8,
+              164.2065
+            ],
+            [
+              "cohorts",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              0,
+              164.333862
+            ],
+            [
+              "directdown",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              32768,
+              158.261681
+            ],
+            [
+              "directdown",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              32768,
+              204.84769
+            ],
+            [
+              "cohorts",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              0,
+              226.639652
+            ]
+          ],
+          "cohorts_minus_directdown_us": [
+            6.0721810000000005,
+            21.791962000000012
+          ],
+          "projected_ms_across_40_layers": [
+            0.24288724000000003,
+            0.8716784800000005
+          ],
+          "materiality_pass": false
+        },
+        "partial": {
+          "interval_columns": [
+            "mode",
+            "reps",
+            "old_row0",
+            "old_row1",
+            "combined_launches",
+            "second_callbacks_skipped",
+            "directdown_launches",
+            "mean_us"
+          ],
+          "all_intervals": [
+            [
+              "cohorts",
+              8,
+              0,
+              0,
+              8,
+              8,
+              0,
+              162.046125
+            ],
+            [
+              "directdown",
+              8,
+              0,
+              0,
+              8,
+              8,
+              8,
+              154.3915
+            ],
+            [
+              "directdown",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              32768,
+              202.506402
+            ],
+            [
+              "cohorts",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              0,
+              161.311345
+            ],
+            [
+              "cohorts",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              0,
+              160.89268
+            ],
+            [
+              "directdown",
+              32768,
+              0,
+              0,
+              32768,
+              32768,
+              32768,
+              153.937514
+            ]
+          ],
+          "cohorts_minus_directdown_us": [
+            -41.19505700000002,
+            6.95516600000002
+          ],
+          "projected_ms_across_40_layers": [
+            -1.6478022800000007,
+            0.2782066400000008
+          ],
+          "materiality_pass": false
+        }
+      }
+    }
+  }
+}

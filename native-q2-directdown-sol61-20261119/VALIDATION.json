@@ -1,0 +1,14 @@
+{
+  "offline_report_reconstruction": "passed",
+  "verbatim_raw_files_checked": 11,
+  "verbatim_source_and_evidence_files_checked": 41,
+  "sanitized_source_files_reversibly_verified": 3,
+  "unified_patches_reconstruct_sources": true,
+  "private_path_credential_key_and_uuid_pattern_scan": "passed",
+  "technical_pass": true,
+  "predeclared_materiality_pass": false,
+  "runner_exit": 0,
+  "cleanup_exit": 0,
+  "gpu_calls_by_packaging_worker": 0,
+  "git_calls_by_packaging_worker": 0
+}

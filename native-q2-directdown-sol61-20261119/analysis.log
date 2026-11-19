@@ -1,0 +1,290 @@
+{
+  "technical_pass": true,
+  "materiality_pass": false,
+  "threshold_us_per_layer": 13.1,
+  "numeric": {
+    "residency": {
+      "sms": 24,
+      "active_per_sm": 2,
+      "grid_ctas": 48,
+      "ctas_per_cohort": 24,
+      "threads_per_cta": 512,
+      "control_registers": 63,
+      "registers": 64,
+      "static_shared_bytes": 96,
+      "dynamic_shared_bytes": 39424,
+      "local_bytes": 0
+    },
+    "results": {
+      "independent": {
+        "ordered_experts": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            85,
+            222,
+            184,
+            46,
+            216,
+            151,
+            64,
+            219
+          ]
+        ],
+        "expert_overlap": 0,
+        "candidate_router_repeats": 2,
+        "output_rows": [
+          {
+            "row": 0,
+            "finite": 2048,
+            "different_words": 0,
+            "repeat_different_words": 0,
+            "max_abs": 0.0
+          },
+          {
+            "row": 1,
+            "finite": 2048,
+            "different_words": 0,
+            "repeat_different_words": 0,
+            "max_abs": 0.0
+          }
+        ],
+        "stock_reference": "unchanged 369c6b05 two-row cohort instructions on the same native Q2 graph"
+      },
+      "partial": {
+        "ordered_experts": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            110,
+            73,
+            64,
+            128,
+            215,
+            96,
+            197,
+            82
+          ]
+        ],
+        "expert_overlap": 5,
+        "candidate_router_repeats": 2,
+        "output_rows": [
+          {
+            "row": 0,
+            "finite": 2048,
+            "different_words": 0,
+            "repeat_different_words": 0,
+            "max_abs": 0.0
+          },
+          {
+            "row": 1,
+            "finite": 2048,
+            "different_words": 0,
+            "repeat_different_words": 0,
+            "max_abs": 0.0
+          }
+        ],
+        "stock_reference": "unchanged 369c6b05 two-row cohort instructions on the same native Q2 graph"
+      }
+    }
+  },
+  "timing": {
+    "residency": {
+      "sms": 24,
+      "active_per_sm": 2,
+      "grid_ctas": 48,
+      "ctas_per_cohort": 24,
+      "threads_per_cta": 512,
+      "control_registers": 63,
+      "registers": 64,
+      "static_shared_bytes": 96,
+      "dynamic_shared_bytes": 39424,
+      "local_bytes": 0
+    },
+    "results": {
+      "independent": {
+        "interval_columns": [
+          "mode",
+          "reps",
+          "old_row0",
+          "old_row1",
+          "combined_launches",
+          "second_callbacks_skipped",
+          "directdown_launches",
+          "mean_us"
+        ],
+        "all_intervals": [
+          [
+            "cohorts",
+            8,
+            0,
+            0,
+            8,
+            8,
+            0,
+            393.556875
+          ],
+          [
+            "directdown",
+            8,
+            0,
+            0,
+            8,
+            8,
+            8,
+            164.2065
+          ],
+          [
+            "cohorts",
+            32768,
+            0,
+            0,
+            32768,
+            32768,
+            0,
+            164.333862
+          ],
+          [
+            "directdown",
+            32768,
+            0,
+            0,
+            32768,
+            32768,
+            32768,
+            158.261681
+          ],
+          [
+            "directdown",
+            32768,
+            0,
+            0,
+            32768,
+            32768,
+            32768,
+            204.84769
+          ],
+          [
+            "cohorts",
+            32768,
+            0,
+            0,
+            32768,
+            32768,
+            0,
+            226.639652
+          ]
+        ],
+        "cohorts_minus_directdown_us": [
+          6.0721810000000005,
+          21.791962000000012
+        ],
+        "projected_ms_across_40_layers": [
+          0.24288724000000003,
+          0.8716784800000005
+        ],
+        "materiality_pass": false
+      },
+      "partial": {
+        "interval_columns": [
+          "mode",
+          "reps",
+          "old_row0",
+          "old_row1",
+          "combined_launches",
+          "second_callbacks_skipped",
+          "directdown_launches",
+          "mean_us"
+        ],
+        "all_intervals": [
+          [
+            "cohorts",
+            8,
+            0,
+            0,
+            8,
+            8,
+            0,
+            162.046125
+          ],
+          [
+            "directdown",
+            8,
+            0,
+            0,
+            8,
+            8,
+            8,
+            154.3915
+          ],
+          [
+            "directdown",
+            32768,
+            0,
+            0,
+            32768,
+            32768,
+            32768,
+            202.506402
+          ],
+          [
+            "cohorts",
+            32768,
+            0,
+            0,
+            32768,
+            32768,
+            0,
+            161.311345
+          ],
+          [
+            "cohorts",
+            32768,
+            0,
+            0,
+            32768,
+            32768,
+            0,
+            160.89268
+          ],
+          [
+            "directdown",
+            32768,
+            0,
+            0,
+            32768,
+            32768,
+            32768,
+            153.937514
+          ]
+        ],
+        "cohorts_minus_directdown_us": [
+          -41.19505700000002,
+          6.95516600000002
+        ],
+        "projected_ms_across_40_layers": [
+          -1.6478022800000007,
+          0.2782066400000008
+        ],
+        "materiality_pass": false
+      }
+    }
+  }
+}
+

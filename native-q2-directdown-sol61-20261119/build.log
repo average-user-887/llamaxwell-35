@@ -1,0 +1,175 @@
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(1082): warning #550-D: variable "inner_uses_dummy" was set but never used
+          int inner_uses_dummy = 0; (void)inner_uses_dummy;
+              ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(1054): warning #177-D: variable "sh_gate_mm" was declared but never referenced
+      const ggml_tensor * router = nullptr, * shgate = nullptr, * sh_gate_mm = nullptr, * sh_up_mm = nullptr, * sh_down = nullptr;
+                                                                  ^
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(1054): warning #177-D: variable "sh_up_mm" was declared but never referenced
+      const ggml_tensor * router = nullptr, * shgate = nullptr, * sh_gate_mm = nullptr, * sh_up_mm = nullptr, * sh_down = nullptr;
+                                                                                          ^
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(303): warning #20058-D: the #pragma unroll must precede a loop
+  #pragma unroll
+          ^
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=0, DX=0]" at line 935
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=0, DX=3]" at line 946
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=0, DX=5]" at line 952
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=0, DX=13]" at line 953
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=0, DX=29]" at line 955
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=1, DX=0]" at line 1317
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=2, DX=0]" at line 1318
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=3, DX=1]" at line 1319
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=3, DX=2]" at line 1319
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=3, DX=3]" at line 1320
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=3, DX=0]" at line 1320
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=0, DX=1]" at line 1322
+
+@PRIVATE_BUILD_SOURCE@/ggml/src/ggml-cuda/occamy-fused.cu(406): warning #186-D: pointless comparison of unsigned integer with zero
+              if (threadIdx.x < tn * 72) {
+                              ^
+          detected during instantiation of "void occamy::moe_v2<PHASE,DX>(occamy::Params) [with PHASE=0, DX=2]" at line 1322
+
+ptxas info    : 26792 bytes gmem, 88 bytes cmem[4]
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi0ELi2EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi0ELi2EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 87 registers, used 1 barriers, 96 bytes smem, 424 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compile time = 95.250 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi0ELi1EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi0ELi1EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 95 registers, used 1 barriers, 96 bytes smem, 424 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compile time = 63.922 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi3ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi3ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 85 registers, used 1 barriers, 64 bytes smem, 424 bytes cmem[0], 12 bytes cmem[2]
+ptxas info    : Compile time = 30.922 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi3ELi3EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi3ELi3EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 89 registers, used 1 barriers, 64 bytes smem, 424 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 39.530 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi3ELi2EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi3ELi2EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 85 registers, used 1 barriers, 64 bytes smem, 424 bytes cmem[0], 12 bytes cmem[2]
+ptxas info    : Compile time = 31.215 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi3ELi1EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi3ELi1EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 89 registers, used 1 barriers, 64 bytes smem, 424 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 39.774 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi2ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi2ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 83 registers, used 1 barriers, 96 bytes smem, 424 bytes cmem[0], 12 bytes cmem[2]
+ptxas info    : Compile time = 23.984 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi1ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi1ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 36 registers, used 1 barriers, 32 bytes smem, 424 bytes cmem[0], 4 bytes cmem[2]
+ptxas info    : Compile time = 7.916 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v3ILb1EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v3ILb1EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 64 registers, used 1 barriers, 96 bytes smem, 424 bytes cmem[0], 20 bytes cmem[2]
+ptxas info    : Compile time = 56.792 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi0ELi61EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi0ELi61EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 104 registers, used 1 barriers, 96 bytes smem, 424 bytes cmem[0], 24 bytes cmem[2]
+ptxas info    : Compile time = 77.007 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi0ELi29EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi0ELi29EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 93 registers, used 1 barriers, 96 bytes smem, 424 bytes cmem[0], 20 bytes cmem[2]
+ptxas info    : Compile time = 64.206 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi0ELi13EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi0ELi13EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 92 registers, used 1 barriers, 96 bytes smem, 424 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compile time = 65.766 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi0ELi5EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi0ELi5EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 93 registers, used 1 barriers, 96 bytes smem, 424 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compile time = 65.129 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi0ELi3EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi0ELi3EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 95 registers, used 1 barriers, 96 bytes smem, 424 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compile time = 66.333 ms
+ptxas info    : Compiling entry function '_ZN6occamy6moe_v2ILi0ELi0EEEvNS_6ParamsE' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy6moe_v2ILi0ELi0EEEvNS_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 88 registers, used 1 barriers, 96 bytes smem, 424 bytes cmem[0], 16 bytes cmem[2]
+ptxas info    : Compile time = 58.760 ms
+ptxas info    : Compiling entry function '_ZN6occamy10moe_v3_cmpEPKfS1_Pj' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy10moe_v3_cmpEPKfS1_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 14 registers, used 0 barriers, 344 bytes cmem[0]
+ptxas info    : Compile time = 1.264 ms
+ptxas info    : Compiling entry function '_ZN6occamy18moe_q2_direct_downENS_6ParamsEb' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy18moe_q2_direct_downENS_6ParamsEb
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 64 registers, used 1 barriers, 96 bytes smem, 425 bytes cmem[0], 20 bytes cmem[2]
+ptxas info    : Compile time = 54.800 ms
+ptxas info    : Compiling entry function '_ZN6occamy14moe_q2_cohortsENS_6ParamsEb' for 'sm_52'
+ptxas info    : Function properties for _ZN6occamy14moe_q2_cohortsENS_6ParamsEb
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 63 registers, used 1 barriers, 96 bytes smem, 425 bytes cmem[0], 20 bytes cmem[2]
+ptxas info    : Compile time = 59.224 ms

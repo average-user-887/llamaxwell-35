@@ -1,0 +1,9 @@
+348038adec471d26d19c2ec74eddbfeb0b2a06f670ba9f5e56393b4fef4d55fd  ../../resume-q2-moe-cohorts/occamy-fused.cu
+bbea6f5c611282090050592a6e49f2c15238c104eb1b1420cb23e562220176eb  ../../resume-q2-moe-cohorts/occamy-fused.cu.o
+bcd063306ea65f5e8143a8d6501960dbfeda359f5b3a261d5d91d612c786eac0  ../../night-gdn-t2-q8-fast/occamy-gdn.cu.o
+6c0171cf760490920d66de2cc0f7c43a170f3095a396808c9ce033186d644a52  ../../runner/night_trial_runtime.sh
+51f7c09180fade3addd04537957e0c1b67267237246415be4f3fea2b53530181  ../../runner/sparse_admission.py
+369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871  ../../finish33-r2-stride/libggml-cuda.so
+c2a805af82cf2060c84a105c44167e66631dfa30ab1cc8807c1b010188b0160a  ../../finish33-r2-stride/fattn-occamy.cu.o
+21ee540db81fd7efbd3ea710f47d0f4348b6902bf642abe5ae4b70762ab45e54  ../FROZEN.sha256
+054d2d0f994e42bed345ac94819bc4600ccd7fb89b171b49545611ffd8f2b618  ../occamy-fused.cu.o

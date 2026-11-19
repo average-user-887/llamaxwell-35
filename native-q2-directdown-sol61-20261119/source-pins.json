@@ -1,0 +1,23 @@
+{
+  "build.log": {
+    "portable_sha256": "c293f7c0919818f79e0de6914f71c32fb7368cd4b7ef4eea942fa27f742e1866",
+    "observed_source_sha256": "963be6823de4fcb1b7c36e0dd9dea1167ac7959220cb8469f50c121153a98316",
+    "private_input_keys": [
+      "BUILD_SOURCE"
+    ]
+  },
+  "original-19607/build.sh": {
+    "portable_sha256": "d8d89e9ac1e4240b7ef5607902caa6a3bfa3d562d7b4a351717ce337c5fd90e5",
+    "observed_source_sha256": "7f9fe95e5470d07734f2c1c27c831369e5db5c08dce626b91dc797dbcfd747d8",
+    "private_input_keys": [
+      "BUILD_SOURCE"
+    ]
+  },
+  "original-19607/compile.sh": {
+    "portable_sha256": "01f93ba39d7f99a37472ac5eb67732d9ecfaaa1437c3816900107fe47d8b66d1",
+    "observed_source_sha256": "6b176b9f8f7749b11210e853646ffaa88d8f4de81520b0e201ce1ff45611fc8c",
+    "private_input_keys": [
+      "BUILD_SOURCE"
+    ]
+  }
+}
