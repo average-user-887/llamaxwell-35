@@ -1,0 +1,9 @@
+# R1 compact-only native MTP1 qualification
+
+R1 fixes the server guard that kept the earlier compact shadow path dormant. The pinned compiled parser retains a default inert `NONE` and appends one `DRAFT_MTP`. The guard admits exactly one MTP alongside at most one inert `NONE`. Other active types and duplicates fall back. Typed cumulative `compact_guard` records expose the first failed gate on each measured offer. The old shadow receipt and source freeze remain sealed.
+
+All three modes explicitly set `GGML_CUDA_OCCAMY_MOE_Q2_DOWN4=0`. R1 retains the original compact core, CUDA and common DSOs and replaces only the server DSO. The seven owned-child snapshots require zero down4 launches at startup and throughout both measured phases. Ordinary native Q2 cohort launches must still account for forty per proposal. The original observer, sampler, mask, rollback, output shape, exact archive identity and token-bearing SSE checks apply.
+
+The last exact native anchor reached 97.28926 tok/s with 3,072 output tokens over 1,642 offers at 19.23017 ms per offer. Exceeding 100 tok/s at unchanged yield requires a measured saving greater than 0.52128 ms per offer. If the prior standalone 0.431103–0.432290 ms saving transferred in full, the result would be about 99.52–99.53 tok/s. R1 model performance is pending.
+
+`./release.sh --check` verifies the freeze, CPU parser and runtime loader witness. The GPU owner supplies the admitted selector and cutoff, then uses `./release.sh --run shadow`, `./release.sh --run native`, or `./release.sh --run serial`. `./release.sh --compare SERIAL_RECEIPT NATIVE_RECEIPT` is the strict throughput comparison. Each arm retains the inherited 430-second shared-lock cap. `python3 -B model.py guard RECEIPT` reads typed guard deltas from existing sealed logs without assessing throughput or exactness.

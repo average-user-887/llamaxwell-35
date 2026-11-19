@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "source_freeze_sha256": "8f5dd7ed774c947049177813b1347ad7f5fff4f2ec7bcc8a89f7887fbd2cfb60",
+  "attempts": [
+    {
+      "attempt": "shadow-01",
+      "stage": "shadow",
+      "terminal": {
+        "runner_exit": 0,
+        "cleanup_exit": 0,
+        "cap_seconds": 430,
+        "observation_manifest_verified": true
+      },
+      "model": {
+        "mapped_software_sha256": {
+          "libggml-cuda.so": "e9100d3898264235602fbca88def3eb965c5cc38f3074e4c651ebf73cae5c263",
+          "libllama-common.so.0.6.0": "1088044d770e2e1f7a302192180208049cff263c009ef4fe3815d584a0763131",
+          "libllama-server-impl.so": "918e977f1ab23a86bc9b7b734cc2c9f0a1d7100942de7480480d6f5fa3e76d3c",
+          "libllama.so.0.6.0": "04ef90bb7eab8f890b1ea8d26d24207e45b815e140e6845a43015e76ad0d3f33",
+          "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+        },
+        "semantic_score": null,
+        "accepted_experts": 8,
+        "phases": {
+          "cold": {
+            "metrics": {
+              "n_out": 192,
+              "decode_toks_s": 93.44152434273379,
+              "request_wall_s": 269.76540541509166,
+              "ttft_s": 267.5543129751459,
+              "decode_s": 2.054761,
+              "cache_n": 0,
+              "evaluated_prompt_n": 80000,
+              "draft_n": 101,
+              "draft_n_accepted": 89,
+              "decode_ms_per_round": 20.344168316831684,
+              "truncated": false
+            },
+            "compact": {
+              "requested": 101,
+              "launched": 101,
+              "compact_only": 0,
+              "ambiguous": 0,
+              "unsupported": 0,
+              "raw_bytes": 200642560,
+              "compact_bytes": 1616,
+              "shadow_rows": 202,
+              "shadow_mismatches": 0
+            },
+            "guard": {
+              "ready": 101,
+              "observer": 0,
+              "types": 0,
+              "rollback": 0,
+              "shape": 0,
+              "model": 0,
+              "draft": 0,
+              "sampler": 0,
+              "mask": 0
+            },
+            "down4": {
+              "down4_launches": 0,
+              "expected": 0,
+              "ordinary_q2_launches": 4040,
+              "ordered_full_experts": 8
+            },
+            "archived_parity": {
+              "exact_ids": 192,
+              "exact_full_text": true,
+              "cache_and_draft_totals_equal": true
+            },
+            "repetition": {
+              "nonblank_lines": 16,
+              "duplicate_normalized_lines": 0,
+              "final_quarter_lines": 4,
+              "final_quarter_normalized_duplicates": 0,
+              "word_windows_24": 54,
+              "repeated_24_word_windows": 0,
+              "python_keyword_led_lines": 6,
+              "trailing_comment_only_lines": 0,
+              "malformed_characters": 0
+            }
+          },
+          "warm": {
+            "metrics": {
+              "n_out": 3072,
+              "decode_toks_s": 94.76107884871335,
+              "request_wall_s": 32.69228523899801,
+              "ttft_s": 0.26904401113279164,
+              "decode_s": 32.418373,
+              "cache_n": 79996,
+              "evaluated_prompt_n": 4,
+              "draft_n": 1642,
+              "draft_n_accepted": 1429,
+              "decode_ms_per_round": 19.743223507917175,
+              "truncated": false
+            },
+            "compact": {
+              "requested": 1642,
+              "launched": 1642,
+              "compact_only": 0,
+              "ambiguous": 0,
+              "unsupported": 0,
+              "raw_bytes": 3261931520,
+              "compact_bytes": 26272,
+              "shadow_rows": 3284,
+              "shadow_mismatches": 0
+            },
+            "guard": {
+              "ready": 1642,
+              "observer": 0,
+              "types": 0,
+              "rollback": 0,
+              "shape": 0,
+              "model": 0,
+              "draft": 0,
+              "sampler": 0,
+              "mask": 0
+            },
+            "down4": {
+              "down4_launches": 0,
+              "expected": 0,
+              "ordinary_q2_launches": 65680,
+              "ordered_full_experts": 8
+            },
+            "archived_parity": {
+              "exact_ids": 3072,
+              "exact_full_text": true,
+              "cache_and_draft_totals_equal": true
+            },
+            "repetition": {
+              "nonblank_lines": 304,
+              "duplicate_normalized_lines": 127,
+              "final_quarter_lines": 76,
+              "final_quarter_normalized_duplicates": 39,
+              "word_windows_24": 1336,
+              "repeated_24_word_windows": 63,
+              "python_keyword_led_lines": 203,
+              "trailing_comment_only_lines": 0,
+              "malformed_characters": 0
+            }
+          }
+        },
+        "physical_cumulative_snapshots": [
+          {
+            "combined": 39,
+            "row0": 0,
+            "row1": 0,
+            "skip": 39,
+            "q2_sparse": 0,
+            "q2_stride": 0,
+            "down4": 0
+          },
+          {
+            "combined": 4079,
+            "row0": 0,
+            "row1": 0,
+            "skip": 4079,
+            "q2_sparse": 1010,
+            "q2_stride": 1010,
+            "down4": 0
+          },
+          {
+            "combined": 69759,
+            "row0": 0,
+            "row1": 0,
+            "skip": 69759,
+            "q2_sparse": 17430,
+            "q2_stride": 17430,
+            "down4": 0
+          }
+        ]
+      },
+      "private_request_observations_excluded": true,
+      "available_response_counts": {
+        "cold": {
+          "n_out": 192,
+          "wall_s": 269.76540541509166,
+          "ttft_s": 267.5543129751459,
+          "truncated": false
+        },
+        "warm": {
+          "n_out": 3072,
+          "wall_s": 32.69228523899801,
+          "ttft_s": 0.26904401113279164,
+          "truncated": false
+        }
+      },
+      "bounded_wall_s": 349,
+      "disposition": "validated"
+    }
+  ],
+  "unrepresented_stages": [
+    "native",
+    "serial"
+  ],
+  "same_build_pair": null
+}

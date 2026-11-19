@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+here=$(cd -- "$(dirname -- "$0")" && pwd -P)
+c=$(dirname -- "$here")
+n1=$c/night-cache-only
+source_mount=@@OWNER_SOURCE_MOUNT@@
+image=sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed
+cd "$here"
+python3 -B prepare-r1.py
+timeout -k 3s 210s docker run --rm --pull never --runtime runc --network none --cpuset-cpus 2-3 \
+  --name "nmmoon-compact-server-$$" --tmpfs /tmp:rw,size=256m --user "$(id -u):$(id -g)" \
+  -e NVIDIA_VISIBLE_DEVICES=void -e TMPDIR=/tmp -v "$n1/src:$source_mount:ro" \
+  -v "$n1/build:/b:ro" -v "$here:/work" -w /b/tools/server --entrypoint /bin/bash "$image" -euc '
+    flags=CMakeFiles/server-context.dir/flags.make
+    read -ra defines <<< "$(sed -n "s/^CXX_DEFINES = //p" "$flags")"
+    read -ra includes <<< "$(sed -n "s/^CXX_INCLUDES = //p" "$flags")"
+    read -ra cxxflags <<< "$(sed -n "s/^CXX_FLAGS = //p" "$flags")"
+    set -x
+    /usr/bin/g++-14 "${defines[@]}" "${includes[@]}" "${cxxflags[@]}" -I/work \
+      -o /work/server-context.cpp.o -c /work/server-context.cpp
+    cp libserver-context.a /work/libserver-context.a
+    /usr/bin/ar r /work/libserver-context.a /work/server-context.cpp.o
+    /usr/bin/ranlib /work/libserver-context.a
+    sed "s|-o ../../bin/libllama-server-impl.so|-o /work/libllama-server-impl.so|;s| libserver-context.a | /work/libserver-context.a |" \
+      CMakeFiles/llama-server-impl.dir/link.txt > /work/server-link.sh
+    bash /work/server-link.sh
+    nm -D /work/libllama-server-impl.so | c++filt | grep llama_occamy_compact_decode
+  ' > server-build.log 2>&1

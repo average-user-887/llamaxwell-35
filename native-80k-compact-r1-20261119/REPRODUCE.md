@@ -1,0 +1,9 @@
+# Reproduce R1 source and replay the shadow packet
+
+The R1 patch follows the compact/down4 composite foundation named in `source-pins.json`. Apply the R1 server patch to the pinned composite server source, or reconstruct it using `prepare-r1.py` in the owner campaign layout. The candidate core and CUDA libraries and the original common library come from the pinned parent. `profile.json`, `build.json`, `owner-inputs.sha256` and `owner-frozen.sha256` specify their exact identities.
+
+On the owner host, create a JSON alias file with the key `@@OWNER_SOURCE_MOUNT@@` and the original source mount as its value. Keep it outside this packet. Run `python3 -B rehydrate.py --aliases PRIVATE_JSON --output PRIVATE_EMPTY_PATH` to reconstruct the original byte-pinned server build script and log. The build and argument-parser smoke run in the pinned device-free toolchain image. The runtime loader check verifies the exact candidate server and parent core in the device-free runtime image.
+
+Validate the portable files with `sha256sum --check --strict SHA256SUMS`, then run `python3 -B replay.py --results shadow-results.json`. The independent replay rederives per-phase offer, down4, Q2, compact-byte and row-check accounting from the aggregate artifacts. On the owner host, the strict `release.sh --check` and `model.py` depend on the sealed private request fixture, prior archive and runtime inputs. The owned `release.sh --run shadow` uses the established admitted selector and shared lease with a 430-second cap.
+
+To independently rebuild the portable shadow export from the sealed owner receipt, run `python3 -B export-model.py --owner-card OWNER_R1_CARD --receipt shadow OWNER_SHADOW_RECEIPT --output SHADOW_EXPORT`. The exporter replays the exact owner validator and outputs public artifact digests, numerical evidence and equality flags. It excludes raw request identifiers, tokens, text and output fingerprints.

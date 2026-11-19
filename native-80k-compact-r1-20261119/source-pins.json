@@ -1,0 +1,40 @@
+{
+  "composite_parent_package": "native-80k-compact-down4-20261119",
+  "composite_parent_source_freeze_sha256": "bda2c10a72ff4cc13f92466157f617990341364de061b941588088927347e156",
+  "exact_composite_sources": {
+    "build.json": "09ade82817542f48fb8e3d7aedfcbbeebcdcfdf9658ed696fce9fae8994f3c6d",
+    "compact-readback.h": "7e479a032f0e6fb7add0c882078e9005df215abd43a9566c7b3661c73f1e35af",
+    "compact-sampler-policy.h": "f336af09acb53646631c77582ef23b4ae06deca496da2fdc5eee3730a2c8d7bc",
+    "cpu-replay.log": "ab2a036fc95639f032e42fa2e931747a1ffd833230c6ea11e4f15d010c04179c",
+    "cpu-replay.py": "5ebdd97c0bd6dd06f84e67a5f31606d71ad9e3dede1bb9e4ec137c7e07455aa8",
+    "loader-check.log": "6798ad0ad3c68ca0ade5551c388c0fdab65af854f5b8f752ffa0589aab8250f9",
+    "model.py": "4dc08d4d1389ce2ff83bd98c1198b2e6651125a1849ce8d577cef99067fb939c",
+    "parser-check.log": "88d117873b264c23101fe23b808caff8752b7d69b46a4b426615f097b5b2bd26",
+    "parser-check.sh": "fae4fa964000afd361ac2186c7cbe23c484f26c4580426b757cc7be976bda328",
+    "parser-smoke.cpp": "022de3a4e92272c12fd41132025d153440be08957d4d9ea0961e4fff1d6b4adf",
+    "prepare-r1.py": "6839e30054f282030dddb710f947f8446b8bd5291a53848785cb39e6bfdf07fb",
+    "profile.json": "4d14dc73784ab601b356d3cb8f083d5ecf88f8c57cd5b0ede401be419ee7f0a6",
+    "release.sh": "f8ec981306f6bd137c55e617144fae5a6112a3b72e55d3f3ccb69f7650180293",
+    "server-context.r1.patch": "11ca93cd18656f3bd81ce2631007d11bf8fd996a172a4e4b33c79c0fe289ae33",
+    "verify-r1.py": "80ad499ce194bb3cc599cb97cc715419d0411939258956028b9c0eea2cff2bac"
+  },
+  "owner_source_freeze_sha256": "8f5dd7ed774c947049177813b1347ad7f5fff4f2ec7bcc8a89f7887fbd2cfb60",
+  "rehydration": [
+    {
+      "aliases": [
+        "@@OWNER_SOURCE_MOUNT@@"
+      ],
+      "original": "build-server.sh",
+      "sha256": "5204da40e712d5ee63e3ed79e61cd3d058ee3b219dce19d6c93fb08e2fdc637d",
+      "template": "build-server.sh.in"
+    },
+    {
+      "aliases": [
+        "@@OWNER_SOURCE_MOUNT@@"
+      ],
+      "original": "server-build.log",
+      "sha256": "bae240ccbe26f8f8e6fddc51d2b712e1ad0d17282a1fd09f3f62a77a13839f96",
+      "template": "server-build.log.in"
+    }
+  ]
+}
