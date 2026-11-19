@@ -1,0 +1,14 @@
+5543cacab8cbdfd26815b80d9073f056858e4779ca735d2f726d472735dd7bd4  ../night-cache-only/src/common/speculative.cpp
+3606e3554803c9af8f3b9db4c681b9506cf8a4b15aba387dd27f485124999c3d  src/common/speculative.cpp
+b63d8654358d6141fac1f45b1b56247d7c8360e609a55323d30e7dcb6a6ffc00  ../night-cache-only/src/src/llama-adapter.h
+5648f52f935866eadd8078ae6bda20337b11b61b0d482012b485d32d170fe151  src/src/llama-adapter.h
+e75a7fbca1ea10dc2e9ce6e9ec6c7233a3c1f906eb1f0f11b20baccf378fdf2e  ../night-cache-only/src/src/llama-context.cpp
+f8a97cdf50f092b282c15f0845bc623d88d7b2763e14ebc2060fae20217d057f  src/src/llama-context.cpp
+075867236ccf2a47779805baea1ab8f71ff01dd0c896a3196b90a617b724b575  ../night-cache-only/src/src/llama-context.h
+5381999e6d79d075fb0488461c59758e3a87fbe4311e39475cfb9c132148968b  src/src/llama-context.h
+031a53817f4e0d4a26ea5c143570d628cc94c13f6c5aba2edbdfe7771a209ae1  ../night-cache-only/src/src/llama-ext.h
+50dfb655d93b6fd0dc4fca08768b4047be98bc3ff4f161a8cefaf2c56467260b  src/src/llama-ext.h
+d596d67a2aed4a25a001ea86db3a9b6b081bb889426a7d616359300e43191d5a  ../night-cache-only/src/src/llama-graph.h
+58711e282d98fceae975fc4b87bb84b569be5aab3acbd9dcec7ec3ea7e16489c  src/src/llama-graph.h
+6ca9bd7abd24869f65d94790cf7dff053961fcd8a937b7719505d00bb5f9f162  ../night-cache-only/src/src/models/qwen35moe.cpp
+b92c4d2d1e228a5810c72e35382a9a85ae388580e21bf86861d8485cf924cc28  src/src/models/qwen35moe.cpp

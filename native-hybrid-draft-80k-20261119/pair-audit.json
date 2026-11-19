@@ -1,0 +1,69 @@
+{
+  "same_private_prompt_and_settings": true,
+  "implementation_identity": {
+    "same_observed_server_software": {
+      "libggml-cuda.so": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+      "libllama-common.so.0.6.0": "1088044d770e2e1f7a302192180208049cff263c009ef4fe3815d584a0763131",
+      "libllama-server-impl.so": "4a0ff82df62550ccb27927bd98a39d036148b4666abc819bec18f14686efcc64",
+      "libllama.so.0.6.0": "46c4dd7075c5229598c8a9c7aadc3542ac03d5f928fb8078696c42a9c4bfd607",
+      "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+    },
+    "same_child_environment": true,
+    "only_argv_difference_is_speculation": true,
+    "native_speculation_args": [
+      "--spec-type",
+      "draft-mtp",
+      "--spec-draft-n-max",
+      "1",
+      "--spec-draft-type-k",
+      "f16",
+      "--spec-draft-type-v",
+      "f16"
+    ],
+    "serial_speculation_args": [
+      "--spec-type",
+      "none"
+    ],
+    "common_enabled_flags": [
+      "GGML_CUDA_OCCAMY_FA_Q2_R2_PROBE4=1",
+      "GGML_CUDA_OCCAMY_FA_Q2_R2_STRIDE=1",
+      "GGML_CUDA_OCCAMY_FA_Q2_R2_TOP16=1",
+      "LLAMA_MTP_LAST_QUERY=1",
+      "LLAMA_MTP_MERGE_REEVAL=1",
+      "LLAMA_SPEC_RS_SAMPLER_SNAPSHOT_ELIDE=1"
+    ]
+  },
+  "metrics": {
+    "cold": {
+      "serial_decode_tok_s": 73.99183238075273,
+      "native_decode_tok_s": 96.57087874972903,
+      "decode_gain_pct": 30.51559292759145,
+      "meets_25_pct": true,
+      "serial_wall_s": 265.0842487041373,
+      "native_wall_s": 268.11632472393103,
+      "native_wall_saved_s": -3.032076019793749,
+      "output_per_offer": 1.900990099009901,
+      "native_ms_per_offer": 19.684920792079208,
+      "budget_ms_per_offer_at_100": 19.00990099009901,
+      "additional_ms_per_offer_to_100": 0.6750198019801971,
+      "native_offered": 101,
+      "native_accepted": 89
+    },
+    "warm": {
+      "serial_decode_tok_s": 76.72289540818716,
+      "native_decode_tok_s": 97.28925901878083,
+      "decode_gain_pct": 26.806031630030237,
+      "meets_25_pct": true,
+      "serial_wall_s": 40.16921609384008,
+      "native_wall_s": 31.864485294092447,
+      "native_wall_saved_s": 8.304730799747631,
+      "output_per_offer": 1.8708891595615103,
+      "native_ms_per_offer": 19.230171741778317,
+      "budget_ms_per_offer_at_100": 18.708891595615103,
+      "additional_ms_per_offer_to_100": 0.521280146163215,
+      "native_offered": 1642,
+      "native_accepted": 1429
+    }
+  },
+  "semantic_score": null
+}

@@ -1,0 +1,42 @@
+{
+  "scope": "clean archived split repeat versus one separately launched hybrid",
+  "hardware_or_other_routes_changed": false,
+  "semantic_score": null,
+  "observed_candidate_software_sha256": {
+    "libggml-cuda.so": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+    "libllama-common.so.0.6.0": "1088044d770e2e1f7a302192180208049cff263c009ef4fe3815d584a0763131",
+    "libllama-server-impl.so": "4a0ff82df62550ccb27927bd98a39d036148b4666abc819bec18f14686efcc64",
+    "libllama.so.0.6.0": "46c4dd7075c5229598c8a9c7aadc3542ac03d5f928fb8078696c42a9c4bfd607",
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+  },
+  "phases": {
+    "cold": {
+      "control_decode_tok_s": 96.02227716830305,
+      "hybrid_decode_tok_s": 96.57087874972903,
+      "control_wall_s": 268.7536459369585,
+      "hybrid_wall_s": 268.11632472393103,
+      "saved_ms_per_offer": 0.11246534653465545,
+      "observed_warm_100_gate": false,
+      "exact": {
+        "all_ids_equal": true,
+        "compared_ids": 192,
+        "full_text_equal": true,
+        "same_draft_acceptance_and_cache_totals": true
+      }
+    },
+    "warm": {
+      "control_decode_tok_s": 96.44708649740161,
+      "hybrid_decode_tok_s": 97.28925901878083,
+      "control_wall_s": 32.11943546193652,
+      "hybrid_wall_s": 31.864485294092447,
+      "saved_ms_per_offer": 0.16791717417783403,
+      "observed_warm_100_gate": false,
+      "exact": {
+        "all_ids_equal": true,
+        "compared_ids": 3072,
+        "full_text_equal": true,
+        "same_draft_acceptance_and_cache_totals": true
+      }
+    }
+  }
+}

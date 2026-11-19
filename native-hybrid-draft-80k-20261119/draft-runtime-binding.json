@@ -1,0 +1,48 @@
+{
+  "intent": "split versus merged draft re-evaluation with one final query",
+  "mode": "native",
+  "native_baseline": "<OWNER_CLEAN_SPLIT_NATIVE_RECEIPT_RELATIVE_TO_CAMPAIGN>",
+  "baseline_mapped_software": {
+    "libggml-cuda.so": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+    "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf",
+    "libllama-server-impl.so": "4a0ff82df62550ccb27927bd98a39d036148b4666abc819bec18f14686efcc64",
+    "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+  },
+  "warm_historical_saving_ms_per_offer": 0.1605247524752471,
+  "arm_cap_s": 430,
+  "live_qualification": null,
+  "original_libraries": {
+    "libllama.so.0.6.0": "a20131e824749b0b5fa99aa1e526b943ac1ced40570628606bf0c0273c182117",
+    "libllama-common.so.0.6.0": "bac2474430363d8ef35f90b3256265e8edb108800420e1f9f16decc535b47fbf"
+  },
+  "alternate_libraries": {
+    "libllama.so.0.6.0": "46c4dd7075c5229598c8a9c7aadc3542ac03d5f928fb8078696c42a9c4bfd607",
+    "libllama-common.so.0.6.0": "1088044d770e2e1f7a302192180208049cff263c009ef4fe3815d584a0763131"
+  },
+  "abi": {
+    "libllama.so.0.6.0": {
+      "all_original_dynamic_definitions_preserved": true,
+      "equal_dependency_soname_search_path_metadata": true,
+      "new_definitions": [
+        "_Z26llama_mtp_draft_last_queryP13llama_contextS0_P15llama_batch_ext",
+        "_Z27llama_mtp_enable_last_queryP13llama_context",
+        "_ZN13llama_context10decode_mtpERK15llama_batch_extbb"
+      ],
+      "new_imports_satisfied_by_alternate_core": []
+    },
+    "libllama-common.so.0.6.0": {
+      "all_original_dynamic_definitions_preserved": true,
+      "equal_dependency_soname_search_path_metadata": true,
+      "new_definitions": [],
+      "new_imports_satisfied_by_alternate_core": [
+        "_Z26llama_mtp_draft_last_queryP13llama_contextS0_P15llama_batch_ext",
+        "_Z27llama_mtp_enable_last_queryP13llama_context",
+        "llama_state_seq_save_file"
+      ]
+    }
+  },
+  "unchanged_server_imports_satisfied": 308,
+  "n40_build_products_match_packaged_libraries": true,
+  "n40_source_parent_hashes_verified": true
+}

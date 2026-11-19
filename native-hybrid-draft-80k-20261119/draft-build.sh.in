@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+mount=<EXACT_SOURCE_MOUNT>
+image=sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed
+date -u +%FT%TZ > "$here/BUILD_STARTED_UTC"
+start=$SECONDS
+name=nmmoon-n40-build-$$
+cleanup() { docker rm -f "$name" >/dev/null 2>&1 || true; }
+trap cleanup EXIT
+rc=0
+timeout --kill-after=5s 8m docker run --rm --network none --cpuset-cpus 2-3 \
+    --name "$name" -u "$(id -u):$(id -g)" -v "$here/src:$mount:ro" -v "$here/build:/b" -w /b \
+    --entrypoint /usr/bin/nice "$image" -n 19 bash -euc '
+    llama=src/CMakeFiles/llama.dir
+    common=common/CMakeFiles/llama-common.dir
+    rm -f "$llama/Unity/unity_8_cxx.cxx.o" "$llama/llama-context.cpp.o" "$common/speculative.cpp.o"
+    gmake -j2 -f "$llama/build.make" "$llama/Unity/unity_8_cxx.cxx.o" "$llama/llama-context.cpp.o"
+    (cd src && cmake -E cmake_link_script CMakeFiles/llama.dir/link.txt)
+    gmake -f "$common/build.make" "$common/speculative.cpp.o"
+    (cd common && cmake -E cmake_link_script CMakeFiles/llama-common.dir/link.txt)
+    ' > "$here/build.log" 2>&1 || rc=$?
+printf 'exit_code=%d\nelapsed_seconds=%d\n' "$rc" "$(( SECONDS - start ))" > "$here/BUILD_STATUS"
+date -u +%FT%TZ > "$here/BUILD_FINISHED_UTC"
+tail -n 20 "$here/build.log"
+exit "$rc"

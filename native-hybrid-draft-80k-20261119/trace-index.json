@@ -1,0 +1,91 @@
+{
+  "arm_order": [
+    "native",
+    "serial"
+  ],
+  "owned_arms_did_not_overlap": true,
+  "native": {
+    "file": "hybrid-native.trace-v2.jsonl",
+    "trace_sha256": "cffaa4c3e7a3a8553352324e2de089aa52d10cfc9b8b68f54fc3136551eb6a5a",
+    "events": {
+      "draft_final_query_first_dispatch": 1,
+      "fast_selector_first_dispatch": 1,
+      "fixed_stride_first_dispatch": 1,
+      "host_counter_snapshot": 70,
+      "merged_draft_catchup_enabled": 1,
+      "observed_response_metrics": 2,
+      "observed_stream_output_ordinal": 3264,
+      "offload_observed": 1,
+      "output_boundary": 2,
+      "owned_health_observed": 1,
+      "owned_run_begin": 1,
+      "owned_run_outcome": 1,
+      "physical_counter_boundary": 3,
+      "q2_moe_residency": 1,
+      "recurrent_rollback_rows": 2,
+      "request_begin": 2,
+      "runtime_state_marker": 1,
+      "sampler_snapshot_completion": 2,
+      "slot_release": 2,
+      "sparse_attention_dispatch_sample": 24,
+      "sse_clock_checkpoint": 7,
+      "tiled_probe_first_dispatch": 1,
+      "trace_metadata": 1
+    },
+    "log_boundary_issue": null,
+    "response_phases_observed": [
+      "cold",
+      "warm"
+    ],
+    "start_epoch": 1795046483,
+    "completed_epoch": 1795046845,
+    "terminal": {
+      "runner_exit": 0,
+      "cleanup_exit": 0,
+      "runner_failure_class": null,
+      "cleanup_outcome": "passed",
+      "validation_disposition": "passed_original_terminal_validator",
+      "owned_worker_ready_s": 58,
+      "health_check_limit_s": null
+    }
+  },
+  "serial": {
+    "file": "hybrid-serial.trace-v2.jsonl",
+    "trace_sha256": "d14864ecee472a5d61706545011d2087d7331d21c25f85ee31fdced80d484d2e",
+    "events": {
+      "cycle": 3264,
+      "observed_response_metrics": 2,
+      "offload_observed": 1,
+      "output_boundary": 2,
+      "owned_health_observed": 1,
+      "owned_run_begin": 1,
+      "owned_run_outcome": 1,
+      "physical_counter_boundary": 3,
+      "q2_moe_residency": 1,
+      "recurrent_rollback_rows": 1,
+      "request_begin": 2,
+      "runtime_state_marker": 1,
+      "sampler_snapshot_completion": 2,
+      "slot_release": 2,
+      "sparse_attention_dispatch_sample": 35,
+      "sse_clock_checkpoint": 7,
+      "trace_metadata": 1
+    },
+    "log_boundary_issue": null,
+    "response_phases_observed": [
+      "cold",
+      "warm"
+    ],
+    "start_epoch": 1795047041,
+    "completed_epoch": 1795047395,
+    "terminal": {
+      "runner_exit": 0,
+      "cleanup_exit": 0,
+      "runner_failure_class": null,
+      "cleanup_outcome": "passed",
+      "validation_disposition": "passed_original_terminal_validator",
+      "owned_worker_ready_s": 44,
+      "health_check_limit_s": null
+    }
+  }
+}

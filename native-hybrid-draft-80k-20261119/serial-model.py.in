@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""Run the same N40 libraries and SSE fixture with speculation disabled."""
+from contextlib import contextmanager
+import importlib.util
+import json
+from pathlib import Path
+import sys
+
+HERE = Path(__file__).resolve().parent
+C = HERE.parent
+HYBRID = C / "hundred-hybrid-draft"
+NATIVE = HYBRID / "<OWNER_COMPLETED_HYBRID_NATIVE_RECEIPT_RELATIVE_TO_HYBRID>"
+SERIAL_REF = C / "<OWNER_CLEAN_SERIAL_REFERENCE_RECEIPT_RELATIVE_TO_CAMPAIGN>"
+spec = importlib.util.spec_from_file_location("native_hybrid", HYBRID / "model.py")
+hybrid = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(hybrid)
+core, q2, need, validator = hybrid.core, hybrid.q2, hybrid.need, hybrid.validator
+
+
+def settings(stage):
+    need(stage == "serial", "this launcher admits only the same-build no-MTP control")
+    env, native_args = hybrid.settings("native")
+    original_env, serial_args = core.settings("serial")
+    index = native_args.index("--spec-type")
+    need(serial_args == native_args[:index] + ["--spec-type", "none"], "serial differs beyond native speculation arguments")
+    need((SERIAL_REF / "server.args").read_text().splitlines() == serial_args and
+         (SERIAL_REF / "environment.args").read_text().splitlines() == original_env,
+         "archived serial profile changed")
+    need((NATIVE / "environment.args").read_text().splitlines() == env and
+         (NATIVE / "server.args").read_text().splitlines() == native_args,
+         "actual hybrid native profile differs")
+    return env, serial_args
+
+
+@contextmanager
+def serial_bindings():
+    original_dispatch = q2.n88.dispatch
+    with hybrid.candidate_bindings():
+        q2.settings = settings
+        q2.n88.dispatch = original_dispatch
+        yield
+
+
+def ready(stage, out):
+    with serial_bindings():
+        start, observed = q2.ready(stage, out)
+    need(hybrid.MERGE not in start and "mtp_last_graph" not in start,
+         "no-MTP control showed live merged draft or MTP graph")
+    return observed
+
+
+def collect(stage, out):
+    with serial_bindings():
+        result = core.collect(stage, out)
+    for name in ("server-start.log", "server-pre-warm.log", "server.log"):
+        log = (out / name).read_text()
+        need(hybrid.MERGE not in log and "mtp_last_graph" not in log, "no-MTP control produced draft graph evidence")
+    parity = {}
+    for phase, count in (("cold", 192), ("warm", 3072)):
+        sample, previous = [core.read(path / f"{phase}.json") for path in (out, SERIAL_REF)]
+        need(all(sample[key] == previous[key] for key in hybrid.INPUT_FIELDS), f"{phase}: archived exact fixture changed")
+        need(sample["token_ids"] == previous["token_ids"] and len(sample["token_ids"]) == count
+             and sample["text"] == previous["text"], f"{phase}: serial IDs or text differ from archived control")
+        need(all(sample["timings"].get(key) == previous["timings"].get(key) for key in
+                 ("draft_n", "draft_n_accepted", "cache_n", "prompt_n")),
+             f"{phase}: serial cache or proposal totals changed")
+        parity[phase] = {"ids_compared": count, "all_token_ids_equal": True, "full_text_equal": True,
+                         "same_draft_and_cache_totals": True}
+    result["exact_output_vs_clean_current_serial"] = parity
+    return result
+
+
+def check():
+    settings("serial")
+    serial = validator.verify("serial", SERIAL_REF)["validated"]
+    hybrid.result_comparison(NATIVE)
+    need(serial["accepted_experts"] == 8 and serial["serial_sparse_widths"] == [1], "archived serial hardware or path")
+    actual = core.read(NATIVE / "result.json")["actual_server_software_sha256"]
+    need(actual == {**hybrid.binding["baseline_mapped_software"], **hybrid.binding["alternate_libraries"]},
+         "native combination library identities differ")
+
+
+def finished(out):
+    need(out.parent == HERE / "receipts", "control must be an owned terminal receipt")
+    validator.sha_check(out, "observations.sha256")
+    need({"runner_exit=0", "cleanup_exit=0"} <= set((out / "status.txt").read_text().splitlines()),
+         "control failed or cleanup incomplete")
+    result = collect("serial", out)
+    official = core.read(out / "sanitized/model-receipt.json")
+    need(result == core.read(out / "result.json") == official["validated"], "control terminal result does not replay")
+    return result
+
+
+def compare(out):
+    control = finished(out)
+    hybrid.result_comparison(NATIVE)
+    native = core.read(NATIVE / "result.json")
+    need(control["actual_server_software_sha256"] == native["actual_server_software_sha256"],
+         "actual same-build library/program equality failed")
+    need((out / "environment.args").read_bytes() == (NATIVE / "environment.args").read_bytes(),
+         "native and serial child feature flags differ")
+    old_finished = core.finished
+    try:
+        core.finished = lambda path: {out: control, NATIVE: native}[path]
+        pair = core.compare(out, NATIVE)
+    finally:
+        core.finished = old_finished
+    pair["actual_same_build_mapped_software"] = native["actual_server_software_sha256"]
+    pair["actual_same_build_runtime_flags"] = True
+    pair["serial_exact_vs_clean_repeat"] = control["exact_output_vs_clean_current_serial"]
+    pair["native_exact_vs_clean_repeat"] = native["exact_output_vs_clean_current_split"]
+    pair["native_draft_graph_witness"] = native["draft_graph_witness"]
+    pair["serial_sparse_widths"] = control["serial_sparse_widths"]
+    warm = pair["measurements"]["warm"]["native"]
+    pair["warm_100_tok_s_gate"] = warm["decode_toks_s"] >= 100
+    return pair
+
+
+def main():
+    command, *args = sys.argv[1:]
+    if command == "check" and not args:
+        check()
+    elif command in ("env", "args") and len(args) == 1:
+        print("\n".join(settings(args[0])[command == "args"]))
+    elif command == "ready" and len(args) == 2:
+        ready(args[0], Path(args[1]))
+    elif command == "verify" and len(args) == 2:
+        out = Path(args[1])
+        core.n9.write_json(out / "result.json", collect(args[0], out))
+    elif command == "finalize" and len(args) == 5:
+        q2.finish(args[0], Path(args[1]), *map(int, args[2:]))
+    elif command == "compare" and len(args) == 1:
+        print(json.dumps(compare(Path(args[0]).resolve()), indent=2, allow_nan=False))
+    else:
+        raise ValueError("unknown serial hybrid command")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (ValueError, KeyError, OSError) as exc:
+        raise SystemExit(f"Q2 model: {exc}") from None

@@ -1,0 +1,9 @@
+{
+  "original_file": "model.py",
+  "original_source_sha256": "1136fd05555b9bd804cd501b52b079743e6b8431e077aa184eb611822ea95287",
+  "public_template": "serial-model.py.in",
+  "replacements": [
+    "<OWNER_COMPLETED_HYBRID_NATIVE_RECEIPT_RELATIVE_TO_HYBRID>",
+    "<OWNER_CLEAN_SERIAL_REFERENCE_RECEIPT_RELATIVE_TO_CAMPAIGN>"
+  ]
+}

@@ -1,0 +1,222 @@
+{
+  "candidate_cuda_sha256": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+  "prior_cuda_sha256": "9e999bcaf04397f267548abdfa3e326b65bee122fb1e24f92be55529f40a335e",
+  "candidate_server_impl_sha256": "4a0ff82df62550ccb27927bd98a39d036148b4666abc819bec18f14686efcc64",
+  "technical_pass": true,
+  "semantic_score": null,
+  "exact_output_ids_same_mode_each": 3264,
+  "warm_same_build_25_percent_gate": true,
+  "measurements": {
+    "cold": {
+      "serial": {
+        "n_out": 192,
+        "decode_toks_s": 73.99183238075273,
+        "request_wall_s": 265.0842487041373,
+        "ttft_s": 262.38468347815797,
+        "decode_s": 2.594881,
+        "cache_n": 0,
+        "evaluated_prompt_n": 80000,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "decode_ms_per_round": null,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "native": {
+        "n_out": 192,
+        "decode_toks_s": 96.57087874972903,
+        "request_wall_s": 268.11632472393103,
+        "ttft_s": 266.1155171399005,
+        "decode_s": 1.9881769999999999,
+        "cache_n": 0,
+        "evaluated_prompt_n": 80000,
+        "draft_n": 101,
+        "draft_n_accepted": 89,
+        "decode_ms_per_round": 19.684920792079208,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "serial_decode_toks_s": 73.99183238075273,
+      "native_decode_toks_s": 96.57087874972903,
+      "same_build_native_over_serial_ratio": 1.3051559292759145,
+      "same_build_native_over_serial_pct": 30.51559292759145,
+      "native_minus_prior_selector_decode_toks_s": 2.7663273724388233,
+      "serial_minus_prior_selector_decode_toks_s": -0.23926681557964002,
+      "native_saved_ms_per_round_vs_prior_selector": 0.5805148514851481,
+      "same_build_native_vs_serial_first_id_difference": 170,
+      "same_build_native_vs_serial_full_text_equal": false,
+      "native_selector_witness": {
+        "aggregate_q2_sparse_calls": 1010,
+        "offered_drafts": 101,
+        "sampled_dispatch_count": 4,
+        "sampled_key_widths": [
+          80128,
+          80384
+        ]
+      },
+      "serial_selector_witness": {
+        "aggregate_q2_sparse_calls": 0,
+        "offered_drafts": 0,
+        "sampled_dispatch_count": 0,
+        "sampled_key_widths": []
+      },
+      "native_stride_dispatches": {
+        "actual_stride_dispatches": 1010,
+        "expected_stride_dispatches": 1010
+      },
+      "native_first_kv_pitch_bytes": 1024,
+      "serial_stride_dispatches": {
+        "actual_stride_dispatches": 0,
+        "expected_stride_dispatches": 0
+      },
+      "native_sampler_snapshots": {
+        "elided": 101,
+        "elided_rejected": 12,
+        "kept": 0,
+        "restored": 0
+      },
+      "serial_sampler_snapshots": {
+        "elided": 0,
+        "elided_rejected": 0,
+        "kept": 0,
+        "restored": 0
+      }
+    },
+    "warm": {
+      "serial": {
+        "n_out": 3072,
+        "decode_toks_s": 76.72289540818716,
+        "request_wall_s": 40.16921609384008,
+        "ttft_s": 0.12430110899731517,
+        "decode_s": 40.040199,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "decode_ms_per_round": null,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "native": {
+        "n_out": 3072,
+        "decode_toks_s": 97.28925901878083,
+        "request_wall_s": 31.864485294092447,
+        "ttft_s": 0.2835434761364013,
+        "decode_s": 31.575941999999998,
+        "cache_n": 79996,
+        "evaluated_prompt_n": 4,
+        "draft_n": 1642,
+        "draft_n_accepted": 1429,
+        "decode_ms_per_round": 19.230171741778317,
+        "finish_reason": "limit",
+        "truncated": false
+      },
+      "serial_decode_toks_s": 76.72289540818716,
+      "native_decode_toks_s": 97.28925901878083,
+      "same_build_native_over_serial_ratio": 1.2680603163003024,
+      "same_build_native_over_serial_pct": 26.806031630030237,
+      "native_minus_prior_selector_decode_toks_s": 3.1406184813244806,
+      "serial_minus_prior_selector_decode_toks_s": 0.14087846122498604,
+      "native_saved_ms_per_round_vs_prior_selector": 0.6414817295980519,
+      "same_build_native_vs_serial_first_id_difference": 170,
+      "same_build_native_vs_serial_full_text_equal": false,
+      "native_selector_witness": {
+        "aggregate_q2_sparse_calls": 16420,
+        "offered_drafts": 1642,
+        "sampled_dispatch_count": 16,
+        "sampled_key_widths": [
+          80384,
+          80640,
+          80896,
+          81152,
+          81408,
+          81664,
+          81920,
+          82176,
+          82432,
+          82688,
+          82944,
+          83200
+        ]
+      },
+      "serial_selector_witness": {
+        "aggregate_q2_sparse_calls": 0,
+        "offered_drafts": 0,
+        "sampled_dispatch_count": 0,
+        "sampled_key_widths": []
+      },
+      "native_stride_dispatches": {
+        "actual_stride_dispatches": 16420,
+        "expected_stride_dispatches": 16420
+      },
+      "native_first_kv_pitch_bytes": 1024,
+      "serial_stride_dispatches": {
+        "actual_stride_dispatches": 0,
+        "expected_stride_dispatches": 0
+      },
+      "native_sampler_snapshots": {
+        "elided": 1642,
+        "elided_rejected": 213,
+        "kept": 0,
+        "restored": 0
+      },
+      "serial_sampler_snapshots": {
+        "elided": 0,
+        "elided_rejected": 0,
+        "kept": 0,
+        "restored": 0
+      }
+    }
+  },
+  "actual_same_build_mapped_software": {
+    "libggml-cuda.so": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+    "libllama-common.so.0.6.0": "1088044d770e2e1f7a302192180208049cff263c009ef4fe3815d584a0763131",
+    "libllama-server-impl.so": "4a0ff82df62550ccb27927bd98a39d036148b4666abc819bec18f14686efcc64",
+    "libllama.so.0.6.0": "46c4dd7075c5229598c8a9c7aadc3542ac03d5f928fb8078696c42a9c4bfd607",
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405"
+  },
+  "actual_same_build_runtime_flags": true,
+  "serial_exact_vs_clean_repeat": {
+    "cold": {
+      "ids_compared": 192,
+      "all_token_ids_equal": true,
+      "full_text_equal": true,
+      "same_draft_and_cache_totals": true
+    },
+    "warm": {
+      "ids_compared": 3072,
+      "all_token_ids_equal": true,
+      "full_text_equal": true,
+      "same_draft_and_cache_totals": true
+    }
+  },
+  "native_exact_vs_clean_repeat": {
+    "cold": {
+      "all_ids_equal": true,
+      "compared_ids": 192,
+      "full_text_equal": true,
+      "same_draft_acceptance_and_cache_totals": true
+    },
+    "warm": {
+      "all_ids_equal": true,
+      "compared_ids": 3072,
+      "full_text_equal": true,
+      "same_draft_acceptance_and_cache_totals": true
+    }
+  },
+  "native_draft_graph_witness": {
+    "cold_first_position": 80002,
+    "draft_rows": 3,
+    "k_write_rows": 3,
+    "v_write_rows": 3,
+    "query_rows": 1,
+    "ffn_rows": 1,
+    "key_width": 80128,
+    "ordered_cache_writes": true,
+    "one_first_dispatch_marker": true
+  },
+  "serial_sparse_widths": [
+    1
+  ],
+  "warm_100_tok_s_gate": false
+}
