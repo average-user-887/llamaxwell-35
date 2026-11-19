@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+here=$(cd -- "$(dirname -- "$0")" && pwd -P)
+c=$(dirname -- "$here")
+base=$c/sparse/r2
+n40=$c/night-one-graph-draft
+source_mount=@@OWNER_SOURCE_MOUNT@@
+image=sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed
+cd "$here"
+python3 -B - <<'PY'
+from pathlib import Path
+import shlex
+lines = Path('../break100-q2-down4/compile.sh').read_text().splitlines()
+assert len(lines) == 7 and '/work/libggml-cuda.so' in lines[4]
+args = shlex.split(lines[2])
+assert args[-4] == '-c' and args[-2:] == ['-o', '/work/occamy-fused.cu.o']
+args.remove('-use_fast_math')
+args[-3:] = ['/work/compact-cuda.cu', '-o', '/work/compact-cuda.o']
+args[1:1] = ['-I/work','-I/n40-include','-I'+str(Path(shlex.split(lines[2])[-3]).parent),
+    '-I'+str(Path(shlex.split(lines[2])[-3]).parent.parent)]
+original = lines[4].replace('/work/occamy-fused.cu.o','/down4/occamy-fused.cu.o')
+control = original.replace('/work/libggml-cuda.so','/work/cuda-control.so')
+new = original.replace('/down4/occamy-fused.cu.o','/down4/occamy-fused.cu.o /work/compact-cuda.o')
+Path('cuda-link.sh').write_text('set -eux\n'+shlex.join(args)+'\n'+control+'\n'+new+'\n')
+PY
+timeout -k 3s 240s docker run --rm --pull never --runtime runc --network none --cpuset-cpus 3 \
+  --name "nmmoon-compact-cuda-$$" --tmpfs /tmp:rw,size=256m --user "$(id -u):$(id -g)" \
+  -e NVIDIA_VISIBLE_DEVICES=void -e TMPDIR=/tmp -v "$base/src:$source_mount:ro" \
+  -v "$base/build:/b:ro" -v "$n40/src/include:/n40-include:ro" \
+  -v "$c/night-gdn-t2-q8-fast/occamy-gdn.cu.o:/q8/occamy-gdn.cu.o:ro" \
+  -v "$c/finish33-r2-stride/fattn-occamy.cu.o:/stride/fattn-occamy.cu.o:ro" \
+  -v "$c/break100-q2-down4:/down4:ro" -v "$here:/work" -w /b/ggml/src/ggml-cuda \
+  --entrypoint /bin/bash "$image" -euc '
+    /bin/bash /work/cuda-link.sh
+    cmp /work/cuda-control.so /down4/libggml-cuda.so
+    /usr/local/cuda/bin/cuobjdump --list-elf /work/compact-cuda.o
+    nm -D --defined-only /work/libggml-cuda.so | grep -w ggml_backend_cuda_occamy_compact_v1
+  ' > cuda-build.log 2>&1

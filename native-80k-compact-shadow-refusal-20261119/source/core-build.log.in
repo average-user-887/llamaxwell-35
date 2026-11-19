@@ -1,0 +1,11 @@
++ /usr/bin/g++-14 -DGGML_BACKEND_DL -DGGML_SHARED -DLLAMA_BUILD -DLLAMA_SHARED -Dllama_EXPORTS -I@@OWNER_SOURCE_MOUNT@@/src/. -I/b/src -I@@OWNER_SOURCE_MOUNT@@/src/../include -I@@OWNER_SOURCE_MOUNT@@/ggml/src/../include -O3 -DNDEBUG -fPIC -Wmissing-declarations -Wmissing-noreturn -Wall -Wextra -Wpedantic -Wcast-qual -Wno-unused-function -Wno-array-bounds -Wextra-semi -I/work -o /work/llama-context.cpp.o -c /work/llama-context.cpp
+/work/llama-context.cpp: In lambda function:
+/work/llama-context.cpp:4819:38: warning: comparison of integer expressions of different signedness: 'llama_token' {aka 'int'} and 'uint32_t' {aka 'unsigned int'} [-Wsign-compare]
+ 4819 |                 return id >= 0 && id < vocab.n_tokens() && vocab.is_eog(id);
+      |                                   ~~~^~~~~~~~~~~~~~~~~~
++ sed -e 's|/work/core-control.so|/work/libllama.so.0.6.0|' -e 's|CMakeFiles/llama.dir/llama-context.cpp.o|/work/llama-context.cpp.o|' /work/core-control-link.sh
++ bash /work/core-link.sh
++ nm -D --defined-only /work/libllama.so.0.6.0
++ c++filt
++ grep llama_occamy_compact_decode
+0000000000230790 T llama_occamy_compact_decode(llama_context*, llama_batch_ext*, std::array<int, 5ul> const&, bool, occamy_compact::Result&)

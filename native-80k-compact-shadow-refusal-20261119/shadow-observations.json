@@ -1,0 +1,233 @@
+{
+  "arm": "shadow",
+  "child_feature_environment": {
+    "GGML_CUDA_CONCAT_T": "1",
+    "GGML_CUDA_FA_MAXWELL_GEMM": "1",
+    "GGML_CUDA_FA_MAXWELL_GEMM_FUSED": "1",
+    "GGML_CUDA_GATE_COPY": "1",
+    "GGML_CUDA_GDN_COLS": "2,4",
+    "GGML_CUDA_HEAD_ROWPACK_SM52": "1",
+    "GGML_CUDA_MMQ_COMPACT_SM52": "1",
+    "GGML_CUDA_MMQ_TAIL_SM52": "1",
+    "GGML_CUDA_MMQ_XMAD_SM52": "1",
+    "GGML_CUDA_MMVQ_SM52": "1",
+    "GGML_CUDA_MOE_DOWNH": "2",
+    "GGML_CUDA_MOE_DOWNX": "1",
+    "GGML_CUDA_MOE_LOP3": "1",
+    "GGML_CUDA_MOE_TAILBAL": "1",
+    "GGML_CUDA_MOE_V3": "1",
+    "GGML_CUDA_NORM_Q8": "1",
+    "GGML_CUDA_OCCAMY_DEBUG": "1",
+    "GGML_CUDA_OCCAMY_FA": "1",
+    "GGML_CUDA_OCCAMY_FA2_NU": "4",
+    "GGML_CUDA_OCCAMY_FA_ADDR": "1",
+    "GGML_CUDA_OCCAMY_FA_MROW": "3",
+    "GGML_CUDA_OCCAMY_FA_PIPE": "3",
+    "GGML_CUDA_OCCAMY_FA_Q2_R2_PROBE4": "1",
+    "GGML_CUDA_OCCAMY_FA_Q2_R2_STRIDE": "1",
+    "GGML_CUDA_OCCAMY_FA_Q2_R2_TOP16": "1",
+    "GGML_CUDA_OCCAMY_FA_Q2_R2_TOP16_CHECK": "0",
+    "GGML_CUDA_OCCAMY_FA_SPARSE": "1",
+    "GGML_CUDA_OCCAMY_FA_SPARSE_R2": "1",
+    "GGML_CUDA_OCCAMY_FUSED": "1",
+    "GGML_CUDA_OCCAMY_GDN": "1",
+    "GGML_CUDA_OCCAMY_GDN_PCSHARE": "1",
+    "GGML_CUDA_OCCAMY_GDN_PREF": "1",
+    "GGML_CUDA_OCCAMY_GDN_QKREUSE": "1",
+    "GGML_CUDA_OCCAMY_GDN_REPACK": "1",
+    "GGML_CUDA_OCCAMY_GDN_STATE_DIRECT": "1",
+    "GGML_CUDA_OCCAMY_GDN_T2": "1",
+    "GGML_CUDA_OCCAMY_GDN_T2_Q8A": "1",
+    "GGML_CUDA_OCCAMY_GDN_T2_Q8A_EVENTS": "0",
+    "GGML_CUDA_OCCAMY_HOSTGAP": "1",
+    "GGML_CUDA_OCCAMY_MOE_Q2_COHORTS": "1",
+    "GGML_CUDA_OCCAMY_MOE_Q2_COUNT": "1",
+    "GGML_CUDA_OCCAMY_MOE_Q2_DOWN4": "1",
+    "GGML_CUDA_OCCAMY_MOE_Q2_READ_IDS": "0",
+    "GGML_CUDA_OCCAMY_N2GDN": "1",
+    "GGML_CUDA_OCCAMY_N2SPLIT": "1",
+    "GGML_CUDA_OCCAMY_SMALLFUSE": "2",
+    "GGML_CUDA_Q8_REUSE": "1",
+    "GGML_CUDA_RMS_WARP": "0",
+    "LLAMA_MTP_CACHE_ONLY": "1",
+    "LLAMA_MTP_LAST_QUERY": "1",
+    "LLAMA_MTP_MERGE_REEVAL": "1",
+    "LLAMA_MV1_TRACE": "1",
+    "LLAMA_OCCAMY_COMPACT_READBACK": "shadow",
+    "LLAMA_SPEC_RS_SAMPLER_SNAPSHOT_ELIDE": "1"
+  },
+  "child_speculation_arguments": [
+    "--spec-type",
+    "draft-mtp",
+    "--spec-draft-n-max",
+    "1",
+    "--spec-draft-type-k",
+    "f16",
+    "--spec-draft-type-v",
+    "f16"
+  ],
+  "down4_residency": {
+    "active_blocks_per_sm": 2,
+    "dynamic_bytes": 39424,
+    "local_bytes": 0,
+    "ready": 1,
+    "registers_per_thread": 62,
+    "sms": 24,
+    "static_bytes": 96
+  },
+  "mapped_software_sha256": {
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+    "libggml-cuda.so": "e9100d3898264235602fbca88def3eb965c5cc38f3074e4c651ebf73cae5c263",
+    "libllama-common.so.0.6.0": "1088044d770e2e1f7a302192180208049cff263c009ef4fe3815d584a0763131",
+    "libllama-server-impl.so": "aef2e1ee95b3b53ad9c8a1a6fefd130522e6b39ece71fbaf7f3b2743053e8a8a",
+    "libllama.so.0.6.0": "04ef90bb7eab8f890b1ea8d26d24207e45b815e140e6845a43015e76ad0d3f33"
+  },
+  "phases": {
+    "cold": {
+      "archived_scorer_control": {
+        "cache_n": 0,
+        "draft_n": 101,
+        "draft_n_accepted": 89,
+        "exact_full_text": true,
+        "exact_token_sequence": true,
+        "first_token_mismatch_ordinal": null,
+        "observed_response_tokens": 192,
+        "predicted_n": 192,
+        "prompt_n": 80000,
+        "same_request": true,
+        "same_slot": true
+      },
+      "compact_counts": {
+        "ambiguous": 0,
+        "compact_bytes": 0,
+        "compact_only": 0,
+        "launched": 0,
+        "raw_bytes": 0,
+        "requested": 0,
+        "shadow_mismatches": 0,
+        "shadow_rows": 0,
+        "unsupported": 0
+      },
+      "finish_reason": "limit",
+      "observed_response_tokens": 192,
+      "physical_delta": {
+        "combined": 4080,
+        "down4": 4080,
+        "q2_sparse": 1020,
+        "q2_stride": 1020,
+        "row0": 0,
+        "row1": 0,
+        "skip": 4080
+      },
+      "requested_generation_tokens": 192,
+      "requested_prompt_tokens": 80000,
+      "server": {
+        "cache_n": 0,
+        "draft_n": 102,
+        "draft_n_accepted": 88,
+        "predicted_n": 192,
+        "prompt_n": 80000
+      },
+      "truncated": false,
+      "ttft_s": 266.9815711379051,
+      "wall_s": 269.1097158070188
+    },
+    "warm": {
+      "archived_scorer_control": {
+        "cache_n": 79996,
+        "draft_n": 1642,
+        "draft_n_accepted": 1429,
+        "exact_full_text": false,
+        "exact_token_sequence": false,
+        "first_token_mismatch_ordinal": 1603,
+        "observed_response_tokens": 3072,
+        "predicted_n": 3072,
+        "prompt_n": 4,
+        "same_request": true,
+        "same_slot": true
+      },
+      "compact_counts": {
+        "ambiguous": 0,
+        "compact_bytes": 0,
+        "compact_only": 0,
+        "launched": 0,
+        "raw_bytes": 0,
+        "requested": 0,
+        "shadow_mismatches": 0,
+        "shadow_rows": 0,
+        "unsupported": 0
+      },
+      "finish_reason": "limit",
+      "observed_response_tokens": 3071,
+      "physical_delta": {
+        "combined": 65840,
+        "down4": 65840,
+        "q2_sparse": 16460,
+        "q2_stride": 16460,
+        "row0": 0,
+        "row1": 0,
+        "skip": 65840
+      },
+      "requested_generation_tokens": 3072,
+      "requested_prompt_tokens": 80000,
+      "server": {
+        "cache_n": 79996,
+        "draft_n": 1646,
+        "draft_n_accepted": 1424,
+        "predicted_n": 3072,
+        "prompt_n": 4
+      },
+      "sse_checkpoints_observed": [
+        1,
+        512,
+        1024,
+        1536,
+        2048,
+        2560
+      ],
+      "truncated": false,
+      "ttft_s": 0.2752774809487164,
+      "wall_s": 31.53384603606537
+    }
+  },
+  "physical_cumulative_snapshots": {
+    "cold": {
+      "combined": 4119,
+      "down4": 4119,
+      "q2_sparse": 1020,
+      "q2_stride": 1020,
+      "row0": 0,
+      "row1": 0,
+      "skip": 4119
+    },
+    "start": {
+      "combined": 39,
+      "down4": 39,
+      "q2_sparse": 0,
+      "q2_stride": 0,
+      "row0": 0,
+      "row1": 0,
+      "skip": 39
+    },
+    "warm": {
+      "combined": 69959,
+      "down4": 69959,
+      "q2_sparse": 17480,
+      "q2_stride": 17480,
+      "row0": 0,
+      "row1": 0,
+      "skip": 69959
+    }
+  },
+  "schema": 1,
+  "sealed_observation_files": 22,
+  "source_freeze_sha256": "bda2c10a72ff4cc13f92466157f617990341364de061b941588088927347e156",
+  "terminal": {
+    "bounded_wall_s": 374,
+    "cap_s": 430,
+    "cleanup_exit": 0,
+    "runner_exit": 1
+  },
+  "validation": "refused",
+  "validator_message": "warm prompt, slot, stop or exact output length differs from the pinned protocol; token-bearing SSE checkpoints incomplete"
+}

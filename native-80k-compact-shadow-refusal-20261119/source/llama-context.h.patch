@@ -1,0 +1,18 @@
+--- a/src/llama-context.h
++++ b/src/llama-context.h
+@@ -1,4 +1,6 @@
+ #pragma once
++
++#include "compact-readback.h"
+ 
+ #include "llama.h"
+ #include "llama-ext.h"
+@@ -151,6 +153,8 @@
+     void enable_mtp_last_query() { mtp_last_query_allowed = true; }
+     bool has_graph_adapter() const { return cvec->active() || !loras->empty(); }
+     int decode_mtp(const llama_batch_ext & batch_inp, bool mtp_cache_catch_up, bool last_query);
++    int decode_mtp_output(const llama_batch_ext & batch_inp, bool mtp_cache_catch_up, bool last_query,
++            const occamy_compact::Mask * mask, occamy_compact::Result * compact);
+ 
+     // compat version
+     int encode(const llama_batch & batch_inp);

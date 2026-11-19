@@ -1,0 +1,29 @@
+CPU_PARENT_PASS seven exact words, wrong image/executable/index refused
+{
+  "sha256": {
+    "exe": "f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405",
+    "libggml-cuda.so": "e9100d3898264235602fbca88def3eb965c5cc38f3074e4c651ebf73cae5c263",
+    "libllama-common.so.0.6.0": "1088044d770e2e1f7a302192180208049cff263c009ef4fe3815d584a0763131",
+    "libllama-server-impl.so": "aef2e1ee95b3b53ad9c8a1a6fefd130522e6b39ece71fbaf7f3b2743053e8a8a",
+    "libllama.so.0.6.0": "04ef90bb7eab8f890b1ea8d26d24207e45b815e140e6845a43015e76ad0d3f33"
+  },
+  "down4_counter_addresses": [
+    36024880,
+    36024888,
+    36024896,
+    36024872,
+    36006976,
+    36006732,
+    36024864
+  ],
+  "cuda_rw_program_header": [
+    1,
+    6,
+    35970736,
+    35974832,
+    35974832,
+    26880,
+    101208,
+    4096
+  ]
+}

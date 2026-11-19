@@ -1,0 +1,10 @@
++ /usr/bin/g++-14 -DGGML_BACKEND_DL -DGGML_SHARED -DLLAMA_SHARED -DLLAMA_SUBPROCESS -I@@OWNER_SOURCE_MOUNT@@/tools/server -I/b/tools/server -I@@OWNER_SOURCE_MOUNT@@/tools/server/../mtmd -I@@OWNER_SOURCE_MOUNT@@ -I@@OWNER_SOURCE_MOUNT@@/common/. -I@@OWNER_SOURCE_MOUNT@@/vendor/nlohmann/.. -I@@OWNER_SOURCE_MOUNT@@/vendor/sheredom/.. -I@@OWNER_SOURCE_MOUNT@@/src/../include -I@@OWNER_SOURCE_MOUNT@@/ggml/src/../include -I@@OWNER_SOURCE_MOUNT@@/tools/mtmd/. -O3 -DNDEBUG -fPIC -Wmissing-declarations -Wmissing-noreturn -Wall -Wextra -Wpedantic -Wcast-qual -Wno-unused-function -Wno-array-bounds -Wextra-semi -I/work -o /work/server-context.cpp.o -c /work/server-context.cpp
++ cp libserver-context.a /work/libserver-context.a
++ /usr/bin/ar r /work/libserver-context.a /work/server-context.cpp.o
++ /usr/bin/ranlib /work/libserver-context.a
++ sed 's|-o ../../bin/libllama-server-impl.so|-o /work/libllama-server-impl.so|;s| libserver-context.a | /work/libserver-context.a |' CMakeFiles/llama-server-impl.dir/link.txt
++ bash /work/server-link.sh
++ nm -D /work/libllama-server-impl.so
++ c++filt
++ grep llama_occamy_compact_decode
+                 U llama_occamy_compact_decode(llama_context*, llama_batch_ext*, std::array<int, 5ul> const&, bool, occamy_compact::Result&)
