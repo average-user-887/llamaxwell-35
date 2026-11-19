@@ -1,0 +1,323 @@
+{
+  "decision_ordinal": 170,
+  "preincrement_n_dec_window": [
+    160,
+    170
+  ],
+  "score": "target log-softmax (natural log) rounded to 5 decimals",
+  "recurrent_state_bytes_compared": null,
+  "phases": {
+    "cold": {
+      "shared_output_prefix_length": 169,
+      "exact_per_arm_archive_parity": true,
+      "serial": {
+        "already_emitted": 169,
+        "row_zero_based": 0,
+        "round_kind": "ordinary",
+        "target_rows_in_round": 1,
+        "emitted_in_round": 1,
+        "accepted_proposals_in_round": null,
+        "previous_round_rejected_proposal": null,
+        "emitted_choice": "serial_choice",
+        "emitted_equals_raw_top1": true,
+        "own": {
+          "rank": 1,
+          "in_top_eight": true,
+          "log_probability": -0.52341,
+          "gap_from_top": 0.0
+        },
+        "cross": {
+          "rank": 2,
+          "in_top_eight": true,
+          "log_probability": -1.18379,
+          "gap_from_top": 0.66038
+        },
+        "top_eight": [
+          {
+            "rank": 1,
+            "label": "serial_choice",
+            "log_probability": -0.52341
+          },
+          {
+            "rank": 2,
+            "label": "native_choice",
+            "log_probability": -1.18379
+          },
+          {
+            "rank": 3,
+            "label": "other",
+            "log_probability": -2.8877
+          },
+          {
+            "rank": 4,
+            "label": "other",
+            "log_probability": -4.1807
+          },
+          {
+            "rank": 5,
+            "label": "other",
+            "log_probability": -5.27473
+          },
+          {
+            "rank": 6,
+            "label": "other",
+            "log_probability": -5.57781
+          },
+          {
+            "rank": 7,
+            "label": "other",
+            "log_probability": -5.7984
+          },
+          {
+            "rank": 8,
+            "label": "other",
+            "log_probability": -6.44283
+          }
+        ],
+        "top1_minus_top2": 0.66038,
+        "own_minus_cross": 0.66038,
+        "sampler_snapshot_counters": {
+          "elided": 0,
+          "elided_rejected": 0,
+          "kept": 0,
+          "restored": 0
+        },
+        "stride_dispatches": 0,
+        "offered_proposals": 0,
+        "accepted_proposals": 0
+      },
+      "native": {
+        "already_emitted": 168,
+        "row_zero_based": 1,
+        "round_kind": "verifier",
+        "target_rows_in_round": 2,
+        "emitted_in_round": 2,
+        "accepted_proposals_in_round": 1,
+        "previous_round_rejected_proposal": false,
+        "emitted_choice": "native_choice",
+        "emitted_equals_raw_top1": true,
+        "own": {
+          "rank": 1,
+          "in_top_eight": true,
+          "log_probability": -0.58299,
+          "gap_from_top": 0.0
+        },
+        "cross": {
+          "rank": 2,
+          "in_top_eight": true,
+          "log_probability": -1.11982,
+          "gap_from_top": 0.53683
+        },
+        "top_eight": [
+          {
+            "rank": 1,
+            "label": "native_choice",
+            "log_probability": -0.58299
+          },
+          {
+            "rank": 2,
+            "label": "serial_choice",
+            "log_probability": -1.11982
+          },
+          {
+            "rank": 3,
+            "label": "other",
+            "log_probability": -2.52795
+          },
+          {
+            "rank": 4,
+            "label": "other",
+            "log_probability": -4.96336
+          },
+          {
+            "rank": 5,
+            "label": "other",
+            "log_probability": -5.13823
+          },
+          {
+            "rank": 6,
+            "label": "other",
+            "log_probability": -5.55893
+          },
+          {
+            "rank": 7,
+            "label": "other",
+            "log_probability": -5.96228
+          },
+          {
+            "rank": 8,
+            "label": "other",
+            "log_probability": -6.60511
+          }
+        ],
+        "top1_minus_top2": 0.53683,
+        "own_minus_cross": 0.53683,
+        "sampler_snapshot_counters": {
+          "elided": 101,
+          "elided_rejected": 12,
+          "kept": 0,
+          "restored": 0
+        },
+        "stride_dispatches": 1010,
+        "offered_proposals": 101,
+        "accepted_proposals": 89
+      }
+    },
+    "warm": {
+      "shared_output_prefix_length": 169,
+      "exact_per_arm_archive_parity": true,
+      "serial": {
+        "already_emitted": 169,
+        "row_zero_based": 0,
+        "round_kind": "ordinary",
+        "target_rows_in_round": 1,
+        "emitted_in_round": 1,
+        "accepted_proposals_in_round": null,
+        "previous_round_rejected_proposal": null,
+        "emitted_choice": "serial_choice",
+        "emitted_equals_raw_top1": true,
+        "own": {
+          "rank": 1,
+          "in_top_eight": true,
+          "log_probability": -0.52341,
+          "gap_from_top": 0.0
+        },
+        "cross": {
+          "rank": 2,
+          "in_top_eight": true,
+          "log_probability": -1.18379,
+          "gap_from_top": 0.66038
+        },
+        "top_eight": [
+          {
+            "rank": 1,
+            "label": "serial_choice",
+            "log_probability": -0.52341
+          },
+          {
+            "rank": 2,
+            "label": "native_choice",
+            "log_probability": -1.18379
+          },
+          {
+            "rank": 3,
+            "label": "other",
+            "log_probability": -2.8877
+          },
+          {
+            "rank": 4,
+            "label": "other",
+            "log_probability": -4.1807
+          },
+          {
+            "rank": 5,
+            "label": "other",
+            "log_probability": -5.27473
+          },
+          {
+            "rank": 6,
+            "label": "other",
+            "log_probability": -5.57781
+          },
+          {
+            "rank": 7,
+            "label": "other",
+            "log_probability": -5.7984
+          },
+          {
+            "rank": 8,
+            "label": "other",
+            "log_probability": -6.44283
+          }
+        ],
+        "top1_minus_top2": 0.66038,
+        "own_minus_cross": 0.66038,
+        "sampler_snapshot_counters": {
+          "elided": 0,
+          "elided_rejected": 0,
+          "kept": 0,
+          "restored": 0
+        },
+        "stride_dispatches": 0,
+        "offered_proposals": 0,
+        "accepted_proposals": 0
+      },
+      "native": {
+        "already_emitted": 168,
+        "row_zero_based": 1,
+        "round_kind": "verifier",
+        "target_rows_in_round": 2,
+        "emitted_in_round": 2,
+        "accepted_proposals_in_round": 1,
+        "previous_round_rejected_proposal": false,
+        "emitted_choice": "native_choice",
+        "emitted_equals_raw_top1": true,
+        "own": {
+          "rank": 1,
+          "in_top_eight": true,
+          "log_probability": -0.58299,
+          "gap_from_top": 0.0
+        },
+        "cross": {
+          "rank": 2,
+          "in_top_eight": true,
+          "log_probability": -1.11982,
+          "gap_from_top": 0.53683
+        },
+        "top_eight": [
+          {
+            "rank": 1,
+            "label": "native_choice",
+            "log_probability": -0.58299
+          },
+          {
+            "rank": 2,
+            "label": "serial_choice",
+            "log_probability": -1.11982
+          },
+          {
+            "rank": 3,
+            "label": "other",
+            "log_probability": -2.52795
+          },
+          {
+            "rank": 4,
+            "label": "other",
+            "log_probability": -4.96336
+          },
+          {
+            "rank": 5,
+            "label": "other",
+            "log_probability": -5.13823
+          },
+          {
+            "rank": 6,
+            "label": "other",
+            "log_probability": -5.55893
+          },
+          {
+            "rank": 7,
+            "label": "other",
+            "log_probability": -5.96228
+          },
+          {
+            "rank": 8,
+            "label": "other",
+            "log_probability": -6.60511
+          }
+        ],
+        "top1_minus_top2": 0.53683,
+        "own_minus_cross": 0.53683,
+        "sampler_snapshot_counters": {
+          "elided": 1642,
+          "elided_rejected": 213,
+          "kept": 0,
+          "restored": 0
+        },
+        "stride_dispatches": 16420,
+        "offered_proposals": 1642,
+        "accepted_proposals": 1429
+      }
+    }
+  }
+}

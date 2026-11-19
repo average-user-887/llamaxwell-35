@@ -1,0 +1,94 @@
+"""Single timestamp-grammar amendment to the otherwise frozen 80K observer."""
+from pathlib import Path
+import hashlib
+import importlib.util
+import json
+import re
+import sys
+
+HERE = Path(__file__).resolve().parent
+R0 = HERE.parent / "quality80-divergence"
+SERIAL = R0 / "receipts/@SERIAL_SCORE@"
+spec = importlib.util.spec_from_file_location("quality80_r0", R0 / "model.py")
+q = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(q)
+original_instrument, original_terminal = q.instrument, q.terminal
+need = q.need
+OLD = r"^(?:\d+\.\d{2}\.\d{3}\.\d{3} I )?sampler_snapshot: elided=(\d+) elided_rejected=(\d+) kept=(\d+) restored=(\d+)$"
+NEW = OLD.replace(" I )?", " (?:I )?)?")
+
+
+def instrument(stage):
+    module = original_instrument(stage)
+    need(module.core.SNAPSHOT.pattern == OLD, "parent validator differs")
+    module.core.SNAPSHOT = re.compile(NEW, module.core.SNAPSHOT.flags)
+    return module
+
+
+def revalidate():
+    module = original_instrument("serial")
+    for name in ("FROZEN.sha256", "INPUTS.sha256"):
+        module.validator.sha_check(R0, name)
+    module.validator.sha_check(SERIAL, "observations.sha256")
+    manifest = (SERIAL / "manifest.txt").read_text().splitlines()
+    need(manifest[0] == "stage=serial" and manifest[4] == "cap_seconds=430", "unexpected launch manifest")
+    for p in (R0 / "FROZEN.sha256", R0 / "INPUTS.sha256", R0.parent / "model.sha256"):
+        need(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p}" in manifest, "original launch contract mismatch")
+    status = dict(line.split("=", 1) for line in (SERIAL / "status.txt").read_text().splitlines())
+    original = q.read(SERIAL / "sanitized/model-receipt.json")
+    need(status["runner_exit"] == "1" and status["cleanup_exit"] == "0" and
+         original["runner_exit"] == 1 and original["cleanup_exit"] == 0 and original["validated"] is None,
+         "original refusal or cleanup changed")
+    expected = "malformed snapshot witness"
+    need((SERIAL / "run.log").read_text().splitlines()[-1] == "Quality replay: " + expected, "unexpected prior refusal")
+    decisions = q.private_evidence("serial", SERIAL)
+    try:
+        module.collect("serial", SERIAL)
+    except ValueError as exc:
+        need(str(exc) == expected, "prior refusal did not reproduce")
+    else:
+        raise ValueError("original validator unexpectedly passed")
+    result = instrument("serial").collect("serial", SERIAL)
+    need(result["actual_server_software_sha256"] == q.read(q.ARCHIVE["serial"] / "result.json")["actual_server_software_sha256"],
+         "exact mapped hybrid DSOs differ")
+    n_lines = len((SERIAL / "witness/mv2-private.tsv").read_bytes().splitlines())
+    need(n_lines == 22 and all(d["map"]["already_emitted"] == 169 and d["map"]["row_zero_based"] == 0
+                               for d in decisions.values()), "serial diagnostics incomplete")
+    receipt = {"source_receipt": SERIAL.name, "original_runner_exit": 1, "original_cleanup_exit": 0,
+               "original_refusal_reproduced": expected, "observation_manifest_verified": True,
+               "timestamp_only_revalidation": "pass", "exact_hybrid_dso_set": True,
+               "exact_full_phase_ids_and_text_and_cache_counts": {"cold": 192, "warm": 3072},
+               "score_lines": n_lines, "cold_and_warm_decision_ordinal": 170, "row_zero_based": 0,
+               "sampling_snapshot_phase_counters": result["sampler_snapshot_witness"]}
+    return (result, decisions), receipt
+
+
+def terminal(stage, out):
+    if stage == "serial":
+        need(out == SERIAL, "unexpected serial receipt")
+        return revalidate()[0]
+    return original_terminal(stage, out)
+
+
+def main(cmd, *args):
+    q.instrument, q.terminal, q.HERE = instrument, terminal, HERE
+    if cmd in ("check", "revalidate") and not args:
+        pattern = re.compile(NEW)
+        body = "sampler_snapshot: elided=0 elided_rejected=0 kept=0 restored=0"
+        for prefix in ("", "5.24.739.146 ", "5.24.739.146 I "):
+            need(pattern.fullmatch(prefix + body), "valid timestamp rejected")
+        for prefix in ("I ", "5.24.739.146 W ", "5.4.739.146 ", "5.24.739.146  "):
+            need(not pattern.fullmatch(prefix + body), "invalid timestamp accepted")
+        if cmd == "check":
+            q.main("check")
+        _, receipt = revalidate()
+        print(json.dumps(receipt, indent=2))
+        return
+    q.main(cmd, *args)
+
+
+if __name__ == "__main__":
+    try:
+        main(*sys.argv[1:])
+    except (ValueError, KeyError, OSError) as exc:
+        raise SystemExit(f"Quality replay: {exc}") from None

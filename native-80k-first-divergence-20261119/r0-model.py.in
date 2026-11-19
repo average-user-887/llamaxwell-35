@@ -1,0 +1,241 @@
+"""Exact hybrid replay with the built-in MV2 observer. Raw records remain private."""
+import importlib.util
+import json
+import math
+from pathlib import Path
+import re
+import sys
+
+HERE = Path(__file__).resolve().parent
+C = HERE.parent
+PARENTS = {"native": "hundred-hybrid-draft", "serial": "moon100-hybrid-serial"}
+ARCHIVE = {
+    "native": C / PARENTS["native"] / "receipts/@HYBRID_NATIVE@",
+    "serial": C / PARENTS["serial"] / "receipts/@HYBRID_SERIAL@",
+}
+LO, HI, ORDINAL = 160, 170, 170
+FLAGS = ["-e", "LLAMA_MV2_DUMP=/witness/mv2-private.tsv",
+         "-e", f"LLAMA_MV2_DUMP_LO={LO}", "-e", f"LLAMA_MV2_DUMP_HI={HI}"]
+FIELDS = ("prompt_sha256", "prompt_n", "n_predict", "seed", "temperature", "cache_prompt",
+          "ignore_eos", "finish_reason", "truncated", "error", "text", "token_ids")
+STAT_FIELDS = ("draft_n", "draft_n_accepted", "cache_n", "prompt_n")
+ROW = r" \[(?:\d+=-?\d+\.\d{5},){7}\d+=-?\d+\.\d{5}\]"
+NORMAL = re.compile(rf"N slot=0 n_dec=(\d+) rows=1({ROW}) ids=(\d+)")
+VERIFY = re.compile(rf"V slot=0 n_dec=(\d+) draft=(\d+) replay=0 rows=2({ROW}{ROW}) acc_n=([01]) ids=(\d+(?:,\d+)?)")
+
+
+def need(ok, why):
+    if not ok:
+        raise ValueError(why)
+
+
+def read(p):
+    return json.loads(p.read_text())
+
+
+def load(stage):
+    spec = importlib.util.spec_from_file_location(f"original_{stage}", C / PARENTS[stage] / "model.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def instrument(stage):
+    mod = load(stage)
+    original = mod.settings
+
+    def observed_settings(name):
+        env, args = original(name)
+        need(not any(v.startswith("LLAMA_MV2_DUMP") for v in env), "profile already contains MV2 observer")
+        return [*env, *FLAGS], args
+
+    mod.settings = observed_settings
+    return mod
+
+
+def parse_line(stage, line):
+    m = NORMAL.fullmatch(line)
+    if m:
+        n, rows, ids = m.groups()
+        kind, accepted = "ordinary", None
+        ids = [int(ids)]
+    else:
+        m = VERIFY.fullmatch(line)
+        need(stage == "native" and m is not None, "unexpected MV2 record shape, slot or replay")
+        n, draft, rows, accepted, ids = m.groups()
+        kind, accepted = "verifier", int(accepted)
+        ids = list(map(int, ids.split(",")))
+        need(len(ids) == accepted + 1 and (ids[0] == int(draft)) == bool(accepted),
+             "draft acceptance does not match committed choices")
+    scores = []
+    for group in re.findall(r"\[([^\]]+)\]", rows):
+        pairs = [v.split("=") for v in group.split(",")]
+        ranked = {int(token): float(lp) for token, lp in pairs}
+        vals = list(ranked.values())
+        need(len(ranked) == 8 and all(math.isfinite(v) and v <= 0 for v in vals)
+             and vals == sorted(vals, reverse=True), "invalid normalized top eight")
+        scores.append(ranked)
+    return dict(n=int(n), ids=ids, scores=scores, kind=kind, accepted=accepted)
+
+
+def actual_decision(stage, blob, trajectory):
+    need(blob and blob.endswith(b"\n"), "missing or truncated phase dump")
+    entries = [parse_line(stage, line) for line in blob.decode("ascii").splitlines()]
+    need(LO <= entries[0]["n"] <= LO + (stage == "native"), "missing first emitted decision")
+    end = entries[0]["n"]
+    for e in entries:
+        start = e["n"]
+        end_new = start + len(e["ids"])
+        need(LO <= start <= HI and start == end and e["ids"] == trajectory[start:end_new],
+             "ambiguous row alignment or selected IDs differ from actual response")
+        end = end_new
+    need(end > HI, "last diagnostic decision missing")
+    matches = [(i, e, ORDINAL - 1 - e["n"]) for i, e in enumerate(entries)
+               if e["n"] < ORDINAL <= e["n"] + len(e["ids"])]
+    need(len(matches) == 1, "decision does not map to one committed row")
+    i, e, r = matches[0]
+    need(stage != "native" or e["kind"] == "verifier", "native divergence was not a two-row verifier decision")
+    earlier = entries[i - 1] if i else None
+    return dict(chosen=e["ids"][r], ranked=e["scores"][r],
+                map={"already_emitted": e["n"], "row_zero_based": r, "round_kind": e["kind"],
+                     "target_rows_in_round": len(e["scores"]), "emitted_in_round": len(e["ids"]),
+                     "accepted_proposals_in_round": e["accepted"],
+                     "previous_round_rejected_proposal": earlier["accepted"] == 0 if earlier and earlier["kind"] == "verifier" else None})
+
+
+def private_evidence(stage, out):
+    blob = (out / "witness/mv2-private.tsv").read_bytes()
+    boundary = int((out / "cold-dump-bytes.txt").read_text())
+    need(0 < boundary < len(blob), "phase dump boundary invalid")
+    decisions = {}
+    for phase, part in (("cold", blob[:boundary]), ("warm", blob[boundary:])):
+        record = read(out / f"{phase}.json")
+        ref = read(ARCHIVE[stage] / f"{phase}.json")
+        need(all(record[k] == ref[k] for k in FIELDS) and
+             all(record["timings"].get(k) == ref["timings"].get(k) for k in STAT_FIELDS),
+             f"{stage} {phase} differs from exact hybrid archive")
+        decisions[phase] = actual_decision(stage, part, record["token_ids"])
+    return decisions
+
+
+def describe(decision, stage, chosen):
+    ranked = decision["ranked"]
+    top_id = next(iter(ranked))
+    top = ranked[top_id]
+    own = chosen[stage]
+    other = chosen["native" if stage == "serial" else "serial"]
+    def entry(token):
+        if token not in ranked:
+            return {"rank": None, "in_top_eight": False, "log_probability": None, "gap_from_top": None}
+        return {"rank": list(ranked).index(token) + 1, "in_top_eight": True, "log_probability": ranked[token],
+                "gap_from_top": round(top - ranked[token], 5)}
+    ranks = []
+    for index, (token, lp) in enumerate(ranked.items(), 1):
+        label = next((s + "_choice" for s, t in chosen.items() if token == t), "other")
+        ranks.append({"rank": index, "label": label, "log_probability": lp})
+    return {**decision["map"], "emitted_choice": stage + "_choice", "emitted_equals_raw_top1": own == top_id,
+            "own": entry(own), "cross": entry(other), "top_eight": ranks,
+            "top1_minus_top2": round(top - list(ranked.values())[1], 5),
+            "own_minus_cross": round(ranked[own] - ranked[other], 5) if own in ranked and other in ranked else None}
+
+
+def terminal(stage, out):
+    need(out.parent == HERE / "receipts" and out.name.startswith(stage + "-"), "not an owned terminal receipt")
+    module = instrument(stage)
+    module.validator.sha_check(out, "observations.sha256")
+    status = dict(v.split("=", 1) for v in (out / "status.txt").read_text().splitlines())
+    need(status["runner_exit"] == status["cleanup_exit"] == "0", "terminal run or cleanup failed")
+    official = read(out / "sanitized/model-receipt.json")
+    result = module.collect(stage, out)
+    need(result == read(out / "result.json") == official["validated"], "terminal receipt did not revalidate")
+    need(result["actual_server_software_sha256"] == read(ARCHIVE[stage] / "result.json")["actual_server_software_sha256"],
+         "mapped software differs from exact hybrid archive")
+    return result, private_evidence(stage, out)
+
+
+def compare(serial, native):
+    paths = {"serial": serial, "native": native}
+    records = {s: terminal(s, out) for s, out in paths.items()}
+    need((serial / "environment.args").read_bytes() == (native / "environment.args").read_bytes(),
+         "paired child features differ")
+    report = {"decision_ordinal": ORDINAL, "preincrement_n_dec_window": [LO, HI], "score": "target log-softmax (natural log) rounded to 5 decimals",
+              "recurrent_state_bytes_compared": None, "phases": {}}
+    for phase in ("cold", "warm"):
+        ids = {s: read(out / f"{phase}.json")["token_ids"] for s, out in paths.items()}
+        first = next((i for i, pair in enumerate(zip(ids["serial"], ids["native"]), 1) if pair[0] != pair[1]), None)
+        need(first == ORDINAL, f"{phase}: actual first divergence changed")
+        chosen = {s: d[phase]["chosen"] for s, (_, d) in records.items()}
+        row = {"shared_output_prefix_length": first - 1, "exact_per_arm_archive_parity": True}
+        for s, (result, decisions) in records.items():
+            summary = describe(decisions[phase], s, chosen)
+            summary["sampler_snapshot_counters"] = result["sampler_snapshot_witness"][phase]
+            summary["stride_dispatches"] = result["stride_execution_witness"]["phases"][phase]["actual_stride_dispatches"]
+            summary["offered_proposals"] = result["metrics"][phase]["draft_n"] or 0
+            summary["accepted_proposals"] = result["metrics"][phase]["draft_n_accepted"] or 0
+            row[s] = summary
+        report["phases"][phase] = row
+    return report
+
+
+def selftest():
+    scores = " [" + ",".join(f"{n}=-{n}.00000" for n in range(1, 9)) + "]"
+    serial = lambda n: f"N slot=0 n_dec={n} rows=1{scores} ids=1\n"
+    native = lambda n, accept: (f"V slot=0 n_dec={n} draft={1 if accept else 2} replay=0 rows=2"
+                                f"{scores}{scores} acc_n={int(accept)} ids={'1,1' if accept else '1'}\n")
+    trajectory = [1] * 175
+    for offset in (0, 1):
+        blob = "".join(native(n, True) for n in range(LO + offset, HI + 1, 2)).encode()
+        d = actual_decision("native", blob, trajectory)
+        need(d["map"]["row_zero_based"] == 1-offset, "accepted row mapping self-test")
+    blob = "".join(native(n, False) for n in range(LO, HI + 1)).encode()
+    d = actual_decision("native", blob, trajectory)
+    need(d["map"]["row_zero_based"] == 0 and d["map"]["previous_round_rejected_proposal"], "reject mapping self-test")
+    scored = describe(d, "native", {"native": 1, "serial": 99})
+    need(scored["own_minus_cross"] is None and scored["cross"]["rank"] is None, "censored margin self-test")
+    blob = "".join(serial(n) for n in range(LO, HI + 1)).encode()
+    actual_decision("serial", blob, trajectory)
+    for invalid in (blob + blob, blob[blob.index(b"\n")+1:], blob.replace(b"ids=1", b"ids=2", 1)):
+        try:
+            actual_decision("serial", invalid, trajectory)
+        except ValueError:
+            continue
+        raise ValueError("faulty row alignment passed self-test")
+
+
+def main(cmd, *args):
+    if cmd == "check" and not args:
+        selftest()
+        serial = load("serial")
+        serial.finished(ARCHIVE["serial"])
+        serial.hybrid.result_comparison(ARCHIVE["native"])
+        for stage, archive in ARCHIVE.items():
+            env, argv = instrument(stage).settings(stage)
+            need(env == (archive / "environment.args").read_text().splitlines() + FLAGS and
+                 argv == (archive / "server.args").read_text().splitlines(), "typed model launch differs")
+        print("Quality replay checks passed: exact archives, argv, observer environment and commit mapping.")
+        return
+    if cmd == "compare" and len(args) == 2:
+        print(json.dumps(compare(*(Path(p).resolve() for p in args)), indent=2, allow_nan=False))
+        return
+    stage, *args = args
+    need(stage in PARENTS, "unknown stage")
+    mod = instrument(stage)
+    if cmd in ("env", "args") and not args:
+        print("\n".join(mod.settings(stage)[cmd == "args"]))
+    elif cmd == "ready" and len(args) == 1:
+        mod.ready(stage, Path(args[0]))
+    elif cmd == "verify" and len(args) == 1:
+        out = Path(args[0])
+        private_evidence(stage, out)
+        mod.core.n9.write_json(out / "result.json", mod.collect(stage, out))
+    elif cmd == "finalize" and len(args) == 4:
+        mod.q2.finish(stage, Path(args[0]), *map(int, args[1:]))
+    else:
+        raise ValueError("unknown quality command")
+
+
+if __name__ == "__main__":
+    try:
+        main(*sys.argv[1:])
+    except (ValueError, KeyError, OSError) as exc:
+        raise SystemExit(f"Quality replay: {exc}") from None

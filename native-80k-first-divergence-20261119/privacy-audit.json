@@ -1,0 +1,16 @@
+{
+  "payload_files_screened_before_manifest": 16,
+  "privacy_scan": "pass",
+  "machine_trace_rows": 46,
+  "raw_score_records_examined": 34,
+  "private_phase_records_checked": 4,
+  "checks": [
+    "exact artifact allowlist and no symlinks",
+    "anonymous rank and score schema",
+    "private prompt and text values and digests, eight-consecutive-output-ID windows",
+    "private receipt aliases, absolute owner mount and home paths, device identifiers, raw score lines and token-score vectors",
+    "credential signatures and private keys",
+    "only public runtime or code identities in hexadecimal digest fields"
+  ],
+  "source_templates_locally_rehydrated_byte_exact": 4
+}

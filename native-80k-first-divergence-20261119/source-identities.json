@@ -1,0 +1,18 @@
+{
+  "r0-release.sh": {
+    "original_source_sha256": "545586d40d0af03781f520737149f12c11287695a13819b87a1005872cdaeb7a",
+    "output": "quality80-divergence/release.sh"
+  },
+  "r0-model.py": {
+    "original_source_sha256": "0d0a8c473bede7df7241ec5cceb00273649471ab917dfd1f291f33b77bf4fde0",
+    "output": "quality80-divergence/model.py"
+  },
+  "r1-release.sh": {
+    "original_source_sha256": "862471808197e1cec56c52e88b0d8fc8a7492237a70b211b2be40440e8f853e7",
+    "output": "quality80-divergence-r1/release.sh"
+  },
+  "r1-model.py": {
+    "original_source_sha256": "c3f50a7b47d3506e707f3b4b29a45405b0625543f726b9d7dceadb73c800d730",
+    "output": "quality80-divergence-r1/model.py"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "original_runner_exit": 1,
+  "original_cleanup_exit": 0,
+  "original_refusal_reproduced": "malformed snapshot witness",
+  "observation_manifest_verified": true,
+  "timestamp_only_revalidation": "pass",
+  "exact_hybrid_dso_set": true,
+  "exact_full_phase_ids_and_text_and_cache_counts": {
+    "cold": 192,
+    "warm": 3072
+  },
+  "score_lines": 22,
+  "cold_and_warm_decision_ordinal": 170,
+  "row_zero_based": 0,
+  "sampling_snapshot_phase_counters": {
+    "cold": {
+      "elided": 0,
+      "elided_rejected": 0,
+      "kept": 0,
+      "restored": 0
+    },
+    "warm": {
+      "elided": 0,
+      "elided_rejected": 0,
+      "kept": 0,
+      "restored": 0
+    }
+  }
+}
