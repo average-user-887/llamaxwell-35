@@ -1,0 +1,495 @@
+{
+  "technical_pass": true,
+  "materiality_pass": false,
+  "threshold_us_per_layer": 13.1,
+  "numeric": {
+    "residency": {
+      "sms": 24,
+      "active_per_sm": 2,
+      "grid_ctas": 48,
+      "ctas_per_cohort": 24,
+      "threads_per_cta": 512,
+      "registers": 63,
+      "control_static_shared_bytes": 96,
+      "candidate_registers": 62,
+      "candidate_static_shared_bytes": 96,
+      "dynamic_shared_bytes": 39424,
+      "local_bytes": 0
+    },
+    "results": {
+      "independent": {
+        "ordered_experts": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            85,
+            222,
+            184,
+            46,
+            216,
+            151,
+            64,
+            219
+          ]
+        ],
+        "expert_overlap": 0,
+        "candidate_router_repeats": 2,
+        "output_rows": [
+          {
+            "row": 0,
+            "finite": 2048,
+            "different_words": 0,
+            "repeat_different_words": 0,
+            "max_abs": 0.0
+          },
+          {
+            "row": 1,
+            "finite": 2048,
+            "different_words": 0,
+            "repeat_different_words": 0,
+            "max_abs": 0.0
+          }
+        ],
+        "stock_reference": "unchanged 369c6b05 two-row cohort instructions on the same native Q2 graph"
+      },
+      "partial": {
+        "ordered_experts": [
+          [
+            128,
+            215,
+            73,
+            136,
+            110,
+            167,
+            197,
+            112
+          ],
+          [
+            110,
+            73,
+            64,
+            128,
+            215,
+            96,
+            197,
+            82
+          ]
+        ],
+        "expert_overlap": 5,
+        "candidate_router_repeats": 2,
+        "output_rows": [
+          {
+            "row": 0,
+            "finite": 2048,
+            "different_words": 0,
+            "repeat_different_words": 0,
+            "max_abs": 0.0
+          },
+          {
+            "row": 1,
+            "finite": 2048,
+            "different_words": 0,
+            "repeat_different_words": 0,
+            "max_abs": 0.0
+          }
+        ],
+        "stock_reference": "unchanged 369c6b05 two-row cohort instructions on the same native Q2 graph"
+      }
+    }
+  },
+  "timing": {
+    "residency": {
+      "sms": 24,
+      "active_per_sm": 2,
+      "grid_ctas": 48,
+      "ctas_per_cohort": 24,
+      "threads_per_cta": 512,
+      "registers": 63,
+      "control_static_shared_bytes": 96,
+      "candidate_registers": 62,
+      "candidate_static_shared_bytes": 96,
+      "dynamic_shared_bytes": 39424,
+      "local_bytes": 0
+    },
+    "results": {
+      "independent": {
+        "interval_columns": [
+          "mode",
+          "reps",
+          "old_row0",
+          "old_row1",
+          "combined_launches",
+          "second_callbacks_skipped",
+          "down4_launches",
+          "mean_us"
+        ],
+        "all_intervals": [
+          [
+            "cohorts",
+            4096,
+            0,
+            0,
+            4096,
+            4096,
+            0,
+            165.853062
+          ],
+          [
+            "down4",
+            4096,
+            0,
+            0,
+            4096,
+            4096,
+            4096,
+            155.283192
+          ],
+          [
+            "cohorts",
+            98304,
+            0,
+            0,
+            98304,
+            98304,
+            0,
+            163.626528
+          ],
+          [
+            "down4",
+            98304,
+            0,
+            0,
+            98304,
+            98304,
+            98304,
+            155.447797
+          ],
+          [
+            "down4",
+            98304,
+            0,
+            0,
+            98304,
+            98304,
+            98304,
+            154.649259
+          ],
+          [
+            "cohorts",
+            98304,
+            0,
+            0,
+            98304,
+            98304,
+            0,
+            163.721439
+          ]
+        ],
+        "cohorts_minus_down4_us": [
+          8.178730999999999,
+          9.072180000000003
+        ],
+        "projected_ms_across_40_layers": [
+          0.32714923999999995,
+          0.36288720000000013
+        ],
+        "materiality_pass": false
+      },
+      "partial": {
+        "interval_columns": [
+          "mode",
+          "reps",
+          "old_row0",
+          "old_row1",
+          "combined_launches",
+          "second_callbacks_skipped",
+          "down4_launches",
+          "mean_us"
+        ],
+        "all_intervals": [
+          [
+            "cohorts",
+            4096,
+            0,
+            0,
+            4096,
+            4096,
+            0,
+            160.05556
+          ],
+          [
+            "down4",
+            4096,
+            0,
+            0,
+            4096,
+            4096,
+            4096,
+            150.64055
+          ],
+          [
+            "down4",
+            98304,
+            0,
+            0,
+            98304,
+            98304,
+            98304,
+            149.720289
+          ],
+          [
+            "cohorts",
+            98304,
+            0,
+            0,
+            98304,
+            98304,
+            0,
+            160.226476
+          ],
+          [
+            "cohorts",
+            98304,
+            0,
+            0,
+            98304,
+            98304,
+            0,
+            160.142346
+          ],
+          [
+            "down4",
+            98304,
+            0,
+            0,
+            98304,
+            98304,
+            98304,
+            150.616094
+          ]
+        ],
+        "cohorts_minus_down4_us": [
+          10.506186999999983,
+          9.526252
+        ],
+        "projected_ms_across_40_layers": [
+          0.42024747999999934,
+          0.38105008
+        ],
+        "materiality_pass": false
+      }
+    }
+  },
+  "fleet_clock": {
+    "source": "Fleetdash8090 ryzen_telemetry, admitted M6000 only",
+    "windows": [
+      {
+        "fixture": "independent",
+        "mode": "cohorts",
+        "begin_epoch": 1795088776.162071,
+        "end_epoch": 1795088792.247213,
+        "samples": 3,
+        "clock_mhz": {
+          "range": [
+            1151,
+            1151
+          ],
+          "median": 1151
+        },
+        "memory_clock_mhz": {
+          "range": [
+            3304,
+            3304
+          ],
+          "median": 3304
+        }
+      },
+      {
+        "fixture": "independent",
+        "mode": "down4",
+        "begin_epoch": 1795088792.247269,
+        "end_epoch": 1795088807.528409,
+        "samples": 3,
+        "clock_mhz": {
+          "range": [
+            1151,
+            1151
+          ],
+          "median": 1151
+        },
+        "memory_clock_mhz": {
+          "range": [
+            3304,
+            3304
+          ],
+          "median": 3304
+        }
+      },
+      {
+        "fixture": "independent",
+        "mode": "down4",
+        "begin_epoch": 1795088807.528452,
+        "end_epoch": 1795088822.731093,
+        "samples": 2,
+        "clock_mhz": {
+          "range": [
+            1151,
+            1151
+          ],
+          "median": 1151.0
+        },
+        "memory_clock_mhz": {
+          "range": [
+            3304,
+            3304
+          ],
+          "median": 3304.0
+        }
+      },
+      {
+        "fixture": "independent",
+        "mode": "cohorts",
+        "begin_epoch": 1795088822.731137,
+        "end_epoch": 1795088838.82561,
+        "samples": 4,
+        "clock_mhz": {
+          "range": [
+            1151,
+            1151
+          ],
+          "median": 1151.0
+        },
+        "memory_clock_mhz": {
+          "range": [
+            3304,
+            3304
+          ],
+          "median": 3304.0
+        }
+      },
+      {
+        "fixture": "partial",
+        "mode": "down4",
+        "begin_epoch": 1795088840.098355,
+        "end_epoch": 1795088854.816459,
+        "samples": 2,
+        "clock_mhz": {
+          "range": [
+            1151,
+            1151
+          ],
+          "median": 1151.0
+        },
+        "memory_clock_mhz": {
+          "range": [
+            3304,
+            3304
+          ],
+          "median": 3304.0
+        }
+      },
+      {
+        "fixture": "partial",
+        "mode": "cohorts",
+        "begin_epoch": 1795088854.816503,
+        "end_epoch": 1795088870.567407,
+        "samples": 2,
+        "clock_mhz": {
+          "range": [
+            1151,
+            1151
+          ],
+          "median": 1151.0
+        },
+        "memory_clock_mhz": {
+          "range": [
+            3304,
+            3304
+          ],
+          "median": 3304.0
+        }
+      },
+      {
+        "fixture": "partial",
+        "mode": "cohorts",
+        "begin_epoch": 1795088870.567452,
+        "end_epoch": 1795088886.310085,
+        "samples": 3,
+        "clock_mhz": {
+          "range": [
+            1151,
+            1151
+          ],
+          "median": 1151
+        },
+        "memory_clock_mhz": {
+          "range": [
+            3304,
+            3304
+          ],
+          "median": 3304
+        }
+      },
+      {
+        "fixture": "partial",
+        "mode": "down4",
+        "begin_epoch": 1795088886.310131,
+        "end_epoch": 1795088901.116295,
+        "samples": 2,
+        "clock_mhz": {
+          "range": [
+            1151,
+            1151
+          ],
+          "median": 1151.0
+        },
+        "memory_clock_mhz": {
+          "range": [
+            3304,
+            3304
+          ],
+          "median": 3304.0
+        }
+      }
+    ],
+    "paired": [
+      {
+        "clock_mhz_median_ratio": 1.0,
+        "memory_clock_mhz_median_ratio": 1.0
+      },
+      {
+        "clock_mhz_median_ratio": 1.0,
+        "memory_clock_mhz_median_ratio": 1.0
+      },
+      {
+        "clock_mhz_median_ratio": 1.0,
+        "memory_clock_mhz_median_ratio": 1.0
+      },
+      {
+        "clock_mhz_median_ratio": 1.0,
+        "memory_clock_mhz_median_ratio": 1.0
+      }
+    ],
+    "all_pairs_within_two_percent": true
+  },
+  "standalone_screen": false,
+  "combination_screen": {
+    "minimum_down4_us_per_layer": 8.178730999999999,
+    "down4_screen_us_per_layer": 2.3,
+    "companion_lower_bound_ms_sourced_elsewhere": 0.431103,
+    "native_target_gap_ms": 0.52128,
+    "projected_sum_ms": 0.75825224,
+    "comparably_clocked": true,
+    "passes_independent_operator_screen": true,
+    "combined_model_measurement": null
+  },
+  "advance_to_model": false
+}

@@ -1,0 +1,131 @@
+--- a/prepare-host.py
++++ b/prepare-host.py
+@@ -17,7 +17,7 @@
+ s=s.replace('set_mode(on,on);','set_mode(on,true);').replace('        if(on) {\n            Ids','        {\n            Ids')
+ s=s.replace('Q2_COHORT ROUTES %s row=%d ids=",f.name,r','Q2_PAIR ROUTES %s mode=%s row=%d ids=",f.name,on?"down4":"cohorts",r')
+ s=s.replace('Q2_COHORT TIME','Q2_PAIR TIME').replace('Q2_COHORT FINISH','Q2_PAIR FINISH').replace('skip=%llu us','skip=%llu down4=%llu us').replace('skip=%llu\\n','skip=%llu down4=%llu\\n').replace('on?"cohorts":"n2split"','on?"down4":"cohorts"').replace('after[3]-before[3],us','after[3]-before[3],after[4]-before[4],us').replace('done[2],done[3]);','done[2],done[3],done[4]);')
+-s = s.replace('constexpr int reps = 96;', 'constexpr int reps = 32768;')
++s = s.replace('constexpr int reps = 96;', 'constexpr int reps = 98304;')
+ s = s.replace('batch(false,8);batch(true,8);','batch(false,4096);batch(true,4096);')
+ s = s.replace('const auto start=std::chrono::steady_clock::now();','const auto epoch0=std::chrono::system_clock::now();\n        const auto start=std::chrono::steady_clock::now();')
+ s = s.replace('const auto end=std::chrono::steady_clock::now();','const auto end=std::chrono::steady_clock::now();\n        const auto epoch1=std::chrono::system_clock::now();')
+--- a/operator.cpp
++++ b/operator.cpp
+@@ -24,7 +24,7 @@
+ constexpr int middle = 512;
+ constexpr int width = 2;
+ constexpr int graph_size = 256;
+-constexpr int reps = 32768;
++constexpr int reps = 98304;
+ using Ids = std::array<int32_t, ranks * width>;
+ using Output = std::array<float, hidden * width>;
+ 
+--- a/release.sh
++++ b/release.sh
+@@ -46,13 +46,13 @@
+ id=$(date -u +%Y%m%dT%H%M%SZ)-$$
+ out=$card/receipts/$id
+ mkdir -p -- "$out"
+-printf 'Q2_DOWN4_RECEIPT=%s\n' "$out"
++printf 'Q2_DOWN4_CLOCK_RECEIPT=%s\n' "$out"
+ current=
+ 
+ clean() {
+   local ids
+   [[ -n $current ]] || return 0
+-  ids=$(timeout -k 1s 3s docker ps -aq --filter "name=^/$current$" --filter "label=q2down4.owner=$id") || return 1
++  ids=$(timeout -k 1s 3s docker ps -aq --filter "name=^/$current$" --filter "label=q2down4clock.owner=$id") || return 1
+   if [[ -n $ids ]]; then
+     [[ $ids =~ ^[0-9a-f]+$ ]] || return 1
+     timeout -k 1s 5s docker rm -f "$ids" >> "$out/cleanup.log" 2>&1 || return 1
+@@ -97,14 +97,14 @@
+   if [[ $mode == check ]]; then debug=1; checks=0; fi
+   for item in "${flags[@]}"; do env+=(-e "$item"); done
+   env+=(-e "GGML_CUDA_OCCAMY_DEBUG=$debug" -e "GGML_CUDA_MOE_V3_CHECK=$checks")
+-  current=nmmoon-q2down4-$mode-$id
+-  timeout -k 2s "${left}s" docker run --pull never --name "$current" --label "q2down4.owner=$id" \
++  current=nmmoon-q2down4clock-$mode-$id
++  timeout -k 2s "${left}s" docker run --pull never --name "$current" --label "q2down4clock.owner=$id" \
+     --network none --device "nvidia.com/gpu=$N3_GPU" --cpuset-cpus 2-3 \
+     -v "$runtime:/runtime:ro" -v "$card/libggml-cuda.so:/runtime/libggml-cuda.so:ro" \
+     -v "$card/operator:/operator:ro" --entrypoint /bin/sh "${env[@]}" "$night_image" -ec '
+       sha256sum /runtime/libggml.so.0.26.0 /runtime/libggml-base.so.0.26.0 /runtime/libggml-cuda.so /operator
+       exec nice -n 19 /operator "$1"
+-    ' q2down4 "--$mode" > "$out/$mode.log" 2>&1
++    ' q2down4clock "--$mode" > "$out/$mode.log" 2>&1
+   clean
+ }
+ 
+@@ -113,6 +113,8 @@
+ python3 -B "$card/fleet-clock.py" --sample "$out" "$deadline" &
+ clock_pid=$!
+ run perf
++# Accept delayed Fleetdash publication only by its original in-window timestamp.
++sleep 8
+ touch "$out/perf.done"
+ wait "$clock_pid"
+ python3 -B report.py --report "$out" 2>&1 | tee "$out/analysis.log"
+--- a/report.py
++++ b/report.py
+@@ -46,14 +46,14 @@
+                    'stock_reference':'unchanged 369c6b05 two-row cohort instructions on the same native Q2 graph'}
+     return {'residency':hw,'results':out}
+ def timing(raw):
+-    hw=common(raw,139264,139264)
++    hw=common(raw,401408,401408)
+     need('MOE_V3 CHECK' not in raw and 'Q2_PAIR ROUTES ' not in raw,'diagnostic work active during performance')
+     out={}
+     for name in CASES:
+         rx=rf'^Q2_PAIR TIME {name} mode=(cohorts|down4) reps=(\d+) row0=(\d+) row1=(\d+) pair=(\d+) skip=(\d+) down4=(\d+) us=({F})$'
+         vals=[(m,int(n),int(a),int(b),int(p),int(s),int(g),float(t)) for m,n,a,b,p,s,g,t in re.findall(rx,raw,re.M)]
+         a,b=('cohorts','down4') if name=='independent' else ('down4','cohorts')
+-        need([r[0] for r in vals]==['cohorts','down4',a,b,b,a] and [r[1] for r in vals]==[4096,4096,32768,32768,32768,32768],'timing order or count')
++        need([r[0] for r in vals]==['cohorts','down4',a,b,b,a] and [r[1] for r in vals]==[4096,4096,98304,98304,98304,98304],'timing order or count')
+         for mode,n,x,y,p,s,g,t in vals:need((x,y,p,s,g)==(0,0,n,n,n if mode=='down4' else 0) and math.isfinite(t) and t>0,'timed launches or duration')
+         pairs=[]
+         for pair in (vals[2:4],vals[4:6]):
+@@ -71,14 +71,14 @@
+         diag+=''.join(x.replace('Q2_COHORT FIXTURE_IDS','Q2_PAIR ROUTES').replace(' row=',f' mode={mode} row=')+'\n' for mode in ('cohorts','down4','down4') for x in rows)
+         diag+=''.join(f'Q2_COHORT ROW {name} row={i} finite=2048 different=0 repeat_different=0 max_abs=0\n' for i in range(2))
+         a,b=('cohorts','down4') if name=='independent' else ('down4','cohorts')
+-        for mode,n in zip(['cohorts','down4',a,b,b,a],[4096,4096,32768,32768,32768,32768]):
++        for mode,n in zip(['cohorts','down4',a,b,b,a],[4096,4096,98304,98304,98304,98304]):
+             old=n if mode=='cohorts' else 0;new=n-old
+             perf+=f'Q2_PAIR TIME {name} mode={mode} reps={n} row0=0 row1=0 pair={n} skip={n} down4={new} us={165 if old else 138}\n'
+     diag+='Q2_PAIR FINISH row0=0 row1=0 pair=6 skip=6 down4=4\n'
+-    perf+='Q2_PAIR FINISH row0=0 row1=0 pair=278528 skip=278528 down4=139264\n'
++    perf+='Q2_PAIR FINISH row0=0 row1=0 pair=802816 skip=802816 down4=401408\n'
+     numeric(diag);need(all(v['materiality_pass'] for v in timing(perf)['results'].values()),'positive synthetic gate')
+     need(not timing(perf.replace('us=138','us=154'))['results']['independent']['materiality_pass'],'synthetic speed miss')
+-    for fn,bad in [(numeric,diag.replace('different=0','different=1',1)),(numeric,diag.replace('active=2','active=1')),(timing,perf.replace('skip=32768','skip=32767',1))]:
++    for fn,bad in [(numeric,diag.replace('different=0','different=1',1)),(numeric,diag.replace('active=2','active=1')),(timing,perf.replace('skip=98304','skip=98303',1))]:
+         try:fn(bad)
+         except ValueError:continue
+         raise ValueError('incorrect data passed')
+@@ -108,7 +108,14 @@
+              'numeric':n,'timing':t}
+         clocks=json.loads(subprocess.check_output([sys.executable,'-B',str(P/'fleet-clock.py'),'--summary',str(d)],text=True))
+         rec['fleet_clock']=clocks
+-        rec['advance_to_model']=rec['materiality_pass'] and clocks['all_pairs_within_two_percent']
++        rec['standalone_screen']=rec['materiality_pass'] and clocks['all_pairs_within_two_percent']
++        minimum=min(x for v in t['results'].values() for x in v['cohorts_minus_down4_us'])
++        rec['combination_screen']={'minimum_down4_us_per_layer':minimum,'down4_screen_us_per_layer':2.3,
++            'companion_lower_bound_ms_sourced_elsewhere':0.431103,'native_target_gap_ms':0.52128,
++            'projected_sum_ms':minimum*0.04+0.431103,'comparably_clocked':clocks['all_pairs_within_two_percent'],
++            'passes_independent_operator_screen':minimum>=2.3 and clocks['all_pairs_within_two_percent'],
++            'combined_model_measurement':None}
++        rec['advance_to_model']=False
+         text=json.dumps(rec,indent=2,allow_nan=False)+'\n'
+         if (d/'result.json').exists():need(json.loads((d/'result.json').read_text())==json.loads(text),'saved result differs')
+         else:(d/'result.json').write_text(text)
+--- a/fleet-clock.py
++++ b/fleet-clock.py
+@@ -33,7 +33,7 @@
+ 
+ 
+ def analyze(raw, samples):
+-    windows = re.findall(r'^Q2_DOWN4 WINDOW (independent|partial) mode=(cohorts|down4) reps=32768 begin=([0-9.]+) end=([0-9.]+)$',raw,re.M)
++    windows = re.findall(r'^Q2_DOWN4 WINDOW (independent|partial) mode=(cohorts|down4) reps=98304 begin=([0-9.]+) end=([0-9.]+)$',raw,re.M)
+     if [a[1] for a in windows] != ['cohorts','down4','down4','cohorts','down4','cohorts','cohorts','down4']:
+         raise ValueError('missing or out-of-order wall clock windows')
+     if [a[0] for a in windows] != ['independent']*4+['partial']*4:

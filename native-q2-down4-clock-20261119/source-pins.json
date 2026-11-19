@@ -1,0 +1,9 @@
+{
+  "fleet-clock.py": {
+    "private_input_keys": [
+      "FLEET_URL"
+    ],
+    "portable_sha256": "77c15467b0831ec0a4937e80c2211617e8daed3f08795777ce0998d680b4039c",
+    "observed_source_sha256": "90fe5582a5accc2472eebe63785b549f7cdc2183d3bc5fef68229f0286300904"
+  }
+}
