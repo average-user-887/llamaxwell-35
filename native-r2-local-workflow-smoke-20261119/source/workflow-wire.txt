@@ -1,0 +1,222 @@
+class ProtocolError(RuntimeError):
+    def __init__(self, code, fatal=False):
+        super().__init__(code)
+        self.code = code
+        self.fatal = fatal
+
+
+def require(test, code, fatal=False):
+    if not test:
+        raise ProtocolError(code, fatal)
+
+
+def guard(request, origin):
+    require(request.method == "POST" and str(request.url) in {origin + path for path in ROUTES},
+            "outbound_route_rejected", True)
+    require(request.headers.get("Authorization") == FIXTURE_HEADER
+            and not request.headers.get("Cookie")
+            and not request.headers.get("OpenAI-Organization")
+            and not request.headers.get("OpenAI-Project"),
+            "outbound_account_header_rejected", True)
+
+
+class GuardedTransport(httpx.AsyncBaseTransport):
+    def __init__(self, origin, inner=None):
+        self.origin = endpoint(origin + "/v1")
+        self.inner = inner if inner is not None else httpx.AsyncHTTPTransport(
+            retries=0, trust_env=False, limits=httpx.Limits(max_connections=1, max_keepalive_connections=1))
+
+    async def handle_async_request(self, request):
+        guard(request, self.origin)
+        return await self.inner.handle_async_request(request)
+
+    async def aclose(self):
+        await self.inner.aclose()
+
+
+def parsed_arguments(text):
+    arguments = json.loads(text)
+    if not isinstance(arguments, dict):
+        raise ValueError("A function's arguments must be a JSON object")
+    return arguments
+
+
+def replayable_messages(messages):
+    # Retain failed calls in the raw transcript. Template rendering needs JSON
+    # objects for their historical argument fields, so replay a neutral argument
+    # object next to the error message the model actually received.
+    normalized = []
+    for message in messages:
+        calls = message.get("tool_calls")
+        if not calls:
+            normalized.append(message)
+            continue
+        replay = []
+        for call in calls:
+            function = call["function"]
+            try:
+                parsed_arguments(function["arguments"])
+            except ValueError:
+                replay.append({**call, "function": {**function, "arguments": "{}"}})
+            else:
+                replay.append(call)
+        normalized.append({**message, "tool_calls": replay})
+    return normalized
+
+
+class Chat:
+    def __init__(self, client, origin):
+        self.client = client
+        self.origin = origin
+        self.events = []
+        self.messages = []
+        self.tools = []
+        self.metrics = Counter()
+
+    async def post(self, path, body):
+        async with self.client.stream("POST", self.origin + path, json=body, headers={
+            "Authorization": FIXTURE_HEADER,
+        }) as response:
+            if response.status_code != 200:
+                self.events.append({"type": "http_error", "path": path, "status": response.status_code})
+                raise ProtocolError("owned_http_error", True)
+            parts = bytearray()
+            async for chunk in response.aiter_bytes():
+                parts.extend(chunk)
+                require(len(parts) <= MAX_HTTP_BYTES, "oversize_owned_response", True)
+        result = json.loads(parts)
+        require(isinstance(result, dict), "owned_response_not_object", True)
+        return result
+
+    async def generate(self, messages, tools, options):
+        self.messages = messages
+        self.tools = tools
+        body = {
+            "model": ALIAS, "messages": replayable_messages(messages), "tools": tools,
+            "tool_choice": "auto", "parallel_tool_calls": True,
+            "chat_template_kwargs": {"enable_thinking": False},
+            "stream": False, "seed": options["seed"], "temperature": options["temperature"],
+            "cache_prompt": False, "max_tokens": options["max_tokens"],
+        }
+        require(body["seed"] == 7 and body["temperature"] == 0
+                and options["context_tokens"] == 8192 and 1 <= body["max_tokens"] <= 256,
+                "generation_options_drift", True)
+        started = time.monotonic()
+        rendered = (await self.post("/apply-template", body)).get("prompt")
+        require(isinstance(rendered, str) and rendered, "template_render_empty", True)
+        ids = (await self.post("/tokenize", {
+            "content": rendered, "add_special": True, "parse_special": True,
+        })).get("tokens")
+        require(isinstance(ids, list) and ids and all(type(token) is int and token >= 0 for token in ids),
+                "tokenizer_reply_invalid", True)
+        prompt_tokens = len(ids)
+        self.metrics["max_prompt_tokens"] = max(self.metrics["max_prompt_tokens"], prompt_tokens)
+        self.metrics["rendered_transactions"] += 1
+        if prompt_tokens + body["max_tokens"] > options["context_tokens"]:
+            self.events.append({"type": "context_cap", "prompt_tokens": prompt_tokens,
+                                "reserved_completion_tokens": body["max_tokens"]})
+            raise mock.ContextBudgetExceeded
+        result = await self.post("/v1/chat/completions", body)
+        self.metrics["chat_requests"] += 1
+        self.events.append({"type": "chat", "raw": result, "prompt_tokens": prompt_tokens,
+                            "reserved_completion_tokens": body["max_tokens"],
+                            "elapsed_s": round(time.monotonic() - started, 6)})
+        require(result.get("model") == ALIAS, "served_model_alias_drift", True)
+        usage = result.get("usage")
+        require(isinstance(usage, dict) and type(usage.get("prompt_tokens")) is int
+                and usage["prompt_tokens"] == prompt_tokens,
+                "actual_prompt_tokens_disagree_with_tokenizer", True)
+        require(usage.get("prompt_tokens_details", {}).get("cached_tokens", 0) == 0,
+                "prompt_cache_was_used", True)
+        completion = usage.get("completion_tokens")
+        require(type(completion) is int and 0 <= completion <= body["max_tokens"],
+                "missing_or_invalid_completion_usage", True)
+        self.metrics["prompt_tokens"] += prompt_tokens
+        self.metrics["completion_tokens"] += completion
+        choices = result.get("choices")
+        require(isinstance(choices, list) and len(choices) == 1
+                and isinstance(choices[0], dict), "missing_chat_choice")
+        choice = choices[0]
+        message = choice.get("message")
+        require(isinstance(message, dict) and message.get("role") == "assistant",
+                "missing_assistant_message")
+        require(message.get("content") is None or isinstance(message["content"], str),
+                "invalid_assistant_content")
+        calls = message.get("tool_calls")
+        require(calls is None or isinstance(calls, list), "tool_calls_payload_invalid")
+        calls = calls or []
+        wire = {"role": "assistant", "content": message.get("content")}
+        if message.get("reasoning_content") is not None:
+            require(isinstance(message["reasoning_content"], str), "reasoning_payload_invalid")
+            wire["reasoning_content"] = message["reasoning_content"]
+        used_ids = {entry["tool_call_id"] for entry in messages if entry["role"] == "tool"}
+        for call in calls:
+            self.metrics["assistant_tool_calls"] += 1
+            if not self.valid_call(call, used_ids):
+                self.metrics["malformed_tool_calls"] += 1
+                raise ProtocolError("malformed_tool_call_envelope")
+        if calls:
+            wire["tool_calls"] = calls
+        if not calls and not wire["content"]:
+            self.metrics["empty_assistant_turns"] += 1
+        if choice.get("finish_reason") == "length":
+            self.metrics["generation_length_ends"] += 1
+        return {"message": wire, "completion_tokens": completion}
+
+    def valid_call(self, call, used_ids):
+        if not isinstance(call, dict) or call.get("type") != "function":
+            return False
+        call_id = call.get("id")
+        function = call.get("function")
+        if (not isinstance(call_id, str) or not call_id or call_id in used_ids
+                or not isinstance(function, dict) or not isinstance(function.get("name"), str)
+                or not function["name"] or not isinstance(function.get("arguments"), str)):
+            return False
+        used_ids.add(call_id)
+        try:
+            parsed_arguments(function["arguments"])
+        except ValueError:
+            self.metrics["malformed_tool_arguments"] += 1
+        return True
+
+
+async def episode(case_id, client, origin, private):
+    chat = Chat(client, origin)
+    start = time.monotonic()
+    error = None
+    fatal = False
+    try:
+        result = await mock.run_case(case_id, chat.generate)
+    except ProtocolError as failure:
+        error, fatal = failure.code, failure.fatal
+        result = {}
+    except httpx.HTTPError:
+        error, fatal, result = "owned_transport_error", True, {}
+    except (ValueError, TypeError, OSError, KeyError):
+        error, fatal, result = "workflow_or_protocol_exception", True, {}
+    except BaseException:
+        write(private / f"{case_id}.json", {"id": case_id, "interrupted": True,
+              "messages": chat.messages, "tools": chat.tools, "events": chat.events})
+        raise
+    write(private / f"{case_id}.json", {"id": case_id, "messages": chat.messages,
+          "tools": chat.tools, "events": chat.events, "result": result,
+          "error_code": error})
+    metrics = chat.metrics
+    tool_messages = [x for x in chat.messages if x["role"] == "tool"]
+    summary = {
+        "id": case_id, "status": "infrastructure_error" if error else result["status"],
+        "budget_reason": result.get("budget_reason"),
+        "error_code": error, "wall_s": round(time.monotonic() - start, 6),
+        "state": None if result.get("state") is None else int(result["state"]),
+        "joint": None if result.get("joint") is None else int(result["joint"]),
+        "rounds": result.get("rounds"),
+        "tool_messages": len(tool_messages),
+        "tool_output_truncations": sum("was too long to be displayed" in x["content"] for x in tool_messages),
+        "tool_rejections": sum(x["content"].startswith(("Mock tool ", "Order changes require"))
+                               for x in tool_messages),
+        **{key: metrics[key] for key in (
+            "rendered_transactions", "chat_requests", "assistant_tool_calls", "malformed_tool_calls",
+            "malformed_tool_arguments", "empty_assistant_turns", "generation_length_ends",
+            "max_prompt_tokens", "prompt_tokens", "completion_tokens")},
+    }
+    return summary, fatal

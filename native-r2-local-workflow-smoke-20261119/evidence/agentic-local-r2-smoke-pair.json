@@ -1,0 +1,152 @@
+{
+  "arms": {
+    "native": {
+      "cleanup_exit": 0,
+      "episode_wall_sum_s": 147.023789,
+      "evaluator_exit": 0,
+      "evaluator_wall_s": 148,
+      "routes": {
+        "compact_only": 0,
+        "down4_launches": 29120,
+        "experts_used": 8,
+        "gpu_layers_offloaded": "42/42",
+        "sampler_guard_fallbacks": 728
+      },
+      "runner_exit": 0
+    },
+    "serial": {
+      "cleanup_exit": 0,
+      "episode_wall_sum_s": 146.702874,
+      "evaluator_exit": 0,
+      "evaluator_wall_s": 148,
+      "routes": {
+        "compact_only": 0,
+        "down4_launches": 0,
+        "experts_used": 8,
+        "gpu_layers_offloaded": "42/42",
+        "sampler_guard_fallbacks": 0
+      },
+      "runner_exit": 0
+    }
+  },
+  "cases": [
+    {
+      "id": "agentdojo-travel-u1",
+      "native": {
+        "assistant_tool_calls": 5,
+        "budget_reason": null,
+        "chat_requests": 4,
+        "completion_tokens": 706,
+        "empty_assistant_turns": 0,
+        "error_code": null,
+        "generation_length_ends": 1,
+        "joint": 1,
+        "malformed_tool_arguments": 1,
+        "malformed_tool_calls": 0,
+        "max_prompt_tokens": 4548,
+        "prompt_tokens": 16599,
+        "rendered_transactions": 4,
+        "rounds": 4,
+        "state": 1,
+        "status": "completed",
+        "tool_messages": 5,
+        "tool_output_truncations": 0,
+        "tool_rejections": 1,
+        "wall_s": 42.891348
+      },
+      "serial": {
+        "assistant_tool_calls": 5,
+        "budget_reason": null,
+        "chat_requests": 4,
+        "completion_tokens": 706,
+        "empty_assistant_turns": 0,
+        "error_code": null,
+        "generation_length_ends": 1,
+        "joint": 1,
+        "malformed_tool_arguments": 1,
+        "malformed_tool_calls": 0,
+        "max_prompt_tokens": 4548,
+        "prompt_tokens": 16599,
+        "rendered_transactions": 4,
+        "rounds": 4,
+        "state": 1,
+        "status": "completed",
+        "tool_messages": 5,
+        "tool_output_truncations": 0,
+        "tool_rejections": 1,
+        "wall_s": 43.407834
+      }
+    },
+    {
+      "id": "tau2-retail-23",
+      "native": {
+        "assistant_tool_calls": 8,
+        "budget_reason": "context_tokens",
+        "chat_requests": 8,
+        "completion_tokens": 717,
+        "empty_assistant_turns": 0,
+        "error_code": null,
+        "generation_length_ends": 0,
+        "joint": 0,
+        "malformed_tool_arguments": 0,
+        "malformed_tool_calls": 0,
+        "max_prompt_tokens": 8526,
+        "prompt_tokens": 46396,
+        "rendered_transactions": 9,
+        "rounds": 9,
+        "state": 0,
+        "status": "budget_exhausted",
+        "tool_messages": 8,
+        "tool_output_truncations": 1,
+        "tool_rejections": 0,
+        "wall_s": 104.132441
+      },
+      "serial": {
+        "assistant_tool_calls": 8,
+        "budget_reason": "context_tokens",
+        "chat_requests": 8,
+        "completion_tokens": 733,
+        "empty_assistant_turns": 0,
+        "error_code": null,
+        "generation_length_ends": 0,
+        "joint": 0,
+        "malformed_tool_arguments": 0,
+        "malformed_tool_calls": 0,
+        "max_prompt_tokens": 8542,
+        "prompt_tokens": 46405,
+        "rendered_transactions": 9,
+        "rounds": 9,
+        "state": 0,
+        "status": "budget_exhausted",
+        "tool_messages": 8,
+        "tool_output_truncations": 1,
+        "tool_rejections": 0,
+        "wall_s": 103.29504
+      }
+    }
+  ],
+  "logical_context_cap_tokens": 8192,
+  "observation_seals_verified": true,
+  "predeclared_pairs": 2,
+  "projected_full_arm_wall_floor_s": 12616,
+  "same_r2_build_and_budgets_verified": true,
+  "scores": {
+    "joint": {
+      "native_losses": 0,
+      "native_pass": 1,
+      "native_wins": 0,
+      "serial_pass": 1,
+      "ties": 2,
+      "unknown_pairs": 0
+    },
+    "state": {
+      "native_losses": 0,
+      "native_pass": 1,
+      "native_wins": 0,
+      "serial_pass": 1,
+      "ties": 2,
+      "unknown_pairs": 0
+    }
+  },
+  "stage": "smoke"
+}

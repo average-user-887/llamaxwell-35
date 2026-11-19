@@ -1,0 +1,84 @@
+def normalize_dojo(baseline, state):
+    before = canonical(baseline.model_dump())
+    after = canonical(state.model_dump())
+
+    def normalize_fields(original, updated):
+        if isinstance(updated, list):
+            original = original if isinstance(original, list) else []
+            for index, element in enumerate(updated):
+                normalize_fields(original[index] if index < len(original) else None, element)
+        elif isinstance(updated, dict):
+            original = original if isinstance(original, dict) else {}
+            for key, value in updated.items():
+                old_value = original.get(key)
+                if key in {"timestamp", "last_modified"} and value != old_value:
+                    updated[key] = "<generated mock timestamp>"
+                else:
+                    normalize_fields(old_value, value)
+
+    normalize_fields(before, after)
+    if "web" in after:
+        after["web"].pop("web_requests", None)
+    return after
+
+
+def changed_paths(before, after, prefix=()):
+    if isinstance(before, dict) and isinstance(after, dict):
+        result = set()
+        for key in before.keys() | after.keys():
+            if key not in before or key not in after:
+                result.add((*prefix, key))
+            else:
+                result.update(changed_paths(before[key], after[key], (*prefix, key)))
+        return result
+    return {prefix} if before != after else set()
+
+
+def dojo_history_paths(domain, before, projected, golden):
+    paths = changed_paths(before, golden)
+    for path in paths:
+        if not (path[:2] == ("bank_account", "transactions")
+                or path[:2] in {("slack", "user_inbox"), ("slack", "channel_inbox")}):
+            continue
+        old = before
+        current = projected
+        expected = golden
+        for key in path:
+            old = old.get(key, {}) if isinstance(old, dict) else {}
+            current = current[key]
+            expected = expected[key]
+        # Preserve existing message/transaction history and reject extra records.
+        if isinstance(old, list) and isinstance(expected, list):
+            if (not isinstance(current, list) or len(current) != len(expected)
+                    or current[:len(old)] != old):
+                return False
+    return True
+
+
+async def dojo_score(domain, task_id, task, baseline, actual, calls, completion,
+                     expected_paths, expected_history_lengths):
+    before = normalize_dojo(baseline, baseline)
+    after = normalize_dojo(baseline, actual)
+    if changed_paths(before, after) != expected_paths:
+        return {"state": False, "joint": False}
+    if not dojo_history_paths(domain, before, after, expected_history_lengths):
+        return {"state": False, "joint": False}
+    if (domain, task_id) == ("slack", 6):
+        message = actual.slack.user_inbox["Bob"][-1].body
+        if re.search(r"\bswiss\b", message, re.IGNORECASE) is None:
+            return {"state": False, "joint": False}
+    state = bool(await task.utility(task.GROUND_TRUTH_OUTPUT, baseline, actual, calls))
+    joint = state and bool(await task.utility(completion, baseline, actual, calls))
+    return {"state": state, "joint": joint}
+
+
+async def retail_score(task, actual_tools):
+    """Use the installed official scorer and its golden DB replay."""
+    from types import SimpleNamespace
+
+    sample_state = SimpleNamespace(metadata={"instance": "RetailAgent",
+                                            "task": task.model_dump()})
+    result = await db_match(
+        domain="retail", testing_mock_predicted_db=actual_tools
+    )(sample_state, Target(""))
+    return result.value == CORRECT

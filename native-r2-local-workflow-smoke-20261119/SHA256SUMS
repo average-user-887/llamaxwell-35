@@ -1,0 +1,6 @@
+8e449bb6158cf6aba137ebe8b0045346a739f46ef708125f5b7c60f2aae2a128  ./README.md
+bb4d5b2bf9f26df8294d069ee7c4202682945410b0b421289258d6884eb2f369  ./evidence/agentic-local-r2-smoke-pair.json
+acf6140e928aa6c70c2cbeadff354dce3ec24c3e7b5b7a68610e6c812f73dfeb  ./source/mock-loop.txt
+bf17aaf33dccadfe2734798b4f1d9790b85ccac8702dd095ccdf5bbc74e0096f  ./source/scoring.txt
+fd2ae5d78c70a1db7c1bc822166d517b5dcda532aad1014a279de4734c3e0040  ./source/workflow-wire.txt
+1c69c1503cda37eca55f497816e8f0c5d571aa84786fb2812905ea27817708d8  ./verify-evidence.py

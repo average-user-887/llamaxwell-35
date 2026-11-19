@@ -1,0 +1,104 @@
+class ContextBudgetExceeded(ValueError):
+    """Raised by the inference adapter when the next prompt exceeds the logical context."""
+
+
+    def user_reply(self, text):
+        # This finite script responds only to the documented confirmation request.
+        if (self.retail and not self.retail_confirmed and "?" in text
+                and CONFIRMATION_REQUEST.search(text)):
+            if w.digest(w.RETAIL_CONFIRMATION) != self.row["confirmation_sha256"]:
+                raise ValueError("Retail scripted reply drifted")
+            self.retail_confirmed = True
+            return w.RETAIL_CONFIRMATION
+        return None
+
+
+    async def tool_reply(self, name, arguments, call_id):
+        self.attempts += 1
+        if self.attempts > w.BUDGETS["tool_calls"]:
+            raise RuntimeError("Tool call budget exhausted")
+        if self.retail and name in w.RETAIL_WRITES and not self.retail_confirmed:
+            return "Order changes require an explicit, text-only user confirmation before execution."
+        call = w.tool_call(call_id, name, arguments)
+        try:
+            response = await w.call_one(self.scratch, self.tools, call)
+        except ValueError:
+            return "Mock tool call rejected. Check its name and input arguments."
+        self.trace.append(call)
+        return response.text
+
+
+    async def result(self, completion):
+        if self.retail:
+            actual_hash = self.actual.db.get_hash()
+            # The native database oracle agreed with this frozen golden hash in preflight.
+            ok = actual_hash == self.row["golden_state_sha256"]
+            return {"state": ok, "joint": ok, "final_state_sha256": actual_hash}
+        actual = w.dojo_final(self.baseline, self.scratch)
+        paths = {tuple(path) for path in self.row["golden_effect_paths"]}
+        result = await w.dojo_score(
+            self.row["domain"], self.row["upstream_id"], self.task,
+            self.baseline, actual, self.trace, completion, paths, self.golden,
+        )
+        result["final_state_sha256"] = w.digest(w.normalize_dojo(self.baseline, actual))
+        return result
+
+
+async def run_loaded(session, generate):
+    budgets = w.BUDGETS
+    await session.load()
+    tool_specs = w.schemas(session.tools)
+    remaining = budgets["combined_output_tokens"]
+    completion = ""
+    exhausted = "rounds"
+    for round_number in range(1, budgets["rounds"] + 1):
+        max_tokens = min(remaining, budgets["output_tokens_per_round"])
+        if max_tokens <= 0:
+            exhausted = "combined_output_tokens"
+            break
+        try:
+            response = await generate(session.messages, tool_specs, {
+                "seed": budgets["seed"], "temperature": budgets["temperature"],
+                "max_tokens": max_tokens, "context_tokens": budgets["context_tokens"],
+            })
+        except ContextBudgetExceeded:
+            exhausted = "context_tokens"
+            break
+        message = response["message"]
+        used = response["completion_tokens"]
+        if (not isinstance(used, int) or isinstance(used, bool) or not 0 <= used <= max_tokens):
+            raise ValueError("Missing or invalid model completion token usage")
+        if message["role"] != "assistant":
+            raise ValueError("Inference adapter returned a non-assistant message")
+        remaining -= used
+        session.messages.append(message)
+        calls = message.get("tool_calls") or []
+        if session.attempts + len(calls) > budgets["tool_calls"]:
+            exhausted = "tool_calls"
+            break
+        if calls:
+            for call in calls:
+                function = call["function"]
+                try:
+                    arguments = json.loads(function["arguments"])
+                    if not isinstance(arguments, dict):
+                        raise ValueError("Expected argument object")
+                except (ValueError, TypeError):
+                    session.attempts += 1
+                    reply = "Mock tool arguments must be a JSON object."
+                else:
+                    reply = await session.tool_reply(function["name"], arguments, call["id"])
+                session.messages.append({"role": "tool", "tool_call_id": call["id"],
+                                         "content": reply})
+            continue
+        completion = message.get("content") or ""
+        reply = session.user_reply(completion)
+        if reply is None:
+            exhausted = None
+            break
+        session.messages.append({"role": "user", "content": reply})
+        completion = ""
+    score = await session.result(completion)
+    return {"id": session.row["id"], "status": "budget_exhausted" if exhausted else "completed",
+            "budget_reason": exhausted, "rounds": round_number, "tool_calls": session.attempts,
+            "completion_tokens": budgets["combined_output_tokens"] - remaining, **score}
