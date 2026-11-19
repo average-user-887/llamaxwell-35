@@ -1,0 +1,9 @@
+{
+  "source_files_match_the_frozen_observer_and_report": true,
+  "reports_recomputed_from_allowed_numeric_and_witness_fields": true,
+  "runtime_file_digests_are_software_only": true,
+  "portable_build_reproduced_executed_cpu_observer_binary": true,
+  "original_trace_archive_digests_and_host_locations_excluded": true,
+  "private_prompt_ids_proposals_output_ids_text_and_raw_buffers_excluded": true,
+  "packet_file_count_including_this_audit_and_checksums": 15
+}

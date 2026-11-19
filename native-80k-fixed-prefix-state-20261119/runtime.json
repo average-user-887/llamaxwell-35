@@ -1,0 +1,36 @@
+{
+  "runtime_image": "sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+  "compiler_image": "sha256:747c8a878fc2a36aca96e10da800f6cfe80d1e813c7e4af49ded30588be16bed",
+  "device": "Quadro M6000",
+  "offloaded_layers": 42,
+  "routed_experts_per_token": 8,
+  "elapsed_seconds_including_cleanup": 311,
+  "cap_seconds": 430,
+  "runner_exit": 0,
+  "cleanup_exit": 0,
+  "in_container_file_sha256_verified_before_execution": {
+    "libggml-cuda.so": "369c6b058813a7ca53fc62c67c2a4ea056a8d3e35ee08aca36afca4040975871",
+    "libllama.so": "46c4dd7075c5229598c8a9c7aadc3542ac03d5f928fb8078696c42a9c4bfd607",
+    "libllama-common.so": "1088044d770e2e1f7a302192180208049cff263c009ef4fe3815d584a0763131",
+    "libggml.so": "1ad2df73c62eb606aa6943cd3f9fe19d1fabb7461d1d3cc384712b57214376fc",
+    "libggml-base.so": "678cf75e5ef5b1f92460eb0f816d3bbe755ee9710fd04606c31ec24dcd41fa06",
+    "state": "5f8d65cd4838d2abfd59b70ffaa5d6df3c25285a4048896f2fcffa6af260ad25"
+  },
+  "mapped_library_builds": {
+    "libggml-cuda.so": "libggml-cuda.so",
+    "libggml-base.so": "libggml-base.so.0.26.0",
+    "libggml.so": "libggml.so.0.26.0",
+    "libllama.so": "libllama.so.0.6.0"
+  },
+  "pinned_common_library_used_as_provenance_only": true,
+  "exact_source_files": {
+    "state.cpp": "58aabbfd416366bfa7c4644584f0bbf1fd612e4407d18df1d6a4b86c004c8992",
+    "dispatch.inc": "1cd53dcd4f56fae7f19c1c02a283a1935fa225addb37838e567b3ce7a88d5a5a",
+    "report.py": "3867104fcdd276ce6e1bb563c5029c0837955f71451eb9731f4c18ef0e21fb29",
+    "check-report.py": "6b7f2ab09ff35ccab0c715102ad59955ffb3c1d116c2877ce8fcd571c06c7baa",
+    "environment.args": "0dd383290850ba8ee0ed00c096d31a3c6dc584f8e890f77c0e14a41f6722f006"
+  },
+  "archive_result_regenerated_exactly_from_local_observations": true,
+  "private_replay_inputs_and_digests_omitted": true,
+  "portable_cpu_build_reproduced_executed_observer_binary": true
+}

@@ -1,0 +1,41 @@
+PREFIX positions=80167 bytes=1709608860 offload=42/42 rs=1 outputs=2
+RESTORE accepted bitwise=1
+GRAPH accepted input=2 output=2 calls=1 position=80167 sparse=10 invalid_sparse=0 padded_kv=80384 t2=30 t2_attempts=30 t2_fallback=0 moe=0,0,40,40
+SCORE accepted_row1 raw=native greedy=native top2_gap=1.49843216 serial_logp=-1.83342055 native_logp=-0.334988395 serial_minus_native=-1.49843216
+ACCEPTED row0_matches_archived_accepted_token=true
+RESTORE serial bitwise=1
+GRAPH serial_first input=1 output=1 calls=1 position=80167 sparse=10 invalid_sparse=0 padded_kv=80384 t2=0 t2_attempts=0 t2_fallback=0 moe=0,0,0,0
+GRAPH serial_second input=1 output=1 calls=1 position=80168 sparse=10 invalid_sparse=0 padded_kv=80384 t2=0 t2_attempts=0 t2_fallback=0 moe=0,0,0,0
+SCORE serial_row1_conditioning raw=native greedy=native top2_gap=1.12422752 serial_logp=-1.42425504 native_logp=-0.300027513 serial_minus_native=-1.12422752
+LOGITS accepted_row1_vs_serial different_f32_words=248320 max_abs=3.62129903
+STATE accepted_vs_serial kv=false conv=false ssm=false a_prefix=true b_prefix=true
+RESTORE wrong_a bitwise=1
+GRAPH wrong_a input=2 output=2 calls=1 position=80167 sparse=10 invalid_sparse=0 padded_kv=80384 t2=30 t2_attempts=30 t2_fallback=0 moe=0,0,40,40
+TRIM wrong_a removed=1 genuine=true retained_position=80167
+GRAPH correct_a input=1 output=1 calls=1 position=80168 sparse=10 invalid_sparse=0 padded_kv=80384 t2=0 t2_attempts=0 t2_fallback=0 moe=0,0,0,0
+SCORE correct_a raw=native greedy=native top2_gap=1.9756546 serial_logp=-2.22585089 native_logp=-0.25019629 serial_minus_native=-1.9756546
+RESTORE wrong_b bitwise=1
+GRAPH wrong_b input=2 output=2 calls=1 position=80167 sparse=10 invalid_sparse=0 padded_kv=80384 t2=30 t2_attempts=30 t2_fallback=0 moe=0,0,40,40
+TRIM wrong_b removed=1 genuine=true retained_position=80167
+GRAPH correct_b input=1 output=1 calls=1 position=80168 sparse=10 invalid_sparse=0 padded_kv=80384 t2=0 t2_attempts=0 t2_fallback=0 moe=0,0,0,0
+SCORE correct_b raw=native greedy=native top2_gap=1.9756546 serial_logp=-2.22585089 native_logp=-0.25019629 serial_minus_native=-1.9756546
+STATE wrong_untrimmed_a_vs_b kv=false conv=false ssm=false a_prefix=true b_prefix=true
+STATE wrong_retained_a_vs_b kv=true conv=true ssm=true a_prefix=true b_prefix=true
+STATE wrong_corrected_a_vs_b kv=true conv=true ssm=true a_prefix=true b_prefix=true
+STATE wrong_retained_a_vs_serial kv=false conv=false ssm=false a_prefix=true b_prefix=true
+STATE wrong_corrected_a_vs_serial kv=false conv=false ssm=false a_prefix=true b_prefix=true
+LOGITS wrong_row0_a_vs_b different_f32_words=0 max_abs=0
+LOGITS wrong_row1_a_vs_b different_f32_words=248320 max_abs=10.716743
+LOGITS wrong_row0_a_vs_accepted_row0 different_f32_words=0 max_abs=0
+LOGITS wrong_corrected_a_vs_b different_f32_words=0 max_abs=0
+LOGITS wrong_corrected_a_vs_serial different_f32_words=248320 max_abs=3.53820682
+COMPLETE width_flip_matches_archived=false genuine_two_rejections=true
+print_info: n_expert_used         = 8
+load_tensors: offloaded 42/42 layers to GPU
+N82_ADMISSION original_blocks=3 candidate_blocks=3 grid=72 admitted=1
+q2_r2_top16_dispatch n_q=2 n_kv=80384 nkvh=2 plans=4
+q2_r2_stride_dispatch width=80384 k_token_bytes=1024 v_token_bytes=1024 splits=12 nu=4 threads=512 grid=24
+QUALITY80_MAPPED libggml-base.so
+QUALITY80_MAPPED libggml-cuda.so
+QUALITY80_MAPPED libggml.so
+QUALITY80_MAPPED libllama.so

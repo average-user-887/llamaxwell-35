@@ -1,0 +1,264 @@
+{
+  "matches_logged_live_pair_margins_within_2e_5": false,
+  "runner_exit": 0,
+  "cleanup_exit": 0,
+  "executed_required_paths": true,
+  "witness": {
+    "graphs": true,
+    "long_q2_stride": true,
+    "long_q2_top16": true,
+    "q8_gdn_occupancy": true,
+    "eight_experts": true,
+    "runtime_maps": true
+  },
+  "executed_width_only_paths": true,
+  "width_only_choice_reproduction": false,
+  "both_proposals_genuinely_rejected": true,
+  "prior_active_kv_matches_common_prefix": true,
+  "same_shape_suffix_isolation": true,
+  "records": {
+    "PREFIX": {
+      "": {
+        "positions": "80167",
+        "bytes": "1709608860",
+        "offload": "42/42",
+        "rs": "1",
+        "outputs": "2"
+      }
+    },
+    "RESTORE": {
+      "accepted": {
+        "bitwise": "1"
+      },
+      "serial": {
+        "bitwise": "1"
+      },
+      "wrong_a": {
+        "bitwise": "1"
+      },
+      "wrong_b": {
+        "bitwise": "1"
+      }
+    },
+    "GRAPH": {
+      "accepted": {
+        "input": "2",
+        "output": "2",
+        "calls": "1",
+        "position": "80167",
+        "sparse": "10",
+        "invalid_sparse": "0",
+        "padded_kv": "80384",
+        "t2": "30",
+        "t2_attempts": "30",
+        "t2_fallback": "0",
+        "moe": "0,0,40,40"
+      },
+      "serial_first": {
+        "input": "1",
+        "output": "1",
+        "calls": "1",
+        "position": "80167",
+        "sparse": "10",
+        "invalid_sparse": "0",
+        "padded_kv": "80384",
+        "t2": "0",
+        "t2_attempts": "0",
+        "t2_fallback": "0",
+        "moe": "0,0,0,0"
+      },
+      "serial_second": {
+        "input": "1",
+        "output": "1",
+        "calls": "1",
+        "position": "80168",
+        "sparse": "10",
+        "invalid_sparse": "0",
+        "padded_kv": "80384",
+        "t2": "0",
+        "t2_attempts": "0",
+        "t2_fallback": "0",
+        "moe": "0,0,0,0"
+      },
+      "wrong_a": {
+        "input": "2",
+        "output": "2",
+        "calls": "1",
+        "position": "80167",
+        "sparse": "10",
+        "invalid_sparse": "0",
+        "padded_kv": "80384",
+        "t2": "30",
+        "t2_attempts": "30",
+        "t2_fallback": "0",
+        "moe": "0,0,40,40"
+      },
+      "correct_a": {
+        "input": "1",
+        "output": "1",
+        "calls": "1",
+        "position": "80168",
+        "sparse": "10",
+        "invalid_sparse": "0",
+        "padded_kv": "80384",
+        "t2": "0",
+        "t2_attempts": "0",
+        "t2_fallback": "0",
+        "moe": "0,0,0,0"
+      },
+      "wrong_b": {
+        "input": "2",
+        "output": "2",
+        "calls": "1",
+        "position": "80167",
+        "sparse": "10",
+        "invalid_sparse": "0",
+        "padded_kv": "80384",
+        "t2": "30",
+        "t2_attempts": "30",
+        "t2_fallback": "0",
+        "moe": "0,0,40,40"
+      },
+      "correct_b": {
+        "input": "1",
+        "output": "1",
+        "calls": "1",
+        "position": "80168",
+        "sparse": "10",
+        "invalid_sparse": "0",
+        "padded_kv": "80384",
+        "t2": "0",
+        "t2_attempts": "0",
+        "t2_fallback": "0",
+        "moe": "0,0,0,0"
+      }
+    },
+    "ACCEPTED": {
+      "": {
+        "row0_matches_archived_accepted_token": "true"
+      }
+    },
+    "STATE": {
+      "accepted_vs_serial": {
+        "kv": "false",
+        "conv": "false",
+        "ssm": "false",
+        "a_prefix": "true",
+        "b_prefix": "true"
+      },
+      "wrong_untrimmed_a_vs_b": {
+        "kv": "false",
+        "conv": "false",
+        "ssm": "false",
+        "a_prefix": "true",
+        "b_prefix": "true"
+      },
+      "wrong_retained_a_vs_b": {
+        "kv": "true",
+        "conv": "true",
+        "ssm": "true",
+        "a_prefix": "true",
+        "b_prefix": "true"
+      },
+      "wrong_corrected_a_vs_b": {
+        "kv": "true",
+        "conv": "true",
+        "ssm": "true",
+        "a_prefix": "true",
+        "b_prefix": "true"
+      },
+      "wrong_retained_a_vs_serial": {
+        "kv": "false",
+        "conv": "false",
+        "ssm": "false",
+        "a_prefix": "true",
+        "b_prefix": "true"
+      },
+      "wrong_corrected_a_vs_serial": {
+        "kv": "false",
+        "conv": "false",
+        "ssm": "false",
+        "a_prefix": "true",
+        "b_prefix": "true"
+      }
+    },
+    "SCORE": {
+      "accepted_row1": {
+        "raw": "native",
+        "greedy": "native",
+        "top2_gap": "1.49843216",
+        "serial_logp": "-1.83342055",
+        "native_logp": "-0.334988395",
+        "serial_minus_native": "-1.49843216"
+      },
+      "serial_row1_conditioning": {
+        "raw": "native",
+        "greedy": "native",
+        "top2_gap": "1.12422752",
+        "serial_logp": "-1.42425504",
+        "native_logp": "-0.300027513",
+        "serial_minus_native": "-1.12422752"
+      },
+      "correct_a": {
+        "raw": "native",
+        "greedy": "native",
+        "top2_gap": "1.9756546",
+        "serial_logp": "-2.22585089",
+        "native_logp": "-0.25019629",
+        "serial_minus_native": "-1.9756546"
+      },
+      "correct_b": {
+        "raw": "native",
+        "greedy": "native",
+        "top2_gap": "1.9756546",
+        "serial_logp": "-2.22585089",
+        "native_logp": "-0.25019629",
+        "serial_minus_native": "-1.9756546"
+      }
+    },
+    "LOGITS": {
+      "accepted_row1_vs_serial": {
+        "different_f32_words": "248320",
+        "max_abs": "3.62129903"
+      },
+      "wrong_row0_a_vs_b": {
+        "different_f32_words": "0",
+        "max_abs": "0"
+      },
+      "wrong_row1_a_vs_b": {
+        "different_f32_words": "248320",
+        "max_abs": "10.716743"
+      },
+      "wrong_row0_a_vs_accepted_row0": {
+        "different_f32_words": "0",
+        "max_abs": "0"
+      },
+      "wrong_corrected_a_vs_b": {
+        "different_f32_words": "0",
+        "max_abs": "0"
+      },
+      "wrong_corrected_a_vs_serial": {
+        "different_f32_words": "248320",
+        "max_abs": "3.53820682"
+      }
+    },
+    "TRIM": {
+      "wrong_a": {
+        "removed": "1",
+        "genuine": "true",
+        "retained_position": "80167"
+      },
+      "wrong_b": {
+        "removed": "1",
+        "genuine": "true",
+        "retained_position": "80167"
+      }
+    },
+    "COMPLETE": {
+      "": {
+        "width_flip_matches_archived": "false",
+        "genuine_two_rejections": "true"
+      }
+    }
+  }
+}
