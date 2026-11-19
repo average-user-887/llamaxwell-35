@@ -1,0 +1,74 @@
+{
+  "arms": [
+    {
+      "mode": "serial",
+      "server_decode_tps": 75.35758723586993,
+      "delivered_count_over_server_decode_s": 75.47228675982103,
+      "first_to_last_stream_id_tps": 75.36395732712413,
+      "visible_whole_request_tps": 2.420153024885936,
+      "acceptance_fraction": null,
+      "correct_choices_out_of_four": 4,
+      "sustained_visible_length": true,
+      "declared_terminal": true
+    },
+    {
+      "mode": "native",
+      "server_decode_tps": 93.71159031384133,
+      "delivered_count_over_server_decode_s": 93.84565553603566,
+      "first_to_last_stream_id_tps": 93.72493150972525,
+      "visible_whole_request_tps": 2.551484334190483,
+      "acceptance_fraction": 0.7412935323383084,
+      "correct_choices_out_of_four": 4,
+      "sustained_visible_length": true,
+      "declared_terminal": true
+    },
+    {
+      "mode": "native",
+      "server_decode_tps": 93.9986248498745,
+      "delivered_count_over_server_decode_s": 94.13310070802883,
+      "first_to_last_stream_id_tps": 94.0102844816908,
+      "visible_whole_request_tps": 2.5470930762574033,
+      "acceptance_fraction": 0.7412935323383084,
+      "correct_choices_out_of_four": 4,
+      "sustained_visible_length": true,
+      "declared_terminal": true
+    },
+    {
+      "mode": "serial",
+      "server_decode_tps": 75.62119879742725,
+      "delivered_count_over_server_decode_s": 75.73629955663186,
+      "first_to_last_stream_id_tps": 75.62999318107549,
+      "visible_whole_request_tps": 2.4206008748205106,
+      "acceptance_fraction": null,
+      "correct_choices_out_of_four": 4,
+      "sustained_visible_length": true,
+      "declared_terminal": true
+    }
+  ],
+  "pairs": [
+    {
+      "serial_arm": 1,
+      "native_arm": 2,
+      "native_over_serial": {
+        "server_decode_tps": 1.2435587941599457,
+        "delivered_count_over_server_decode_s": 1.24344523751725,
+        "first_to_last_stream_id_tps": 1.2436307066905157
+      },
+      "native_minus_serial_cold_request_s": 2.5728140919999873
+    },
+    {
+      "serial_arm": 4,
+      "native_arm": 3,
+      "native_over_serial": {
+        "server_decode_tps": 1.243019501736231,
+        "delivered_count_over_server_decode_s": 1.2429059943394878,
+        "first_to_last_stream_id_tps": 1.2430291280948378
+      },
+      "native_minus_serial_cold_request_s": 3.0923432669999897
+    }
+  ],
+  "distinct_tasks": 1,
+  "independent_ordered_pairs": 2,
+  "agentic_quality": null,
+  "blind_rationale_review": null
+}
