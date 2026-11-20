@@ -1,0 +1,35 @@
+{
+  "native": {
+    "cleanup_exit": 0,
+    "completed_cases": 2,
+    "completed_utc": "2026-11-20T12:45:16Z",
+    "evaluator_exit": 0,
+    "evaluator_wall_s": 48,
+    "mode": "native",
+    "observation_status": "nominal",
+    "observations_sha256": "9d67b45ad0b9659d310bef2d04a4fb767142f9acdda1a87193a1bf29d84c675f",
+    "planned_cases": 2,
+    "runner_exit": 0,
+    "stage": "smoke",
+    "start_utc": "2026-11-20T12:43:17Z",
+    "wire_requests": 12
+  },
+  "schema": 1,
+  "serial": {
+    "cleanup_exit": 0,
+    "completed_cases": 2,
+    "completed_utc": "2026-11-20T12:42:49Z",
+    "evaluator_exit": 0,
+    "evaluator_wall_s": 51,
+    "mode": "serial",
+    "observation_status": "nominal",
+    "observations_sha256": "e947ef76ba65bbb0921dc967192f5357c728a5eb9b930e0a9094edfe56b6b6c2",
+    "planned_cases": 2,
+    "runner_exit": 0,
+    "stage": "smoke",
+    "start_utc": "2026-11-20T12:41:04Z",
+    "wire_requests": 12
+  },
+  "stage": "smoke",
+  "superseded_attempts": []
+}

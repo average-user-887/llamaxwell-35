@@ -1,0 +1,254 @@
+{
+  "native": {
+    "agentdojo-travel-u1": [
+      {
+        "cache_n": 0,
+        "cache_prompt": false,
+        "elapsed_s": 9.766557,
+        "predicted_ms": 1050.807,
+        "predicted_n": 118,
+        "prompt_ms": 8285.574,
+        "prompt_n": 3788,
+        "request": 1
+      },
+      {
+        "cache_n": 3905,
+        "cache_prompt": true,
+        "elapsed_s": 3.399707,
+        "predicted_ms": 2311.459,
+        "predicted_n": 256,
+        "prompt_ms": 1036.865,
+        "prompt_n": 144,
+        "request": 2
+      },
+      {
+        "cache_n": 4045,
+        "cache_prompt": true,
+        "elapsed_s": 2.767175,
+        "predicted_ms": 1442.752,
+        "predicted_n": 162,
+        "prompt_ms": 1286.878,
+        "prompt_n": 174,
+        "request": 3
+      },
+      {
+        "cache_n": 4215,
+        "cache_prompt": true,
+        "elapsed_s": 2.507709,
+        "predicted_ms": 1443.93,
+        "predicted_n": 157,
+        "prompt_ms": 1026.482,
+        "prompt_n": 334,
+        "request": 4
+      }
+    ],
+    "tau2-retail-23": [
+      {
+        "cache_n": 0,
+        "cache_prompt": false,
+        "elapsed_s": 10.619613,
+        "predicted_ms": 846.588,
+        "predicted_n": 96,
+        "prompt_ms": 9627.768,
+        "prompt_n": 4566,
+        "request": 1
+      },
+      {
+        "cache_n": 4661,
+        "cache_prompt": true,
+        "elapsed_s": 1.00576,
+        "predicted_ms": 568.752,
+        "predicted_n": 67,
+        "prompt_ms": 410.668,
+        "prompt_n": 28,
+        "request": 2
+      },
+      {
+        "cache_n": 4755,
+        "cache_prompt": true,
+        "elapsed_s": 1.854795,
+        "predicted_ms": 585.953,
+        "predicted_n": 68,
+        "prompt_ms": 1233.558,
+        "prompt_n": 187,
+        "request": 3
+      },
+      {
+        "cache_n": 5010,
+        "cache_prompt": true,
+        "elapsed_s": 1.816001,
+        "predicted_ms": 437.432,
+        "predicted_n": 51,
+        "prompt_ms": 1346.781,
+        "prompt_n": 230,
+        "request": 4
+      },
+      {
+        "cache_n": 5290,
+        "cache_prompt": true,
+        "elapsed_s": 1.912326,
+        "predicted_ms": 418.279,
+        "predicted_n": 48,
+        "prompt_ms": 1453.648,
+        "prompt_n": 557,
+        "request": 5
+      },
+      {
+        "cache_n": 5895,
+        "cache_prompt": true,
+        "elapsed_s": 1.937153,
+        "predicted_ms": 418.333,
+        "predicted_n": 48,
+        "prompt_ms": 1480.272,
+        "prompt_n": 562,
+        "request": 6
+      },
+      {
+        "cache_n": 6505,
+        "cache_prompt": true,
+        "elapsed_s": 3.180866,
+        "predicted_ms": 2234.026,
+        "predicted_n": 249,
+        "prompt_ms": 912.558,
+        "prompt_n": 260,
+        "request": 7
+      },
+      {
+        "cache_n": 7014,
+        "cache_prompt": true,
+        "elapsed_s": 3.124024,
+        "predicted_ms": 1006.355,
+        "predicted_n": 108,
+        "prompt_ms": 2070.178,
+        "prompt_n": 887,
+        "request": 8
+      }
+    ]
+  },
+  "serial": {
+    "agentdojo-travel-u1": [
+      {
+        "cache_n": 0,
+        "cache_prompt": false,
+        "elapsed_s": 10.585305,
+        "predicted_ms": 2070.427,
+        "predicted_n": 118,
+        "prompt_ms": 7983.716,
+        "prompt_n": 3788,
+        "request": 1
+      },
+      {
+        "cache_n": 3905,
+        "cache_prompt": true,
+        "elapsed_s": 4.071334,
+        "predicted_ms": 3034.692,
+        "predicted_n": 256,
+        "prompt_ms": 978.924,
+        "prompt_n": 144,
+        "request": 2
+      },
+      {
+        "cache_n": 4045,
+        "cache_prompt": true,
+        "elapsed_s": 3.791306,
+        "predicted_ms": 2509.537,
+        "predicted_n": 162,
+        "prompt_ms": 1229.4,
+        "prompt_n": 186,
+        "request": 3
+      },
+      {
+        "cache_n": 4227,
+        "cache_prompt": true,
+        "elapsed_s": 1.754927,
+        "predicted_ms": 742.195,
+        "predicted_n": 65,
+        "prompt_ms": 973.56,
+        "prompt_n": 334,
+        "request": 4
+      }
+    ],
+    "tau2-retail-23": [
+      {
+        "cache_n": 0,
+        "cache_prompt": false,
+        "elapsed_s": 10.643148,
+        "predicted_ms": 1116.148,
+        "predicted_n": 96,
+        "prompt_ms": 9334.457,
+        "prompt_n": 4566,
+        "request": 1
+      },
+      {
+        "cache_n": 4661,
+        "cache_prompt": true,
+        "elapsed_s": 1.192632,
+        "predicted_ms": 785.047,
+        "predicted_n": 67,
+        "prompt_ms": 374.363,
+        "prompt_n": 28,
+        "request": 2
+      },
+      {
+        "cache_n": 4755,
+        "cache_prompt": true,
+        "elapsed_s": 1.983813,
+        "predicted_ms": 776.829,
+        "predicted_n": 68,
+        "prompt_ms": 1158.447,
+        "prompt_n": 187,
+        "request": 3
+      },
+      {
+        "cache_n": 5009,
+        "cache_prompt": true,
+        "elapsed_s": 1.88788,
+        "predicted_ms": 579.699,
+        "predicted_n": 51,
+        "prompt_ms": 1273.027,
+        "prompt_n": 231,
+        "request": 4
+      },
+      {
+        "cache_n": 5290,
+        "cache_prompt": true,
+        "elapsed_s": 1.991599,
+        "predicted_ms": 549.743,
+        "predicted_n": 48,
+        "prompt_ms": 1385.134,
+        "prompt_n": 557,
+        "request": 5
+      },
+      {
+        "cache_n": 5894,
+        "cache_prompt": true,
+        "elapsed_s": 1.962884,
+        "predicted_ms": 503.564,
+        "predicted_n": 44,
+        "prompt_ms": 1415.273,
+        "prompt_n": 563,
+        "request": 6
+      },
+      {
+        "cache_n": 6500,
+        "cache_prompt": true,
+        "elapsed_s": 3.941342,
+        "predicted_ms": 2982.904,
+        "predicted_n": 254,
+        "prompt_ms": 917.987,
+        "prompt_n": 261,
+        "request": 7
+      },
+      {
+        "cache_n": 7014,
+        "cache_prompt": true,
+        "elapsed_s": 3.244915,
+        "predicted_ms": 1189.378,
+        "predicted_n": 91,
+        "prompt_ms": 1987.764,
+        "prompt_n": 888,
+        "request": 8
+      }
+    ]
+  }
+}
