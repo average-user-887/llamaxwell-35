@@ -1,0 +1,295 @@
+{
+  "active_state_comparison": null,
+  "arms": {
+    "native": {
+      "cap_seconds": 430,
+      "cleanup_exit": 0,
+      "cold_run": {
+        "cache_prompt": true,
+        "finish_reason": "limit",
+        "ignore_eos": true,
+        "n_out": 192,
+        "n_predict": 192,
+        "output_sha256": "2976ff6b52a9b7e7891fe437407ee29088fccbd7ce785673dd0650ce52d5bf89",
+        "prompt_n": 80000,
+        "prompt_sha256": "7c1dcdc2f609928922953fc626d8b90e5b5288092036f21b57f6ffda0a128dcc",
+        "seed": 7,
+        "temperature": 0,
+        "timings": {
+          "cache_n": 0,
+          "draft_acceptance_rate": 0.881188,
+          "draft_n": 101,
+          "draft_n_accepted": 89,
+          "draft_rejected": 12,
+          "predicted_ms": 2175.663,
+          "predicted_n": 192,
+          "predicted_per_second": 87.789,
+          "predicted_per_token_ms": 11.390906,
+          "prompt_ms": 265445.616,
+          "prompt_n": 80000,
+          "prompt_per_second": 301.38,
+          "prompt_per_token_ms": 3.31807
+        },
+        "truncated": false,
+        "ttft_s": 265.463,
+        "wall_s": 267.643
+      },
+      "completed_utc": "2026-11-20T12:55:45Z",
+      "image_tag": "sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+      "manifest_hashes": {
+        "pin:FROZEN.sha256": "1da482dbbfe2468e8bfbcd1e61a942bab8c4d6d35ca8ce224c0a18f2be84ae7e",
+        "pin:INPUTS.sha256": "2bcf8179626968bcdf48a2a66c3f37bb8966695b3f995ab2664d0ca2fd54ccd4",
+        "pin:model.sha256": "6a8ef5ec63c32a1f7118bb853fd9baa2c525bbe8c192e7f6ff2709abecd9099b"
+      },
+      "mode": "native",
+      "observation_status": "revalidated_terminal_destructor_histogram",
+      "phase": "cold",
+      "physical": {
+        "accepted_draft_tokens": 89,
+        "coefficients_expected": {
+          "combined": 40,
+          "q2_sparse": 10,
+          "q2_stride": 10,
+          "row0": 0,
+          "row1": 0,
+          "skip": 40
+        },
+        "counters": {
+          "combined": 4040,
+          "q2_sparse": 1010,
+          "q2_stride": 1010,
+          "row0": 0,
+          "row1": 0,
+          "skip": 4040
+        },
+        "exact_counter_ratios_verified": true,
+        "final_mv1_host": {
+          "acc_0": 12,
+          "acc_1": 89,
+          "restores": 0,
+          "rounds": 101
+        },
+        "mode": "native",
+        "n_expert_used": 8,
+        "offered_draft_tokens": 101,
+        "offloaded_layers": "42/42",
+        "sampler_snapshot": {
+          "elided": 101,
+          "elided_rejected": 12,
+          "kept": 0,
+          "restored": 0
+        }
+      },
+      "result": {
+        "archive_ids_and_text_exact": 192,
+        "decision_170_row_zero_based": 1,
+        "first_decision_row_zero_based": 0,
+        "first_rejection": {
+          "decision_ordinal": 60,
+          "offer_ordinal": 30,
+          "rejected_proposal_differs_from_raw_top1": true
+        },
+        "instrumented_latency_only": true,
+        "known_trace_window_exact": true,
+        "mode": "native",
+        "observed_verifier_rounds_through_window": 88,
+        "phase": "cold",
+        "retained_ordinal_range": [
+          1,
+          170
+        ]
+      },
+      "revalidation_note": "Frozen verifier ref_hist matched ARCHIVED server-pre-warm.log at periodic checkpoints rounds=25,50,75,100 [(0,25),(3,47),(7,68),(11,89)]; live container shutdown via docker stop also flushed the destructor line rounds=101 restores=0 acc_hist=[12,89,0,0] matching timings.draft_n=101 and draft_n_accepted=89.",
+      "runner_exit": 1,
+      "seal": {
+        "entries": 21,
+        "observations_sha256": "3a81676b8919736320935b8101ecd87a285223e98ab893d9d8b4b528d0c4c3f3"
+      },
+      "start_utc": "2026-11-20T12:50:56Z",
+      "wall_seconds_receipt": 289
+    },
+    "serial": {
+      "cap_seconds": 430,
+      "cleanup_exit": 0,
+      "cold_run": {
+        "cache_prompt": true,
+        "finish_reason": "limit",
+        "ignore_eos": true,
+        "n_out": 192,
+        "n_predict": 192,
+        "output_sha256": "cbb447bc8d3b78fbac5688419c2e70dd40626632ef9e73ade7acdbad3000c788",
+        "prompt_n": 80000,
+        "prompt_sha256": "7c1dcdc2f609928922953fc626d8b90e5b5288092036f21b57f6ffda0a128dcc",
+        "seed": 7,
+        "temperature": 0,
+        "timings": {
+          "cache_n": 0,
+          "draft_acceptance_rate": null,
+          "draft_n": 0,
+          "draft_n_accepted": 0,
+          "draft_rejected": 0,
+          "predicted_ms": 2790.894,
+          "predicted_n": 192,
+          "predicted_per_second": 68.437,
+          "predicted_per_token_ms": 14.61201,
+          "prompt_ms": 260897.913,
+          "prompt_n": 80000,
+          "prompt_per_second": 306.633,
+          "prompt_per_token_ms": 3.261224
+        },
+        "truncated": false,
+        "ttft_s": 260.915,
+        "wall_s": 263.71
+      },
+      "completed_utc": "2026-11-20T12:50:28Z",
+      "image_tag": "sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d",
+      "manifest_hashes": {
+        "pin:FROZEN.sha256": "1da482dbbfe2468e8bfbcd1e61a942bab8c4d6d35ca8ce224c0a18f2be84ae7e",
+        "pin:INPUTS.sha256": "2bcf8179626968bcdf48a2a66c3f37bb8966695b3f995ab2664d0ca2fd54ccd4",
+        "pin:model.sha256": "6a8ef5ec63c32a1f7118bb853fd9baa2c525bbe8c192e7f6ff2709abecd9099b"
+      },
+      "mode": "serial",
+      "observation_status": "nominal",
+      "phase": "cold",
+      "physical": {
+        "accepted_draft_tokens": 0,
+        "coefficients_expected": {
+          "combined": 40,
+          "q2_sparse": 10,
+          "q2_stride": 10,
+          "row0": 0,
+          "row1": 0,
+          "skip": 40
+        },
+        "counters": {
+          "combined": 0,
+          "q2_sparse": 0,
+          "q2_stride": 0,
+          "row0": 0,
+          "row1": 0,
+          "skip": 0
+        },
+        "exact_counter_ratios_verified": true,
+        "final_mv1_host": null,
+        "mode": "serial",
+        "n_expert_used": 8,
+        "offered_draft_tokens": 0,
+        "offloaded_layers": "42/42",
+        "sampler_snapshot": {
+          "elided": 0,
+          "elided_rejected": 0,
+          "kept": 0,
+          "restored": 0
+        }
+      },
+      "result": {
+        "archive_ids_and_text_exact": 192,
+        "decision_170_row_zero_based": 0,
+        "first_decision_row_zero_based": 0,
+        "first_rejection": null,
+        "instrumented_latency_only": true,
+        "known_trace_window_exact": true,
+        "mode": "serial",
+        "observed_verifier_rounds_through_window": 0,
+        "phase": "cold",
+        "retained_ordinal_range": [
+          1,
+          170
+        ]
+      },
+      "runner_exit": 0,
+      "seal": {
+        "entries": 22,
+        "observations_sha256": "800e7e45b6a7aa1addb9b70f79b2c2f707b002d3826b67c1ded4dfb4a3e67bdd"
+      },
+      "start_utc": "2026-11-20T12:45:56Z",
+      "wall_seconds_receipt": 272
+    }
+  },
+  "compare": {
+    "no_observed_pre_rejection_order_difference": false,
+    "strictly_before_first_rejected_round": {
+      "first_emitted_difference": null,
+      "first_order_difference": 1,
+      "first_rounded_score_or_rank_difference": 1,
+      "ordinals": [
+        1,
+        59
+      ]
+    },
+    "through_170": {
+      "first_emitted_difference": 170,
+      "first_order_difference": 1,
+      "first_rounded_score_or_rank_difference": 1
+    }
+  },
+  "decision_window_aggregates": {
+    "first_emitted_diff_ordinal": 170,
+    "first_order_diff_ordinal": 1,
+    "first_rejected_decision_ordinal": 60,
+    "first_score_diff_ordinal": 1,
+    "first_top1_flip_ordinal": 170,
+    "from_first_rejection_through_170": {
+      "count": 111,
+      "emitted_diff_count": 1,
+      "max_abs_shared_token_logprob_diff": 3.14861,
+      "max_abs_top1_logprob_diff": 0.43287,
+      "order_diff_count": 110,
+      "scores_diff_count": 111,
+      "top1_flip_count": 1
+    },
+    "ordinal_170_snapshot": {
+      "native_choice_rank_in_serial_top8": 2,
+      "native_row_zero_based": 1,
+      "native_top1_minus_top2": 0.53683,
+      "serial_choice_rank_in_native_top8": 2,
+      "serial_top1_minus_top2": 0.66038,
+      "top1_logprob_diff": -0.05958,
+      "top8_order_equal": false,
+      "top8_set_equal": false
+    },
+    "ordinals_covered": [
+      1,
+      170
+    ],
+    "pre_rejection": {
+      "count": 59,
+      "emitted_diff_count": 0,
+      "max_abs_shared_token_logprob_diff": 2.42764,
+      "max_abs_top1_logprob_diff": 0.15386,
+      "order_diff_count": 56,
+      "scores_diff_count": 59,
+      "top1_flip_count": 0
+    },
+    "through_170": {
+      "count": 170,
+      "emitted_diff_count": 1,
+      "max_abs_shared_token_logprob_diff": 3.14861,
+      "max_abs_top1_logprob_diff": 0.43287,
+      "order_diff_count": 166,
+      "scores_diff_count": 170,
+      "top1_flip_count": 1
+    }
+  },
+  "observation_seals_verified": true,
+  "packet_version": "token170-v1",
+  "same_input_and_build_checks": {
+    "image_tag_match": true,
+    "manifest_hashes_match": true,
+    "n_predict_match": true,
+    "prompt_n_match": true,
+    "prompt_sha256_match": true,
+    "runtime_libraries_match": true,
+    "seed_match": true,
+    "temperature_match": true
+  },
+  "scope": "one cold diagnostic pair",
+  "score_observation": "top eight raw target log-probabilities rounded to five decimals",
+  "token_comparison": {
+    "compared_cold_tokens": 192,
+    "first_emitted_difference_1_based": 170,
+    "output_sha256_differs": true,
+    "token_equality_prefix_len": 169,
+    "total_equal_tokens_in_192": 176
+  }
+}

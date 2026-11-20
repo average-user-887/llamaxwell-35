@@ -1,0 +1,33 @@
+{
+  "packet_version": "token170-v1",
+  "runs": [
+    {
+      "arm": "serial",
+      "cleanup_exit": 0,
+      "cold_n_out": 192,
+      "completed_utc": "2026-11-20T12:50:28Z",
+      "observation_status": "nominal",
+      "outcome": "completed",
+      "retained_ordinal_range": [
+        1,
+        170
+      ],
+      "runner_exit": 0,
+      "start_utc": "2026-11-20T12:45:56Z"
+    },
+    {
+      "arm": "native",
+      "cleanup_exit": 0,
+      "cold_n_out": 192,
+      "completed_utc": "2026-11-20T12:55:45Z",
+      "observation_status": "revalidated_terminal_destructor_histogram",
+      "outcome": "revalidated",
+      "retained_ordinal_range": [
+        1,
+        170
+      ],
+      "runner_exit": 1,
+      "start_utc": "2026-11-20T12:50:56Z"
+    }
+  ]
+}
