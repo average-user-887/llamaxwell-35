@@ -1,0 +1,198 @@
+--- a/ggml/src/ggml-cuda/mmf.cu
++++ b/ggml/src/ggml-cuda/mmf.cu
+@@ -1,4 +1,5 @@
+ #include "ggml.h"
++#ifndef GGML_CUDA_OCCAMY_SLIM
+ #include "mmf.cuh"
+ #include "mmid.cuh"
+ 
+@@ -130,8 +131,21 @@
+     }
+ }
+ 
++#else
++#include "mmf.cuh"
++void ggml_cuda_mul_mat_f(ggml_backend_cuda_context & ctx, const ggml_tensor * src0, const ggml_tensor * src1, const ggml_tensor * ids, ggml_tensor * dst) {
++    GGML_UNUSED(ctx); GGML_UNUSED(src0); GGML_UNUSED(src1); GGML_UNUSED(ids); GGML_UNUSED(dst);
++    GGML_ABORT("mmf stripped on sm_52 (GGML_CUDA_OCCAMY_SLIM)");
++}
++#endif // GGML_CUDA_OCCAMY_SLIM
++
+ bool ggml_cuda_should_use_mmf(enum ggml_type type, int cc, int warp_size, const int64_t * src0_ne,
+         const size_t * src0_nb, const int src1_ncols, bool mul_mat_id) {
++#ifdef GGML_CUDA_OCCAMY_SLIM
++    GGML_UNUSED(type); GGML_UNUSED(cc); GGML_UNUSED(warp_size);
++    GGML_UNUSED(src0_ne); GGML_UNUSED(src0_nb); GGML_UNUSED(src1_ncols); GGML_UNUSED(mul_mat_id);
++    return false;
++#else
+     if (ggml_is_quantized(type)) {
+         return false;
+     }
+@@ -188,4 +202,5 @@
+         default:
+             return false;
+     }
+-}
++#endif // GGML_CUDA_OCCAMY_SLIM
++}
+--- a/ggml/src/ggml-cuda/mmq.cu
++++ b/ggml/src/ggml-cuda/mmq.cu
+@@ -4,8 +4,20 @@
+ #include "mmid.cuh"
+ 
+ #include <cstdint>
++#include <cstdlib>
+ 
+ static void ggml_cuda_mul_mat_q_switch_type(ggml_backend_cuda_context & ctx, const mmq_args & args, cudaStream_t stream, const ggml_prec prec_src1) {
++#ifdef GGML_CUDA_OCCAMY_SLIM
++    GGML_UNUSED(prec_src1);
++    switch (args.type_x) {
++        case GGML_TYPE_Q4_0:
++            mul_mat_q_case<GGML_TYPE_Q4_0, GGML_PREC_Q8>(ctx, args, stream);
++            break;
++        default:
++            GGML_ABORT("mmq stripped under GGML_CUDA_OCCAMY_SLIM (only Q4_0 supported)");
++            break;
++    }
++#else
+     switch (args.type_x) {
+         case GGML_TYPE_Q1_0:
+             mul_mat_q_case<GGML_TYPE_Q1_0, GGML_PREC_Q8>(ctx, args, stream);
+@@ -89,6 +101,7 @@
+             GGML_ABORT("fatal error");
+             break;
+     }
++#endif // GGML_CUDA_OCCAMY_SLIM
+ }
+ 
+ // overrides the src1 precision requested by the graph, "auto" keeps the requested one
+@@ -357,6 +370,21 @@
+ #ifdef GGML_CUDA_FORCE_CUBLAS
+     return false;
+ #endif // GGML_CUDA_FORCE_CUBLAS
++#ifdef GGML_CUDA_OCCAMY_SLIM
++    static const int64_t mmid_cublas_min_m = []() -> int64_t {
++        const char * val = std::getenv("GGML_CUDA_OCCAMY_MMID_CUBLAS_MIN_M");
++        return val && *val ? std::atoll(val) : 0;
++    }();
++    if (type != GGML_TYPE_Q4_0 || n_experts <= 0) {
++        return false;
++    }
++    if (mmid_cublas_min_m > 0 && ne11 >= mmid_cublas_min_m) {
++        return false;
++    }
++    const int    id    = ggml_cuda_get_device();
++    const size_t smpbo = ggml_cuda_info().devices[id].smpbo;
++    return smpbo >= 48 * 1024 && ggml_cuda_highest_compiled_arch(cc) < GGML_CUDA_CC_DP4A;
++#else
+ 
+     bool mmq_supported;
+ 
+@@ -485,4 +513,5 @@
+     }
+ 
+     return (!GGML_CUDA_CC_IS_CDNA(cc)) || ne11 < MMQ_DP4A_MAX_BATCH_SIZE;
++#endif // GGML_CUDA_OCCAMY_SLIM
+ }
+--- a/ggml/src/ggml-cuda/fattn.cu
++++ b/ggml/src/ggml-cuda/fattn.cu
+@@ -1,12 +1,22 @@
+ #include "common.cuh"
+ #include "fattn-common.cuh"
++#ifndef GGML_CUDA_OCCAMY_SLIM
+ #include "fattn-mma-f16.cuh"
++#endif // GGML_CUDA_OCCAMY_SLIM
+ #include "fattn-tile.cuh"
+ #include "fattn-vec.cuh"
+ #include "fattn.cuh"
+ #include "fattn-occamy.cuh"
+ #include "fattn-maxwell-gemm.cuh"
+ 
++#ifdef GGML_CUDA_OCCAMY_SLIM
++void ggml_cuda_flash_attn_ext_compact_mask(
++        const ggml_tensor * mask, int32_t * indices, int32_t * counts, int32_t n_queries, int32_t ncols1, int32_t n_kv_max, cudaStream_t stream) {
++    GGML_UNUSED(mask); GGML_UNUSED(indices); GGML_UNUSED(counts);
++    GGML_UNUSED(n_queries); GGML_UNUSED(ncols1); GGML_UNUSED(n_kv_max); GGML_UNUSED(stream);
++    GGML_ABORT("sparse mma_f16 compact_mask stripped on sm_52 (GGML_CUDA_OCCAMY_SLIM)");
++}
++#else
+ #if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA)
+ // one list per group of ncols1 queries: a column is selected if any query of the group can see it
+ template <int ncols1, bool oob>
+@@ -417,6 +427,7 @@
+             break;
+     }
+ }
++#endif // GGML_CUDA_OCCAMY_SLIM
+ 
+ #define FATTN_VEC_CASE(D, type_K_case, type_V_case)                                                                                \
+     if constexpr (GGML_CUDA_FA_##type_K_case##_##type_V_case) {                                                                    \
+@@ -437,6 +448,7 @@
+ // Vector kernel for the given head size and K/V types, nullptr if its template instance was not compiled:
+ static fattn_vec_case_t ggml_cuda_get_fattn_vec_case(const int64_t head_size, const ggml_type type_K, const ggml_type type_V) {
+     FATTN_VEC_CASES_ALL_D(F16,  F16)
++#ifndef GGML_CUDA_OCCAMY_SLIM
+     FATTN_VEC_CASES_ALL_D(Q4_0, F16)
+     FATTN_VEC_CASES_ALL_D(Q4_1, F16)
+     FATTN_VEC_CASES_ALL_D(Q5_0, F16)
+@@ -491,6 +503,7 @@
+     FATTN_VEC_CASES_ALL_D(Q5_1, BF16)
+     FATTN_VEC_CASES_ALL_D(Q8_0, BF16)
+     FATTN_VEC_CASES_ALL_D(BF16, BF16)
++#endif // GGML_CUDA_OCCAMY_SLIM
+ 
+     return nullptr;
+ }
+@@ -636,6 +649,7 @@
+     // 192 satisfies % 64 == 0 but has no vec instance (DKQ != DV); force it onto the MMA path.
+     const bool can_use_vector_kernel = Q->ne[0] <= 256 && Q->ne[0] % 64 == 0 && Q->ne[0] != 192 && K->ne[1] % FATTN_KQ_STRIDE == 0;
+ 
++#ifndef GGML_CUDA_OCCAMY_SLIM
+     // If Turing tensor cores are available, use them:
+     if (turing_mma_available(cc) && Q->ne[0] != 40 && Q->ne[0] != 72) {
+         if (can_use_vector_kernel) {
+@@ -703,6 +717,7 @@
+             Q->ne[1] * gqa_ratio_eff > (Q->ne[0] <= 128 ? 8 : 16)) {
+         return BEST_FATTN_KERNEL_MMA_F16;
+     }
++#endif // GGML_CUDA_OCCAMY_SLIM
+ 
+     { // local patch 20261012 fattn: GGML_CUDA_FA_KERNEL=vec|tile forces the generic kernel choice (A/B testing only).
+         const int force = ggml_cuda_fattn_env_kernel();
+@@ -778,7 +793,11 @@
+             ggml_cuda_flash_attn_ext_vec(ctx, dst);
+             break;
+         case BEST_FATTN_KERNEL_MMA_F16:
++#ifdef GGML_CUDA_OCCAMY_SLIM
++            GGML_ABORT("fattn mma_f16 stripped on sm_52 (GGML_CUDA_OCCAMY_SLIM)");
++#else
+             ggml_cuda_flash_attn_ext_mma_f16(ctx, dst);
++#endif // GGML_CUDA_OCCAMY_SLIM
+             break;
+     }
+ }
+--- a/ggml/src/ggml-cuda/fattn-tile.cu
++++ b/ggml/src/ggml-cuda/fattn-tile.cu
+@@ -5,6 +5,15 @@
+     const ggml_tensor * K = dst->src[1];
+     const ggml_tensor * V = dst->src[2];
+     switch (K->ne[0]) {
++#ifdef GGML_CUDA_OCCAMY_SLIM
++        case 256: {
++            GGML_ASSERT(V->ne[0] == K->ne[0]);
++            ggml_cuda_flash_attn_ext_tile_case<256, 256>(ctx, dst);
++        } break;
++        default: {
++            GGML_ABORT("Unsupported head size under GGML_CUDA_OCCAMY_SLIM (only dkq256-dv256)");
++        } break;
++#else
+         case  40: {
+             GGML_ASSERT(V->ne[0] == K->ne[0]);
+             ggml_cuda_flash_attn_ext_tile_case< 40,  40>(ctx, dst);
+@@ -56,5 +65,6 @@
+         default: {
+             GGML_ABORT("Unsupported head size");
+         } break;
++#endif // GGML_CUDA_OCCAMY_SLIM
+     }
+ }

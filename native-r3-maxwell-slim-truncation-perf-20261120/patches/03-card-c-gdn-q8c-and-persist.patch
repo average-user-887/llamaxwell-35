@@ -1,0 +1,272 @@
+--- a/ggml/src/ggml-cuda/occamy-gdn.cu
++++ b/ggml/src/ggml-cuda/occamy-gdn.cu
+@@ -45,6 +45,8 @@
+     unsigned bar_count, bar_gen;
+     // C11 (PCS): shared phase-C preparation, written once per head in phase B by the last contributing block
+     alignas(16) float xg[DI]; alignas(16) float sg[DI / 32];   // gated/normalised phase-C input and its 32-element block sums
++    alignas(16) uint4 q8c_pk[16 * 32];   // Q8C: packed Q8_1 phase-C input (2 halves * 8 * 32 uint4s = 8192 B)
++    alignas(16) float2 q8c_ds[DI / 32];  // Q8C: (d, sum) per 32-element block (128 float2s = 1024 B)
+     unsigned hcnt[NVH];          // per-head phase-B contribution counter, +NCG per launch (multiple of NCG between launches)
+ };
+ struct Params {
+@@ -554,6 +556,36 @@
+     v1 = accum1;
+ }
+ 
++// Q8C: single-chunk (2 Q4_0 blocks = 9 words) XMAD dot for both tokens against smem packed Q8_1
++static __device__ __forceinline__ void q8c_dot_chunk(
++    const unsigned (&w)[9], const uint4 * packed, const float2 * ds,
++    int half, int lane, float & acc0, float & acc1) {
++#pragma unroll
++    for (int b = 0; b < 2; ++b) {
++        int e0 = 0, o0 = 0, e1 = 0, o1 = 0;
++#pragma unroll
++        for (int j = 0; j < 4; ++j) {
++            const unsigned v = b == 0 ? __byte_perm(w[j], w[j + 1], 0x5432) : w[j + 5];
++            const unsigned mask = 0x000f000fu;
++            const unsigned le = v & mask, lo = (v >> 8) & mask;
++            const unsigned he = (v >> 4) & mask, ho = (v >> 12) & mask;
++            const int pk_idx = (half * 8 + b * 4 + j) * 32 + lane;
++            const uint4 a = packed[pk_idx];
++            const uint4 z = packed[512 + pk_idx];
++            e0 = ggml_cuda_sm52_mad2(le, a.x, e0); e1 = ggml_cuda_sm52_mad2(le, z.x, e1);
++            o0 = ggml_cuda_sm52_mad2(lo, a.y, o0); o1 = ggml_cuda_sm52_mad2(lo, z.y, o1);
++            e0 = ggml_cuda_sm52_mad2(he, a.z, e0); e1 = ggml_cuda_sm52_mad2(he, z.z, e1);
++            o0 = ggml_cuda_sm52_mad2(ho, a.w, o0); o1 = ggml_cuda_sm52_mad2(ho, z.w, o1);
++        }
++        const unsigned scale_bits = b == 0 ? w[0] : (w[4] >> 16);
++        const float d4 = __half2float(__ushort_as_half((unsigned short)scale_bits));
++        const float2 s0 = ds[half * 64 + 2 * lane + b];
++        const float2 s1 = ds[128 + half * 64 + 2 * lane + b];
++        acc0 += d4 * ((e0 + o0) * s0.x - 8.f * s0.y);
++        acc1 += d4 * ((e1 + o1) * s1.x - 8.f * s1.y);
++    }
++}
++
+ template <int T2>
+ __global__ void __launch_bounds__(NT, 3) gdn_fused2(const Params2 PP) {
+     extern __shared__ float smem[];
+@@ -568,7 +600,7 @@
+     const Layer & L = PP.p[0].L;
+     Scratch * const s0 = PP.p[0].s, * const s1 = PP.p[1].s;
+ 
+-    if constexpr (T2 == 2) {   // ---- phase A ----
++    if constexpr (T2 >= 2) {   // ---- phase A ----
+         uint4 * packed = reinterpret_cast<uint4 *>(smem);
+         float2 * scales = reinterpret_cast<float2 *>(packed + 2*8*32);
+         float * partial = reinterpret_cast<float *>(scales + 2*64);
+@@ -767,9 +799,27 @@
+                     for (int q = 0; q < NCG; ++q) tt += __ldcg(&s->ssq[hv * NCG + q]);
+                     const float fh = rsqrtf(tt / SD + P.eps_gated);
+                     const float v = __ldcg(&s->attn[i]) * fh * __ldg(L.ssm_norm + t) * silu(__ldcg(&s->z[i]));
+-                    s->xg[i] = v;
+-                    const float bs = warp_sum(v);
+-                    if (lane == 0) s->sg[i >> 5] = bs;
++                    if constexpr (T2 == 3) {
++                        const float amax = warp_reduce_max<32>(fabsf(v));
++                        const float bs = warp_sum(v);
++                        const float d = amax / 127.0f;
++                        const int q = amax == 0.f ? 0 : int(roundf(v / d));
++                        const int other = __shfl_down_sync(0xffffffffu, q, 2);
++                        const int block = i >> 5;
++                        if (lane == 0) s->q8c_ds[block] = __half22float2(make_half2(d, bs));
++                        if ((lane & 2) == 0) {
++                            const int half = block >> 6;
++                            const int lb = block & 63;
++                            const int j = (lane & 15) >> 2;
++                            const int field = ((lane >> 4) * 2) + (lane & 1);
++                            const int slot = ((half * 8 + (lb & 1) * 4 + j) * 32 + (lb >> 1)) * 4 + field;
++                            ((unsigned *)s->q8c_pk)[slot] = (unsigned(q) & 65535u) | (unsigned(other) << 16);
++                        }
++                    } else {
++                        s->xg[i] = v;
++                        const float bs = warp_sum(v);
++                        if (lane == 0) s->sg[i >> 5] = bs;
++                    }
+                 }
+             }
+         }
+@@ -903,55 +953,102 @@
+                 co[0] = a; co[1] = b; co[2] = __ldcg(&P.s->qkv[c]);
+             }
+         }
+-        // pass 1: chunks 0..31 (words 0..8 of each lane) of every row of this warp, both sequences; partials -> smem
+-        const uint4 * const rp0 = (const uint4 *)(L.out + (size_t)gw * ROW_O);
+-        const size_t rstep = (size_t)W * (ROW_O / 16);   // uint4 per W rows
+-        float * const pa = (float *)stg + lane;          // [ri][seq][lane] in the warp's phase-C-idle stage words
+-        uint4 c0, c1, c2;
+-        if (gw < H) { c0 = __ldg(rp0 + lane); c1 = __ldg(rp0 + 32 + lane); c2 = __ldg(rp0 + 64 + lane); }
+-#pragma unroll
+-        for (int k = 0; k < 2; ++k) {
+-            const Scratch * s = PP.p[k].s;
+-            for (int i = 4 * threadIdx.x; i < H; i += 4 * NT)
+-                *(float4 *)(xs + k * XS_HALF + (i >> 6) * CH + (i & 63)) = __ldcg((const float4 *)(s->xg + i));
+-        }
+-        if (threadIdx.x < 32) ((float4 *)(sums + 32 * (threadIdx.x >> 4)))[threadIdx.x & 15] = __ldcg((const float4 *)(((threadIdx.x >> 4) ? s1 : s0)->sg) + (threadIdx.x & 15));
+-        __syncthreads();
+-        {
++        if constexpr (T2 == 3) {
++            // Single-pass Q8C over repacked ssm_out (no pass-2 re-read, no pa[] staging)
++            uint4 * const c_pk = reinterpret_cast<uint4 *>(smem);         // 1024 uint4s = 16384 B
++            float2 * const c_ds = reinterpret_cast<float2 *>(c_pk + 1024); // 256 float2s = 2048 B
++            static_assert(1024 * 4 + 256 * 2 <= SMEM3_FLOATS, "Q8C phase C smem");
++            const uint4 * const rp0 = (const uint4 *)(L.out + (size_t)gw * ROW_O);
++            const size_t rstep = (size_t)W * (ROW_O / 16);
++            uint4 c0, c1, c2;
++            if (gw < H) { c0 = __ldg(rp0 + lane); c1 = __ldg(rp0 + 32 + lane); c2 = __ldg(rp0 + 64 + lane); }
++            for (int i = threadIdx.x; i < 512; i += NT) {
++                c_pk[i]       = __ldcg(&s0->q8c_pk[i]);
++                c_pk[512 + i] = __ldcg(&s1->q8c_pk[i]);
++            }
++            if (threadIdx.x < 128) {
++                c_ds[threadIdx.x]       = __ldcg(&s0->q8c_ds[threadIdx.x]);
++                c_ds[128 + threadIdx.x] = __ldcg(&s1->q8c_ds[threadIdx.x]);
++            }
++            __syncthreads();
+             const uint4 * p = rp0;
+ #pragma unroll 1
+-            for (int r = gw, ri = 0; r < H; r += W, ++ri, p += rstep) {
+-                const uint4 a0 = c0, a1 = c1, a2 = c2;
+-                if (r + W < H)
+-                { c0 = __ldg(p + rstep + lane); c1 = __ldg(p + rstep + 32 + lane); c2 = __ldg(p + rstep + 64 + lane); }
+-                float v0, v1;
+-                dot2v2(a0.x, a0.y, a0.z, a0.w, a1.x, a1.y, a1.z, a1.w, a2.x, xs + lane * CH, sums[lane], xs + XS_HALF + lane * CH, sums[32 + lane], v0, v1);
+-                pa[ri * 64] = v0; pa[ri * 64 + 32] = v1;
+-            }
+-        }
+-        // pass 2: chunks 32..63 (words 9..17): word-group 2 is re-read (9..11), then 3 and the tail
+-        __syncthreads();   // every warp is done with the first-half inputs
+-#pragma unroll
+-        for (int k = 0; k < 2; ++k) {
+-            const Scratch * s = PP.p[k].s;
+-            for (int i = 4 * threadIdx.x; i < H; i += 4 * NT)
+-                *(float4 *)(xs + k * XS_HALF + (i >> 6) * CH + (i & 63)) = __ldcg((const float4 *)(s->xg + H + i));
+-        }
+-        if (threadIdx.x < 32) ((float4 *)(sums + 32 * (threadIdx.x >> 4)))[threadIdx.x & 15] = __ldcg((const float4 *)(((threadIdx.x >> 4) ? s1 : s0)->sg) + 16 + (threadIdx.x & 15));
+-        __syncthreads();
+-        {
+-            const uint4 * p = rp0;
+-#pragma unroll 1
+-            for (int r = gw, ri = 0; r < H; r += W, ++ri, p += rstep) {
+-                // no prefetch here: one extra row in flight costs 16 B of spills at the 80-register cap (3 blocks/SM)
+-                const uint4 b2 = __ldg(p + 64 + lane), b3 = __ldg(p + 96 + lane); const uint2 bt = __ldg((const uint2 *)(p + 128) + lane);
+-                float v0, v1;
+-                dot2v2(b2.y, b2.z, b2.w, b3.x, b3.y, b3.z, b3.w, bt.x, bt.y, xs + lane * CH, sums[lane], xs + XS_HALF + lane * CH, sums[32 + lane], v0, v1);
+-                float acc0 = pa[ri * 64] + v0;
+-                float acc1 = pa[ri * 64 + 32] + v1;
++            for (int r = gw; r < H; r += W, p += rstep) {
++                const uint4 c3 = __ldg(p + 96 + lane);
++                const uint2 ct = __ldg((const uint2 *)(p + 128) + lane);
++                float acc0 = 0.f, acc1 = 0.f;
++                {
++                    const unsigned w0[9] = { c0.x, c0.y, c0.z, c0.w, c1.x, c1.y, c1.z, c1.w, c2.x };
++                    q8c_dot_chunk(w0, c_pk, c_ds, 0, lane, acc0, acc1);
++                }
++                const unsigned b2y = c2.y, b2z = c2.z, b2w = c2.w;
++                if (r + W < H) {
++                    c0 = __ldg(p + rstep + lane);
++                    c1 = __ldg(p + rstep + 32 + lane);
++                    c2 = __ldg(p + rstep + 64 + lane);
++                }
++                {
++                    const unsigned w1[9] = { b2y, b2z, b2w, c3.x, c3.y, c3.z, c3.w, ct.x, ct.y };
++                    q8c_dot_chunk(w1, c_pk, c_ds, 1, lane, acc0, acc1);
++                }
+                 acc0 = warp_sum(acc0);
+                 acc1 = warp_sum(acc1);
+-                if (lane == 0) { PP.p[0].out[r] = PP.p[0].h[r] + acc0; PP.p[1].out[r] = PP.p[1].h[r] + acc1; }
++                if (lane == 0) {
++                    PP.p[0].out[r] = PP.p[0].h[r] + acc0;
++                    PP.p[1].out[r] = PP.p[1].h[r] + acc1;
++                }
++            }
++        } else {
++            // pass 1: chunks 0..31 (words 0..8 of each lane) of every row of this warp, both sequences; partials -> smem
++            const uint4 * const rp0 = (const uint4 *)(L.out + (size_t)gw * ROW_O);
++            const size_t rstep = (size_t)W * (ROW_O / 16);   // uint4 per W rows
++            float * const pa = (float *)stg + lane;          // [ri][seq][lane] in the warp's phase-C-idle stage words
++            uint4 c0, c1, c2;
++            if (gw < H) { c0 = __ldg(rp0 + lane); c1 = __ldg(rp0 + 32 + lane); c2 = __ldg(rp0 + 64 + lane); }
++#pragma unroll
++            for (int k = 0; k < 2; ++k) {
++                const Scratch * s = PP.p[k].s;
++                for (int i = 4 * threadIdx.x; i < H; i += 4 * NT)
++                    *(float4 *)(xs + k * XS_HALF + (i >> 6) * CH + (i & 63)) = __ldcg((const float4 *)(s->xg + i));
++            }
++            if (threadIdx.x < 32) ((float4 *)(sums + 32 * (threadIdx.x >> 4)))[threadIdx.x & 15] = __ldcg((const float4 *)(((threadIdx.x >> 4) ? s1 : s0)->sg) + (threadIdx.x & 15));
++            __syncthreads();
++            {
++                const uint4 * p = rp0;
++#pragma unroll 1
++                for (int r = gw, ri = 0; r < H; r += W, ++ri, p += rstep) {
++                    const uint4 a0 = c0, a1 = c1, a2 = c2;
++                    if (r + W < H)
++                    { c0 = __ldg(p + rstep + lane); c1 = __ldg(p + rstep + 32 + lane); c2 = __ldg(p + rstep + 64 + lane); }
++                    float v0, v1;
++                    dot2v2(a0.x, a0.y, a0.z, a0.w, a1.x, a1.y, a1.z, a1.w, a2.x, xs + lane * CH, sums[lane], xs + XS_HALF + lane * CH, sums[32 + lane], v0, v1);
++                    pa[ri * 64] = v0; pa[ri * 64 + 32] = v1;
++                }
++            }
++            // pass 2: chunks 32..63 (words 9..17): word-group 2 is re-read (9..11), then 3 and the tail
++            __syncthreads();   // every warp is done with the first-half inputs
++#pragma unroll
++            for (int k = 0; k < 2; ++k) {
++                const Scratch * s = PP.p[k].s;
++                for (int i = 4 * threadIdx.x; i < H; i += 4 * NT)
++                    *(float4 *)(xs + k * XS_HALF + (i >> 6) * CH + (i & 63)) = __ldcg((const float4 *)(s->xg + H + i));
++            }
++            if (threadIdx.x < 32) ((float4 *)(sums + 32 * (threadIdx.x >> 4)))[threadIdx.x & 15] = __ldcg((const float4 *)(((threadIdx.x >> 4) ? s1 : s0)->sg) + 16 + (threadIdx.x & 15));
++            __syncthreads();
++            {
++                const uint4 * p = rp0;
++#pragma unroll 1
++                for (int r = gw, ri = 0; r < H; r += W, ++ri, p += rstep) {
++                    // no prefetch here: one extra row in flight costs 16 B of spills at the 80-register cap (3 blocks/SM)
++                    const uint4 b2 = __ldg(p + 64 + lane), b3 = __ldg(p + 96 + lane); const uint2 bt = __ldg((const uint2 *)(p + 128) + lane);
++                    float v0, v1;
++                    dot2v2(b2.y, b2.z, b2.w, b3.x, b3.y, b3.z, b3.w, bt.x, bt.y, xs + lane * CH, sums[lane], xs + XS_HALF + lane * CH, sums[32 + lane], v0, v1);
++                    float acc0 = pa[ri * 64] + v0;
++                    float acc1 = pa[ri * 64 + 32] + v1;
++                    acc0 = warp_sum(acc0);
++                    acc1 = warp_sum(acc1);
++                    if (lane == 0) { PP.p[0].out[r] = PP.p[0].h[r] + acc0; PP.p[1].out[r] = PP.p[1].h[r] + acc1; }
++                }
+             }
+         }
+     }
+@@ -964,6 +1061,7 @@
+     Scratch * scratch2 = nullptr;   // D1BF: second sequence's scratch
+     int grid2 = 0;                  // D1BF: grid of gdn_fused2 (co-resident, <= grid_rp)
+     bool q8a = false;
++    bool q8c = false;
+     int gridT2 = 0;                 // GDN2: grid of gdn_fused2<1> (co-resident, <= grid_rp)
+ };
+ __global__ void rp_pack(const unsigned * __restrict__ src, unsigned * __restrict__ dst) {
+@@ -1073,6 +1171,14 @@
+                             q8_residency == per_smt && d.gridT2 == 72 && nsm == 24;
+                     std::fprintf(stderr, "N82_ADMISSION original_blocks=%d candidate_blocks=%d grid=%d admitted=%d\n",
+                                  per_smt, q8_residency, d.gridT2, int(d.q8a));
++                }
++                if (env_flag("GGML_CUDA_OCCAMY_GDN_T2_Q8C")) {
++                    int q8c_residency = 0;
++                    CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&q8c_residency, gdn_fused2<3>, NT, SMEM3_FLOATS * sizeof(float)));
++                    d.q8c = ggml_cuda_info().devices[device].cc == 520 && per_smt == 3 &&
++                            q8c_residency == per_smt && d.gridT2 == 72 && nsm == 24;
++                    std::fprintf(stderr, "N82C_ADMISSION original_blocks=%d candidate_blocks=%d grid=%d admitted=%d\n",
++                                 per_smt, q8c_residency, d.gridT2, int(d.q8c));
+                 }
+                 if (d.gridT2 > 0 && d.scratch2 == nullptr) {
+                     CUDA_CHECK(cudaMalloc((void **)&d.scratch2, sizeof(Scratch)));
+@@ -1575,8 +1681,10 @@
+     PP.p[0] = fill_params(m, nullptr, &ov0, d.scratch);  PP.p[0].L.out = pk;
+     PP.p[1] = fill_params(m, nullptr, &ov1, d.scratch2); PP.p[1].L.out = pk;
+     static const bool events = env_flag("GGML_CUDA_OCCAMY_GDN_T2_Q8A_EVENTS");
+-    if (events) n82_before(ctx.device, st, m.wqkv->name, d.gridT2, d.q8a);
+-    if (d.q8a) {
++    if (events) n82_before(ctx.device, st, m.wqkv->name, d.gridT2, d.q8a || d.q8c);
++    if (d.q8c) {
++        gdn_fused2<3><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
++    } else if (d.q8a) {
+         gdn_fused2<2><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
+     } else {
+         gdn_fused2<1><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
