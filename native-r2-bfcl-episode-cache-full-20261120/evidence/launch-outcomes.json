@@ -1,0 +1,95 @@
+{
+  "native": {
+    "cleanup_exit": 0,
+    "completed_cases": 5,
+    "completed_utc": "2026-11-20T11:15:00Z",
+    "evaluator_exit": 0,
+    "evaluator_wall_s": 406,
+    "mode": "native",
+    "observation_status": "aborted_mid_run_batch_overflow",
+    "observations_sha256": "b4eb78a677ec86b3f4c5063e2d3941f8ba59d922180fd0728758976b3ae8fc13",
+    "planned_cases": 160,
+    "runner_exit": 1,
+    "stage": "full",
+    "start_utc": "2026-11-20T11:07:09Z",
+    "wire_requests": 59
+  },
+  "schema": 1,
+  "serial": {
+    "cleanup_exit": 0,
+    "completed_cases": 160,
+    "completed_utc": "2026-11-20T11:00:48Z",
+    "evaluator_exit": 0,
+    "evaluator_wall_s": 7346,
+    "mode": "serial",
+    "observation_status": "revalidated_after_log_rotation",
+    "observations_sha256": "c1ccb4e90c4816036c8785abf47c3172c7b15d882cbdfb8478c5428cdc691c29",
+    "planned_cases": 160,
+    "runner_exit": 1,
+    "stage": "full",
+    "start_utc": "2026-11-20T08:57:20Z",
+    "wire_requests": 1931
+  },
+  "smoke_reference": {
+    "cached_requests_ge_2047": 0,
+    "native": {
+      "case_wall_s": 145.579,
+      "cleanup_exit": 0,
+      "evaluator_exit": 0,
+      "observations_sha256": "c60213ffb9c862f26629216e5ed44a76594a93862a0d8d82a1a643e615a616be",
+      "passes": "3/4",
+      "runner_exit": 0,
+      "wire_requests": 50
+    },
+    "planned_cases": 4,
+    "serial": {
+      "case_wall_s": 150.104,
+      "cleanup_exit": 0,
+      "evaluator_exit": 0,
+      "observations_sha256": "509843b96671f559ad199052095d4014ede4e926fe14136bb95b2cf2665e49bb",
+      "passes": "3/4",
+      "runner_exit": 0,
+      "wire_requests": 53
+    },
+    "stage": "smoke"
+  },
+  "stage": "full",
+  "superseded_attempts": [
+    {
+      "cleanup_exit": 0,
+      "completed_cases": 35,
+      "completed_denominator": "35/160",
+      "completed_utc": "2026-11-19T14:32:51Z",
+      "evaluator_exit": null,
+      "inspect_status": "interrupted",
+      "mode": "serial",
+      "observations_sha256": "ad4c31300c00cb88c996a9b124a5440c2e84213eeb8331ca228fcd28b5032144",
+      "outcome": "interrupted_partial",
+      "planned_cases": 160,
+      "reason": "Terminated",
+      "runner_exit": 143,
+      "stage": "full",
+      "start_utc": "2026-11-19T14:03:55Z",
+      "wire_requests": 406,
+      "wire_unique_case_ids": 36
+    },
+    {
+      "cleanup_exit": 0,
+      "completed_cases": 0,
+      "completed_denominator": "0/160",
+      "completed_utc": "2026-11-20T08:55:06Z",
+      "evaluator_exit": null,
+      "inspect_status": "not_started",
+      "mode": "serial",
+      "observations_sha256": "a7c6e7958fd60b1d32c05e5bf6cfadeceec66907506f4a89c32d05f3a6d49178",
+      "outcome": "startup_timeout",
+      "planned_cases": 160,
+      "reason": "owned server failed to become healthy within 75s",
+      "runner_exit": 2,
+      "stage": "full",
+      "start_utc": "2026-11-20T08:53:48Z",
+      "wire_requests": 0,
+      "wire_unique_case_ids": 0
+    }
+  ]
+}
