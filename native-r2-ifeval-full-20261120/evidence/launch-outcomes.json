@@ -1,0 +1,57 @@
+{
+  "native": {
+    "cdi_startup_attested": 1,
+    "cleanup_exit": 0,
+    "completed_cases": 541,
+    "completed_utc": "2026-11-20T12:37:38Z",
+    "evaluator_exit": 0,
+    "evaluator_wall_s": 2095,
+    "mode": "native",
+    "observation_status": "nominal",
+    "observations_sha256": "5aaddf9764e557a7be37d8b3ea62a22c4e1fb7f1b9391888bc30f892fef38873",
+    "planned_cases": 541,
+    "runner_exit": 0,
+    "stage": "full",
+    "start_utc": "2026-11-20T12:01:27Z",
+    "worker_status": "finished"
+  },
+  "schema": 1,
+  "serial": {
+    "cdi_startup_attested": 1,
+    "cleanup_exit": 0,
+    "completed_cases": 541,
+    "completed_utc": "2026-11-20T12:00:25Z",
+    "evaluator_exit": 0,
+    "evaluator_wall_s": 2320,
+    "mode": "serial",
+    "observation_status": "revalidated_after_log_rotation",
+    "observations_sha256": "c918d808198e0e2ea7a78e3372710e4afb277996382637fd58fecde5e30a7d4e",
+    "planned_cases": 541,
+    "runner_exit": 1,
+    "stage": "full",
+    "start_utc": "2026-11-20T11:21:04Z",
+    "worker_status": "finished"
+  },
+  "smoke_reference": {
+    "native": {
+      "cleanup_exit": 0,
+      "evaluator_exit": 0,
+      "evaluator_wall_s": 23,
+      "observations_sha256": "16c994a02dfd8ecadc6b45f37f798c0c4b8f0a6add4f21211bdf0253f437c5b3",
+      "runner_exit": 0,
+      "strict_prompts": "4/6"
+    },
+    "planned_prompts": 6,
+    "serial": {
+      "cleanup_exit": 0,
+      "evaluator_exit": 0,
+      "evaluator_wall_s": 25,
+      "observations_sha256": "89387ebc2557e3d795f45d4f28bb17744c38756ca7986907b7e327270a6d3c41",
+      "runner_exit": 0,
+      "strict_prompts": "5/6"
+    },
+    "stage": "smoke"
+  },
+  "stage": "full",
+  "superseded_attempts": []
+}
