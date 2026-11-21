@@ -21,3 +21,4 @@ runs: S1 scripts/s1_abba.py (ABBA B1,B2,A,B,B,A, N3R 2x65536); S2 scripts/s2b_ch
       S3 scripts/s3_chain.sh -> s3_lp.py A1,A2,B,C8 + s3_cmp.py; S4 s2_bfcl.py full native ckpt8full QA_CKPT=8 QA_UB=1024 (paced)
 env: GGML_CUDA_OCCAMY_DEBUG unset; GGML_CUDA_MAXWELL_GRAPHS unset; no power/clock change; arm B adds GGML_CUDA_FA_MAXWELL_GEMM_V5=1
 evidence: evidence/qa-prefill-card-20261121/card2/ (sanitized; no private payloads, logs or dumps)
+card-2 evidence commit: 6c5ad14
