@@ -1,0 +1,23 @@
+branch: claude/qa-prefill-card-20261121 (local only, not pushed), worktree /tmp/qa-prefill-card/wt
+base: origin/gemini/r3-maxwell-cards-20261121 abee1c14a1d3d7cb6d9ff7d6cbb7122e33c93dc9
+HEAD: a228ff3e1e3c73a08c9a24a2940f9d68f18f103d
+build: none (no rebuild; existing combined-r3-card1 DSOs + night-moe-rank6-80k llama-server)
+image: sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d
+sha256 (runtime-mapped hashes in step2/*/runtime-library-hashes.txt match):
+c08bb3f08af3c0385f438836188845ff535587dad0c4ca63b5310806a65cd59f  <scratch>/proto-dev/combined-r3-card1/libggml-cuda.so
+3ad7d0ff8fe78b31679cfc0d59561a5a74cb5be1d375bdf066a332a01feacab0  <scratch>/proto-dev/combined-r3-card1/libllama-common.so.0
+3ad7d0ff8fe78b31679cfc0d59561a5a74cb5be1d375bdf066a332a01feacab0  <scratch>/proto-dev/combined-r3-card1/libllama-common.so.0.6.0
+bdd39cf9a6cf9bfa51271ce5c6978bba3acef9f570214d994a71b3fd9945fe5e  <scratch>/proto-dev/combined-r3-card1/libllama-server-impl.so
+85c6322def25b9e9141242e6d5589fc65bae0d24f6536f51a40dace1153ae2a4  <scratch>/proto-dev/combined-r3-card1/libllama.so.0
+85c6322def25b9e9141242e6d5589fc65bae0d24f6536f51a40dace1153ae2a4  <scratch>/proto-dev/combined-r3-card1/libllama.so.0.6.0
+f70e5e1f71c7ca3c9608884745d76ea2003fd6563e3a62768cd77692a554c405  <storage>/Storage/m6000-llama-cpp/mtp-moonshot-20261117/night-moe-rank6-80k/libs/llama-server
+run: env -u GGML_CUDA_OCCAMY_DEBUG -u GGML_CUDA_MAXWELL_GRAPHS python3 -I scripts/step2_abba.py
+
+== Card 2 (2026-11-21/22) ==
+branch: claude/qa-prefill-card-20261121 (local only, no push); base abee1c1; card-1 HEAD a228ff3
+build: none (no rebuild, no source patch). Same DSOs and llama-server as card 1 (sha256 list above):
+  libggml-cuda.so, libllama-common, libllama-server-impl, libllama, llama-server, docker image - unchanged
+runs: S1 scripts/s1_abba.py (ABBA B1,B2,A,B,B,A, N3R 2x65536); S2 scripts/s2b_chain.sh -> s2_bfcl.py preview native ckpt2p/ckpt8p (paced 77/72 C);
+      S3 scripts/s3_chain.sh -> s3_lp.py A1,A2,B,C8 + s3_cmp.py; S4 s2_bfcl.py full native ckpt8full QA_CKPT=8 QA_UB=1024 (paced)
+env: GGML_CUDA_OCCAMY_DEBUG unset; GGML_CUDA_MAXWELL_GRAPHS unset; no power/clock change; arm B adds GGML_CUDA_FA_MAXWELL_GEMM_V5=1
+evidence: evidence/qa-prefill-card-20261121/card2/ (sanitized; no private payloads, logs or dumps)
