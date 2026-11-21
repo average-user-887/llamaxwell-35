@@ -1,0 +1,37 @@
+--- a/occamy-fused.cu
++++ b/occamy-fused.cu
+@@ -993,6 +993,18 @@
+ static std::atomic<unsigned long long> down4_calls{0};
+ extern "C" __attribute__((visibility("default"))) unsigned long long ggml_cuda_occamy_q2_down4_count();
+ extern "C" unsigned long long ggml_cuda_occamy_q2_down4_count() {return down4_calls.load(std::memory_order_relaxed);}
++static std::atomic<unsigned long long> d1_persist_scratch2_calls{0};
++static std::atomic<unsigned long long> d2_moe_sh_q8_calls{0};
++struct R3EngagedMoeAtExit {
++    ~R3EngagedMoeAtExit() {
++        const unsigned long long d1 = d1_persist_scratch2_calls.load(std::memory_order_relaxed);
++        const unsigned long long d2 = d2_moe_sh_q8_calls.load(std::memory_order_relaxed);
++        if (d1 > 0 || d2 > 0) {
++            fprintf(stderr, "r3_engaged_moe: persist_scratch2=%llu moe_sh_q8=%llu\n", d1, d2);
++        }
++    }
++};
++static R3EngagedMoeAtExit g_r3_moe_atexit;
+ static bool admit_down4(int d) {
+     if (!env_flag("GGML_CUDA_OCCAMY_MOE_Q2_DOWN4")) return false;
+     static std::once_flag once[GGML_CUDA_MAX_DEVICES];
+@@ -1340,6 +1352,7 @@
+         Scratch * work_ptr = nullptr;
+         if (persist_scratch2 && d.scratch2 != nullptr) {
+             work_ptr = d.scratch2;
++            d1_persist_scratch2_calls.fetch_add(1, std::memory_order_relaxed);
+         } else {
+             work.alloc(2);
+             work_ptr = work.get();
+@@ -1397,6 +1410,7 @@
+     P.eps  = m.eps;
+     if (sh_q8) {
+         moe_v3<true, true><<<d.grid_v3_sh_q8, NT3, SMEM3_FLOATS * sizeof(float), st>>>(P);
++        d2_moe_sh_q8_calls.fetch_add(1, std::memory_order_relaxed);
+     } else {
+         moe_v3<true><<<d.grid_v3, NT3, SMEM3_FLOATS * sizeof(float), st>>>(P);
+     }

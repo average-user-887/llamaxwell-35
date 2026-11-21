@@ -1,0 +1,38 @@
+--- a/fattn-occamy-sparse.cuh
++++ b/fattn-occamy-sparse.cuh
+@@ -5,6 +5,19 @@
+ constexpr int OFS_KEEP = 16;
+ constexpr int OFS_RECENT = 4096;
+ constexpr int OFS_MAX_BLOCKS = 512;
++
++static std::atomic<unsigned long long> d3_fa_q1_r2_fast_calls{0};
++static std::atomic<unsigned long long> d3_fa_q2_r2_stride_calls{0};
++struct R3EngagedFaAtExit {
++    ~R3EngagedFaAtExit() {
++        const unsigned long long q1 = d3_fa_q1_r2_fast_calls.load(std::memory_order_relaxed);
++        const unsigned long long q2 = d3_fa_q2_r2_stride_calls.load(std::memory_order_relaxed);
++        if (q1 > 0 || q2 > 0) {
++            fprintf(stderr, "r3_engaged_fa: q1_r2_fast=%llu q2_r2_stride=%llu\n", q1, q2);
++        }
++    }
++};
++static R3EngagedFaAtExit g_r3_fa_atexit;
+ 
+ struct ofa_sparse_plan {
+     int ok, invalid, n_blocks, recent_begin, visible_end, units, kept, omitted, fallback;
+@@ -1162,6 +1175,7 @@
+             }
+             if (p.nbk1 == 1024) ofa_sparse_attention_q2_stride<1024><<<dim3(nsplit,nkvh,1),NT,0,stream>>>(p,plans.get());
+             else ofa_sparse_attention_q2_stride<2048><<<dim3(nsplit,nkvh,1),NT,0,stream>>>(p,plans.get());
++            d3_fa_q2_r2_stride_calls.fetch_add(1, std::memory_order_relaxed);
+         } else {
+             ofa_sparse_attention<NQ, NU><<<dim3(nsplit, nkvh, 1), NT, 0, stream>>>(p, plans.get());
+         }
+@@ -1173,6 +1187,7 @@
+         }
+         if (p.nbk1 == 1024) ofa_sparse_attention_q1_stride<1024><<<dim3(nsplit,nkvh,1),NT,0,stream>>>(p,plans.get());
+         else ofa_sparse_attention_q1_stride<2048><<<dim3(nsplit,nkvh,1),NT,0,stream>>>(p,plans.get());
++        d3_fa_q1_r2_fast_calls.fetch_add(1, std::memory_order_relaxed);
+     } else {
+         ofa_sparse_attention<NQ, NU><<<dim3(nsplit, nkvh, 1), NT, 0, stream>>>(p, plans.get());
+     }

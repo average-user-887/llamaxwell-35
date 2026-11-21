@@ -1,0 +1,93 @@
+--- a/ggml-cuda.cu
++++ b/ggml-cuda.cu
+@@ -2861,6 +2861,11 @@
+             }
+         }
+ 
++        if (node->op == GGML_OP_GATED_DELTA_NET && node->src[2] != nullptr && node->src[2]->ne[3] == 2 && ggml_cuda_occamy_n2split()) {
++            // occamy-gdn split2 syncs stream for D2H s_copy readback on 2-seq graphs
++            use_cuda_graph = false;
++        }
++
+         if (!use_cuda_graph) {
+             break;
+         }
+@@ -5368,7 +5373,11 @@
+     ggml_cuda_graph * graph = cuda_ctx->cuda_graph(graph_key);
+ 
+     if (graph->graph == nullptr) {
+-        if (ggml_cuda_info().devices[cuda_ctx->device].cc < GGML_CUDA_CC_VOLTA && getenv("GGML_CUDA_MAXWELL_GRAPHS") == nullptr) {
++        static const bool maxwell_graphs = []() {
++            const char * s = getenv("GGML_CUDA_MAXWELL_GRAPHS");
++            return s != nullptr && s[0] != '\0' && strcmp(s, "0") != 0;
++        }();
++        if (ggml_cuda_info().devices[cuda_ctx->device].cc < GGML_CUDA_CC_VOLTA && !maxwell_graphs) {
+             if (!graph->disable_due_to_gpu_arch) {
+                 GGML_LOG_DEBUG("%s: disabling CUDA graphs due to GPU architecture\n", __func__);
+             }
+@@ -5434,7 +5443,31 @@
+     return st;
+ }
+ 
++static std::atomic<uint64_t> g_r3_cg_calls{0};
++static std::atomic<uint64_t> g_r3_cg_arch_off{0};
++static std::atomic<uint64_t> g_r3_cg_incompat{0};
++static std::atomic<uint64_t> g_r3_cg_prop_chg{0};
++static std::atomic<uint64_t> g_r3_cg_captures{0};
++static std::atomic<uint64_t> g_r3_cg_replays{0};
++
++struct R3CudaGraphsAtExit {
++    ~R3CudaGraphsAtExit() {
++        const unsigned long long c = g_r3_cg_calls.load(std::memory_order_relaxed);
++        if (c > 0) {
++            fprintf(stderr, "r3_cuda_graphs: calls=%llu arch_off=%llu incompat=%llu prop_chg=%llu captures=%llu replays=%llu\n",
++                c,
++                (unsigned long long) g_r3_cg_arch_off.load(std::memory_order_relaxed),
++                (unsigned long long) g_r3_cg_incompat.load(std::memory_order_relaxed),
++                (unsigned long long) g_r3_cg_prop_chg.load(std::memory_order_relaxed),
++                (unsigned long long) g_r3_cg_captures.load(std::memory_order_relaxed),
++                (unsigned long long) g_r3_cg_replays.load(std::memory_order_relaxed));
++        }
++    }
++};
++static R3CudaGraphsAtExit g_r3_cg_atexit;
++
+ static enum ggml_status ggml_backend_cuda_graph_compute_impl(ggml_backend_t backend, ggml_cgraph * cgraph) {
++    g_r3_cg_calls.fetch_add(1, std::memory_order_relaxed);
+     ggml_backend_cuda_context * cuda_ctx = (ggml_backend_cuda_context *) backend->context;
+ 
+     ggml_cuda_set_device(cuda_ctx->device);
+@@ -5453,10 +5486,17 @@
+     ggml_cuda_graph_set_enabled(cuda_ctx, graph_key);
+ 
+     ggml_cuda_graph * graph = cuda_ctx->cuda_graph(graph_key);
+-    if (graph->is_enabled()) {
++    if (!graph->is_enabled()) {
++        g_r3_cg_arch_off.fetch_add(1, std::memory_order_relaxed);
++    } else {
+         const bool graph_compatible = ggml_cuda_graph_check_compability(cgraph);
+-        if (graph_compatible) {
++        if (!graph_compatible) {
++            g_r3_cg_incompat.fetch_add(1, std::memory_order_relaxed);
++        } else {
+             const bool properties_changed = ggml_cuda_graph_update_required(cuda_ctx, cgraph);
++            if (properties_changed) {
++                g_r3_cg_prop_chg.fetch_add(1, std::memory_order_relaxed);
++            }
+ 
+             if (!graph->warmup_complete) {
+                 // Warmup: need at least 2 calls with no property change on the 2nd call
+@@ -5476,6 +5516,13 @@
+                 } else {
+                     use_cuda_graph = true;
+                     cuda_graph_update_required = graph->instance == nullptr;
++                }
++            }
++            if (use_cuda_graph) {
++                if (cuda_graph_update_required) {
++                    g_r3_cg_captures.fetch_add(1, std::memory_order_relaxed);
++                } else {
++                    g_r3_cg_replays.fetch_add(1, std::memory_order_relaxed);
+                 }
+             }
+         }

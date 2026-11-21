@@ -1,0 +1,112 @@
+{
+  "suite": "t123",
+  "dso_preset": "card1",
+  "checks": {
+    "T1_sf2_rate_limit": {
+      "passed": true,
+      "n_out": 128,
+      "sf2_lines": 16,
+      "sample_lines": [
+        "occamy-sf2: i=1490 last=1492 gate_reshaped-15 gate_sigmoid-15 attn_gated-15 (count=14)",
+        "occamy-sf2: i=1874 last=1876 gate_reshaped-19 gate_sigmoid-19 attn_gated-19 (count=15)",
+        "occamy-sf2: i=2258 last=2260 gate_reshaped-23 gate_sigmoid-23 attn_gated-23 (count=16)"
+      ]
+    },
+    "CardA_and_A2_shadow": {
+      "passed": true,
+      "n_out": 96,
+      "target_compact": {
+        "requested": 49,
+        "launched": 49,
+        "compact_only": 0,
+        "ambiguous": 0,
+        "unsupported": 0,
+        "raw_bytes": 97341440,
+        "compact_bytes": 784,
+        "shadow_rows": 98,
+        "shadow_mismatches": 0
+      },
+      "draft_compact": {
+        "mode": "1",
+        "req": 49,
+        "compact_only": 49,
+        "fallback": 0,
+        "shadow_mismatch": 0
+      }
+    },
+    "CardA_and_A2_active": {
+      "passed": true,
+      "exact_parity_vs_shadow": true,
+      "compact": {
+        "requested": 119,
+        "launched": 119,
+        "compact_only": 119,
+        "ambiguous": 0,
+        "unsupported": 0,
+        "raw_bytes": 0,
+        "compact_bytes": 1904,
+        "shadow_rows": 0,
+        "shadow_mismatches": 0
+      },
+      "draft_compact": {
+        "mode": "1",
+        "req": 119,
+        "compact_only": 119,
+        "fallback": 0,
+        "shadow_mismatch": 0
+      }
+    },
+    "T2_subbatch_2050_fix": {
+      "passed": true,
+      "turn2_2048_suffix": {
+        "cache_n": 111,
+        "prompt_n": 2052,
+        "n_out": 16
+      },
+      "turn2_2064_suffix": {
+        "cache_n": 0,
+        "prompt_n": 2179,
+        "n_out": 16
+      }
+    },
+    "T3_utf8_final_flush": {
+      "passed": true,
+      "split_index_k": 2,
+      "n_out": 2,
+      "predicted_n": 2,
+      "valid_utf8": true,
+      "streamed_text_len": 0
+    }
+  },
+  "active_cuda_graphs": {
+    "r3_cuda_graphs": {
+      "calls": 277,
+      "arch_off": 0,
+      "incompat": 0,
+      "prop_chg": 57,
+      "captures": 18,
+      "replays": 202
+    },
+    "warmup_complete": 0,
+    "warmup_reset": 0,
+    "llama_ctx_reused_lines": 0,
+    "disabled_arch": 0,
+    "disabled_unsupported": 0,
+    "update_failed": 0
+  },
+  "active_r3_engaged": {
+    "dso_moe": {
+      "persist_scratch2": 519,
+      "moe_sh_q8": 24
+    },
+    "dso_fa": null,
+    "dso_gdn": {
+      "q8c": 0,
+      "q8a": 390,
+      "fp32": 0
+    },
+    "mv1_host_final": "mv1_host: rounds=119 restores=0 draft_ms=215.087(n=119) tgt_decode_ms=7706.767(n=140) spec_process_ms=3305.605(n=140) sample_accept_ms=0.205(n=119) acc_hist=[8,111,0,0]",
+    "q1_r2_stride_seen": 0,
+    "q2_r2_stride_seen": 0
+  }
+}

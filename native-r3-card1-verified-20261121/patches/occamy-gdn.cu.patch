@@ -1,0 +1,46 @@
+--- a/occamy-gdn.cu
++++ b/occamy-gdn.cu
+@@ -13,6 +13,7 @@
+ #include "ggml-backend-impl.h"
+ 
+ #include <algorithm>
++#include <atomic>
+ #include <cstdio>
+ #include <cstdlib>
+ #include <cstring>
+@@ -1665,6 +1666,21 @@
+ 
+ // GDN2: MTP1 verify window (one sequence, two tokens) as one gdn_fused2<1> launch. p[0] = token 1 -> snapshot plane 1
+ // (conv_out1/state_out1), p[1] = token 2 -> plane 0 (conv_out/state_out); both read the s_copy source row.
++static std::atomic<unsigned long long> c_gdn_q8c_calls{0};
++static std::atomic<unsigned long long> c_gdn_q8a_calls{0};
++static std::atomic<unsigned long long> c_gdn_fp_calls{0};
++struct R3EngagedGdnAtExit {
++    ~R3EngagedGdnAtExit() {
++        const unsigned long long c = c_gdn_q8c_calls.load(std::memory_order_relaxed);
++        const unsigned long long a = c_gdn_q8a_calls.load(std::memory_order_relaxed);
++        const unsigned long long f = c_gdn_fp_calls.load(std::memory_order_relaxed);
++        if (c > 0 || a > 0 || f > 0) {
++            fprintf(stderr, "r3_engaged_gdn: q8c=%llu q8a=%llu fp32=%llu\n", c, a, f);
++        }
++    }
++};
++static R3EngagedGdnAtExit g_r3_gdn_atexit;
++
+ bool ggml_cuda_occamy_gdn_t2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m) {
+     if (m.nt != 2 || m.n_seqs != 1 || !m.conv_out1 || !m.state_out1) { return false; }
+     DevState & d = dev_state(ctx.device);
+@@ -1684,10 +1700,13 @@
+     if (events) n82_before(ctx.device, st, m.wqkv->name, d.gridT2, d.q8a || d.q8c);
+     if (d.q8c) {
+         gdn_fused2<3><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
++        c_gdn_q8c_calls.fetch_add(1, std::memory_order_relaxed);
+     } else if (d.q8a) {
+         gdn_fused2<2><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
++        c_gdn_q8a_calls.fetch_add(1, std::memory_order_relaxed);
+     } else {
+         gdn_fused2<1><<<d.gridT2, NT, SMEM3_FLOATS * sizeof(float), st>>>(PP);
++        c_gdn_fp_calls.fetch_add(1, std::memory_order_relaxed);
+     }
+     if (events) n82_after(st);
+     CUDA_CHECK(cudaGetLastError());

@@ -1,0 +1,4 @@
+e01bce67ce1292494f6e237dbb19209e9b07c0bbf51a31eaf2f4b1fe9e149de9  README.md
+f54b4c71b7778d04b0004b45ab6e74385607c19b24a5befc0aa45e803ba5e216  evidence/bfcl-full-paired.json
+09e0fbe26ec6f3a7be9486de4bc485a765e77c536306dcfb44e53c665f8381ff  evidence/ifeval-full-paired.json
+0f0556d5a56f0d94575e218e62b56dcd75f6da66740c61cdc1f02be219dd7c41  verify-evidence.py

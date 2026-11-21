@@ -1,0 +1,173 @@
+{
+  "packet": "native-r3-card1-verified-20261121",
+  "dso_hashes": {
+    "libggml-cuda.so": {
+      "size_bytes": 14679848,
+      "sha256": "c08bb3f08af3c0385f438836188845ff535587dad0c4ca63b5310806a65cd59f"
+    },
+    "libllama.so.0.6.0": {
+      "size_bytes": 5083544,
+      "sha256": "85c6322def25b9e9141242e6d5589fc65bae0d24f6536f51a40dace1153ae2a4"
+    },
+    "libllama-common.so.0.6.0": {
+      "size_bytes": 6524120,
+      "sha256": "3ad7d0ff8fe78b31679cfc0d59561a5a74cb5be1d375bdf066a332a01feacab0"
+    },
+    "libllama-server-impl.so": {
+      "size_bytes": 7715464,
+      "sha256": "bdd39cf9a6cf9bfa51271ce5c6978bba3acef9f570214d994a71b3fd9945fe5e"
+    }
+  },
+  "t123_all_passed": true,
+  "fast2k_means": {
+    "c1-base": {
+      "cold_toks_s": 111.3207,
+      "cold_ms_per_round": 16.5841,
+      "warm_toks_s": 116.6702,
+      "warm_ms_per_round": 16.4979,
+      "warm_acc_1": "244/266",
+      "warm_acc_2": "244/266",
+      "warm_output_sha256": [
+        "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa",
+        "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa"
+      ]
+    },
+    "c1-nograph": {
+      "cold_toks_s": 114.3087,
+      "cold_ms_per_round": 16.3075,
+      "warm_toks_s": 118.9147,
+      "warm_ms_per_round": 16.2476,
+      "warm_acc_1": "245/265",
+      "warm_acc_2": "245/265",
+      "warm_output_sha256": [
+        "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa",
+        "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa"
+      ]
+    },
+    "c1-graph": {
+      "cold_toks_s": 114.4142,
+      "cold_ms_per_round": 16.2924,
+      "warm_toks_s": 119.2111,
+      "warm_ms_per_round": 16.2072,
+      "warm_acc_1": "245/265",
+      "warm_acc_2": "245/265",
+      "warm_output_sha256": [
+        "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa",
+        "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa"
+      ]
+    },
+    "c1-q8c": {
+      "cold_toks_s": 118.886,
+      "cold_ms_per_round": 15.99,
+      "warm_toks_s": 121.3215,
+      "warm_ms_per_round": 15.9253,
+      "warm_acc_1": "245/265",
+      "warm_acc_2": "245/265",
+      "warm_output_sha256": [
+        "361a0aecffa90bc00c425a7d7bef59da63617985d40ac9c75589f5a963aa629a",
+        "361a0aecffa90bc00c425a7d7bef59da63617985d40ac9c75589f5a963aa629a"
+      ]
+    }
+  },
+  "warm80k_means": {
+    "r2": {
+      "ttft_s": 265.9349,
+      "cold_toks_s": 101.9097,
+      "warm_toks_s": 102.1542,
+      "warm_ms_per_round": 18.3144,
+      "cold_exact_vs_r2": [
+        true,
+        true
+      ],
+      "warm_exact_vs_r2": [
+        true,
+        true
+      ]
+    },
+    "exact": {
+      "ttft_s": 265.935,
+      "cold_toks_s": 102.7302,
+      "warm_toks_s": 104.7083,
+      "warm_ms_per_round": 17.8785,
+      "cold_exact_vs_r2": [
+        true,
+        true
+      ],
+      "warm_exact_vs_r2": [
+        true,
+        true
+      ]
+    },
+    "ub2048v5": {
+      "ttft_s": 252.4958,
+      "cold_toks_s": 103.12,
+      "warm_toks_s": 105.1052,
+      "warm_ms_per_round": 17.8764,
+      "cold_exact_vs_r2": [
+        false,
+        false
+      ],
+      "warm_exact_vs_r2": [
+        false,
+        false
+      ]
+    },
+    "q8c": {
+      "ttft_s": 265.5423,
+      "cold_toks_s": 106.432,
+      "warm_toks_s": 108.7894,
+      "warm_ms_per_round": 17.6598,
+      "cold_exact_vs_r2": [
+        false,
+        false
+      ],
+      "warm_exact_vs_r2": [
+        false,
+        false
+      ]
+    },
+    "serial": {
+      "ttft_s": 261.5342,
+      "cold_toks_s": 81.0955,
+      "warm_toks_s": 80.8786,
+      "warm_ms_per_round": null,
+      "cold_exact_vs_r2": [
+        false,
+        false
+      ],
+      "warm_exact_vs_r2": [
+        false,
+        false
+      ]
+    }
+  },
+  "ordinary80_means": {
+    "r2": {
+      "ttft_s": 264.5496,
+      "cold_toks_s": 94.9275,
+      "cold_ms_per_round": 18.3434,
+      "exact_stream_ids_vs_r2": [
+        true,
+        true
+      ]
+    },
+    "exact": {
+      "ttft_s": 265.2766,
+      "cold_toks_s": 96.8224,
+      "cold_ms_per_round": 17.9398,
+      "exact_stream_ids_vs_r2": [
+        true,
+        true
+      ]
+    },
+    "ub2048v5": {
+      "ttft_s": 251.2631,
+      "cold_toks_s": 98.4025,
+      "cold_ms_per_round": 17.9367,
+      "exact_stream_ids_vs_r2": [
+        false,
+        false
+      ]
+    }
+  }
+}

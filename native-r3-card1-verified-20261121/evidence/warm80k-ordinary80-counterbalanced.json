@@ -1,0 +1,1865 @@
+{
+  "warm80k_order": [
+    "w80-r2-1",
+    "w80-exact-1",
+    "w80-ub2048v5-1",
+    "w80-q8c-1",
+    "w80-serial-1",
+    "w80-serial-2",
+    "w80-q8c-2",
+    "w80-ub2048v5-2",
+    "w80-exact-2",
+    "w80-r2-2"
+  ],
+  "warm80k_means": {
+    "r2": {
+      "ttft_s": 265.9349,
+      "cold_toks_s": 101.9097,
+      "warm_toks_s": 102.1542,
+      "warm_ms_per_round": 18.3144,
+      "cold_exact_vs_r2": [
+        true,
+        true
+      ],
+      "warm_exact_vs_r2": [
+        true,
+        true
+      ]
+    },
+    "exact": {
+      "ttft_s": 265.935,
+      "cold_toks_s": 102.7302,
+      "warm_toks_s": 104.7083,
+      "warm_ms_per_round": 17.8785,
+      "cold_exact_vs_r2": [
+        true,
+        true
+      ],
+      "warm_exact_vs_r2": [
+        true,
+        true
+      ]
+    },
+    "ub2048v5": {
+      "ttft_s": 252.4958,
+      "cold_toks_s": 103.12,
+      "warm_toks_s": 105.1052,
+      "warm_ms_per_round": 17.8764,
+      "cold_exact_vs_r2": [
+        false,
+        false
+      ],
+      "warm_exact_vs_r2": [
+        false,
+        false
+      ]
+    },
+    "q8c": {
+      "ttft_s": 265.5423,
+      "cold_toks_s": 106.432,
+      "warm_toks_s": 108.7894,
+      "warm_ms_per_round": 17.6598,
+      "cold_exact_vs_r2": [
+        false,
+        false
+      ],
+      "warm_exact_vs_r2": [
+        false,
+        false
+      ]
+    },
+    "serial": {
+      "ttft_s": 261.5342,
+      "cold_toks_s": 81.0955,
+      "warm_toks_s": 80.8786,
+      "warm_ms_per_round": null,
+      "cold_exact_vs_r2": [
+        false,
+        false
+      ],
+      "warm_exact_vs_r2": [
+        false,
+        false
+      ]
+    }
+  },
+  "warm80k_runs": {
+    "w80-r2-1": {
+      "suite": "warm80k",
+      "dso_preset": "r2",
+      "mode": "native",
+      "ub": 1024,
+      "mixed_batch": 1024,
+      "env_overrides": [],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 265.928690536,
+        "wall_s": 267.823154525,
+        "decode_s": 1.881807,
+        "decode_toks_s": 102.02959177003805,
+        "draft_n": 101,
+        "draft_n_accepted": 89,
+        "decode_ms_per_round": 18.631752475247524,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "output_sha256": "2976ff6b52a9b7e7891fe437407ee29088fccbd7ce785673dd0650ce52d5bf89"
+      },
+      "warm": {
+        "n_out": 3072,
+        "ttft_s": 0.255226521,
+        "wall_s": 30.30220672,
+        "decode_s": 30.041974999999997,
+        "decode_toks_s": 102.25692551837888,
+        "draft_n": 1642,
+        "draft_n_accepted": 1429,
+        "decode_ms_per_round": 18.295965286236296,
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "output_sha256": "f0fc65b0daac7ba7d7f584e217e3e8822b1b81b99d74aaf5f50c37e916895ea6"
+      },
+      "parity_vs_r2_native": {
+        "cold_exact": true,
+        "cold_first_diff": null,
+        "warm_exact": true,
+        "warm_first_diff": null
+      },
+      "r2_warm_ref_toks_s": 101.32693091380102,
+      "uplift_vs_r2_warm_pct": 0.9178158226947675,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 101,
+            "launched": 101,
+            "compact_only": 101,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1616,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 1743,
+            "launched": 1743,
+            "compact_only": 1743,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 27888,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 1743,
+          "launched": 1743,
+          "compact_only": 1743,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 27888,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": []
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": null,
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": null,
+        "dso_fa": null,
+        "dso_gdn": null,
+        "mv1_host_final": "mv1_host: rounds=1743 restores=0 draft_ms=4024.282(n=1743) tgt_decode_ms=255496.145(n=1786) spec_process_ms=37669.457(n=1786) sample_accept_ms=3.206(n=1743) acc_hist=[225,1518,0,0]",
+        "q1_r2_stride_seen": 0,
+        "q2_r2_stride_seen": 1
+      }
+    },
+    "w80-exact-1": {
+      "suite": "warm80k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "mixed_batch": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 265.609067858,
+        "wall_s": 267.489073629,
+        "decode_s": 1.865318,
+        "decode_toks_s": 102.93151087374915,
+        "draft_n": 102,
+        "draft_n_accepted": 88,
+        "decode_ms_per_round": 18.28743137254902,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "output_sha256": "2976ff6b52a9b7e7891fe437407ee29088fccbd7ce785673dd0650ce52d5bf89"
+      },
+      "warm": {
+        "n_out": 3072,
+        "ttft_s": 0.26045582,
+        "wall_s": 29.600374109,
+        "decode_s": 29.334983,
+        "decode_toks_s": 104.72138333947561,
+        "draft_n": 1641,
+        "draft_n_accepted": 1430,
+        "decode_ms_per_round": 17.876284582571603,
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "output_sha256": "f0fc65b0daac7ba7d7f584e217e3e8822b1b81b99d74aaf5f50c37e916895ea6"
+      },
+      "parity_vs_r2_native": {
+        "cold_exact": true,
+        "cold_first_diff": null,
+        "warm_exact": true,
+        "warm_first_diff": null
+      },
+      "r2_warm_ref_toks_s": 101.32693091380102,
+      "uplift_vs_r2_warm_pct": 3.3500002369185156,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 102,
+            "launched": 102,
+            "compact_only": 102,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1632,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 1743,
+            "launched": 1743,
+            "compact_only": 1743,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 27888,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 1743,
+          "launched": 1743,
+          "compact_only": 1743,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 27888,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 1743,
+            "compact_only": 1743,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 3651,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 411,
+          "captures": 195,
+          "replays": 3045
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 1239,
+          "moe_sh_q8": 486
+        },
+        "dso_fa": {
+          "q1_r2_fast": 496,
+          "q2_r2_stride": 300
+        },
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 930,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=1743 restores=0 draft_ms=3550.204(n=1743) tgt_decode_ms=254897.988(n=1786) spec_process_ms=37572.856(n=1786) sample_accept_ms=3.036(n=1743) acc_hist=[225,1518,0,0]",
+        "q1_r2_stride_seen": 1,
+        "q2_r2_stride_seen": 1
+      }
+    },
+    "w80-ub2048v5-1": {
+      "suite": "warm80k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 2048,
+      "mixed_batch": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1",
+        "GGML_CUDA_FA_MAXWELL_GEMM_V5=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 252.412563986,
+        "wall_s": 254.275376674,
+        "decode_s": 1.857815,
+        "decode_toks_s": 103.34721164378584,
+        "draft_n": 102,
+        "draft_n_accepted": 88,
+        "decode_ms_per_round": 18.21387254901961,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "output_sha256": "560cc989c14e26039ba41213f3262bb50560337dc345eb16895c61b843ffd97f"
+      },
+      "warm": {
+        "n_out": 3072,
+        "ttft_s": 0.278877401,
+        "wall_s": 29.514126313,
+        "decode_s": 29.230366,
+        "decode_toks_s": 105.09618661634273,
+        "draft_n": 1635,
+        "draft_n_accepted": 1435,
+        "decode_ms_per_round": 17.877899694189605,
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "output_sha256": "66151aaf8a67f71296460540ea7deac744a48a7d971e56a4615dc9612f3e161f"
+      },
+      "parity_vs_r2_native": {
+        "cold_exact": false,
+        "cold_first_diff": 45,
+        "warm_exact": false,
+        "warm_first_diff": 45
+      },
+      "r2_warm_ref_toks_s": 101.32693091380102,
+      "uplift_vs_r2_warm_pct": 3.7198952623446413,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 102,
+            "launched": 102,
+            "compact_only": 102,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1632,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 1737,
+            "launched": 1737,
+            "compact_only": 1737,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 27792,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 1737,
+          "launched": 1737,
+          "compact_only": 1737,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 27792,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 1737,
+            "compact_only": 1737,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 3562,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 376,
+          "captures": 202,
+          "replays": 2984
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 1239,
+          "moe_sh_q8": 496
+        },
+        "dso_fa": {
+          "q1_r2_fast": 516,
+          "q2_r2_stride": 300
+        },
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 930,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=1737 restores=0 draft_ms=3541.033(n=1737) tgt_decode_ms=262647.678(n=1781) spec_process_ms=16640.321(n=1781) sample_accept_ms=3.190(n=1737) acc_hist=[214,1523,0,0]",
+        "q1_r2_stride_seen": 1,
+        "q2_r2_stride_seen": 1
+      }
+    },
+    "w80-q8c-1": {
+      "suite": "warm80k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "mixed_batch": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1",
+        "GGML_CUDA_OCCAMY_GDN_T2_Q8C=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 265.405682512,
+        "wall_s": 267.227110031,
+        "decode_s": 1.804992,
+        "decode_toks_s": 106.37166258908627,
+        "draft_n": 101,
+        "draft_n_accepted": 90,
+        "decode_ms_per_round": 17.871207920792077,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "output_sha256": "ccfb6b4c07fbb59755ce0bde07fa5cd108e32157f1618c5d767af3b5bfc85a24"
+      },
+      "warm": {
+        "n_out": 3072,
+        "ttft_s": 0.26140736,
+        "wall_s": 28.502841932,
+        "decode_s": 28.236743999999998,
+        "decode_toks_s": 108.79441340687156,
+        "draft_n": 1599,
+        "draft_n_accepted": 1471,
+        "decode_ms_per_round": 17.659001876172606,
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "output_sha256": "d306196863bb371dc1ca14f8e2dcd2adae7cabdac6a19d750729599e677b6230"
+      },
+      "parity_vs_r2_native": {
+        "cold_exact": false,
+        "cold_first_diff": 27,
+        "warm_exact": false,
+        "warm_first_diff": 27
+      },
+      "r2_warm_ref_toks_s": 101.32693091380102,
+      "uplift_vs_r2_warm_pct": 7.369691774660714,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 101,
+            "launched": 101,
+            "compact_only": 101,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1616,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 1700,
+            "launched": 1700,
+            "compact_only": 1700,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 27200,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 1700,
+          "launched": 1700,
+          "compact_only": 1700,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 27200,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 1700,
+            "compact_only": 1700,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 3565,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 320,
+          "captures": 142,
+          "replays": 3103
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 1239,
+          "moe_sh_q8": 342
+        },
+        "dso_fa": {
+          "q1_r2_fast": 352,
+          "q2_r2_stride": 300
+        },
+        "dso_gdn": {
+          "q8c": 930,
+          "q8a": 0,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=1700 restores=0 draft_ms=3443.690(n=1700) tgt_decode_ms=253763.122(n=1743) spec_process_ms=37577.976(n=1743) sample_accept_ms=2.845(n=1700) acc_hist=[139,1561,0,0]",
+        "q1_r2_stride_seen": 1,
+        "q2_r2_stride_seen": 1
+      }
+    },
+    "w80-serial-1": {
+      "suite": "warm80k",
+      "dso_preset": "card1",
+      "mode": "serial",
+      "ub": 1024,
+      "mixed_batch": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 261.08517769,
+        "wall_s": 263.457259373,
+        "decode_s": 2.368579,
+        "decode_toks_s": 81.06126078125322,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "decode_ms_per_round": null,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "output_sha256": "cbb447bc8d3b78fbac5688419c2e70dd40626632ef9e73ade7acdbad3000c788"
+      },
+      "warm": {
+        "n_out": 3072,
+        "ttft_s": 0.119340745,
+        "wall_s": 38.116509982,
+        "decode_s": 37.991381000000004,
+        "decode_toks_s": 80.86044568898403,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "decode_ms_per_round": null,
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "output_sha256": "edeb0ed3390b7f6e6fcfd354331c563b8f8937af58c4ebcde886b555950b8725"
+      },
+      "parity_vs_r2_native": {
+        "cold_exact": false,
+        "cold_first_diff": 170,
+        "warm_exact": false,
+        "warm_first_diff": 170
+      },
+      "r2_warm_ref_toks_s": 101.32693091380102,
+      "uplift_vs_r2_warm_pct": -20.198465541434253,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 0,
+            "launched": 0,
+            "compact_only": 0,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 0,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 0,
+            "launched": 0,
+            "compact_only": 0,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 0,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 0,
+          "launched": 0,
+          "compact_only": 0,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 0,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": []
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 3345,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 97,
+          "captures": 16,
+          "replays": 3232
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 78,
+          "moe_sh_q8": 0
+        },
+        "dso_fa": {
+          "q1_r2_fast": 300,
+          "q2_r2_stride": 0
+        },
+        "dso_gdn": null,
+        "mv1_host_final": null,
+        "q1_r2_stride_seen": 1,
+        "q2_r2_stride_seen": 0
+      }
+    },
+    "w80-serial-2": {
+      "suite": "warm80k",
+      "dso_preset": "card1",
+      "mode": "serial",
+      "ub": 1024,
+      "mixed_batch": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 261.983278571,
+        "wall_s": 264.354836337,
+        "decode_s": 2.3665819999999997,
+        "decode_toks_s": 81.12966294850548,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "decode_ms_per_round": null,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "output_sha256": "cbb447bc8d3b78fbac5688419c2e70dd40626632ef9e73ade7acdbad3000c788"
+      },
+      "warm": {
+        "n_out": 3072,
+        "ttft_s": 0.121133928,
+        "wall_s": 38.100332928,
+        "decode_s": 37.974345,
+        "decode_toks_s": 80.89672119426945,
+        "draft_n": null,
+        "draft_n_accepted": null,
+        "decode_ms_per_round": null,
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "output_sha256": "edeb0ed3390b7f6e6fcfd354331c563b8f8937af58c4ebcde886b555950b8725"
+      },
+      "parity_vs_r2_native": {
+        "cold_exact": false,
+        "cold_first_diff": 170,
+        "warm_exact": false,
+        "warm_first_diff": 170
+      },
+      "r2_warm_ref_toks_s": 101.32693091380102,
+      "uplift_vs_r2_warm_pct": -20.16266508349255,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 0,
+            "launched": 0,
+            "compact_only": 0,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 0,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 0,
+            "launched": 0,
+            "compact_only": 0,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 0,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 0,
+          "launched": 0,
+          "compact_only": 0,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 0,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": []
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 3345,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 97,
+          "captures": 16,
+          "replays": 3232
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 78,
+          "moe_sh_q8": 0
+        },
+        "dso_fa": {
+          "q1_r2_fast": 300,
+          "q2_r2_stride": 0
+        },
+        "dso_gdn": null,
+        "mv1_host_final": null,
+        "q1_r2_stride_seen": 1,
+        "q2_r2_stride_seen": 0
+      }
+    },
+    "w80-q8c-2": {
+      "suite": "warm80k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "mixed_batch": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1",
+        "GGML_CUDA_OCCAMY_GDN_T2_Q8C=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 265.678946053,
+        "wall_s": 267.494496123,
+        "decode_s": 1.802946,
+        "decode_toks_s": 106.49237414764502,
+        "draft_n": 101,
+        "draft_n_accepted": 90,
+        "decode_ms_per_round": 17.850950495049503,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "output_sha256": "ccfb6b4c07fbb59755ce0bde07fa5cd108e32157f1618c5d767af3b5bfc85a24"
+      },
+      "warm": {
+        "n_out": 3072,
+        "ttft_s": 0.277760197,
+        "wall_s": 28.521722436,
+        "decode_s": 28.239330000000002,
+        "decode_toks_s": 108.78445062258913,
+        "draft_n": 1599,
+        "draft_n_accepted": 1471,
+        "decode_ms_per_round": 17.6606191369606,
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "output_sha256": "d306196863bb371dc1ca14f8e2dcd2adae7cabdac6a19d750729599e677b6230"
+      },
+      "parity_vs_r2_native": {
+        "cold_exact": false,
+        "cold_first_diff": 27,
+        "warm_exact": false,
+        "warm_first_diff": 27
+      },
+      "r2_warm_ref_toks_s": 101.32693091380102,
+      "uplift_vs_r2_warm_pct": 7.359859458421991,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 101,
+            "launched": 101,
+            "compact_only": 101,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1616,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 1700,
+            "launched": 1700,
+            "compact_only": 1700,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 27200,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 1700,
+          "launched": 1700,
+          "compact_only": 1700,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 27200,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 1700,
+            "compact_only": 1700,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 3565,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 320,
+          "captures": 142,
+          "replays": 3103
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 1239,
+          "moe_sh_q8": 342
+        },
+        "dso_fa": {
+          "q1_r2_fast": 352,
+          "q2_r2_stride": 300
+        },
+        "dso_gdn": {
+          "q8c": 930,
+          "q8a": 0,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=1700 restores=0 draft_ms=3447.239(n=1700) tgt_decode_ms=254012.197(n=1743) spec_process_ms=37600.584(n=1743) sample_accept_ms=3.042(n=1700) acc_hist=[139,1561,0,0]",
+        "q1_r2_stride_seen": 1,
+        "q2_r2_stride_seen": 1
+      }
+    },
+    "w80-ub2048v5-2": {
+      "suite": "warm80k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 2048,
+      "mixed_batch": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1",
+        "GGML_CUDA_FA_MAXWELL_GEMM_V5=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 252.579105783,
+        "wall_s": 254.449218001,
+        "decode_s": 1.866021,
+        "decode_toks_s": 102.89273271844208,
+        "draft_n": 102,
+        "draft_n_accepted": 88,
+        "decode_ms_per_round": 18.294323529411763,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "output_sha256": "560cc989c14e26039ba41213f3262bb50560337dc345eb16895c61b843ffd97f"
+      },
+      "warm": {
+        "n_out": 3072,
+        "ttft_s": 0.256534797,
+        "wall_s": 29.486623608,
+        "decode_s": 29.225330000000003,
+        "decode_toks_s": 105.1142963997327,
+        "draft_n": 1635,
+        "draft_n_accepted": 1435,
+        "decode_ms_per_round": 17.874819571865444,
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "output_sha256": "66151aaf8a67f71296460540ea7deac744a48a7d971e56a4615dc9612f3e161f"
+      },
+      "parity_vs_r2_native": {
+        "cold_exact": false,
+        "cold_first_diff": 45,
+        "warm_exact": false,
+        "warm_first_diff": 45
+      },
+      "r2_warm_ref_toks_s": 101.32693091380102,
+      "uplift_vs_r2_warm_pct": 3.7377678883352194,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 102,
+            "launched": 102,
+            "compact_only": 102,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1632,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 1737,
+            "launched": 1737,
+            "compact_only": 1737,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 27792,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 1737,
+          "launched": 1737,
+          "compact_only": 1737,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 27792,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 1737,
+            "compact_only": 1737,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 3562,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 376,
+          "captures": 202,
+          "replays": 2984
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 1239,
+          "moe_sh_q8": 496
+        },
+        "dso_fa": {
+          "q1_r2_fast": 516,
+          "q2_r2_stride": 300
+        },
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 930,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=1737 restores=0 draft_ms=3550.608(n=1737) tgt_decode_ms=262812.027(n=1781) spec_process_ms=16653.138(n=1781) sample_accept_ms=3.044(n=1737) acc_hist=[214,1523,0,0]",
+        "q1_r2_stride_seen": 1,
+        "q2_r2_stride_seen": 1
+      }
+    },
+    "w80-exact-2": {
+      "suite": "warm80k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "mixed_batch": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 266.260862227,
+        "wall_s": 268.270744471,
+        "decode_s": 1.872644,
+        "decode_toks_s": 102.52883089364556,
+        "draft_n": 102,
+        "draft_n_accepted": 88,
+        "decode_ms_per_round": 18.359254901960785,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "output_sha256": "2976ff6b52a9b7e7891fe437407ee29088fccbd7ce785673dd0650ce52d5bf89"
+      },
+      "warm": {
+        "n_out": 3072,
+        "ttft_s": 0.255239934,
+        "wall_s": 29.602460352,
+        "decode_s": 29.342299,
+        "decode_toks_s": 104.69527285506838,
+        "draft_n": 1641,
+        "draft_n_accepted": 1430,
+        "decode_ms_per_round": 17.88074283973187,
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "output_sha256": "f0fc65b0daac7ba7d7f584e217e3e8822b1b81b99d74aaf5f50c37e916895ea6"
+      },
+      "parity_vs_r2_native": {
+        "cold_exact": true,
+        "cold_first_diff": null,
+        "warm_exact": true,
+        "warm_first_diff": null
+      },
+      "r2_warm_ref_toks_s": 101.32693091380102,
+      "uplift_vs_r2_warm_pct": 3.324231683413781,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 102,
+            "launched": 102,
+            "compact_only": 102,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1632,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 1743,
+            "launched": 1743,
+            "compact_only": 1743,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 27888,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 1743,
+          "launched": 1743,
+          "compact_only": 1743,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 27888,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 1743,
+            "compact_only": 1743,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 3651,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 411,
+          "captures": 195,
+          "replays": 3045
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 1239,
+          "moe_sh_q8": 486
+        },
+        "dso_fa": {
+          "q1_r2_fast": 496,
+          "q2_r2_stride": 300
+        },
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 930,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=1743 restores=0 draft_ms=3553.014(n=1743) tgt_decode_ms=255567.444(n=1786) spec_process_ms=37665.338(n=1786) sample_accept_ms=2.996(n=1743) acc_hist=[225,1518,0,0]",
+        "q1_r2_stride_seen": 1,
+        "q2_r2_stride_seen": 1
+      }
+    },
+    "w80-r2-2": {
+      "suite": "warm80k",
+      "dso_preset": "r2",
+      "mode": "native",
+      "ub": 1024,
+      "mixed_batch": 1024,
+      "env_overrides": [],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 265.941197765,
+        "wall_s": 267.841185392,
+        "decode_s": 1.886239,
+        "decode_toks_s": 101.78985801905273,
+        "draft_n": 101,
+        "draft_n_accepted": 89,
+        "decode_ms_per_round": 18.675633663366337,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "output_sha256": "2976ff6b52a9b7e7891fe437407ee29088fccbd7ce785673dd0650ce52d5bf89"
+      },
+      "warm": {
+        "n_out": 3072,
+        "ttft_s": 0.25198298,
+        "wall_s": 30.359383226,
+        "decode_s": 30.102428,
+        "decode_toks_s": 102.05156873060206,
+        "draft_n": 1642,
+        "draft_n_accepted": 1429,
+        "decode_ms_per_round": 18.33278197320341,
+        "cache_n": 79996,
+        "prompt_n": 4,
+        "output_sha256": "f0fc65b0daac7ba7d7f584e217e3e8822b1b81b99d74aaf5f50c37e916895ea6"
+      },
+      "parity_vs_r2_native": {
+        "cold_exact": true,
+        "cold_first_diff": null,
+        "warm_exact": true,
+        "warm_first_diff": null
+      },
+      "r2_warm_ref_toks_s": 101.32693091380102,
+      "uplift_vs_r2_warm_pct": 0.715148293021417,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 101,
+            "launched": 101,
+            "compact_only": 101,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1616,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 1743,
+            "launched": 1743,
+            "compact_only": 1743,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 27888,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 1743,
+          "launched": 1743,
+          "compact_only": 1743,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 27888,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": []
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": null,
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": null,
+        "dso_fa": null,
+        "dso_gdn": null,
+        "mv1_host_final": "mv1_host: rounds=1743 restores=0 draft_ms=4024.778(n=1743) tgt_decode_ms=255557.638(n=1786) spec_process_ms=37681.931(n=1786) sample_accept_ms=3.183(n=1743) acc_hist=[225,1518,0,0]",
+        "q1_r2_stride_seen": 0,
+        "q2_r2_stride_seen": 1
+      }
+    }
+  },
+  "ordinary80_order": [
+    "o80-r2-1",
+    "o80-exact-1",
+    "o80-ub2048v5-1",
+    "o80-ub2048v5-2",
+    "o80-exact-2",
+    "o80-r2-2"
+  ],
+  "ordinary80_means": {
+    "r2": {
+      "ttft_s": 264.5496,
+      "cold_toks_s": 94.9275,
+      "cold_ms_per_round": 18.3434,
+      "exact_stream_ids_vs_r2": [
+        true,
+        true
+      ]
+    },
+    "exact": {
+      "ttft_s": 265.2766,
+      "cold_toks_s": 96.8224,
+      "cold_ms_per_round": 17.9398,
+      "exact_stream_ids_vs_r2": [
+        true,
+        true
+      ]
+    },
+    "ub2048v5": {
+      "ttft_s": 251.2631,
+      "cold_toks_s": 98.4025,
+      "cold_ms_per_round": 17.9367,
+      "exact_stream_ids_vs_r2": [
+        false,
+        false
+      ]
+    }
+  },
+  "ordinary80_runs": {
+    "o80-r2-1": {
+      "suite": "ordinary80",
+      "dso_preset": "r2",
+      "mode": "native",
+      "ub": 1024,
+      "mixed_batch": 1024,
+      "env_overrides": [],
+      "cold": {
+        "n_out": 700,
+        "ttft_s": 265.08548118,
+        "wall_s": 272.461662808,
+        "decode_s": 7.363679,
+        "decode_toks_s": 95.06117797910528,
+        "draft_n": 402,
+        "draft_n_accepted": 298,
+        "decode_ms_per_round": 18.317609452736317,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "finish_reason": "word",
+        "output_sha256": "77b9d2cf790b1fb92142dcd02f0c92c8a3d8f94da416d029332acd991d8fa76e"
+      },
+      "exact_stream_ids_vs_r2": true,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 402,
+            "launched": 402,
+            "compact_only": 402,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 6432,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 402,
+          "launched": 402,
+          "compact_only": 402,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 6432,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": []
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": null,
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": null,
+        "dso_fa": null,
+        "dso_gdn": null,
+        "mv1_host_final": "mv1_host: rounds=402 restores=0 draft_ms=930.942(n=402) tgt_decode_ms=233635.867(n=443) spec_process_ms=37482.682(n=443) sample_accept_ms=0.664(n=402) acc_hist=[104,298,0,0]",
+        "q1_r2_stride_seen": 0,
+        "q2_r2_stride_seen": 1
+      }
+    },
+    "o80-exact-1": {
+      "suite": "ordinary80",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "mixed_batch": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1"
+      ],
+      "cold": {
+        "n_out": 700,
+        "ttft_s": 265.617223234,
+        "wall_s": 272.859699772,
+        "decode_s": 7.22483,
+        "decode_toks_s": 96.88809286862113,
+        "draft_n": 403,
+        "draft_n_accepted": 297,
+        "decode_ms_per_round": 17.92761786600496,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "finish_reason": "word",
+        "output_sha256": "77b9d2cf790b1fb92142dcd02f0c92c8a3d8f94da416d029332acd991d8fa76e"
+      },
+      "exact_stream_ids_vs_r2": true,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 403,
+            "launched": 403,
+            "compact_only": 403,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 6448,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 403,
+          "launched": 403,
+          "compact_only": 403,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 6448,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 403,
+            "compact_only": 403,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 968,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 242,
+          "captures": 85,
+          "replays": 641
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 359,
+          "moe_sh_q8": 232
+        },
+        "dso_fa": {
+          "q1_r2_fast": 232,
+          "q2_r2_stride": 80
+        },
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 270,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=403 restores=0 draft_ms=829.891(n=403) tgt_decode_ms=234040.393(n=444) spec_process_ms=37556.796(n=444) sample_accept_ms=0.721(n=403) acc_hist=[106,297,0,0]",
+        "q1_r2_stride_seen": 1,
+        "q2_r2_stride_seen": 1
+      }
+    },
+    "o80-ub2048v5-1": {
+      "suite": "ordinary80",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 2048,
+      "mixed_batch": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1",
+        "GGML_CUDA_FA_MAXWELL_GEMM_V5=1"
+      ],
+      "cold": {
+        "n_out": 676,
+        "ttft_s": 251.642863826,
+        "wall_s": 258.527433613,
+        "decode_s": 6.873001,
+        "decode_toks_s": 98.35587103799344,
+        "draft_n": 383,
+        "draft_n_accepted": 293,
+        "decode_ms_per_round": 17.94517232375979,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "finish_reason": "word",
+        "output_sha256": "3c0a2ca8e101f17a1313b47de7447e047c1e278770d65f622659ea6cc1a9d9c4"
+      },
+      "exact_stream_ids_vs_r2": false,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 383,
+            "launched": 383,
+            "compact_only": 383,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 6128,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 383,
+          "launched": 383,
+          "compact_only": 383,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 6128,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 383,
+            "compact_only": 383,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 850,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 190,
+          "captures": 72,
+          "replays": 588
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 359,
+          "moe_sh_q8": 206
+        },
+        "dso_fa": {
+          "q1_r2_fast": 206,
+          "q2_r2_stride": 80
+        },
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 270,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=383 restores=0 draft_ms=794.334(n=383) tgt_decode_ms=240478.445(n=424) spec_process_ms=16590.572(n=424) sample_accept_ms=0.631(n=383) acc_hist=[90,293,0,0]",
+        "q1_r2_stride_seen": 1,
+        "q2_r2_stride_seen": 1
+      }
+    },
+    "o80-ub2048v5-2": {
+      "suite": "ordinary80",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 2048,
+      "mixed_batch": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1",
+        "GGML_CUDA_FA_MAXWELL_GEMM_V5=1"
+      ],
+      "cold": {
+        "n_out": 676,
+        "ttft_s": 250.883247856,
+        "wall_s": 257.755632324,
+        "decode_s": 6.866492,
+        "decode_toks_s": 98.44910618114751,
+        "draft_n": 383,
+        "draft_n_accepted": 293,
+        "decode_ms_per_round": 17.928177545691906,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "finish_reason": "word",
+        "output_sha256": "3c0a2ca8e101f17a1313b47de7447e047c1e278770d65f622659ea6cc1a9d9c4"
+      },
+      "exact_stream_ids_vs_r2": false,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 383,
+            "launched": 383,
+            "compact_only": 383,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 6128,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 383,
+          "launched": 383,
+          "compact_only": 383,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 6128,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 383,
+            "compact_only": 383,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 850,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 190,
+          "captures": 72,
+          "replays": 588
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 359,
+          "moe_sh_q8": 206
+        },
+        "dso_fa": {
+          "q1_r2_fast": 206,
+          "q2_r2_stride": 80
+        },
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 270,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=383 restores=0 draft_ms=795.860(n=383) tgt_decode_ms=239982.714(n=424) spec_process_ms=16583.603(n=424) sample_accept_ms=0.685(n=383) acc_hist=[90,293,0,0]",
+        "q1_r2_stride_seen": 1,
+        "q2_r2_stride_seen": 1
+      }
+    },
+    "o80-exact-2": {
+      "suite": "ordinary80",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "mixed_batch": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1"
+      ],
+      "cold": {
+        "n_out": 700,
+        "ttft_s": 264.935974924,
+        "wall_s": 272.17623501,
+        "decode_s": 7.234640000000001,
+        "decode_toks_s": 96.75671491601517,
+        "draft_n": 403,
+        "draft_n_accepted": 297,
+        "decode_ms_per_round": 17.95196029776675,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "finish_reason": "word",
+        "output_sha256": "77b9d2cf790b1fb92142dcd02f0c92c8a3d8f94da416d029332acd991d8fa76e"
+      },
+      "exact_stream_ids_vs_r2": true,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 403,
+            "launched": 403,
+            "compact_only": 403,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 6448,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 403,
+          "launched": 403,
+          "compact_only": 403,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 6448,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 403,
+            "compact_only": 403,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 968,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 242,
+          "captures": 85,
+          "replays": 641
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 359,
+          "moe_sh_q8": 232
+        },
+        "dso_fa": {
+          "q1_r2_fast": 232,
+          "q2_r2_stride": 80
+        },
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 270,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=403 restores=0 draft_ms=834.869(n=403) tgt_decode_ms=233483.620(n=444) spec_process_ms=37451.890(n=444) sample_accept_ms=0.680(n=403) acc_hist=[106,297,0,0]",
+        "q1_r2_stride_seen": 1,
+        "q2_r2_stride_seen": 1
+      }
+    },
+    "o80-r2-2": {
+      "suite": "ordinary80",
+      "dso_preset": "r2",
+      "mode": "native",
+      "ub": 1024,
+      "mixed_batch": 1024,
+      "env_overrides": [],
+      "cold": {
+        "n_out": 700,
+        "ttft_s": 264.013724769,
+        "wall_s": 271.413634155,
+        "decode_s": 7.384448,
+        "decode_toks_s": 94.79381532648073,
+        "draft_n": 402,
+        "draft_n_accepted": 298,
+        "decode_ms_per_round": 18.369273631840798,
+        "cache_n": 0,
+        "prompt_n": 80000,
+        "finish_reason": "word",
+        "output_sha256": "77b9d2cf790b1fb92142dcd02f0c92c8a3d8f94da416d029332acd991d8fa76e"
+      },
+      "exact_stream_ids_vs_r2": true,
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 402,
+            "launched": 402,
+            "compact_only": 402,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 6432,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 402,
+          "launched": 402,
+          "compact_only": 402,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 6432,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": []
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": null,
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": null,
+        "dso_fa": null,
+        "dso_gdn": null,
+        "mv1_host_final": "mv1_host: rounds=402 restores=0 draft_ms=937.375(n=402) tgt_decode_ms=232689.342(n=443) spec_process_ms=37374.057(n=443) sample_accept_ms=0.776(n=402) acc_hist=[104,298,0,0]",
+        "q1_r2_stride_seen": 0,
+        "q2_r2_stride_seen": 1
+      }
+    }
+  }
+}

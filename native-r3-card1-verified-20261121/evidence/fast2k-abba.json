@@ -1,0 +1,974 @@
+{
+  "order": [
+    "c1-base-1",
+    "c1-nograph-1",
+    "c1-graph-1",
+    "c1-q8c-1",
+    "c1-q8c-2",
+    "c1-graph-2",
+    "c1-nograph-2",
+    "c1-base-2"
+  ],
+  "runs": {
+    "c1-base-1": {
+      "suite": "fast2k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 4.042370543,
+        "wall_s": 5.768129608,
+        "decode_s": 1.722864,
+        "decode_toks_s": 111.44234251803972,
+        "draft_n": 104,
+        "draft_n_accepted": 87,
+        "decode_ms_per_round": 16.566,
+        "cache_n": 0,
+        "prompt_n": 2000,
+        "output_sha256": "259d808edf3dd201414e81616ae2ab8c364f969b0a46b5ecb28a00b70e9781b0"
+      },
+      "warm": {
+        "n_out": 512,
+        "ttft_s": 0.085221992,
+        "wall_s": 4.470627293,
+        "decode_s": 4.38512,
+        "decode_toks_s": 116.75849235596746,
+        "draft_n": 266,
+        "draft_n_accepted": 244,
+        "decode_ms_per_round": 16.485413533834585,
+        "cache_n": 1996,
+        "prompt_n": 4,
+        "output_sha256": "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa"
+      },
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 104,
+            "launched": 104,
+            "compact_only": 104,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1664,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 370,
+            "launched": 370,
+            "compact_only": 370,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 5920,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 370,
+          "launched": 370,
+          "compact_only": 370,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 5920,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": []
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 751,
+          "arch_off": 751,
+          "incompat": 0,
+          "prop_chg": 0,
+          "captures": 0,
+          "replays": 0
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": null,
+        "dso_fa": null,
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 11130,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=370 restores=0 draft_ms=723.633(n=370) tgt_decode_ms=7733.918(n=375) spec_process_ms=1575.988(n=375) sample_accept_ms=0.630(n=370) acc_hist=[39,331,0,0]",
+        "q1_r2_stride_seen": 0,
+        "q2_r2_stride_seen": 0
+      }
+    },
+    "c1-nograph-1": {
+      "suite": "fast2k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 4.597457091,
+        "wall_s": 6.280251917,
+        "decode_s": 1.682915,
+        "decode_toks_s": 114.08775844293979,
+        "draft_n": 103,
+        "draft_n_accepted": 88,
+        "decode_ms_per_round": 16.33898058252427,
+        "cache_n": 0,
+        "prompt_n": 2000,
+        "output_sha256": "259d808edf3dd201414e81616ae2ab8c364f969b0a46b5ecb28a00b70e9781b0"
+      },
+      "warm": {
+        "n_out": 512,
+        "ttft_s": 0.085571053,
+        "wall_s": 4.398183606,
+        "decode_s": 4.312296999999999,
+        "decode_toks_s": 118.7302266054495,
+        "draft_n": 265,
+        "draft_n_accepted": 245,
+        "decode_ms_per_round": 16.272818867924528,
+        "cache_n": 1996,
+        "prompt_n": 4,
+        "output_sha256": "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa"
+      },
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 103,
+            "launched": 103,
+            "compact_only": 103,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1648,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 368,
+            "launched": 368,
+            "compact_only": 368,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 5888,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 368,
+          "launched": 368,
+          "compact_only": 368,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 5888,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 368,
+            "compact_only": 368,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 747,
+          "arch_off": 747,
+          "incompat": 0,
+          "prop_chg": 0,
+          "captures": 0,
+          "replays": 0
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 14759,
+          "moe_sh_q8": 368
+        },
+        "dso_fa": null,
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 11070,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=368 restores=0 draft_ms=654.081(n=368) tgt_decode_ms=8000.785(n=373) spec_process_ms=1647.056(n=373) sample_accept_ms=0.960(n=368) acc_hist=[35,333,0,0]",
+        "q1_r2_stride_seen": 0,
+        "q2_r2_stride_seen": 0
+      }
+    },
+    "c1-graph-1": {
+      "suite": "fast2k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 4.007341916,
+        "wall_s": 5.690999855,
+        "decode_s": 1.681627,
+        "decode_toks_s": 114.1751410984719,
+        "draft_n": 103,
+        "draft_n_accepted": 88,
+        "decode_ms_per_round": 16.32647572815534,
+        "cache_n": 0,
+        "prompt_n": 2000,
+        "output_sha256": "259d808edf3dd201414e81616ae2ab8c364f969b0a46b5ecb28a00b70e9781b0"
+      },
+      "warm": {
+        "n_out": 512,
+        "ttft_s": 0.087553192,
+        "wall_s": 4.386451449,
+        "decode_s": 4.298560999999999,
+        "decode_toks_s": 119.10962761724215,
+        "draft_n": 265,
+        "draft_n_accepted": 245,
+        "decode_ms_per_round": 16.220984905660377,
+        "cache_n": 1996,
+        "prompt_n": 4,
+        "output_sha256": "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa"
+      },
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 103,
+            "launched": 103,
+            "compact_only": 103,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1648,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 368,
+            "launched": 368,
+            "compact_only": 368,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 5888,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 368,
+          "launched": 368,
+          "compact_only": 368,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 5888,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 368,
+            "compact_only": 368,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 747,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 88,
+          "captures": 37,
+          "replays": 622
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 439,
+          "moe_sh_q8": 104
+        },
+        "dso_fa": null,
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 330,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=368 restores=0 draft_ms=653.245(n=368) tgt_decode_ms=7647.361(n=373) spec_process_ms=1567.136(n=373) sample_accept_ms=0.654(n=368) acc_hist=[35,333,0,0]",
+        "q1_r2_stride_seen": 0,
+        "q2_r2_stride_seen": 0
+      }
+    },
+    "c1-q8c-1": {
+      "suite": "fast2k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1",
+        "GGML_CUDA_OCCAMY_GDN_T2_Q8C=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 3.957708561,
+        "wall_s": 5.574240327,
+        "decode_s": 1.616279,
+        "decode_toks_s": 118.79137203415995,
+        "draft_n": 101,
+        "draft_n_accepted": 90,
+        "decode_ms_per_round": 16.002762376237623,
+        "cache_n": 0,
+        "prompt_n": 2000,
+        "output_sha256": "8fe7928e6ec01d24e790b1526c0dcfd46f3650a99a7a8cc4a49b887c68abcbbe"
+      },
+      "warm": {
+        "n_out": 512,
+        "ttft_s": 0.083932574,
+        "wall_s": 4.3020619,
+        "decode_s": 4.21779,
+        "decode_toks_s": 121.39058606521425,
+        "draft_n": 265,
+        "draft_n_accepted": 245,
+        "decode_ms_per_round": 15.916188679245282,
+        "cache_n": 1996,
+        "prompt_n": 4,
+        "output_sha256": "361a0aecffa90bc00c425a7d7bef59da63617985d40ac9c75589f5a963aa629a"
+      },
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 101,
+            "launched": 101,
+            "compact_only": 101,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1616,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 366,
+            "launched": 366,
+            "compact_only": 366,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 5856,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 366,
+          "launched": 366,
+          "compact_only": 366,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 5856,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 366,
+            "compact_only": 366,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 743,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 82,
+          "captures": 34,
+          "replays": 627
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 439,
+          "moe_sh_q8": 95
+        },
+        "dso_fa": null,
+        "dso_gdn": {
+          "q8c": 330,
+          "q8a": 0,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=366 restores=0 draft_ms=643.251(n=366) tgt_decode_ms=7462.567(n=371) spec_process_ms=1570.142(n=371) sample_accept_ms=0.593(n=366) acc_hist=[31,335,0,0]",
+        "q1_r2_stride_seen": 0,
+        "q2_r2_stride_seen": 0
+      }
+    },
+    "c1-q8c-2": {
+      "suite": "fast2k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1",
+        "GGML_CUDA_OCCAMY_GDN_T2_Q8C=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 3.966272738,
+        "wall_s": 5.580237029,
+        "decode_s": 1.6137080000000001,
+        "decode_toks_s": 118.98063342314718,
+        "draft_n": 101,
+        "draft_n_accepted": 90,
+        "decode_ms_per_round": 15.97730693069307,
+        "cache_n": 0,
+        "prompt_n": 2000,
+        "output_sha256": "8fe7928e6ec01d24e790b1526c0dcfd46f3650a99a7a8cc4a49b887c68abcbbe"
+      },
+      "warm": {
+        "n_out": 512,
+        "ttft_s": 0.083281437,
+        "wall_s": 4.306125303,
+        "decode_s": 4.222595999999999,
+        "decode_toks_s": 121.2524238643716,
+        "draft_n": 265,
+        "draft_n_accepted": 245,
+        "decode_ms_per_round": 15.934324528301886,
+        "cache_n": 1996,
+        "prompt_n": 4,
+        "output_sha256": "361a0aecffa90bc00c425a7d7bef59da63617985d40ac9c75589f5a963aa629a"
+      },
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 101,
+            "launched": 101,
+            "compact_only": 101,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1616,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 366,
+            "launched": 366,
+            "compact_only": 366,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 5856,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 366,
+          "launched": 366,
+          "compact_only": 366,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 5856,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 366,
+            "compact_only": 366,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 743,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 82,
+          "captures": 34,
+          "replays": 627
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 439,
+          "moe_sh_q8": 95
+        },
+        "dso_fa": null,
+        "dso_gdn": {
+          "q8c": 330,
+          "q8a": 0,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=366 restores=0 draft_ms=644.568(n=366) tgt_decode_ms=7473.641(n=371) spec_process_ms=1569.744(n=371) sample_accept_ms=0.604(n=366) acc_hist=[31,335,0,0]",
+        "q1_r2_stride_seen": 0,
+        "q2_r2_stride_seen": 0
+      }
+    },
+    "c1-graph-2": {
+      "suite": "fast2k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1",
+        "GGML_CUDA_MAXWELL_GRAPHS=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 3.962414139,
+        "wall_s": 5.637266548,
+        "decode_s": 1.6746130000000001,
+        "decode_toks_s": 114.65335573054789,
+        "draft_n": 103,
+        "draft_n_accepted": 88,
+        "decode_ms_per_round": 16.258378640776698,
+        "cache_n": 0,
+        "prompt_n": 2000,
+        "output_sha256": "259d808edf3dd201414e81616ae2ab8c364f969b0a46b5ecb28a00b70e9781b0"
+      },
+      "warm": {
+        "n_out": 512,
+        "ttft_s": 0.083756033,
+        "wall_s": 4.375328803,
+        "decode_s": 4.291252,
+        "decode_toks_s": 119.31249900961303,
+        "draft_n": 265,
+        "draft_n_accepted": 245,
+        "decode_ms_per_round": 16.193403773584908,
+        "cache_n": 1996,
+        "prompt_n": 4,
+        "output_sha256": "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa"
+      },
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 103,
+            "launched": 103,
+            "compact_only": 103,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1648,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 368,
+            "launched": 368,
+            "compact_only": 368,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 5888,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 368,
+          "launched": 368,
+          "compact_only": 368,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 5888,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 368,
+            "compact_only": 368,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 747,
+          "arch_off": 0,
+          "incompat": 0,
+          "prop_chg": 88,
+          "captures": 37,
+          "replays": 622
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 439,
+          "moe_sh_q8": 104
+        },
+        "dso_fa": null,
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 330,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=368 restores=0 draft_ms=647.398(n=368) tgt_decode_ms=7595.174(n=373) spec_process_ms=1569.608(n=373) sample_accept_ms=0.554(n=368) acc_hist=[35,333,0,0]",
+        "q1_r2_stride_seen": 0,
+        "q2_r2_stride_seen": 0
+      }
+    },
+    "c1-nograph-2": {
+      "suite": "fast2k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1",
+        "LLAMA_OCCAMY_COMPACT_DRAFT=1",
+        "GGML_CUDA_OCCAMY_PERSIST_SCRATCH2=1",
+        "GGML_CUDA_OCCAMY_MOE_SH_Q8=1",
+        "GGML_CUDA_OCCAMY_FA_Q1_R2_FAST=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 3.992175781,
+        "wall_s": 5.668831605,
+        "decode_s": 1.676422,
+        "decode_toks_s": 114.52963513960088,
+        "draft_n": 103,
+        "draft_n_accepted": 88,
+        "decode_ms_per_round": 16.275941747572816,
+        "cache_n": 0,
+        "prompt_n": 2000,
+        "output_sha256": "259d808edf3dd201414e81616ae2ab8c364f969b0a46b5ecb28a00b70e9781b0"
+      },
+      "warm": {
+        "n_out": 512,
+        "ttft_s": 0.086255478,
+        "wall_s": 4.385446393,
+        "decode_s": 4.298941,
+        "decode_toks_s": 119.09909905718642,
+        "draft_n": 265,
+        "draft_n_accepted": 245,
+        "decode_ms_per_round": 16.222418867924528,
+        "cache_n": 1996,
+        "prompt_n": 4,
+        "output_sha256": "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa"
+      },
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 103,
+            "launched": 103,
+            "compact_only": 103,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1648,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 368,
+            "launched": 368,
+            "compact_only": 368,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 5888,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 368,
+          "launched": 368,
+          "compact_only": 368,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 5888,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": [
+          {
+            "mode": "1",
+            "req": 368,
+            "compact_only": 368,
+            "fallback": 0,
+            "shadow_mismatch": 0
+          }
+        ]
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 747,
+          "arch_off": 747,
+          "incompat": 0,
+          "prop_chg": 0,
+          "captures": 0,
+          "replays": 0
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": {
+          "persist_scratch2": 14759,
+          "moe_sh_q8": 368
+        },
+        "dso_fa": null,
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 11070,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=368 restores=0 draft_ms=650.237(n=368) tgt_decode_ms=7629.730(n=373) spec_process_ms=1573.939(n=373) sample_accept_ms=0.574(n=368) acc_hist=[35,333,0,0]",
+        "q1_r2_stride_seen": 0,
+        "q2_r2_stride_seen": 0
+      }
+    },
+    "c1-base-2": {
+      "suite": "fast2k",
+      "dso_preset": "card1",
+      "mode": "native",
+      "ub": 1024,
+      "env_overrides": [
+        "LLAMA_MTP_LAST_QUERY=1"
+      ],
+      "cold": {
+        "n_out": 192,
+        "ttft_s": 3.981991747,
+        "wall_s": 5.708890095,
+        "decode_s": 1.7266320000000002,
+        "decode_toks_s": 111.199143766593,
+        "draft_n": 104,
+        "draft_n_accepted": 87,
+        "decode_ms_per_round": 16.60223076923077,
+        "cache_n": 0,
+        "prompt_n": 2000,
+        "output_sha256": "259d808edf3dd201414e81616ae2ab8c364f969b0a46b5ecb28a00b70e9781b0"
+      },
+      "warm": {
+        "n_out": 512,
+        "ttft_s": 0.085570833,
+        "wall_s": 4.477697932,
+        "decode_s": 4.391763,
+        "decode_toks_s": 116.58188294769094,
+        "draft_n": 266,
+        "draft_n_accepted": 244,
+        "decode_ms_per_round": 16.510387218045114,
+        "cache_n": 1996,
+        "prompt_n": 4,
+        "output_sha256": "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa"
+      },
+      "compact": {
+        "snapshots": [
+          {
+            "requested": 104,
+            "launched": 104,
+            "compact_only": 104,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 1664,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          },
+          {
+            "requested": 370,
+            "launched": 370,
+            "compact_only": 370,
+            "ambiguous": 0,
+            "unsupported": 0,
+            "raw_bytes": 0,
+            "compact_bytes": 5920,
+            "shadow_rows": 0,
+            "shadow_mismatches": 0
+          }
+        ],
+        "final": {
+          "requested": 370,
+          "launched": 370,
+          "compact_only": 370,
+          "ambiguous": 0,
+          "unsupported": 0,
+          "raw_bytes": 0,
+          "compact_bytes": 5920,
+          "shadow_rows": 0,
+          "shadow_mismatches": 0
+        },
+        "draft_compact": []
+      },
+      "cuda_graphs": {
+        "r3_cuda_graphs": {
+          "calls": 751,
+          "arch_off": 751,
+          "incompat": 0,
+          "prop_chg": 0,
+          "captures": 0,
+          "replays": 0
+        },
+        "warmup_complete": 0,
+        "warmup_reset": 0,
+        "llama_ctx_reused_lines": 0,
+        "disabled_arch": 0,
+        "disabled_unsupported": 0,
+        "update_failed": 0
+      },
+      "r3_engaged": {
+        "dso_moe": null,
+        "dso_fa": null,
+        "dso_gdn": {
+          "q8c": 0,
+          "q8a": 11130,
+          "fp32": 0
+        },
+        "mv1_host_final": "mv1_host: rounds=370 restores=0 draft_ms=727.178(n=370) tgt_decode_ms=7692.596(n=375) spec_process_ms=1563.510(n=375) sample_accept_ms=0.732(n=370) acc_hist=[39,331,0,0]",
+        "q1_r2_stride_seen": 0,
+        "q2_r2_stride_seen": 0
+      }
+    }
+  },
+  "counterbalanced_means": {
+    "c1-base": {
+      "cold_toks_s": 111.3207,
+      "cold_ms_per_round": 16.5841,
+      "warm_toks_s": 116.6702,
+      "warm_ms_per_round": 16.4979,
+      "warm_acc_1": "244/266",
+      "warm_acc_2": "244/266",
+      "warm_output_sha256": [
+        "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa",
+        "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa"
+      ]
+    },
+    "c1-nograph": {
+      "cold_toks_s": 114.3087,
+      "cold_ms_per_round": 16.3075,
+      "warm_toks_s": 118.9147,
+      "warm_ms_per_round": 16.2476,
+      "warm_acc_1": "245/265",
+      "warm_acc_2": "245/265",
+      "warm_output_sha256": [
+        "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa",
+        "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa"
+      ]
+    },
+    "c1-graph": {
+      "cold_toks_s": 114.4142,
+      "cold_ms_per_round": 16.2924,
+      "warm_toks_s": 119.2111,
+      "warm_ms_per_round": 16.2072,
+      "warm_acc_1": "245/265",
+      "warm_acc_2": "245/265",
+      "warm_output_sha256": [
+        "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa",
+        "d696196780ab6d1f3f06a21fb3b956048cb8a169e584db723fda89b1d1cfa8aa"
+      ]
+    },
+    "c1-q8c": {
+      "cold_toks_s": 118.886,
+      "cold_ms_per_round": 15.99,
+      "warm_toks_s": 121.3215,
+      "warm_ms_per_round": 15.9253,
+      "warm_acc_1": "245/265",
+      "warm_acc_2": "245/265",
+      "warm_output_sha256": [
+        "361a0aecffa90bc00c425a7d7bef59da63617985d40ac9c75589f5a963aa629a",
+        "361a0aecffa90bc00c425a7d7bef59da63617985d40ac9c75589f5a963aa629a"
+      ]
+    }
+  },
+  "pure_deltas": {
+    "nograph_vs_base_warm_ms_per_round": -0.2503,
+    "graph_vs_nograph_warm_ms_per_round": -0.0404,
+    "q8c_vs_graph_warm_ms_per_round": -0.2819,
+    "q8c_vs_graph_cold_ms_per_round": -0.3024
+  }
+}
