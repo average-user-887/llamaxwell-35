@@ -16,7 +16,7 @@ OUT = Path(os.environ.get('QA_OUT', '/tmp/qa-speed-cards/c2/runs'))
 REPLAY = Path('/tmp/qa-speed-cards/c2/scripts/n3r_replay_c2.py')
 LIB = Path('/tmp/qa-speed-cards/c2/build/on/libllama-server-impl.so')
 BFCL_ENV = R3 / 'card2-agentic/runs/r3-bfcl-full-r3-lossless-native-20261121T013713Z-482738/environment.args'
-ORDER = os.environ.get('QA_ORDER', 'OFF96,ON96,ON96,OFF96').split(',')
+ORDER = os.environ.get('QA_ORDER', 'OFF84,ON84,ON84,OFF84').split(',')
 STOP_AT = float(os.environ.get('QA_STOP_EPOCH', '0'))
 COOL_C = int(os.environ.get('QA_COOL_C', 60))
 HARD_C = 80
@@ -62,10 +62,24 @@ def gpu_temp(uuid):
     except Exception: return -1
 
 
+PAUSE_HI = int(os.environ.get('QA_PAUSE_HI', 77))   # pacing ported from C1 (both arms, all phases): freeze own container at >= this
+PAUSE_LO = int(os.environ.get('QA_PAUSE_LO', 72))   # ... resume at <= this
+PAUSE_MAX = float(os.environ.get('QA_PAUSE_MAX', 15))  # ... or after this many seconds
+
+
 class Watchdog(threading.Thread):
+    """80 C kill of own container (run invalid); docker pause/unpause own container for pacing, recorded as (t0, dur)."""
     def __init__(self, uuid, name, log):
         super().__init__(daemon=True); self.uuid, self.name, self.log = uuid, name, log
-        self.stop = threading.Event(); self.tmax = 0; self.mmax = 0; self.tripped = False
+        self.stop = threading.Event(); self.tmax = 0; self.mmax = 0; self.tripped = False; self.pauses = []
+    def pause(self, f, t_hi):
+        t0 = time.time(); subprocess.run(['docker', 'pause', self.name], capture_output=True, timeout=20)
+        f.write('PAUSE %d C\n' % t_hi); f.flush(); t = t_hi
+        while not self.stop.is_set() and time.time() - t0 < PAUSE_MAX:
+            self.stop.wait(1.0); t = gpu_temp(self.uuid); self.tmax = max(self.tmax, t)
+            if 0 <= t <= PAUSE_LO: break
+        subprocess.run(['docker', 'unpause', self.name], capture_output=True, timeout=20)
+        d = round(time.time() - t0, 1); self.pauses.append((round(t0, 1), d)); f.write('UNPAUSE after %.1fs at %d C\n' % (d, t)); f.flush()
     def run(self):
         with open(self.log, 'a') as f:
             while not self.stop.is_set():
@@ -75,6 +89,7 @@ class Watchdog(threading.Thread):
                     self.tripped = True
                     subprocess.run(['docker', 'rm', '-f', self.name], capture_output=True, timeout=20)
                     f.write('TRIP %d C, removed own container\n' % t); return
+                if t >= PAUSE_HI: self.pause(f, t)
                 self.stop.wait(2.0)
 
 
@@ -110,7 +125,7 @@ def main():
             try: log('fleet admission: %s' % rb.admit_idle_fleet()[:200].replace('\n', ' '))
             except Exception as ex: log('fleet admission FAILED: %s' % str(ex)[:200]); break
             cool(uuid, log)
-            on = arm.startswith('ON'); CTX = int(arm[-2:]) * 1024
+            on = arm.startswith('ON'); CTX = {'84': 84224, '64': 65536, '96': 98304}[arm[-2:]]  # 2x96K OOMs on 24 GB with f16 KV (see oom96/)
             env = base_env() + ([('LLAMA_APPEND_SCHED', '1')] + ON_EXTRA if on else [])
             od = OUT / ('%s_%d_%s' % (time.strftime('%H%M'), i, arm)); od.mkdir(parents=True, exist_ok=True)
             sess = rb.ServerSession(dso, od, 'native', 2 * CTX, UB, UB, env, health_timeout=300)
@@ -130,11 +145,16 @@ def main():
         rj = od / 'n3r' / 'run.json'
         rec = dict(run=i, arm=arm, dir=od.name, rc=rc, wall_s=round(time.time() - t_run, 1), tmax=wd.tmax if wd else None,
                    vram_peak_mib=wd.mmax if wd else None, ctx=CTX, env_on=on, on_extra=ON_EXTRA, mv2=MV2,
-                   invalid=bool(not wd or wd.tripped or wd.tmax >= HARD_C))
+                   invalid=bool(not wd or wd.tripped or wd.tmax >= HARD_C),
+                   pauses=list(wd.pauses) if wd else [], pause_s=round(sum(d for _, d in wd.pauses), 1) if wd else None)
         if rj.exists():
             R = json.loads(rj.read_text()); T = R.get('turns_rec', [])
             rec.update(makespan_s=R.get('makespan_s'), ok=R.get('ok'), n_void=R.get('n_void'), run_sha=R.get('run_sha'),
                        setup_s=[round(s['s'], 1) for s in R.get('setup', [])])
+            w0 = R.get('t_run0'); w1 = max([t.get('t_end') or 0 for t in T] or [0])
+            rec['pause_run_s'] = round(sum(max(0.0, min(p0 + d, w1) - max(p0, w0)) for p0, d in rec['pauses']), 1) if w0 else None
+            rec['makespan_raw_s'] = R.get('makespan_s')
+            rec['makespan_net_s'] = round(R['makespan_s'] - rec['pause_run_s'], 2) if w0 and R.get('makespan_s') is not None else None
             for a in (0, 1):
                 g = [x for t in T if t.get('agent') == a for x in (t.get('gaps_s') or [])]
                 rec['p95_gap_a%d' % a] = p95(g); rec['max_gap_a%d' % a] = max(g) if g else None; rec['n_gap_a%d' % a] = len(g)
@@ -148,8 +168,8 @@ def main():
             rec['sched_lines'] = [l.strip()[-140:] for l in txt.splitlines() if 'append-sched' in l][-3:]
             rec['defer_lines'] = [l.strip()[-100:] for l in txt.splitlines() if 'prefill-single-stream' in l][-2:]
         results.append(rec); rpath.write_text(json.dumps(results, indent=1))
-        log('run %d %s rc=%s makespan=%s setup=%s ok=%s void=%s p95=%s/%s tmax=%s invalid=%s sha=%s' % (
-            i, arm, rc, rec.get('makespan_s'), rec.get('setup_s'), rec.get('ok'), rec.get('n_void'),
+        log('run %d %s rc=%s makespan=%s net=%s pause_run=%s pause_all=%s setup=%s ok=%s void=%s p95=%s/%s tmax=%s invalid=%s sha=%s' % (
+            i, arm, rc, rec.get('makespan_s'), rec.get('makespan_net_s'), rec.get('pause_run_s'), rec.get('pause_s'), rec.get('setup_s'), rec.get('ok'), rec.get('n_void'),
             rec.get('p95_gap_a0'), rec.get('p95_gap_a1'), rec.get('tmax'), rec['invalid'], (rec.get('run_sha') or '')[:12]))
     log('done')
 

@@ -164,6 +164,7 @@ static int32_t append_chunk() {
     return n;
 }
 static uint64_t g_append_sched_switch = 0;
+static uint64_t g_append_sched_starve = 0;
 
 enum class compact_mode { off, on, shadow };
 static compact_mode compact_readback_mode() {
@@ -3301,6 +3302,7 @@ private:
     int32_t s1_rr = 0;
     int64_t s1_n_defer = 0;
     int32_t s1_last_owner = -1; // C2 append scheduler: owner of the previous batch
+    std::vector<int32_t> s1_skip; // C2 append scheduler: consecutive batches each slot was passed over
 
     // @ngxson : for debugging only
     int64_t t_pre_decode  = 0;
@@ -3678,29 +3680,53 @@ private:
                     }
                 }
                 // C2 append scheduler (LLAMA_APPEND_SCHED=1, default off): among the same eligible slots, the
-                // owner is the one with the fewest estimated remaining prompt tokens (shortest-first). For a
-                // STARTED slot the cached prefix is not yet known, so the estimate is n_tokens - cached tokens.
+                // owner is the one with the fewest remaining prompt tokens (shortest-first). For a STARTED slot the
+                // remaining count is n_tokens - LCP(cached tokens, task tokens), i.e. the cache-reuse estimate before
+                // any checkpoint rollback (a rollback can only add tokens, so a STARTED slot may be under-estimated).
+                // Anti-starvation: a slot passed over APPEND_SCHED_MAX_SKIP times in a row takes the batch.
+                constexpr int32_t APPEND_SCHED_MAX_SKIP = 8;
                 if (s1_owner >= 0 && append_sched_on()) {
+                    if ((int32_t) s1_skip.size() != n_sl) {
+                        s1_skip.assign(n_sl, 0);
+                    }
                     int64_t best = -1;
+                    int32_t starved = -1;
+                    std::vector<int32_t> elig;
                     for (int32_t k = 0; k < n_sl; ++k) {
                         const int32_t i = (s1_rr + k) % n_sl;
                         const server_slot & c = slots[i];
                         if ((c.state == SLOT_STATE_PROCESSING_PROMPT || c.state == SLOT_STATE_STARTED) && c.task &&
                             c.task->n_tokens() - (c.state == SLOT_STATE_STARTED ? 0 : c.prompt.n_tokens()) >= S1_MIN_PENDING &&
                             (!slot_batched || slot_batched->can_batch_with(const_cast<server_slot &>(c)))) {
-                            const int64_t rem = std::max<int64_t>(0, (int64_t) c.task->n_tokens() - (int64_t) c.prompt.n_tokens());
+                            elig.push_back(i);
+                            const int64_t done = c.state == SLOT_STATE_STARTED
+                                ? (int64_t) c.prompt.tokens.get_common_prefix(c.task->tokens)
+                                : (int64_t) c.prompt.n_tokens();
+                            const int64_t rem = std::max<int64_t>(0, (int64_t) c.task->n_tokens() - done);
                             if (best < 0 || rem < best) {
                                 best = rem;
                                 s1_owner = i;
                             }
+                            if (starved < 0 && s1_skip[i] >= APPEND_SCHED_MAX_SKIP) {
+                                starved = i;
+                            }
+                        } else {
+                            s1_skip[i] = 0;
                         }
+                    }
+                    if (starved >= 0) {
+                        s1_owner = starved;
+                        g_append_sched_starve++;
+                    }
+                    for (int32_t i : elig) {
+                        s1_skip[i] = i == s1_owner ? 0 : s1_skip[i] + 1;
                     }
                     if (s1_owner != s1_last_owner) {
                         g_append_sched_switch++;
                         s1_last_owner = s1_owner;
                         if ((g_append_sched_switch & (g_append_sched_switch - 1)) == 0 || g_append_sched_switch % 256 == 0) {
-                            SRV_INF("append-sched: owner switches = %" PRIu64 " (owner %d, est remaining %" PRId64 ")\n",
-                                    g_append_sched_switch, s1_owner, best);
+                            SRV_INF("append-sched: owner switches = %" PRIu64 " starve-overrides = %" PRIu64 " (owner %d, min remaining %" PRId64 ")\n",
+                                    g_append_sched_switch, g_append_sched_starve, s1_owner, best);
                         }
                     }
                 }
