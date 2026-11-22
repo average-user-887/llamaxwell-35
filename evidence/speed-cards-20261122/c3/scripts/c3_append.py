@@ -1,0 +1,240 @@
+#!/usr/bin/env python3
+"""Speed card C3: 1-slot append prefill at deep KV (80K) on the M6000, combined-r3-card1 B0 recipe.
+Per arm: one container, 80K-token prefill, then timed appends (4096 @80K, 4096 @84K, 1024 @88K) and a short decode.
+Arms are env overrides and/or an alternative libggml-cuda.so. PROFILE arms run llama-server under nvprof
+(build-tools image, GPU trace CSV) so the append window can be split into attention / GDN / MoE / other.
+GPU lease: blocking flock on the shared gpu-bench.lock, held per arm run only. Watchdog kills only this
+run's container at >=80 C; pacing pauses own container at >=77 C until <=72 C. GPU UUID never printed."""
+import contextlib, fcntl, json, os, re, subprocess, sys, threading, time
+from pathlib import Path
+sys.dont_write_bytecode = True
+R3 = Path('/home/avg-usr/.gemini/antigravity/brain/5dde1567-112b-432c-a28b-3e2e14940eab/scratch/r3-bench')
+sys.path.insert(0, str(R3))
+import r3_bench as rb  # noqa: E402
+
+OUT = Path(os.environ.get('QA_OUT', '/tmp/qa-speed-cards/c3/runs'))
+BFCL_ENV = R3 / 'card2-agentic/runs/r3-bfcl-full-r3-lossless-native-20261121T013713Z-482738/environment.args'
+STOP_AT = float(os.environ.get('QA_STOP_EPOCH', '0'))
+HARD_C, PAUSE_C, RESUME_C, APPEND_COOL_C = 80, 77, 72, int(os.environ.get('QA_APPEND_COOL_C', 70))
+CTX = 98304
+NP = 1
+DEPTH = int(os.environ.get('QA_DEPTH', 81920))
+APPENDS = [int(x) for x in os.environ.get('QA_APPENDS', '4096,4096,1024').split(',')]
+TEXT_ROOT = Path('/tmp/qa-speed-cards/wt-c3')   # public llama.cpp sources as filler text
+BUILD_TOOLS = 'local/m6000-build-tools:20261013'
+assert 'GGML_CUDA_MAXWELL_GRAPHS' not in os.environ and 'GGML_CUDA_OCCAMY_DEBUG' not in os.environ
+
+
+def base_env():
+    out = []
+    for l in BFCL_ENV.read_text().splitlines():
+        if '=' not in l: continue
+        k, v = l.split('=', 1)
+        if k in ('GGML_CUDA_MAXWELL_GRAPHS', 'GGML_CUDA_OCCAMY_DEBUG'): continue
+        out.append((k, v))
+    return out
+
+
+def server_args(mode, n_ctx, ub, mb):
+    a = rb.__dict__['_c3_orig_bsa'](mode, n_ctx, ub, mb)
+    a[a.index('--cache-ram') + 1] = '0'
+    a[a.index('--ctx-checkpoints') + 1] = '8'
+    a[a.index('-np') + 1] = str(NP)
+    return a
+
+
+rb._c3_orig_bsa = rb.build_server_args
+rb.build_server_args = server_args
+
+
+@contextlib.contextmanager
+def lease():
+    fd = os.open(str(rb.LOCK_PATH), os.O_CREAT | os.O_RDWR, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)   # blocking: queue behind other workers
+        yield
+    finally:
+        fcntl.flock(fd, fcntl.LOCK_UN); os.close(fd)
+
+
+def gpu_q(uuid):
+    r = subprocess.run(['nvidia-smi', '-i', uuid, '--query-gpu=temperature.gpu,memory.used,clocks.sm,power.draw',
+                        '--format=csv,noheader,nounits'], capture_output=True, text=True, timeout=10)
+    try:
+        t, m, c, p = [x.strip() for x in r.stdout.strip().splitlines()[0].split(',')]
+        return int(t), int(m), int(c), float(p)
+    except Exception:
+        return -1, 0, 0, 0.0
+
+
+class Watch(threading.Thread):
+    def __init__(self, uuid, name, log):
+        super().__init__(daemon=True); self.uuid, self.name, self.log = uuid, name, log
+        self.stop = threading.Event(); self.tmax = 0; self.mmax = 0; self.tripped = False
+        self.paused = False; self.pause_s = 0.0; self.npause = 0; self.allow_pause = True
+    def run(self):
+        with open(self.log, 'a') as f:
+            tp = 0.0
+            while not self.stop.is_set():
+                t, m, c, p = gpu_q(self.uuid); self.tmax = max(self.tmax, t); self.mmax = max(self.mmax, m)
+                f.write('%.1f %d %d %d %.0f%s\n' % (time.time(), t, m, c, p, ' P' if self.paused else '')); f.flush()
+                if t >= HARD_C:
+                    self.tripped = True
+                    subprocess.run(['docker', 'rm', '-f', self.name], capture_output=True, timeout=20)
+                    f.write('TRIP %d C, removed own container\n' % t); return
+                if not self.paused and self.allow_pause and t >= PAUSE_C:
+                    subprocess.run(['docker', 'pause', self.name], capture_output=True, timeout=20)
+                    self.paused = True; tp = time.time(); self.npause += 1
+                elif self.paused and (t <= RESUME_C or time.time() - tp > 30):
+                    subprocess.run(['docker', 'unpause', self.name], capture_output=True, timeout=20)
+                    self.paused = False; self.pause_s += time.time() - tp
+                self.stop.wait(1.0)
+            if self.paused:
+                subprocess.run(['docker', 'unpause', self.name], capture_output=True, timeout=20)
+
+
+class Sess(rb.ServerSession):
+    def __init__(self, *a, tag='x', profile=False, **k):
+        super().__init__(*a, **k)
+        self.name = 'r3bench-c3-%s-%d-%d' % (tag, int(time.time()), os.getpid())
+        self.profile = profile
+
+    def __enter__(self):
+        if not self.profile:
+            return super().__enter__()
+        wrap = self.out_dir / 'nvprof-wrap.sh'
+        wrap.write_text('#!/bin/bash\nmkdir -p /out/tmp; export TMPDIR=/out/tmp\nexec /usr/local/cuda/bin/nvprof --print-gpu-trace --csv --normalized-time-unit us '
+                        '--log-file /out/nvprof.csv /real/llama-server "$@"\n'); wrap.chmod(0o755)
+        old_img, old_mount = rb.IMAGE, rb.mount_args
+        def mounts(dso, od):
+            return old_mount(dso, od) + ['-v', '%s:/real/llama-server:ro' % (rb.CANDIDATE_LIBS / 'llama-server'),
+                                         '-v', '%s:/candidate/llama-server:ro' % wrap, '-w', '/candidate']
+        rb.IMAGE, rb.mount_args = BUILD_TOOLS, mounts
+        try:
+            return super().__enter__()
+        finally:
+            rb.IMAGE, rb.mount_args = old_img, old_mount
+
+    def verify_startup(self):
+        if not self.profile:
+            return super().verify_startup()
+        log = (self.out_dir / 'server-start.log').read_text(encoding='utf-8')
+        if 'offloaded 42/42 layers to GPU' not in log:
+            raise RuntimeError('offload line missing')
+        pid = subprocess.check_output(['docker', 'exec', self.name, 'pidof', 'llama-server'], text=True).split()[0]
+        maps = subprocess.check_output(['docker', 'exec', self.name, 'cat', '/proc/%s/maps' % pid], text=True)
+        paths = sorted({l.split()[-1] for l in maps.splitlines() if len(l.split()) >= 6 and re.search(
+            r'/lib(ggml-cuda\.so|llama-server-impl\.so|llama(-common)?\.so\.[0-9.]+)$', l.split()[-1])})
+        h = subprocess.check_output(['docker', 'exec', self.name, 'sha256sum', *paths], text=True)
+        (self.out_dir / 'runtime-library-hashes.txt').write_text(h)
+        mapped = {Path(l.split()[1]).name: l.split()[0] for l in h.splitlines() if l.strip()}
+        for k, e in self.dso_hashes.items():
+            if mapped.get(k) != e:
+                raise RuntimeError('mapped %s hash mismatch' % k)
+
+    def stop_profiled(self):
+        subprocess.run(['docker', 'exec', self.name, 'pkill', '-INT', '-x', 'llama-server'], capture_output=True, timeout=20)
+        for _ in range(240):
+            st = subprocess.run(['docker', 'inspect', '-f', '{{.State.Running}}', self.name], capture_output=True, text=True).stdout.strip()
+            if st != 'true': break
+            time.sleep(1)
+
+
+def filler_tokens(sess, n, salt):
+    files = sorted(p for p in TEXT_ROOT.glob('ggml/src/**/*') if p.suffix in ('.c', '.cpp', '.h', '.cu', '.cuh') and p.is_file())
+    files = files[salt % len(files):] + files[:salt % len(files)]
+    toks = []
+    for p in files:
+        txt = p.read_text(errors='replace')[:60000]
+        toks += sess.post_json('tokenize', {'content': txt}, timeout=120)['tokens']
+        if len(toks) >= n: break
+    return toks[:n]
+
+
+def complete(sess, prompt, n_predict=1, timeout=1800, slot=0, n_probs=0):
+    q = {'prompt': prompt, 'n_predict': n_predict, 'cache_prompt': True,
+         'temperature': 0, 'id_slot': slot, 'samplers': ['top_k'], 'top_k': 1}
+    if n_probs: q['n_probs'] = n_probs
+    return sess.post_json('completion', q, timeout=timeout)
+
+
+def probs_of(r):
+    return r.get('completion_probabilities') or r.get('probs') or []
+
+
+def run_arm(tag, env_over, dso, profile, log):
+    uuid = rb.resolve_gpu_uuid()
+    od = OUT / tag; od.mkdir(parents=True, exist_ok=True)
+    env = [(k, v) for k, v in base_env() if k not in env_over] + sorted(env_over.items())
+    rec = dict(tag=tag, env_over=env_over, profile=profile, dso_cuda=str(dso['libggml-cuda.so']).replace(str(rb.PROTO_DEV), '<scratch>'))
+    t0 = time.time()
+    with lease():
+        rec['lease_wait_s'] = round(time.time() - t0, 1)
+        if STOP_AT and time.time() > STOP_AT:
+            rec['skipped'] = 'stop time'; return rec
+        # start cool, like other workers' chains
+        tc = time.time()
+        while gpu_q(uuid)[0] > 60 and time.time() - tc < 600: time.sleep(10)
+        rec['start_temp'] = gpu_q(uuid)[0]
+        sess = Sess(dso, od, 'native', CTX, 1024, 1024, env, health_timeout=420, tag=tag, profile=profile)
+        wd = None
+        try:
+            with sess:
+                wd = Watch(uuid, sess.name, od / 'temp.log'); wd.start()
+                base = filler_tokens(sess, DEPTH, 0)
+                extra = filler_tokens(sess, sum(APPENDS) + 64, 37)
+                ts = time.time(); r = complete(sess, base); rec['setup'] = dict(wall_s=round(time.time() - ts, 2), **{k: r['timings'][k] for k in ('prompt_n', 'prompt_ms')})
+                prompt = list(base); off = 0; apps = []; probs = []
+                for n in APPENDS:
+                    wd.allow_pause = False
+                    tc = time.time()
+                    while (wd.paused or gpu_q(uuid)[0] > APPEND_COOL_C) and time.time() - tc < 240: time.sleep(2)
+                    if profile: time.sleep(4)   # idle gap marks the window in the trace
+                    t_s = gpu_q(uuid)[0]
+                    prompt = prompt + extra[off:off + n]; off += n
+                    r = complete(sess, prompt, n_probs=8); probs.append(probs_of(r))
+                    tm = r['timings']; apps.append(dict(n=n, depth=len(prompt) - n, prompt_n=tm['prompt_n'], prompt_ms=tm['prompt_ms'], start_c=t_s, end_c=gpu_q(uuid)[0], cache_n=tm.get('cache_n')))
+                    wd.allow_pause = True
+                    log('%s append %d @%d: prompt_n=%s %.0f ms %.1f tok/s (%d->%d C)' % (tag, n, len(prompt) - n, tm['prompt_n'], tm['prompt_ms'], 1000 * tm['prompt_n'] / tm['prompt_ms'], t_s, apps[-1]['end_c']))
+                rec['appends'] = apps
+                tn = sum(a['prompt_n'] for a in apps); tms = sum(a['prompt_ms'] for a in apps)
+                rec['append_tok_s'] = round(1000 * tn / tms, 2)
+                if profile: time.sleep(4)
+                r = complete(sess, prompt, n_predict=48, n_probs=8); probs.append(probs_of(r))
+                (od / 'probs.json').write_text(json.dumps(probs))
+                rec['decode'] = {k: r['timings'].get(k) for k in ('predicted_n', 'predicted_ms', 'predicted_per_second', 'prompt_n')}
+                rec['decode_text_sha'] = __import__('hashlib').sha256(r.get('content', '').encode()).hexdigest()[:16]
+                if profile: sess.stop_profiled()
+        except Exception as ex:
+            rec['error'] = str(ex)[:400]; log('%s exception: %s' % (tag, str(ex)[:300]))
+        finally:
+            if wd: wd.stop.set(); wd.join(10)
+        if wd: rec.update(tmax=wd.tmax, vram_peak_mib=wd.mmax, tripped=wd.tripped, pauses=wd.npause, pause_s=round(wd.pause_s, 1), invalid=bool(wd.tripped or wd.tmax >= HARD_C))
+        slog = od / 'server.log'
+        if slog.exists():
+            txt = slog.read_text(errors='replace')
+            rec['fa_counters'] = [l.strip()[:300] for l in txt.splitlines() if 'occamy_fa_gemm' in l or 'maxwell_gemm:' in l][-4:]
+            rec['cuda_errors'] = len(rb.CUDA_ERROR_RE.findall(txt)); rec['oom'] = 'out of memory' in txt
+    return rec
+
+
+def main():
+    arms = json.loads(os.environ['QA_ARMS'])   # [{"tag":..,"env":{..},"dso":"dir or ''","profile":0}]
+    OUT.mkdir(parents=True, exist_ok=True)
+    def log(s):
+        line = '%s %s' % (time.strftime('%H:%M:%S'), re.sub(r'GPU-[0-9a-fA-F-]+', 'GPU-REDACTED', s)); print(line, flush=True)
+        with open(OUT / 'steps.log', 'a') as f: f.write(line + '\n')
+    resf = OUT / 'results.jsonl'
+    for a in arms:
+        dso = rb.resolve_dso_map('card1', rb.DEFAULT_DSO_DIR)
+        if a.get('dso'):
+            dso['libggml-cuda.so'] = Path(a['dso']) / 'libggml-cuda.so'
+        log('arm %s queued (lease)' % a['tag'])
+        rec = run_arm(a['tag'], a.get('env', {}), dso, bool(a.get('profile')), log)
+        log('arm %s done: append_tok_s=%s setup=%s tmax=%s invalid=%s err=%s lease_wait=%s' % (
+            a['tag'], rec.get('append_tok_s'), rec.get('setup'), rec.get('tmax'), rec.get('invalid'), rec.get('error'), rec.get('lease_wait_s')))
+        with open(resf, 'a') as f: f.write(json.dumps(rec) + '\n')
+
+
+if __name__ == '__main__':
+    main()

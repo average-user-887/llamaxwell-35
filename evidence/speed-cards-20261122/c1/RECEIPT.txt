@@ -1,0 +1,9 @@
+branch claude/speed-c1-20261122 @7ac90aa (no commits)
+worktree /tmp/qa-speed-cards/wt-c1
+no build (stock combined-r3-card1 libs, sha256 in each run dir via r3_bench dso_hashes)
+run: QA_OUT=abba QA_STOP_EPOCH=08:15 python3 -I scripts/c1_mtp.py
+Update 04:50: active chain = abba3 (paced 77/72 C, max 15 s/pause), order OFF64,ON64,OFF64,ON64,ON96,OFF96,OFF96,ON96, self-stop 08:15.
+Run: QA_OUT=/tmp/qa-speed-cards/c1/abba3 QA_ORDER=... QA_STOP_EPOCH=<08:15> setsid nohup python3 -I scripts/c1_mtp.py (cwd /tmp/qa-speed-cards/c1)
+Score: python3 -I /tmp/qa-speed-cards/c1/scripts/c1_gate.py /tmp/qa-speed-cards/c1/abba3
+Still no commits and no build: stock combined-r3-card1 libs; per-run sha256 in <run dir>/runtime-library-hashes.txt.
+Final 08:2x: REJECT; no commits, no build.
