@@ -17,6 +17,7 @@ BFCL_ENV = R3 / 'card2-agentic/runs/r3-bfcl-full-r3-lossless-native-20261121T013
 STOP_AT = float(os.environ.get('QA_STOP_EPOCH', '0'))
 HARD_C, PAUSE_C, RESUME_C, APPEND_COOL_C = 80, 77, 72, int(os.environ.get('QA_APPEND_COOL_C', 70))
 CTX = 98304
+NP = 1
 DEPTH = int(os.environ.get('QA_DEPTH', 81920))
 APPENDS = [int(x) for x in os.environ.get('QA_APPENDS', '4096,4096,1024').split(',')]
 TEXT_ROOT = Path('/tmp/qa-speed-cards/wt-c3')   # public llama.cpp sources as filler text
@@ -38,6 +39,7 @@ def server_args(mode, n_ctx, ub, mb):
     a = rb.__dict__['_c3_orig_bsa'](mode, n_ctx, ub, mb)
     a[a.index('--cache-ram') + 1] = '0'
     a[a.index('--ctx-checkpoints') + 1] = '8'
+    a[a.index('-np') + 1] = str(NP)
     return a
 
 
@@ -149,9 +151,15 @@ def filler_tokens(sess, n, salt):
     return toks[:n]
 
 
-def complete(sess, prompt, n_predict=1, timeout=1800):
-    return sess.post_json('completion', {'prompt': prompt, 'n_predict': n_predict, 'cache_prompt': True,
-                                         'temperature': 0, 'id_slot': 0, 'samplers': ['top_k'], 'top_k': 1}, timeout=timeout)
+def complete(sess, prompt, n_predict=1, timeout=1800, slot=0, n_probs=0):
+    q = {'prompt': prompt, 'n_predict': n_predict, 'cache_prompt': True,
+         'temperature': 0, 'id_slot': slot, 'samplers': ['top_k'], 'top_k': 1}
+    if n_probs: q['n_probs'] = n_probs
+    return sess.post_json('completion', q, timeout=timeout)
+
+
+def probs_of(r):
+    return r.get('completion_probabilities') or r.get('probs') or []
 
 
 def run_arm(tag, env_over, dso, profile, log):
@@ -176,7 +184,7 @@ def run_arm(tag, env_over, dso, profile, log):
                 base = filler_tokens(sess, DEPTH, 0)
                 extra = filler_tokens(sess, sum(APPENDS) + 64, 37)
                 ts = time.time(); r = complete(sess, base); rec['setup'] = dict(wall_s=round(time.time() - ts, 2), **{k: r['timings'][k] for k in ('prompt_n', 'prompt_ms')})
-                prompt = list(base); off = 0; apps = []
+                prompt = list(base); off = 0; apps = []; probs = []
                 for n in APPENDS:
                     wd.allow_pause = False
                     tc = time.time()
@@ -184,7 +192,7 @@ def run_arm(tag, env_over, dso, profile, log):
                     if profile: time.sleep(4)   # idle gap marks the window in the trace
                     t_s = gpu_q(uuid)[0]
                     prompt = prompt + extra[off:off + n]; off += n
-                    r = complete(sess, prompt)
+                    r = complete(sess, prompt, n_probs=8); probs.append(probs_of(r))
                     tm = r['timings']; apps.append(dict(n=n, depth=len(prompt) - n, prompt_n=tm['prompt_n'], prompt_ms=tm['prompt_ms'], start_c=t_s, end_c=gpu_q(uuid)[0], cache_n=tm.get('cache_n')))
                     wd.allow_pause = True
                     log('%s append %d @%d: prompt_n=%s %.0f ms %.1f tok/s (%d->%d C)' % (tag, n, len(prompt) - n, tm['prompt_n'], tm['prompt_ms'], 1000 * tm['prompt_n'] / tm['prompt_ms'], t_s, apps[-1]['end_c']))
@@ -192,7 +200,8 @@ def run_arm(tag, env_over, dso, profile, log):
                 tn = sum(a['prompt_n'] for a in apps); tms = sum(a['prompt_ms'] for a in apps)
                 rec['append_tok_s'] = round(1000 * tn / tms, 2)
                 if profile: time.sleep(4)
-                r = complete(sess, prompt, n_predict=48)
+                r = complete(sess, prompt, n_predict=48, n_probs=8); probs.append(probs_of(r))
+                (od / 'probs.json').write_text(json.dumps(probs))
                 rec['decode'] = {k: r['timings'].get(k) for k in ('predicted_n', 'predicted_ms', 'predicted_per_second', 'prompt_n')}
                 rec['decode_text_sha'] = __import__('hashlib').sha256(r.get('content', '').encode()).hexdigest()[:16]
                 if profile: sess.stop_profiled()
