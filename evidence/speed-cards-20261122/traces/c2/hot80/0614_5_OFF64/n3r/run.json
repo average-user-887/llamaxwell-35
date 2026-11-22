@@ -1,0 +1,128 @@
+{
+ "arm": "c2-OFF64",
+ "url": "http://127.0.0.1:33094",
+ "ctx": 65536,
+ "start": 45232,
+ "turns": 6,
+ "n_predict": 160,
+ "temp": 0.0,
+ "seed": -1,
+ "worst_final_depth": 61557,
+ "kinds": {
+  "0": [
+   "edit/copy-heavy",
+   "tool-call",
+   "prose",
+   "edit/copy-heavy",
+   "tool-call",
+   "prose"
+  ],
+  "1": [
+   "tool-call",
+   "prose",
+   "edit/copy-heavy",
+   "tool-call",
+   "prose",
+   "edit/copy-heavy"
+  ]
+ },
+ "chat_wrapped": true,
+ "utc_start": 1795324484.4502084,
+ "setup": [
+  {
+   "slot": 0,
+   "restored": false,
+   "s": 120.10988140106201
+  },
+  {
+   "slot": 1,
+   "restored": false,
+   "s": 37.95310139656067
+  }
+ ],
+ "t_run0": 1795324644.516033,
+ "turns_rec": [
+  {
+   "prompt_len": 46257,
+   "n_cap": 160,
+   "t_send": 1795324644.5221004,
+   "t_end": 1795324644.526008,
+   "t_first": null,
+   "http": null,
+   "err": "ConnectionRefusedError(111, 'Connection refused')",
+   "body": null,
+   "tokens_predicted": null,
+   "n_ids_visible": 0,
+   "token_sha": "4f53cda18c2baa0c",
+   "prompt_sha": "97cd0c45ce13d3ec",
+   "stop_type": null,
+   "stopped_eos": false,
+   "prompt_n": null,
+   "cache_n": null,
+   "prompt_ms": null,
+   "predicted_ms": null,
+   "predicted_tps": null,
+   "draft_n": null,
+   "draft_n_accepted": null,
+   "max_token_gap_s": null,
+   "gaps_s": [],
+   "truncated": null,
+   "receipt_ok": false,
+   "agent": 0,
+   "turn": 0,
+   "kind": "edit/copy-heavy",
+   "append_tok": 1024,
+   "depth_after_append": 46257,
+   "gen_tokens": 0,
+   "void": true,
+   "void_reason": "short(<64)"
+  },
+  {
+   "prompt_len": 46256,
+   "n_cap": 160,
+   "t_send": 1795324669.5251572,
+   "t_end": 1795324669.5272589,
+   "t_first": null,
+   "http": null,
+   "err": "ConnectionRefusedError(111, 'Connection refused')",
+   "body": null,
+   "tokens_predicted": null,
+   "n_ids_visible": 0,
+   "token_sha": "4f53cda18c2baa0c",
+   "prompt_sha": "1cb8331db31ca290",
+   "stop_type": null,
+   "stopped_eos": false,
+   "prompt_n": null,
+   "cache_n": null,
+   "prompt_ms": null,
+   "predicted_ms": null,
+   "predicted_tps": null,
+   "draft_n": null,
+   "draft_n_accepted": null,
+   "max_token_gap_s": null,
+   "gaps_s": [],
+   "truncated": null,
+   "receipt_ok": false,
+   "agent": 1,
+   "turn": 0,
+   "kind": "tool-call",
+   "append_tok": 1024,
+   "depth_after_append": 46256,
+   "gen_tokens": 0,
+   "void": true,
+   "void_reason": "short(<64)"
+  }
+ ],
+ "makespan_s": 25.011225938796997,
+ "ok": false,
+ "n_void": 2,
+ "metrics_before": {
+  "err": "ConnectionResetError(104, 'Connection reset by peer')"
+ },
+ "metrics_after": {
+  "err": "ConnectionRefusedError(111, 'Connection refused')"
+ },
+ "spec_log": null,
+ "run_sha": "032ba7d3d93805fd",
+ "utc_end": 1795324669.5299044
+}

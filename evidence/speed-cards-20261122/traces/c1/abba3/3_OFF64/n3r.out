@@ -1,0 +1,3 @@
+{"arm": "qa-OFF64", "url": "http://127.0.0.1:33087", "ctx": 65536, "start": 45232, "turns": 6, "n_predict": 160, "temp": 0.0, "seed": -1, "worst_final_depth": 61557, "kinds": {"0": ["edit/copy-heavy", "tool-call", "prose", "edit/copy-heavy", "tool-call", "prose"], "1": ["tool-call", "prose", "edit/copy-heavy", "tool-call", "prose", "edit/copy-heavy"]}, "chat_wrapped": true}
+makespan_s=169.7 ok=True run_sha=b3fe6a1f9fe8b2ce void_turns=8/12
+out=/tmp/qa-speed-cards/c1/abba3/3_OFF64/n3r rc=0

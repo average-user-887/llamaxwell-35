@@ -1,0 +1,60 @@
+[
+ {
+  "run": 1,
+  "arm": "OFF96",
+  "dir": "0424_1_OFF96",
+  "rc": 1,
+  "wall_s": 69.8,
+  "tmax": 68,
+  "vram_peak_mib": 24410,
+  "ctx": 98304,
+  "env_on": false,
+  "on_extra": [],
+  "mv2": false,
+  "invalid": false,
+  "cuda_errors": 4,
+  "oom": true,
+  "sched_lines": [],
+  "defer_lines": []
+ },
+ {
+  "run": 2,
+  "arm": "ON96",
+  "dir": "0430_2_ON96",
+  "rc": 1,
+  "wall_s": 80.4,
+  "tmax": 67,
+  "vram_peak_mib": 24410,
+  "ctx": 98304,
+  "env_on": true,
+  "on_extra": [],
+  "mv2": false,
+  "invalid": false,
+  "cuda_errors": 4,
+  "oom": true,
+  "sched_lines": [
+   "1.12.767.875 I srv    pre_decode: append-sched: owner switches = 1 (owner 0, est remaining 78000)"
+  ],
+  "defer_lines": []
+ },
+ {
+  "run": 3,
+  "arm": "ON96",
+  "dir": "0436_3_ON96",
+  "rc": 1,
+  "wall_s": 55.5,
+  "tmax": 68,
+  "vram_peak_mib": 24410,
+  "ctx": 98304,
+  "env_on": true,
+  "on_extra": [],
+  "mv2": false,
+  "invalid": false,
+  "cuda_errors": 4,
+  "oom": true,
+  "sched_lines": [
+   "0.48.130.331 I srv    pre_decode: append-sched: owner switches = 1 (owner 0, est remaining 78000)"
+  ],
+  "defer_lines": []
+ }
+]

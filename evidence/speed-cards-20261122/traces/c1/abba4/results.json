@@ -1,0 +1,1576 @@
+[
+ {
+  "run": 1,
+  "arm": "OFF78",
+  "rc": 0,
+  "wall_s": 650.6,
+  "tmax": 77,
+  "pauses": [
+   [
+    1795325266.2,
+    2.1
+   ],
+   [
+    1795325276.4,
+    1.1
+   ],
+   [
+    1795325279.5,
+    2.1
+   ],
+   [
+    1795325289.7,
+    2.1
+   ],
+   [
+    1795325297.9,
+    2.1
+   ],
+   [
+    1795325304.0,
+    2.1
+   ],
+   [
+    1795325310.2,
+    2.1
+   ],
+   [
+    1795325320.4,
+    2.1
+   ],
+   [
+    1795325324.5,
+    2.2
+   ],
+   [
+    1795325332.7,
+    2.1
+   ],
+   [
+    1795325338.9,
+    2.1
+   ],
+   [
+    1795325347.1,
+    2.1
+   ],
+   [
+    1795325353.4,
+    2.1
+   ],
+   [
+    1795325361.7,
+    2.1
+   ],
+   [
+    1795325371.9,
+    3.1
+   ],
+   [
+    1795325383.1,
+    3.1
+   ],
+   [
+    1795325392.3,
+    3.1
+   ],
+   [
+    1795325401.5,
+    2.1
+   ],
+   [
+    1795325409.7,
+    3.1
+   ],
+   [
+    1795325416.9,
+    2.1
+   ],
+   [
+    1795325423.0,
+    2.1
+   ],
+   [
+    1795325429.2,
+    2.1
+   ],
+   [
+    1795325435.4,
+    2.1
+   ],
+   [
+    1795325441.5,
+    2.1
+   ],
+   [
+    1795325449.7,
+    1.1
+   ],
+   [
+    1795325452.8,
+    1.1
+   ],
+   [
+    1795325458.0,
+    1.1
+   ],
+   [
+    1795325463.1,
+    2.1
+   ],
+   [
+    1795325471.3,
+    2.1
+   ],
+   [
+    1795325477.5,
+    2.1
+   ],
+   [
+    1795325483.6,
+    2.1
+   ],
+   [
+    1795325491.8,
+    2.1
+   ],
+   [
+    1795325498.0,
+    1.1
+   ],
+   [
+    1795325505.1,
+    2.1
+   ],
+   [
+    1795325511.3,
+    2.1
+   ],
+   [
+    1795325519.5,
+    2.1
+   ],
+   [
+    1795325525.6,
+    2.1
+   ],
+   [
+    1795325531.8,
+    2.1
+   ],
+   [
+    1795325539.9,
+    2.1
+   ],
+   [
+    1795325548.1,
+    3.1
+   ],
+   [
+    1795325557.3,
+    2.1
+   ],
+   [
+    1795325567.5,
+    3.1
+   ],
+   [
+    1795325576.7,
+    2.1
+   ],
+   [
+    1795325584.9,
+    3.1
+   ],
+   [
+    1795325596.1,
+    2.1
+   ],
+   [
+    1795325604.3,
+    3.1
+   ],
+   [
+    1795325615.5,
+    3.1
+   ],
+   [
+    1795325624.7,
+    2.1
+   ],
+   [
+    1795325634.9,
+    2.1
+   ],
+   [
+    1795325641.0,
+    2.1
+   ],
+   [
+    1795325663.4,
+    3.1
+   ],
+   [
+    1795325672.6,
+    2.1
+   ],
+   [
+    1795325688.9,
+    3.1
+   ],
+   [
+    1795325700.1,
+    3.1
+   ],
+   [
+    1795325721.5,
+    2.1
+   ],
+   [
+    1795325729.6,
+    3.1
+   ],
+   [
+    1795325742.9,
+    2.1
+   ],
+   [
+    1795325757.1,
+    3.1
+   ],
+   [
+    1795325766.3,
+    1.1
+   ],
+   [
+    1795325783.6,
+    3.1
+   ],
+   [
+    1795325792.8,
+    2.1
+   ],
+   [
+    1795325807.1,
+    2.1
+   ],
+   [
+    1795325821.3,
+    3.1
+   ]
+  ],
+  "vram_peak_mib": 22709,
+  "ctx": 79872,
+  "ckpt": "8",
+  "invalid": false,
+  "makespan_s": 189.24940633773804,
+  "ok": true,
+  "n_void": 8,
+  "run_sha": "dd9d49bdee6ffe05",
+  "setup_s": [
+   202.0,
+   211.4
+  ],
+  "turns": [
+   {
+    "a": 0,
+    "k": 0,
+    "prompt_n": 1025,
+    "cache_n": 59568,
+    "prompt_ms": 4249.509,
+    "predicted_ms": 2066.434,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "4d6e1b1cee7ac4c0"
+   },
+   {
+    "a": 0,
+    "k": 1,
+    "prompt_n": 4107,
+    "cache_n": 60752,
+    "prompt_ms": 24456.245,
+    "predicted_ms": 4176.671,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "d76fa43395d98536"
+   },
+   {
+    "a": 0,
+    "k": 2,
+    "prompt_n": 1035,
+    "cache_n": 65018,
+    "prompt_ms": 21341.225,
+    "predicted_ms": 8614.796,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a04742d6ef57174c"
+   },
+   {
+    "a": 0,
+    "k": 3,
+    "prompt_n": 4107,
+    "cache_n": 66212,
+    "prompt_ms": 26122.689,
+    "predicted_ms": 6236.709,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "4d6e1b1cee7ac4c0"
+   },
+   {
+    "a": 0,
+    "k": 4,
+    "prompt_n": 1035,
+    "cache_n": 70478,
+    "prompt_ms": 17798.302,
+    "predicted_ms": 4314.704,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a04742d6ef57174c"
+   },
+   {
+    "a": 0,
+    "k": 5,
+    "prompt_n": 4107,
+    "cache_n": 71672,
+    "prompt_ms": 27107.52,
+    "predicted_ms": 6400.178,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "c171bd8659b379c7"
+   },
+   {
+    "a": 1,
+    "k": 0,
+    "prompt_n": 1025,
+    "cache_n": 59568,
+    "prompt_ms": 5476.201,
+    "predicted_ms": 4072.745,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1ae02ffc9c96d6a0"
+   },
+   {
+    "a": 1,
+    "k": 1,
+    "prompt_n": 4107,
+    "cache_n": 60752,
+    "prompt_ms": 25878.842,
+    "predicted_ms": 4073.273,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1ae02ffc9c96d6a0"
+   },
+   {
+    "a": 1,
+    "k": 2,
+    "prompt_n": 1035,
+    "cache_n": 65018,
+    "prompt_ms": 18381.142,
+    "predicted_ms": 6329.617,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "4d6e1b1cee7ac4c0"
+   },
+   {
+    "a": 1,
+    "k": 3,
+    "prompt_n": 4107,
+    "cache_n": 66212,
+    "prompt_ms": 25538.51,
+    "predicted_ms": 4218.097,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1ae02ffc9c96d6a0"
+   },
+   {
+    "a": 1,
+    "k": 4,
+    "prompt_n": 1035,
+    "cache_n": 70478,
+    "prompt_ms": 17272.385,
+    "predicted_ms": 6500.21,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1ae02ffc9c96d6a0"
+   },
+   {
+    "a": 1,
+    "k": 5,
+    "prompt_n": 4107,
+    "cache_n": 71672,
+    "prompt_ms": 20503.159,
+    "predicted_ms": 2070.299,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "4d6e1b1cee7ac4c0"
+   }
+  ],
+  "counters": [
+   "occamy_fa_gemm: engaged=1420 q_tiled=0 fallback=8250 reasons=ne3:7980,q_lt_64:210,keys_lt_4096:60 when=backend_free",
+   "occamy_fa_gemm_fused: calls=1420 softmax_launches=44920 when=backend_free",
+   "occamy_fa_gemm: engaged=1420 q_tiled=0 fallback=8250 reasons=ne3:7980,q_lt_64:210,keys_lt_4096:60 when=exit",
+   "occamy_fa_gemm_fused: calls=1420 softmax_launches=44920 when=exit"
+  ],
+  "cuda_errors": 0,
+  "bufs": [
+   "0.28.177.923 I load_tensors:        CUDA0 model buffer size = 18393.41 MiB",
+   "0.39.246.027 I llama_kv_cache:      CUDA0 KV buffer size =  3120.00 MiB",
+   "0.39.259.606 I llama_memory_recurrent:      CUDA0 RS buffer size =   125.62 MiB",
+   "0.39.402.835 I sched_reserve:      CUDA0 compute buffer size =   372.04 MiB"
+  ],
+  "draft_lines": [],
+  "oom": false
+ },
+ {
+  "run": 2,
+  "arm": "ON78",
+  "rc": 0,
+  "wall_s": 651.0,
+  "tmax": 77,
+  "pauses": [
+   [
+    1795327218.0,
+    1.2
+   ],
+   [
+    1795327229.4,
+    2.2
+   ],
+   [
+    1795327247.8,
+    2.4
+   ],
+   [
+    1795327256.2,
+    2.2
+   ],
+   [
+    1795327266.5,
+    2.3
+   ],
+   [
+    1795327274.9,
+    2.3
+   ],
+   [
+    1795327287.3,
+    1.3
+   ],
+   [
+    1795327294.7,
+    2.3
+   ],
+   [
+    1795327303.1,
+    2.1
+   ],
+   [
+    1795327315.3,
+    2.1
+   ],
+   [
+    1795327323.5,
+    2.1
+   ],
+   [
+    1795327331.6,
+    2.1
+   ],
+   [
+    1795327341.8,
+    2.1
+   ],
+   [
+    1795327352.0,
+    2.1
+   ],
+   [
+    1795327366.2,
+    2.1
+   ],
+   [
+    1795327374.4,
+    2.1
+   ],
+   [
+    1795327382.6,
+    1.1
+   ],
+   [
+    1795327387.7,
+    2.1
+   ],
+   [
+    1795327395.9,
+    2.1
+   ],
+   [
+    1795327406.1,
+    2.1
+   ],
+   [
+    1795327414.3,
+    2.1
+   ],
+   [
+    1795327422.4,
+    2.1
+   ],
+   [
+    1795327430.6,
+    2.1
+   ],
+   [
+    1795327438.7,
+    2.1
+   ],
+   [
+    1795327444.9,
+    2.1
+   ],
+   [
+    1795327453.1,
+    2.1
+   ],
+   [
+    1795327461.2,
+    2.1
+   ],
+   [
+    1795327467.4,
+    2.1
+   ],
+   [
+    1795327473.5,
+    2.1
+   ],
+   [
+    1795327481.7,
+    2.1
+   ],
+   [
+    1795327489.8,
+    2.1
+   ],
+   [
+    1795327498.0,
+    2.1
+   ],
+   [
+    1795327502.1,
+    2.1
+   ],
+   [
+    1795327512.3,
+    2.1
+   ],
+   [
+    1795327522.5,
+    3.1
+   ],
+   [
+    1795327531.7,
+    2.1
+   ],
+   [
+    1795327541.9,
+    2.1
+   ],
+   [
+    1795327550.1,
+    3.1
+   ],
+   [
+    1795327561.3,
+    2.1
+   ],
+   [
+    1795327567.4,
+    2.1
+   ],
+   [
+    1795327599.9,
+    3.1
+   ],
+   [
+    1795327619.2,
+    2.1
+   ],
+   [
+    1795327625.3,
+    3.1
+   ],
+   [
+    1795327638.6,
+    3.1
+   ],
+   [
+    1795327657.9,
+    3.1
+   ],
+   [
+    1795327671.1,
+    3.1
+   ],
+   [
+    1795327686.4,
+    3.1
+   ],
+   [
+    1795327699.6,
+    2.1
+   ],
+   [
+    1795327717.9,
+    3.1
+   ],
+   [
+    1795327727.1,
+    2.1
+   ],
+   [
+    1795327741.4,
+    2.1
+   ],
+   [
+    1795327753.6,
+    3.1
+   ],
+   [
+    1795327766.8,
+    2.1
+   ]
+  ],
+  "vram_peak_mib": 23909,
+  "ctx": 79872,
+  "ckpt": "8",
+  "invalid": false,
+  "makespan_s": 193.36638069152832,
+  "ok": true,
+  "n_void": 8,
+  "run_sha": "72b300fcac76de17",
+  "setup_s": [
+   192.6,
+   211.3
+  ],
+  "turns": [
+   {
+    "a": 0,
+    "k": 0,
+    "prompt_n": 1025,
+    "cache_n": 59568,
+    "prompt_ms": 4501.163,
+    "predicted_ms": 1618.362,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a7ef973c551a7490"
+   },
+   {
+    "a": 0,
+    "k": 1,
+    "prompt_n": 4107,
+    "cache_n": 60752,
+    "prompt_ms": 24128.786,
+    "predicted_ms": 4534.626,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "d76fa43395d98536"
+   },
+   {
+    "a": 0,
+    "k": 2,
+    "prompt_n": 1035,
+    "cache_n": 65018,
+    "prompt_ms": 17914.027,
+    "predicted_ms": 4533.18,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a04742d6ef57174c"
+   },
+   {
+    "a": 0,
+    "k": 3,
+    "prompt_n": 4107,
+    "cache_n": 66212,
+    "prompt_ms": 27296.037,
+    "predicted_ms": 4259.725,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a7ef973c551a7490"
+   },
+   {
+    "a": 0,
+    "k": 4,
+    "prompt_n": 1035,
+    "cache_n": 70478,
+    "prompt_ms": 15857.309,
+    "predicted_ms": 4554.854,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a04742d6ef57174c"
+   },
+   {
+    "a": 0,
+    "k": 5,
+    "prompt_n": 4107,
+    "cache_n": 71672,
+    "prompt_ms": 27160.873,
+    "predicted_ms": 6558.967,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "b7437ffc463ac64e"
+   },
+   {
+    "a": 1,
+    "k": 0,
+    "prompt_n": 1025,
+    "cache_n": 59568,
+    "prompt_ms": 4607.613,
+    "predicted_ms": 4266.479,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1b6f239acae549d2"
+   },
+   {
+    "a": 1,
+    "k": 1,
+    "prompt_n": 4107,
+    "cache_n": 60752,
+    "prompt_ms": 27695.621,
+    "predicted_ms": 4302.913,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1b6f239acae549d2"
+   },
+   {
+    "a": 1,
+    "k": 2,
+    "prompt_n": 1035,
+    "cache_n": 65018,
+    "prompt_ms": 20356.908,
+    "predicted_ms": 11248.563,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "4d6e1b1cee7ac4c0"
+   },
+   {
+    "a": 1,
+    "k": 3,
+    "prompt_n": 4107,
+    "cache_n": 66212,
+    "prompt_ms": 27026.954,
+    "predicted_ms": 4353.435,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1b6f239acae549d2"
+   },
+   {
+    "a": 1,
+    "k": 4,
+    "prompt_n": 1035,
+    "cache_n": 70478,
+    "prompt_ms": 15844.005,
+    "predicted_ms": 6732.558,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1b6f239acae549d2"
+   },
+   {
+    "a": 1,
+    "k": 5,
+    "prompt_n": 4107,
+    "cache_n": 71672,
+    "prompt_ms": 22143.646,
+    "predicted_ms": 1660.643,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "4d6e1b1cee7ac4c0"
+   }
+  ],
+  "counters": [
+   "occamy_fa_gemm: engaged=1420 q_tiled=0 fallback=4803 reasons=ne3:4406,q_lt_64:337,keys_lt_4096:60 when=backend_free",
+   "occamy_fa_gemm_fused: calls=1420 softmax_launches=44920 when=backend_free",
+   "occamy_fa_gemm: engaged=1420 q_tiled=0 fallback=4803 reasons=ne3:4406,q_lt_64:337,keys_lt_4096:60 when=exit",
+   "occamy_fa_gemm_fused: calls=1420 softmax_launches=44920 when=exit"
+  ],
+  "cuda_errors": 0,
+  "bufs": [
+   "0.31.400.443 I load_tensors:        CUDA0 model buffer size = 18866.77 MiB",
+   "0.46.408.196 I llama_kv_cache:      CUDA0 KV buffer size =  3120.00 MiB",
+   "0.46.422.745 I llama_memory_recurrent:      CUDA0 RS buffer size =   251.25 MiB",
+   "0.46.556.451 I sched_reserve:      CUDA0 compute buffer size =   372.04 MiB",
+   "0.46.680.147 I llama_kv_cache:      CUDA0 KV buffer size =   312.00 MiB",
+   "0.46.787.946 I sched_reserve:      CUDA0 compute buffer size =   244.03 MiB",
+   "0.46.950.792 I sched_reserve:      CUDA0 compute buffer size =   244.03 MiB",
+   "0.48.312.463 I sched_reserve:      CUDA0 compute buffer size =   372.04 MiB"
+  ],
+  "draft_lines": [
+   "slot print_timing: id  1 | task 416 | draft acceptance = 1.00000 (   79 accepted /    79 generated), mean len =  2.00",
+   "10.22.572.797 I slot print_timing: id  1 | task 506 | draft acceptance = 1.00000 (   79 accepted /    79 generated), mean len =  2.00",
+   "10.22.615.063 I slot print_timing: id  0 | task 504 | draft acceptance = 0.97500 (   78 accepted /    80 generated), mean len =  1.98",
+   "10.47.405.142 I slot print_timing: id  1 | task 593 | draft acceptance = 1.00000 (   79 accepted /    79 generated), mean len =  2.00"
+  ],
+  "oom": false
+ },
+ {
+  "run": 3,
+  "arm": "ON78",
+  "rc": 0,
+  "wall_s": 633.8,
+  "tmax": 77,
+  "pauses": [
+   [
+    1795329099.0,
+    1.3
+   ],
+   [
+    1795329114.5,
+    1.8
+   ],
+   [
+    1795329128.5,
+    2.6
+   ],
+   [
+    1795329143.2,
+    6.1
+   ],
+   [
+    1795329159.4,
+    3.1
+   ],
+   [
+    1795329174.8,
+    2.1
+   ],
+   [
+    1795329183.0,
+    2.1
+   ],
+   [
+    1795329193.2,
+    2.1
+   ],
+   [
+    1795329203.4,
+    3.1
+   ],
+   [
+    1795329212.6,
+    2.1
+   ],
+   [
+    1795329222.8,
+    3.1
+   ],
+   [
+    1795329234.0,
+    2.1
+   ],
+   [
+    1795329244.2,
+    2.1
+   ],
+   [
+    1795329252.3,
+    2.1
+   ],
+   [
+    1795329260.5,
+    2.1
+   ],
+   [
+    1795329268.7,
+    2.1
+   ],
+   [
+    1795329276.8,
+    2.1
+   ],
+   [
+    1795329285.0,
+    2.1
+   ],
+   [
+    1795329297.2,
+    2.1
+   ],
+   [
+    1795329307.4,
+    2.1
+   ],
+   [
+    1795329315.6,
+    1.1
+   ],
+   [
+    1795329324.7,
+    2.1
+   ],
+   [
+    1795329330.9,
+    2.1
+   ],
+   [
+    1795329341.1,
+    2.1
+   ],
+   [
+    1795329347.2,
+    2.1
+   ],
+   [
+    1795329355.4,
+    2.1
+   ],
+   [
+    1795329363.5,
+    2.1
+   ],
+   [
+    1795329371.7,
+    2.1
+   ],
+   [
+    1795329381.9,
+    3.1
+   ],
+   [
+    1795329393.1,
+    2.1
+   ],
+   [
+    1795329401.3,
+    2.1
+   ],
+   [
+    1795329409.5,
+    3.1
+   ],
+   [
+    1795329420.7,
+    2.1
+   ],
+   [
+    1795329426.8,
+    2.1
+   ],
+   [
+    1795329437.0,
+    1.1
+   ],
+   [
+    1795329460.3,
+    2.1
+   ],
+   [
+    1795329468.5,
+    3.1
+   ],
+   [
+    1795329487.8,
+    1.1
+   ],
+   [
+    1795329492.9,
+    1.1
+   ],
+   [
+    1795329502.1,
+    3.1
+   ],
+   [
+    1795329523.4,
+    3.1
+   ],
+   [
+    1795329534.7,
+    3.1
+   ],
+   [
+    1795329556.0,
+    3.1
+   ],
+   [
+    1795329565.2,
+    2.1
+   ],
+   [
+    1795329583.5,
+    3.1
+   ],
+   [
+    1795329598.7,
+    3.1
+   ],
+   [
+    1795329612.0,
+    1.1
+   ],
+   [
+    1795329623.2,
+    2.1
+   ],
+   [
+    1795329633.4,
+    3.1
+   ]
+  ],
+  "vram_peak_mib": 23909,
+  "ctx": 79872,
+  "ckpt": "8",
+  "invalid": false,
+  "makespan_s": 192.75717782974243,
+  "ok": true,
+  "n_void": 8,
+  "run_sha": "72b300fcac76de17",
+  "setup_s": [
+   193.3,
+   206.2
+  ],
+  "turns": [
+   {
+    "a": 0,
+    "k": 0,
+    "prompt_n": 1025,
+    "cache_n": 59568,
+    "prompt_ms": 4486.169,
+    "predicted_ms": 1620.819,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a7ef973c551a7490"
+   },
+   {
+    "a": 0,
+    "k": 1,
+    "prompt_n": 4107,
+    "cache_n": 60752,
+    "prompt_ms": 25122.044,
+    "predicted_ms": 4576.374,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "d76fa43395d98536"
+   },
+   {
+    "a": 0,
+    "k": 2,
+    "prompt_n": 1035,
+    "cache_n": 65018,
+    "prompt_ms": 15940.685,
+    "predicted_ms": 4508.175,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a04742d6ef57174c"
+   },
+   {
+    "a": 0,
+    "k": 3,
+    "prompt_n": 4107,
+    "cache_n": 66212,
+    "prompt_ms": 27327.539,
+    "predicted_ms": 4227.961,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a7ef973c551a7490"
+   },
+   {
+    "a": 0,
+    "k": 4,
+    "prompt_n": 1035,
+    "cache_n": 70478,
+    "prompt_ms": 15325.162,
+    "predicted_ms": 4552.578,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a04742d6ef57174c"
+   },
+   {
+    "a": 0,
+    "k": 5,
+    "prompt_n": 4107,
+    "cache_n": 71672,
+    "prompt_ms": 28048.145,
+    "predicted_ms": 5523.425,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "b7437ffc463ac64e"
+   },
+   {
+    "a": 1,
+    "k": 0,
+    "prompt_n": 1025,
+    "cache_n": 59568,
+    "prompt_ms": 4626.86,
+    "predicted_ms": 4292.156,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1b6f239acae549d2"
+   },
+   {
+    "a": 1,
+    "k": 1,
+    "prompt_n": 4107,
+    "cache_n": 60752,
+    "prompt_ms": 26373.634,
+    "predicted_ms": 4284.638,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1b6f239acae549d2"
+   },
+   {
+    "a": 1,
+    "k": 2,
+    "prompt_n": 1035,
+    "cache_n": 65018,
+    "prompt_ms": 22346.131,
+    "predicted_ms": 9259.43,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "4d6e1b1cee7ac4c0"
+   },
+   {
+    "a": 1,
+    "k": 3,
+    "prompt_n": 4107,
+    "cache_n": 66212,
+    "prompt_ms": 26560.267,
+    "predicted_ms": 4354.449,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1b6f239acae549d2"
+   },
+   {
+    "a": 1,
+    "k": 4,
+    "prompt_n": 1035,
+    "cache_n": 70478,
+    "prompt_ms": 16642.535,
+    "predicted_ms": 5687.961,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1b6f239acae549d2"
+   },
+   {
+    "a": 1,
+    "k": 5,
+    "prompt_n": 4107,
+    "cache_n": 71672,
+    "prompt_ms": 22466.434,
+    "predicted_ms": 1652.445,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "4d6e1b1cee7ac4c0"
+   }
+  ],
+  "counters": [
+   "occamy_fa_gemm: engaged=1420 q_tiled=0 fallback=4803 reasons=ne3:4406,q_lt_64:337,keys_lt_4096:60 when=backend_free",
+   "occamy_fa_gemm_fused: calls=1420 softmax_launches=44920 when=backend_free",
+   "occamy_fa_gemm: engaged=1420 q_tiled=0 fallback=4803 reasons=ne3:4406,q_lt_64:337,keys_lt_4096:60 when=exit",
+   "occamy_fa_gemm_fused: calls=1420 softmax_launches=44920 when=exit"
+  ],
+  "cuda_errors": 0,
+  "bufs": [
+   "0.27.987.931 I load_tensors:        CUDA0 model buffer size = 18866.77 MiB",
+   "0.33.184.764 I llama_kv_cache:      CUDA0 KV buffer size =  3120.00 MiB",
+   "0.33.199.173 I llama_memory_recurrent:      CUDA0 RS buffer size =   251.25 MiB",
+   "0.33.328.900 I sched_reserve:      CUDA0 compute buffer size =   372.04 MiB",
+   "0.33.438.094 I llama_kv_cache:      CUDA0 KV buffer size =   312.00 MiB",
+   "0.33.543.953 I sched_reserve:      CUDA0 compute buffer size =   244.03 MiB",
+   "0.33.686.672 I sched_reserve:      CUDA0 compute buffer size =   244.03 MiB",
+   "0.35.097.636 I sched_reserve:      CUDA0 compute buffer size =   372.04 MiB"
+  ],
+  "draft_lines": [
+   "9.29.499.701 I slot print_timing: id  1 | task 416 | draft acceptance = 1.00000 (   79 accepted /    79 generated), mean len =  2.00",
+   "10.04.038.437 I slot print_timing: id  1 | task 506 | draft acceptance = 1.00000 (   79 accepted /    79 generated), mean len =  2.00",
+   "10.04.081.803 I slot print_timing: id  0 | task 504 | draft acceptance = 0.97500 (   78 accepted /    80 generated), mean len =  1.98",
+   "10.29.188.079 I slot print_timing: id  1 | task 593 | draft acceptance = 1.00000 (   79 accepted /    79 generated), mean len =  2.00"
+  ],
+  "oom": false
+ },
+ {
+  "run": 4,
+  "arm": "OFF78",
+  "rc": 0,
+  "wall_s": 639.0,
+  "tmax": 77,
+  "pauses": [
+   [
+    1795330482.3,
+    2.1
+   ],
+   [
+    1795330494.5,
+    1.1
+   ],
+   [
+    1795330503.7,
+    1.1
+   ],
+   [
+    1795330510.8,
+    2.1
+   ],
+   [
+    1795330519.0,
+    2.1
+   ],
+   [
+    1795330527.1,
+    2.1
+   ],
+   [
+    1795330537.3,
+    2.1
+   ],
+   [
+    1795330547.5,
+    2.1
+   ],
+   [
+    1795330555.7,
+    2.1
+   ],
+   [
+    1795330565.9,
+    2.1
+   ],
+   [
+    1795330578.1,
+    2.1
+   ],
+   [
+    1795330592.3,
+    3.1
+   ],
+   [
+    1795330601.5,
+    2.1
+   ],
+   [
+    1795330611.7,
+    2.1
+   ],
+   [
+    1795330619.9,
+    3.1
+   ],
+   [
+    1795330631.1,
+    2.1
+   ],
+   [
+    1795330639.3,
+    2.1
+   ],
+   [
+    1795330647.4,
+    2.1
+   ],
+   [
+    1795330655.6,
+    2.1
+   ],
+   [
+    1795330663.8,
+    2.1
+   ],
+   [
+    1795330671.9,
+    2.1
+   ],
+   [
+    1795330680.1,
+    2.1
+   ],
+   [
+    1795330688.3,
+    2.1
+   ],
+   [
+    1795330696.4,
+    2.1
+   ],
+   [
+    1795330706.6,
+    2.1
+   ],
+   [
+    1795330714.8,
+    2.1
+   ],
+   [
+    1795330725.0,
+    2.1
+   ],
+   [
+    1795330731.1,
+    2.1
+   ],
+   [
+    1795330737.3,
+    2.1
+   ],
+   [
+    1795330743.4,
+    2.1
+   ],
+   [
+    1795330751.6,
+    2.1
+   ],
+   [
+    1795330757.7,
+    2.1
+   ],
+   [
+    1795330763.8,
+    2.1
+   ],
+   [
+    1795330772.0,
+    3.1
+   ],
+   [
+    1795330781.2,
+    2.1
+   ],
+   [
+    1795330787.4,
+    2.1
+   ],
+   [
+    1795330793.5,
+    2.1
+   ],
+   [
+    1795330803.7,
+    3.1
+   ],
+   [
+    1795330814.9,
+    3.1
+   ],
+   [
+    1795330824.1,
+    3.1
+   ],
+   [
+    1795330835.3,
+    3.1
+   ],
+   [
+    1795330864.7,
+    3.1
+   ],
+   [
+    1795330880.0,
+    2.1
+   ],
+   [
+    1795330888.2,
+    3.1
+   ],
+   [
+    1795330899.4,
+    3.1
+   ],
+   [
+    1795330916.7,
+    2.1
+   ],
+   [
+    1795330924.8,
+    3.1
+   ],
+   [
+    1795330944.1,
+    3.1
+   ],
+   [
+    1795330955.4,
+    3.1
+   ],
+   [
+    1795330966.6,
+    3.1
+   ],
+   [
+    1795330983.9,
+    2.1
+   ],
+   [
+    1795330994.1,
+    3.1
+   ],
+   [
+    1795331011.4,
+    2.1
+   ],
+   [
+    1795331021.5,
+    3.1
+   ]
+  ],
+  "vram_peak_mib": 22709,
+  "ctx": 79872,
+  "ckpt": "8",
+  "invalid": false,
+  "makespan_s": 189.1635823249817,
+  "ok": true,
+  "n_void": 8,
+  "run_sha": "cc86070501987e05",
+  "setup_s": [
+   190.7,
+   209.9
+  ],
+  "turns": [
+   {
+    "a": 0,
+    "k": 0,
+    "prompt_n": 1025,
+    "cache_n": 59568,
+    "prompt_ms": 4257.432,
+    "predicted_ms": 2050.614,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "4d6e1b1cee7ac4c0"
+   },
+   {
+    "a": 0,
+    "k": 1,
+    "prompt_n": 4107,
+    "cache_n": 60752,
+    "prompt_ms": 19273.459,
+    "predicted_ms": 8331.729,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "d76fa43395d98536"
+   },
+   {
+    "a": 0,
+    "k": 2,
+    "prompt_n": 1035,
+    "cache_n": 65018,
+    "prompt_ms": 20224.621,
+    "predicted_ms": 10586.655,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a04742d6ef57174c"
+   },
+   {
+    "a": 0,
+    "k": 3,
+    "prompt_n": 4107,
+    "cache_n": 66212,
+    "prompt_ms": 25484.707,
+    "predicted_ms": 4182.766,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "4d6e1b1cee7ac4c0"
+   },
+   {
+    "a": 0,
+    "k": 4,
+    "prompt_n": 1035,
+    "cache_n": 70478,
+    "prompt_ms": 19168.853,
+    "predicted_ms": 4340.655,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a04742d6ef57174c"
+   },
+   {
+    "a": 0,
+    "k": 5,
+    "prompt_n": 4107,
+    "cache_n": 71672,
+    "prompt_ms": 27096.549,
+    "predicted_ms": 4340.758,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "a04742d6ef57174c"
+   },
+   {
+    "a": 1,
+    "k": 0,
+    "prompt_n": 1025,
+    "cache_n": 59568,
+    "prompt_ms": 4303.522,
+    "predicted_ms": 4057.45,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1ae02ffc9c96d6a0"
+   },
+   {
+    "a": 1,
+    "k": 1,
+    "prompt_n": 4107,
+    "cache_n": 60752,
+    "prompt_ms": 26733.728,
+    "predicted_ms": 4073.346,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1ae02ffc9c96d6a0"
+   },
+   {
+    "a": 1,
+    "k": 2,
+    "prompt_n": 1035,
+    "cache_n": 65018,
+    "prompt_ms": 16831.959,
+    "predicted_ms": 4274.521,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "4d6e1b1cee7ac4c0"
+   },
+   {
+    "a": 1,
+    "k": 3,
+    "prompt_n": 4107,
+    "cache_n": 66212,
+    "prompt_ms": 28876.69,
+    "predicted_ms": 4240.559,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1ae02ffc9c96d6a0"
+   },
+   {
+    "a": 1,
+    "k": 4,
+    "prompt_n": 1035,
+    "cache_n": 70478,
+    "prompt_ms": 19139.172,
+    "predicted_ms": 4430.843,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "1ae02ffc9c96d6a0"
+   },
+   {
+    "a": 1,
+    "k": 5,
+    "prompt_n": 4107,
+    "cache_n": 71672,
+    "prompt_ms": 21995.691,
+    "predicted_ms": 2071.175,
+    "predicted_n": null,
+    "timings": null,
+    "sha": "4d6e1b1cee7ac4c0"
+   }
+  ],
+  "counters": [
+   "occamy_fa_gemm: engaged=1420 q_tiled=0 fallback=8250 reasons=ne3:7970,q_lt_64:220,keys_lt_4096:60 when=backend_free",
+   "occamy_fa_gemm_fused: calls=1420 softmax_launches=44920 when=backend_free",
+   "occamy_fa_gemm: engaged=1420 q_tiled=0 fallback=8250 reasons=ne3:7970,q_lt_64:220,keys_lt_4096:60 when=exit",
+   "occamy_fa_gemm_fused: calls=1420 softmax_launches=44920 when=exit"
+  ],
+  "cuda_errors": 0,
+  "bufs": [
+   "0.25.972.705 I load_tensors:        CUDA0 model buffer size = 18393.41 MiB",
+   "0.42.678.055 I llama_kv_cache:      CUDA0 KV buffer size =  3120.00 MiB",
+   "0.42.690.286 I llama_memory_recurrent:      CUDA0 RS buffer size =   125.62 MiB",
+   "0.42.817.821 I sched_reserve:      CUDA0 compute buffer size =   372.04 MiB"
+  ],
+  "draft_lines": [],
+  "oom": false
+ }
+]

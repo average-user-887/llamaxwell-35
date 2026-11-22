@@ -1,0 +1,8 @@
+04:31:01 order=OFF64
+04:36:09 lease acquired after 308s wait
+04:36:09 fleet admission: M6000 telemetry age_s=6.3 vram_used_MiB=129 util_pct=0 power_limit_W=250
+04:36:09 cooldown 0s -> 58 C
+04:36:31 run 1 OFF64 exception: Container r3bench-c1-off64-1795318569-3317 exited during startup
+04:36:31 run 1 OFF64 vram_peak=None rc=None makespan=None setup=None ok=None void=None tmax=None invalid=False sha=
+04:36:31 lease released
+04:36:31 done; analyse with c1_gate.py

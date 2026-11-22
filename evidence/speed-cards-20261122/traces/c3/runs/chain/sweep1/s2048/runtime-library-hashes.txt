@@ -1,0 +1,4 @@
+5afeaeb484062ac3153e7dd174125a0025c31109e755232ce98604d858140639  /candidate/libggml-cuda.so
+3ad7d0ff8fe78b31679cfc0d59561a5a74cb5be1d375bdf066a332a01feacab0  /media/avg-usr/Storage/m6000-llama-cpp/mtp-moonshot-20261117/night-cache-only/libs/libllama-common.so.0.6.0
+bdd39cf9a6cf9bfa51271ce5c6978bba3acef9f570214d994a71b3fd9945fe5e  /media/avg-usr/Storage/m6000-llama-cpp/mtp-moonshot-20261117/night-cache-only/libs/libllama-server-impl.so
+85c6322def25b9e9141242e6d5589fc65bae0d24f6536f51a40dace1153ae2a4  /media/avg-usr/Storage/m6000-llama-cpp/mtp-moonshot-20261117/night-cache-only/libs/libllama.so.0.6.0

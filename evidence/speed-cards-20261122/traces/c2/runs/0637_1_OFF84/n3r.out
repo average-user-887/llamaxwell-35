@@ -1,0 +1,2 @@
+{"arm": "c2-OFF84", "url": "http://127.0.0.1:33097", "ctx": 84224, "start": 63920, "turns": 6, "n_predict": 160, "temp": 0.0, "seed": -1, "worst_final_depth": 80245, "kinds": {"0": ["edit/copy-heavy", "tool-call", "prose", "edit/copy-heavy", "tool-call", "prose"], "1": ["tool-call", "prose", "edit/copy-heavy", "tool-call", "prose", "edit/copy-heavy"]}, "chat_wrapped": true}
+makespan_s=199.2 ok=True run_sha=04e05e5605cb89d2 void_turns=8/12

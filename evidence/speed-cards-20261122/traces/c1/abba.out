@@ -1,0 +1,20 @@
+04:16:01 order=ON64,OFF64,OFF64,ON64,ON96,OFF96,OFF96,ON96
+04:16:01 lease acquired after 0s wait
+04:16:01 fleet admission: M6000 telemetry age_s=4.5 vram_used_MiB=129 util_pct=0 power_limit_W=250
+04:16:01 cooldown 0s -> 41 C
+[r3bench-c1-on64-1795317361-6075] ready after 119.3s on loopback:33072
+04:24:30 run 1 ON64 vram_peak=23233 rc=0 makespan=144.1943075656891 setup=[119.7, 119.7] ok=True void=8 tmax=79 invalid=False sha=94274f0f1053
+04:24:30 lease released
+04:26:03 lease acquired after 93s wait
+04:26:12 fleet admission: M6000 telemetry age_s=3.4 vram_used_MiB=129 util_pct=0 power_limit_W=250
+04:26:12 cooldown 0s -> 60 C
+[r3bench-c1-off64-1795317972-2694] ready after 55.0s on loopback:33075
+04:30:18 run 2 OFF64 vram_peak=21981 rc=3 makespan=25.01206874847412 setup=[117.3, 46.3] ok=False void=2 tmax=79 invalid=False sha=032ba7d3d938
+04:30:18 lease released
+04:31:41 lease acquired after 83s wait
+04:31:52 fleet admission: M6000 telemetry age_s=0.5 vram_used_MiB=129 util_pct=0 power_limit_W=250
+04:31:52 cooldown 0s -> 58 C
+[r3bench-c1-off64-1795318312-2182] ready after 60.6s on loopback:33077
+error: no such object: r3bench-c1-off64-1795318312-2182
+04:36:09 run 3 OFF64 vram_peak=21981 rc=3 makespan=25.00501847267151 setup=[116.9, 51.2] ok=False void=2 tmax=80 invalid=True sha=032ba7d3d938
+04:36:09 lease released

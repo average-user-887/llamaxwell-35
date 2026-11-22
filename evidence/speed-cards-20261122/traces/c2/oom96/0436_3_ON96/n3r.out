@@ -1,0 +1,22 @@
+{"arm": "c2-ON96", "url": "http://127.0.0.1:33079", "ctx": 98304, "start": 78000, "turns": 6, "n_predict": 160, "temp": 0.0, "seed": -1, "worst_final_depth": 94325, "kinds": {"0": ["edit/copy-heavy", "tool-call", "prose", "edit/copy-heavy", "tool-call", "prose"], "1": ["tool-call", "prose", "edit/copy-heavy", "tool-call", "prose", "edit/copy-heavy"]}, "chat_wrapped": true}
+Traceback (most recent call last):
+  File "/tmp/qa-speed-cards/c2/scripts/n3r_replay_c2.py", line 143, in <module>
+    main()
+  File "/tmp/qa-speed-cards/c2/scripts/n3r_replay_c2.py", line 124, in main
+    call('/slots/%d?action=erase' % a, {}); q = Req(pre[a], a, 1, 'pre%d' % a); q.start(); q.join(7200); r, g = q.rec(); assert r['http'] == 200, r
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/qa-speed-cards/c2/scripts/n3r_replay_c2.py", line 36, in call
+    c.request(method, path, json.dumps(body) if body is not None else None, {'Content-Type': 'application/json'}); r = c.getresponse(); d = r.read(); c.close()
+                                                                                                                       ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/http/client.py", line 1457, in getresponse
+    response.begin()
+  File "/usr/lib/python3.12/http/client.py", line 336, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/http/client.py", line 297, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/socket.py", line 707, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [Errno 104] Connection reset by peer

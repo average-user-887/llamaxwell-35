@@ -1,0 +1,3 @@
+04:13:29 lease held; order=ON64,OFF64,OFF64,ON64,ON96,OFF96,OFF96,ON96
+04:13:29 fleet admission: M6000 telemetry age_s=1.6 vram_used_MiB=129 util_pct=0 power_limit_W=250
+04:13:30 cooldown 0s -> 39 C

@@ -1,0 +1,4 @@
+04:22:13 arm p0 queued (lease)
+04:24:53 p0 exception: Container r3bench-c3-p0-1795317891-482758 exited during startup
+04:24:53 arm p0 done: append_tok_s=None setup=None tmax=None invalid=None err=Container r3bench-c3-p0-1795317891-482758 exited during startup lease_wait=137.1
+04:24:53 arm a0 queued (lease)

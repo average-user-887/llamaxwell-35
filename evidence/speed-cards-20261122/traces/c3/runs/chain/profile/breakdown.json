@@ -1,0 +1,62 @@
+{
+ "phase": "prefill",
+ "ms": {
+  "attn": 152469.9854,
+  "gdn": 26008.2738,
+  "moe": 77213.4456,
+  "other": 81259.0561
+ },
+ "total_ms": 336950.7609,
+ "share_measured": 0.4524993058117769,
+ "share_append_est": 0.6060376288303232,
+ "top": [
+  [
+   "FLASH_ATTN_EXT",
+   152470.0
+  ],
+  [
+   "MUL_MAT_ID:blk.#.ffn_down_exps.weight",
+   26772.8
+  ],
+  [
+   "MUL_MAT_ID:blk.#.ffn_gate_exps.weight",
+   25327.8
+  ],
+  [
+   "MUL_MAT_ID:blk.#.ffn_up_exps.weight",
+   25112.8
+  ],
+  [
+   "MUL_MAT:blk.#.attn_qkv.weight",
+   19159.3
+  ],
+  [
+   "GATED_DELTA_NET@fused",
+   10206.6
+  ],
+  [
+   "MUL_MAT:blk.#.ssm_out.weight",
+   10118.3
+  ],
+  [
+   "MUL_MAT:blk.#.attn_gate.weight",
+   10008.6
+  ],
+  [
+   "RESHAPE",
+   7268.6
+  ],
+  [
+   "MUL_MAT:blk.#.attn_q.weight",
+   6278.2
+  ],
+  [
+   "VIEW",
+   5593.9
+  ],
+  [
+   "ADD",
+   5341.8
+  ]
+ ]
+}

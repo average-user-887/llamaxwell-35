@@ -1,0 +1,1 @@
+{"tag": "p0", "env_over": {}, "profile": true, "dso_cuda": "<scratch>/combined-r3-card1/libggml-cuda.so", "lease_wait_s": 137.1, "start_temp": 60, "error": "Container r3bench-c3-p0-1795317891-482758 exited during startup"}

@@ -1,0 +1,29 @@
+06:16:21 order=OFF78,ON78,ON78,OFF78,OFF64,ON64
+06:25:47 lease acquired after 565s wait
+06:25:57 fleet admission: M6000 telemetry age_s=2.1 vram_used_MiB=130 util_pct=0 power_limit_W=250
+06:26:27 cooldown 30s -> 55 C
+[r3bench-c1-off78-1795325187-7007] ready after 39.7s on loopback:33096
+06:37:17 run 1 OFF78 pauses=63 pause_s=142.4 vram_peak=22709 rc=0 makespan=189.24940633773804 setup=[202.0, 211.4] ok=True void=8 tmax=77 invalid=False sha=dd9d49bdee6f
+06:37:17 lease released
+06:57:54 lease acquired after 1236s wait
+06:57:57 fleet admission: M6000 telemetry age_s=2.2 vram_used_MiB=134 util_pct=0 power_limit_W=250
+06:58:42 cooldown 45s -> 54 C
+[r3bench-c1-on78-1795327122-1890] ready after 47.9s on loopback:33099
+07:09:33 run 2 ON78 pauses=53 pause_s=119.7 vram_peak=23909 rc=0 makespan=193.36638069152832 setup=[192.6, 211.3] ok=True void=8 tmax=77 invalid=False sha=72b300fcac76
+07:09:33 lease released
+07:29:17 lease acquired after 1184s wait
+07:29:23 fleet admission: M6000 telemetry age_s=0.4 vram_used_MiB=134 util_pct=0 power_limit_W=250
+07:30:08 cooldown 45s -> 53 C
+[r3bench-c1-on78-1795329008-3908] ready after 34.7s on loopback:33102
+07:40:42 run 3 ON78 pauses=49 pause_s=114.3 vram_peak=23909 rc=0 makespan=192.75717782974243 setup=[193.3, 206.2] ok=True void=8 tmax=77 invalid=False sha=72b300fcac76
+07:40:42 lease released
+07:52:36 lease acquired after 714s wait
+07:52:45 fleet admission: M6000 telemetry age_s=1.8 vram_used_MiB=134 util_pct=0 power_limit_W=250
+07:53:15 cooldown 30s -> 55 C
+[r3bench-c1-off78-1795330395-5023] ready after 43.7s on loopback:33104
+08:03:54 run 4 OFF78 pauses=54 pause_s=127.4 vram_peak=22709 rc=0 makespan=189.1635823249817 setup=[190.7, 209.9] ok=True void=8 tmax=77 invalid=False sha=cc8607050198
+08:03:54 lease released
+08:15:49 lease acquired after 716s wait
+08:15:49 stop time reached after lease wait, not starting run 5 OFF64
+08:15:49 lease released
+08:15:49 done; analyse with c1_gate.py

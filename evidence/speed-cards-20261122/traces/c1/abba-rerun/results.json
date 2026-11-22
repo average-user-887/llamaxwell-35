@@ -1,0 +1,13 @@
+[
+ {
+  "run": 1,
+  "arm": "OFF64",
+  "rc": null,
+  "wall_s": 22.1,
+  "tmax": null,
+  "vram_peak_mib": null,
+  "ctx": 65536,
+  "ckpt": "8",
+  "invalid": false
+ }
+]

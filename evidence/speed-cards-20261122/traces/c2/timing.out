@@ -1,0 +1,70 @@
+04:22:40 order=OFF96,ON96,ON96,OFF96,OFF64,ON64,ON64,OFF64 on_extra=[] mv2=False lib=7a782656c445ac8e
+04:24:53 lease held for 1 OFF96 (queued 133s)
+04:24:53 fleet admission: M6000 telemetry age_s=5.4 vram_used_MiB=129 util_pct=0 power_limit_W=250
+04:24:53 cooldown 0s -> 59 C
+[r3bench-c2-1795317893-484080-8304] ready after 62.1s on loopback:33074
+04:26:03 run 1 OFF96 rc=1 makespan=None setup=None ok=None void=None p95=None/None tmax=68 invalid=False sha=
+04:30:18 lease held for 2 ON96 (queued 255s)
+04:30:20 fleet admission: M6000 telemetry age_s=1.0 vram_used_MiB=129 util_pct=0 power_limit_W=250
+04:30:20 cooldown 0s -> 59 C
+[r3bench-c2-1795318220-484080-7491] ready after 72.4s on loopback:33076
+04:31:41 run 2 ON96 rc=1 makespan=None setup=None ok=None void=None p95=None/None tmax=67 invalid=False sha=
+04:36:31 lease held for 3 ON96 (queued 290s)
+04:36:33 fleet admission: M6000 telemetry age_s=2.4 vram_used_MiB=232 util_pct=0 power_limit_W=250
+04:36:33 cooldown 0s -> 58 C
+[r3bench-c2-1795318593-484080-5655] ready after 47.9s on loopback:33079
+04:37:29 run 3 ON96 rc=1 makespan=None setup=None ok=None void=None p95=None/None tmax=68 invalid=False sha=
+--- restart 04:40:51
+04:40:51 order=OFF84,ON84,ON84,OFF84,OFF64,ON64,ON64,OFF64 on_extra=[] mv2=False lib=7a782656c445ac8e
+04:55:08 lease held for 1 OFF84 (queued 857s)
+04:55:15 fleet admission: M6000 telemetry age_s=3.4 vram_used_MiB=129 util_pct=0 power_limit_W=250
+04:55:30 cooldown 15s -> 58 C
+[r3bench-c2-1795319730-547425-8481] ready after 51.1s on loopback:33082
+04:59:21 run 1 OFF84 rc=1 makespan=None setup=None ok=None void=None p95=None/None tmax=80 invalid=True sha=
+05:16:07 lease held for 2 ON84 (queued 1006s)
+05:16:10 fleet admission: M6000 telemetry age_s=3.4 vram_used_MiB=129 util_pct=0 power_limit_W=250
+05:16:25 cooldown 15s -> 59 C
+[r3bench-c2-1795320985-547425-4153] ready after 50.9s on loopback:33085
+error: no such object: r3bench-c2-1795320985-547425-4153
+05:21:33 run 2 ON84 rc=3 makespan=25.007774591445923 setup=[192.1, 37.0] ok=False void=2 p95=None/None tmax=80 invalid=True sha=032ba7d3d938
+05:37:27 lease held for 3 ON84 (queued 954s)
+05:37:35 fleet admission: M6000 telemetry age_s=1.6 vram_used_MiB=129 util_pct=0 power_limit_W=250
+05:37:50 cooldown 15s -> 58 C
+[r3bench-c2-1795322270-547425-6286] ready after 46.8s on loopback:33088
+error: no such object: r3bench-c2-1795322270-547425-6286
+05:43:00 run 3 ON84 rc=3 makespan=25.013056993484497 setup=[192.0, 43.0] ok=False void=2 p95=None/None tmax=80 invalid=True sha=032ba7d3d938
+05:59:02 lease held for 4 OFF84 (queued 962s)
+05:59:11 fleet admission: M6000 telemetry age_s=0.6 vram_used_MiB=130 util_pct=0 power_limit_W=250
+05:59:26 cooldown 15s -> 58 C
+[r3bench-c2-1795323566-547425-4036] ready after 59.0s on loopback:33091
+error: no such object: r3bench-c2-1795323566-547425-4036
+06:04:24 run 4 OFF84 rc=3 makespan=25.00896167755127 setup=[191.9, 18.7] ok=False void=2 p95=None/None tmax=80 invalid=True sha=032ba7d3d938
+06:14:03 lease held for 5 OFF64 (queued 579s)
+06:14:08 fleet admission: M6000 telemetry age_s=1.1 vram_used_MiB=130 util_pct=0 power_limit_W=250
+06:14:08 cooldown 0s -> 60 C
+[r3bench-c2-1795324448-547425-5642] ready after 34.7s on loopback:33094
+error: no such object: r3bench-c2-1795324448-547425-5642
+06:17:49 run 5 OFF64 rc=3 makespan=25.011225938796997 setup=[120.1, 38.0] ok=False void=2 p95=None/None tmax=80 invalid=True sha=032ba7d3d938
+06:21:57 order=OFF84,ON84,ON84,OFF84,ON64,OFF64,OFF64,ON64 on_extra=[] mv2=False lib=f9aaae14cb24cc62
+06:37:17 lease held for 1 OFF84 (queued 920s)
+06:37:20 fleet admission: M6000 telemetry age_s=3.1 vram_used_MiB=134 util_pct=0 power_limit_W=250
+06:37:35 cooldown 15s -> 60 C
+[r3bench-c2-1795325855-868637-7758] ready after 94.5s on loopback:33097
+06:50:00 run 1 OFF84 rc=0 makespan=199.23770713806152 net=165.04 pause_run=34.2 pause_all=123.3 setup=[212.2, 231.3] ok=True void=8 p95=0.0572/0.0572 tmax=77 invalid=False sha=04e05e5605cb
+07:09:33 lease held for 2 ON84 (queued 1173s)
+07:09:42 fleet admission: M6000 telemetry age_s=0.9 vram_used_MiB=134 util_pct=0 power_limit_W=250
+07:09:57 cooldown 15s -> 58 C
+[r3bench-c2-1795327797-868637-1866] ready after 42.8s on loopback:33100
+07:21:39 run 2 ON84 rc=0 makespan=198.9724760055542 net=163.67 pause_run=35.3 pause_all=139.9 setup=[221.2, 232.9] ok=True void=8 p95=0.0571/0.0572 tmax=77 invalid=False sha=0bc4ee449507
+07:40:42 lease held for 3 ON84 (queued 1143s)
+07:40:48 fleet admission: M6000 telemetry age_s=2.9 vram_used_MiB=134 util_pct=0 power_limit_W=250
+07:41:03 cooldown 15s -> 58 C
+[r3bench-c2-1795329663-868637-2632] ready after 35.6s on loopback:33103
+07:52:36 run 3 ON84 rc=0 makespan=199.84887218475342 net=164.55 pause_run=35.3 pause_all=140.0 setup=[218.8, 232.2] ok=True void=8 p95=0.057/0.057 tmax=77 invalid=False sha=0bc4ee449507
+08:03:54 lease held for 4 OFF84 (queued 678s)
+08:03:59 fleet admission: M6000 telemetry age_s=1.4 vram_used_MiB=134 util_pct=0 power_limit_W=250
+08:04:14 cooldown 15s -> 59 C
+[r3bench-c2-1795331054-868637-9216] ready after 34.6s on loopback:33105
+08:15:49 run 4 OFF84 rc=0 makespan=202.3952522277832 net=162.0 pause_run=40.4 pause_all=142.0 setup=[218.5, 234.0] ok=True void=8 p95=0.0571/0.0571 tmax=77 invalid=False sha=9b770d9c7ab4
+08:15:49 stop time reached, not starting 5 ON64
+08:15:49 done

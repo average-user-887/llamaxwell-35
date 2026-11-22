@@ -1,0 +1,31 @@
+04:40:35 order=OFF64,ON64,OFF64,ON64,ON96,OFF96,OFF96,ON96
+04:45:56 lease acquired after 321s wait
+04:46:06 fleet admission: M6000 telemetry age_s=3.1 vram_used_MiB=129 util_pct=0 power_limit_W=250
+04:46:36 cooldown 30s -> 55 C
+[r3bench-c1-off64-1795319197-4688] ready after 59.0s on loopback:33081
+04:55:08 run 1 OFF64 pauses=42 pause_s=92.1 vram_peak=22117 rc=0 makespan=170.28741693496704 setup=[127.9, 145.9] ok=True void=8 tmax=77 invalid=False sha=7cbca5ceb059
+04:55:08 lease released
+05:07:23 lease acquired after 735s wait
+05:07:32 fleet admission: M6000 telemetry age_s=2.0 vram_used_MiB=129 util_pct=0 power_limit_W=250
+05:08:02 cooldown 30s -> 55 C
+[r3bench-c1-on64-1795320482-9595] ready after 46.9s on loopback:33084
+05:16:07 run 2 ON64 pauses=34 pause_s=72.4 vram_peak=23233 rc=0 makespan=158.67531847953796 setup=[131.4, 141.0] ok=True void=8 tmax=77 invalid=False sha=94274f0f1053
+05:16:07 lease released
+05:28:36 lease acquired after 750s wait
+05:28:46 fleet admission: M6000 telemetry age_s=2.7 vram_used_MiB=129 util_pct=0 power_limit_W=250
+05:29:16 cooldown 30s -> 55 C
+[r3bench-c1-off64-1795321756-8599] ready after 37.6s on loopback:33087
+05:37:27 run 3 OFF64 pauses=43 pause_s=96.4 vram_peak=22117 rc=0 makespan=169.71730017662048 setup=[130.0, 145.4] ok=True void=8 tmax=77 invalid=False sha=b3fe6a1f9fe8
+05:37:27 lease released
+05:50:06 lease acquired after 760s wait
+05:50:12 fleet admission: M6000 telemetry age_s=0.8 vram_used_MiB=130 util_pct=0 power_limit_W=250
+05:50:42 cooldown 30s -> 55 C
+[r3bench-c1-on64-1795323042-8662] ready after 52.2s on loopback:33090
+05:59:02 run 4 ON64 pauses=36 pause_s=78.6 vram_peak=23233 rc=0 makespan=171.5911991596222 setup=[131.4, 139.4] ok=True void=8 tmax=77 invalid=False sha=7b6b74fcd169
+05:59:02 lease released
+06:12:03 lease acquired after 781s wait
+06:12:12 fleet admission: M6000 telemetry age_s=2.7 vram_used_MiB=130 util_pct=0 power_limit_W=250
+06:12:58 cooldown 45s -> 54 C
+[r3bench-c1-on96-1795324378-6938] ready after 56.0s on loopback:33093
+06:14:03 run 5 ON96 pauses=0 pause_s=0 vram_peak=24410 rc=1 makespan=None setup=None ok=None void=None tmax=67 invalid=False sha=
+06:14:03 lease released

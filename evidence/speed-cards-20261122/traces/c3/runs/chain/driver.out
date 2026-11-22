@@ -1,0 +1,53 @@
+04:32:41 driver start pid=519401 stop_epoch=1795331700.0
+04:32:41 queue profile/nt env={'GGML_CUDA_NODE_TIMING': '/out/node_timing.tsv', 'GGML_CUDA_NODE_TIMING_SPLIT': '1', 'LLAMA_MV3_PHASE': '/out/phase.tsv'} dso=card1 np=1
+[r3bench-c3-nt-1795318659-519401] ready after 103.9s on loopback:33080
+04:45:14 nt append 4096 @81920: prompt_n=4096 21058 ms 194.5 tok/s (70->75 C)
+04:45:41 nt append 4096 @86016: prompt_n=4096 21711 ms 188.7 tok/s (70->75 C)
+04:45:53 nt append 1024 @90112: prompt_n=1024 5801 ms 176.5 tok/s (70->73 C)
+04:45:56 done profile/nt append=189.74 agg2=None tmax=77 invalid=False err=None wait=287.8
+04:45:56 breakdown: {'attn': 152470, 'gdn': 26008, 'moe': 77213, 'other': 81259} measured attn=45.2% est-append attn=60.6%
+04:45:56 queue b0/a0 env={} dso=card1 np=1
+[r3bench-c3-a0-1795319991-519401] ready after 60.1s on loopback:33083
+05:06:40 a0 append 4096 @81920: prompt_n=4096 21047 ms 194.6 tok/s (70->75 C)
+05:07:08 a0 append 4096 @86016: prompt_n=4096 21674 ms 189.0 tok/s (70->75 C)
+05:07:20 a0 append 1024 @90112: prompt_n=1024 5797 ms 176.7 tok/s (70->73 C)
+05:07:23 done b0/a0 append=189.95 agg2=None tmax=77 invalid=False err=None wait=804.3
+05:07:23 queue sweep1/d env={} dso=v1 np=1
+[r3bench-c3-d-1795321293-519401] ready after 24.4s on loopback:33086
+05:27:54 d append 4096 @81920: prompt_n=4096 20981 ms 195.2 tok/s (70->75 C)
+05:28:22 d append 4096 @86016: prompt_n=4096 21648 ms 189.2 tok/s (70->76 C)
+05:28:34 d append 1024 @90112: prompt_n=1024 5807 ms 176.3 tok/s (70->73 C)
+05:28:36 done sweep1/d append=190.27 agg2=None tmax=77 invalid=False err=None wait=849.7
+05:28:36 queue sweep1/s2048 env={'GGML_CUDA_FA_MAXWELL_GEMM_SPLIT': '2048'} dso=v1 np=1
+[r3bench-c3-s2048-1795322580-519401] ready after 35.6s on loopback:33089
+05:49:26 s2048 append 4096 @81920: prompt_n=4096 20760 ms 197.3 tok/s (70->75 C)
+05:49:54 s2048 append 4096 @86016: prompt_n=4096 21566 ms 189.9 tok/s (70->75 C)
+05:50:04 s2048 append 1024 @90112: prompt_n=1024 5794 ms 176.7 tok/s (70->73 C)
+05:50:06 done sweep1/s2048 append=191.52 agg2=None tmax=77 invalid=False err=None wait=863.7
+05:50:06 queue sweep1/t128 env={'GGML_CUDA_FA_MAXWELL_GEMM_TQ': '128'} dso=v1 np=1
+[r3bench-c3-t128-1795323864-519401] ready after 49.9s on loopback:33092
+06:11:18 t128 append 4096 @81920: prompt_n=4096 21430 ms 191.1 tok/s (70->76 C)
+06:11:46 t128 append 4096 @86016: prompt_n=4096 22121 ms 185.2 tok/s (70->76 C)
+06:12:00 t128 append 1024 @90112: prompt_n=1024 5970 ms 171.5 tok/s (70->73 C)
+06:12:03 done sweep1/t128 append=186.1 agg2=None tmax=78 invalid=False err=None wait=857.9
+06:12:03 queue sweep1/t128s2048 env={'GGML_CUDA_FA_MAXWELL_GEMM_TQ': '128', 'GGML_CUDA_FA_MAXWELL_GEMM_SPLIT': '2048'} dso=v1 np=1
+[r3bench-c3-t128s2048-1795324669-519401] ready after 73.5s on loopback:33095
+06:25:03 t128s2048 append 4096 @81920: prompt_n=4096 21192 ms 193.3 tok/s (70->76 C)
+06:25:32 t128s2048 append 4096 @86016: prompt_n=4096 21978 ms 186.4 tok/s (70->75 C)
+06:25:44 t128s2048 append 1024 @90112: prompt_n=1024 5949 ms 172.1 tok/s (70->73 C)
+06:25:47 done sweep1/t128s2048 append=187.63 agg2=None tmax=78 invalid=False err=None wait=345.9
+06:25:47 queue sweep1/s8192 env={'GGML_CUDA_FA_MAXWELL_GEMM_SPLIT': '8192'} dso=v1 np=1
+[r3bench-c3-s8192-1795326620-519401] ready after 42.7s on loopback:33098
+06:57:10 s8192 append 4096 @81920: prompt_n=4096 22015 ms 186.1 tok/s (70->75 C)
+06:57:39 s8192 append 4096 @86016: prompt_n=4096 22850 ms 179.3 tok/s (70->76 C)
+06:57:51 s8192 append 1024 @90112: prompt_n=1024 6042 ms 169.5 tok/s (70->74 C)
+06:57:54 done sweep1/s8192 append=181.04 agg2=None tmax=77 invalid=False err=None wait=1453.3
+06:57:54 queue sweep1/d2 env={} dso=v1 np=1
+[r3bench-c3-d2-1795328519-519401] ready after 44.8s on loopback:33101
+07:28:35 d2 append 4096 @81920: prompt_n=4096 21017 ms 194.9 tok/s (70->75 C)
+07:29:03 d2 append 4096 @86016: prompt_n=4096 21666 ms 189.0 tok/s (70->75 C)
+07:29:15 d2 append 1024 @90112: prompt_n=1024 5804 ms 176.4 tok/s (70->73 C)
+07:29:17 done sweep1/d2 append=190.07 agg2=None tmax=77 invalid=False err=None wait=1425.1
+07:29:17 sweep1 vs v1-default 190.17 tok/s: ['s2048 +0.71%', 't128s2048 -1.34%', 't128 -2.14%', 's8192 -4.80%']
+07:29:17 KILL: best sweep gain <1%% -> stop chain
+07:29:17 driver exit

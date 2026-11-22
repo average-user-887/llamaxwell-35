@@ -1,0 +1,3 @@
+{"arm": "qa-OFF78", "url": "http://127.0.0.1:33096", "ctx": 79872, "start": 59568, "turns": 6, "n_predict": 160, "temp": 0.0, "seed": -1, "worst_final_depth": 75893, "kinds": {"0": ["edit/copy-heavy", "tool-call", "prose", "edit/copy-heavy", "tool-call", "prose"], "1": ["tool-call", "prose", "edit/copy-heavy", "tool-call", "prose", "edit/copy-heavy"]}, "chat_wrapped": true}
+makespan_s=189.2 ok=True run_sha=dd9d49bdee6ffe05 void_turns=8/12
+out=/tmp/qa-speed-cards/c1/abba4/1_OFF78/n3r rc=0

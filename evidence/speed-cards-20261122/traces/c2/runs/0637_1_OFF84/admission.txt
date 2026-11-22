@@ -1,0 +1,1 @@
+M6000 telemetry age_s=4.2 vram_used_MiB=134 util_pct=0 power_limit_W=250
