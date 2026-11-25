@@ -4,11 +4,11 @@ Usage: quick.py <round 1..4>. Holds the M6000 for <=85 min, then restores prod (
 State: state.json (base config + metrics + probe ref). Rows: LEDGER.md + ledger.jsonl.
 Keep rule: tg1 or pp4k >= +3% vs base, the other >= -3%, probes prefix-match mean >= 0.95 vs base outputs."""
 import sys, os, json, time, random, subprocess, threading, urllib.request, copy
-HERE = os.path.dirname(os.path.abspath(__file__)); M = "/media/avg-usr/Storage/m6000-llama-cpp"
+HERE = os.path.dirname(os.path.abspath(__file__)); M = "<STORAGE>/m6000-llama-cpp"
 ST = os.path.join(HERE, "state.json"); LMD = os.path.join(HERE, "LEDGER.md"); LJS = os.path.join(HERE, "ledger.jsonl")
-GPU = "GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e"; IMG = "sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d"
+GPU = "GPU-REDACTED"; IMG = "sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d"
 NAME, PORT, PROD, PROD_PORT = "llamacpp-m6000-27b-exp", 11448, "llamacpp-m6000-27b", 11437
-SLOTS = "/home/avg-usr/.claude/jobs/ee277f80/tmp/slots"; CAP_S = 6 * 3600; T0 = time.time()
+SLOTS = "<HOME>/.claude/jobs/ee277f80/tmp/slots"; CAP_S = 6 * 3600; T0 = time.time()
 DEADLINE = time.mktime(time.strptime("2026-11-13 08:00", "%Y-%m-%d %H:%M"))
 ENV = dict(GGML_CUDA_RMS_WARP="0", GGML_CUDA_HEAD_ROWPACK_SM52="1", GGML_CUDA_MMQ_COMPACT_SM52="1", GGML_CUDA_Q8_REUSE="1",
            GGML_CUDA_NORM_Q8="1", GGML_CUDA_CONCAT_T="1", GGML_CUDA_OCCAMY_GDN_STATE_DIRECT="1", GGML_CUDA_GATE_COPY="1",
@@ -54,7 +54,7 @@ def start(c):
     for k, v in env.items():
         if v is not None: ev += ["-e", f"{k}={v}"]
     r = sh("docker", "run", "-d", "--name", NAME, "--network", "ai-net", "--restart", "no", "-p", f"127.0.0.1:{PORT}:8080",
-           "--device", f"nvidia.com/gpu={GPU}", "-v", f"{M}/bench27b-20261105/dl:/models27:ro", "-v", "/media/avg-usr/Models/gguf:/m2:ro",
+           "--device", f"nvidia.com/gpu={GPU}", "-v", f"{M}/bench27b-20261105/dl:/models27:ro", "-v", "<MODELS>/gguf:/m2:ro",
            "-v", f"{SLOTS}:/slots", "-v", (c.get("so") or f"{M}/prod-libs/libggml-cuda-gate-copy-20261013.so") + ":/app/libggml-cuda.so:ro", *ev, IMG, *args_of(c))
     if r.returncode: return False, r.stderr[-300:]
     if healthy(PORT, 240): return True, ""
@@ -221,7 +221,7 @@ def round3(s):
 def round4(s):
     d = "/m2/qwen38-27b/"
     for q in ["Qwen3.8-27B-UD-IQ4_XS.gguf", "Qwen3.8-27B-UD-Q3_K_XL.gguf"]:
-        if not os.path.exists("/media/avg-usr/Models/gguf/qwen38-27b/" + q): log("missing", q); continue
+        if not os.path.exists("<MODELS>/gguf/qwen38-27b/" + q): log("missing", q); continue
         case = "Q-" + q.split("UD-")[1].split(".")[0]
         c = copy.deepcopy(s["base"]); c["model"] = d + q
         m = run_case(s, case, c)
@@ -391,7 +391,7 @@ def round14(s):
 
 def round15(s):
     # FP32-FFMA q4_0 multi-col matvec (GGML_CUDA_FP32MV, n=2..4): op n=3 194 vs 214 us, n=4 234 vs 273
-    L = "/media/avg-usr/Storage/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fp32mv.so"
+    L = "<STORAGE>/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fp32mv.so"
     def fx(c): c.update(so=L); c["env"] = dict(c.get("env") or {}, GGML_CUDA_FP32MV="1")
     for case, ch in (("K-fp32mv", fx), ("K-fp32mv-draft3", lambda c: (fx(c), c.update(draftn=3)))):
         c = copy.deepcopy(s["base"]); ch(c); m = run_case(s, case, c)
@@ -404,7 +404,7 @@ def round15(s):
 
 def round16(s):
     # pp: transposed q4_0 dequant + cuBLAS NN algo5 (GGML_CUDA_SGEMM_NN): ubench 6.1-6.3 TF vs 4.7-5.4 TN; op n512 13.1 vs 15.2 ms
-    L = "/media/avg-usr/Storage/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-sgemmnn.so"
+    L = "<STORAGE>/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-sgemmnn.so"
     lever(s, "P-sgemmnn", lambda c: (c.update(so=L), c["env"].update(GGML_CUDA_SGEMM_NN="1")))
     m = run_case(s, "B16-rep0", copy.deepcopy(s["base"]))
     if m and "tg1" in m: row("B16-rep0", s["base"], m, True, "noise", f"pp4k {m.get('pp4k')} step_ms {step_ms(m)}")
@@ -412,7 +412,7 @@ def round16(s):
 
 def round17(s):
     # adopt sgemmnn on KLD evidence (mean KLD 0.000000, max 5e-5, same-top 100%, PPL ratio 1.00005); r16 pp4k 87.0 vs 79.0
-    L = "/media/avg-usr/Storage/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-sgemmnn.so"
+    L = "<STORAGE>/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-sgemmnn.so"
     case = "P-sgemmnn-adopt"
     if case not in s["tried"]:
         c = copy.deepcopy(s["base"]); c.update(so=L); c["env"].update(GGML_CUDA_SGEMM_NN="1"); m = run_case(s, case, c)
@@ -426,7 +426,7 @@ def round17(s):
 
 def round18(s):
     # tiled transposed dequant k_dequant_q4_0_T2: ubench 1.4-1.9x vs T (184 vs 94-130 GB/s), KLD identical to sgemmnn
-    L = "/media/avg-usr/Storage/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-sgemmnn2.so"
+    L = "<STORAGE>/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-sgemmnn2.so"
     lever(s, "P-dqT2", lambda c: c.update(so=L))
     m = run_case(s, "B18-rep0", copy.deepcopy(s["base"]))
     if m and "tg1" in m: row("B18-rep0", s["base"], m, True, "noise", f"pp4k {m.get('pp4k')} step_ms {step_ms(m)}")
@@ -434,7 +434,7 @@ def round18(s):
 
 def round19(s):
     # overlap dequant piece p+1 (aux stream) with cuBLAS NN GEMM piece p; KLD identical
-    L = "/media/avg-usr/Storage/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-nnsplit.so"
+    L = "<STORAGE>/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-nnsplit.so"
     for n in ("4", "2"):
         lever(s, f"P-nnsplit{n}", lambda c, n=n: (c.update(so=L), c["env"].update(GGML_CUDA_SGEMM_NN_SPLIT=n)))
     m = run_case(s, "B19-rep0", copy.deepcopy(s["base"]))
@@ -451,7 +451,7 @@ def round20(s):
 def round21(s):
     # GEMM prefill FA (fattn-gemm.cu): KLD 0 (max 5.3e-5, top 100%), tbo 3993/3993; pp 22.7k/51.9k/100.2k +7/+15/+24%
     # decode/draft untouched (nq<64); adopt if pp4k/tg1 not worse than -3%
-    L = "/media/avg-usr/Storage/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm.so"; case = "P-fagemm-adopt"
+    L = "<STORAGE>/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm.so"; case = "P-fagemm-adopt"
     c = copy.deepcopy(s["base"]); c.update(so=L); c["env"].update(GGML_CUDA_FA_GEMM="1"); m = run_case(s, case, c)
     if m and "tg1" in m:
         b = s["base_m"]; ok = m["tg1"] >= 0.97*b["tg1"] and m["pp4k"] >= 0.97*b["pp4k"]
@@ -486,7 +486,7 @@ def restore_prod():
 if __name__ == "__main__":
     rnd = int(sys.argv[1]); s = load()
     if rnd > 1 and not s.get("base"): log("no base; run round 1 first"); sys.exit(3)
-    log(f"round {rnd} start; df:", sh("df", "-h", "/media/avg-usr/Storage").stdout.splitlines()[-1])
+    log(f"round {rnd} start; df:", sh("df", "-h", "<STORAGE>").stdout.splitlines()[-1])
     sh("docker", "stop", "-t", "60", "llamacpp-m6000"); sh("docker", "stop", "-t", "60", PROD)
     rc = 0
     try:

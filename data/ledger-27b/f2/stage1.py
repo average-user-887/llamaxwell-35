@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """9 Nov Scout 3 Stage 1 speed. Usage: stage1.py short|long ARM... where ARM is C (C4) or F (C4+FP32MV). Exact live prod env + prod lib on the quick.py base. Caller holds lock, prod stopped."""
 import sys,json,time,copy,threading,subprocess
-sys.path.insert(0,"/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113"); import quick as q
-SO="/media/avg-usr/Storage/m6000-llama-cpp/prod-libs/libggml-cuda-fadec2-20261109.so"
-RES="/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113/fp32mv-stage1-20261109.jsonl"
+sys.path.insert(0,"<STORAGE>/m6000-llama-cpp/opt27b-20261113"); import quick as q
+SO="<STORAGE>/m6000-llama-cpp/prod-libs/libggml-cuda-fadec2-20261109.so"
+RES="<STORAGE>/m6000-llama-cpp/opt27b-20261113/fp32mv-stage1-20261109.jsonl"
 LIVE={"CONCAT_T":"1","FA_DEC":"2","FA_GEMM":"1","GATE_COPY":"1","GDN_COLS":"2,4","HEAD_ROWPACK_SM52":"1","MMQ_COMPACT_SM52":"1","MMQ_TAIL_SM52":"1","MMQ_XMAD_SM52":"1","NORM_Q8":"1","OCCAMY_FA":"1","OCCAMY_FUSED":"1","OCCAMY_GDN":"1","OCCAMY_GDN_STATE_DIRECT":"1","Q8_REUSE":"1","RMS_WARP":"0","SGEMM_NN":"1"}
 LIVE={"GGML_CUDA_"+k:v for k,v in LIVE.items()}
 PR=q.PROBES+[q.TG,"Explain how a B-tree insert splits a full node, with a small worked example:\n","def parse_iso_duration(s: str) -> int:\n    \"\"\"Return seconds for an ISO 8601 duration.\"\"\"\n","Summarise the causes of the 1929 stock market crash in plain language.\n","Translate to Polish and explain the grammar: The cat sat on the warm windowsill all afternoon.\n"]

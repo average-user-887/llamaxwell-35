@@ -96,7 +96,7 @@
     "rc": 0,
     "value": 84.067947,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c00-p0-A-85533498.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c00-p0-A-85533498.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c00-p1-B-b259dcbf",
@@ -108,7 +108,7 @@
     "rc": 0,
     "value": 83.667116,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c00-p1-B-b259dcbf.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c00-p1-B-b259dcbf.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c01-p0-A-2ad02546",
@@ -120,7 +120,7 @@
     "rc": 0,
     "value": 84.014408,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c01-p0-A-2ad02546.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c01-p0-A-2ad02546.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c01-p1-B-da59c5e2",
@@ -132,7 +132,7 @@
     "rc": 0,
     "value": 83.606254,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c01-p1-B-da59c5e2.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c01-p1-B-da59c5e2.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c01-p2-B-e03fe94e",
@@ -144,7 +144,7 @@
     "rc": 0,
     "value": 83.645714,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c01-p2-B-e03fe94e.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c01-p2-B-e03fe94e.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c01-p3-A-adb0a3e9",
@@ -156,7 +156,7 @@
     "rc": 0,
     "value": 84.011476,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c01-p3-A-adb0a3e9.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c01-p3-A-adb0a3e9.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c02-p0-A-1f2316b5",
@@ -168,7 +168,7 @@
     "rc": 0,
     "value": 83.901071,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c02-p0-A-1f2316b5.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c02-p0-A-1f2316b5.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c02-p1-B-3f7beba9",
@@ -180,7 +180,7 @@
     "rc": 0,
     "value": 83.624421,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c02-p1-B-3f7beba9.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c02-p1-B-3f7beba9.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c02-p2-B-295699be",
@@ -192,7 +192,7 @@
     "rc": 0,
     "value": 83.778421,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c02-p2-B-295699be.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c02-p2-B-295699be.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c02-p3-A-1af6c463",
@@ -204,7 +204,7 @@
     "rc": 0,
     "value": 84.035633,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c02-p3-A-1af6c463.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c02-p3-A-1af6c463.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c03-p0-A-afe98a5c",
@@ -216,7 +216,7 @@
     "rc": 0,
     "value": 83.895692,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c03-p0-A-afe98a5c.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c03-p0-A-afe98a5c.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c03-p1-B-a514fad0",
@@ -228,7 +228,7 @@
     "rc": 0,
     "value": 83.442796,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c03-p1-B-a514fad0.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c03-p1-B-a514fad0.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c03-p2-B-903cceff",
@@ -240,7 +240,7 @@
     "rc": 0,
     "value": 83.556609,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c03-p2-B-903cceff.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c03-p2-B-903cceff.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c03-p3-A-d7fd95d9",
@@ -252,7 +252,7 @@
     "rc": 0,
     "value": 83.789017,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c03-p3-A-d7fd95d9.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c03-p3-A-d7fd95d9.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c04-p0-A-32fe5929",
@@ -264,7 +264,7 @@
     "rc": 0,
     "value": 83.935375,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c04-p0-A-32fe5929.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c04-p0-A-32fe5929.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c04-p1-B-fe473b77",
@@ -276,7 +276,7 @@
     "rc": 0,
     "value": 83.437307,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c04-p1-B-fe473b77.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c04-p1-B-fe473b77.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c04-p2-B-31a3e010",
@@ -288,7 +288,7 @@
     "rc": 0,
     "value": 83.508032,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c04-p2-B-31a3e010.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c04-p2-B-31a3e010.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c04-p3-A-4af83e7b",
@@ -300,7 +300,7 @@
     "rc": 0,
     "value": 83.985755,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c04-p3-A-4af83e7b.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c04-p3-A-4af83e7b.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c05-p0-A-6f02b271",
@@ -312,7 +312,7 @@
     "rc": 0,
     "value": 84.162022,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c05-p0-A-6f02b271.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c05-p0-A-6f02b271.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c05-p1-B-40141db8",
@@ -324,7 +324,7 @@
     "rc": 0,
     "value": 83.659947,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c05-p1-B-40141db8.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c05-p1-B-40141db8.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c05-p2-B-339469b8",
@@ -336,7 +336,7 @@
     "rc": 0,
     "value": 83.45642,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c05-p2-B-339469b8.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c05-p2-B-339469b8.log"
    },
    {
     "trial_id": "r1h2h-warm_decode-c05-p3-A-3279105e",
@@ -348,7 +348,7 @@
     "rc": 0,
     "value": 83.818258,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c05-p3-A-3279105e.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h/r1h2h-warm_decode-c05-p3-A-3279105e.log"
    }
   ]
  }

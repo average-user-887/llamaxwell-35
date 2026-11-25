@@ -58,7 +58,7 @@
 - Verdict: rounding-level differences amplified through q8_1 activation rounding; also reachable on stock (stock + 1e-7 output noise reaches 4.50 at the same token). No DEC=2 kernel bug shown, no fix built.
 - 64 chunks: DEC=0 mean .011873, DEC=2 .012500, paired +.000627, t 1.11. >3 tokens: 0 vs 1. Gate 2 still FAILS as written on the 16-chunk test (+.00152); not relaxed.
 - Not determined: 10:416 without q8_1 (run reached chunk 0 only), true >3 rate. No-q8 arm estimate 25-50 min per arm.
-- Files: fadec2-kld-token-20261108.txt; LEDGER "8 Nov Card F2"; lib mmvqtune-libs/libggml-cuda-mmvqT-fagemm-fadec2.so unchanged; 64-chunk base and debug v3 lib in /media/avg-usr/Models/kld-f2-20261108.
+- Files: fadec2-kld-token-20261108.txt; LEDGER "8 Nov Card F2"; lib mmvqtune-libs/libggml-cuda-mmvqT-fagemm-fadec2.so unchanged; 64-chunk base and debug v3 lib in <MODELS>/kld-f2-20261108.
 - Prod restored to C3 after the card. NO_RESTORE renamed NO_RESTORE.done-20261108b.
 
 ## 9 Nov no-q8 test and 64-chunk re-gate (design 2 NOT adopted)

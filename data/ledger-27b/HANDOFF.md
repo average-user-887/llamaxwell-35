@@ -25,9 +25,9 @@ R21 (FA-gemm adopt gate, pp4k/tg1 ≥0.97× base): KEEP — pp4k 90.8 (vs 89.2),
 - **Tools you need:**
   - `opt27b-20261113/quick.py --round N`: one case per lever. It starts the exp container, measures pp4k, tg1 and tg2agg plus probes, writes a row to LEDGER.md, and gates it with `gate()` (7 Nov). Noise is about 0.2%, so a metric counts as moved at 3σ (0.6% for tg1/pp4k/pp23k, 0.8% for tg2agg). KEEP means some metric ≥ +3σ and none ≤ −3σ. CONFIRM (+1.5–3σ) re-runs automatically and decides on the mean; if it is still small but consistent it goes to SHELF. TRADEOFF (one metric ≥ +2% while another drops) goes to `state.json` `tradeoffs` with its full config for the owner. SHELF and TRADEOFF ideas are saved, never lost. With `QUICK_LONG=1` every case also measures pp at 22.7k (pp23k); run `quick.py 23` (rebase, 2 reps) first so the base has it. Add a round as a 10-line `roundN(s)` function.
   - `fa_eval.py <so> <reps…>` with `VARS="0 1"`: long-context pp A/B. reps 1200/2600/4900 give 22.7k/51.9k/100k tokens.
-  - KLD gate for numerics-only changes: see the perplexity block in `fa_eval.sh`, base `/media/avg-usr/Models/kld-head4-20261107/head4.kld`. Pass means mean KLD ≈ 0 and same-top ≥ 99.5%.
+  - KLD gate for numerics-only changes: see the perplexity block in `fa_eval.sh`, base `<MODELS>/kld-head4-20261107/head4.kld`. Pass means mean KLD ≈ 0 and same-top ≥ 99.5%.
   - Kernel correctness: `test-backend-ops -o <OP>` from `src-…/build/bin`.
-  - Profile: `/media/avg-usr/Models/prof-27b-20261107/prof_pp.sh` (nvprof GPU summary).
+  - Profile: `<MODELS>/prof-27b-20261107/prof_pp.sh` (nvprof GPU summary).
 - **Rules:**
   - Always hold `flock ../gpu-bench.lock`.
   - Don't restore prod between runs (owner, 7 Nov); restore at session end with `docker start llamacpp-m6000-27b` and `labslot check`.
@@ -48,7 +48,7 @@ R21 (FA-gemm adopt gate, pp4k/tg1 ≥0.97× base): KEEP — pp4k 90.8 (vs 89.2),
    - MTP accept rate: draft 2 is the best fixed setting; an adaptive draft length is untested.
    - Small-op fusion and launch overhead: check graph replay gaps in nsys.
 5. **Clocks (owner, needs sudo):** apps clocks are 987 MHz while the board supports up to 1152.
-   - Try `sudo nvidia-smi -i GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e -ac 3305,1152`, then A/B pp4k and tg1.
+   - Try `sudo nvidia-smi -i GPU-REDACTED -ac 3305,1152`, then A/B pp4k and tg1.
    - The board may hit its 250 W cap; revert with `-rac`.
 6. **Trade-offs for the owner, not auto-kept:**
    - K-fp32mv: tg2agg +6% but tg1 −7%.
@@ -73,7 +73,7 @@ Files: `LEDGER.md` (every row), `MORNING.md` (dated summaries), `state.json` (qu
 - Verdict: rounding-level differences amplified through q8_1 activation rounding; also reachable on stock (stock + 1e-7 output noise reaches 4.50 at the same token). No DEC=2 kernel bug shown, no fix built.
 - 64 chunks: DEC=0 mean .011873, DEC=2 .012500, paired +.000627, t 1.11. >3 tokens: 0 vs 1. Gate 2 still FAILS as written on the 16-chunk test (+.00152); not relaxed.
 - Not determined: 10:416 without q8_1 (run reached chunk 0 only), true >3 rate. No-q8 arm estimate 25-50 min per arm.
-- Files: fadec2-kld-token-20261108.txt; LEDGER "8 Nov Card F2"; lib mmvqtune-libs/libggml-cuda-mmvqT-fagemm-fadec2.so unchanged; 64-chunk base and debug v3 lib in /media/avg-usr/Models/kld-f2-20261108.
+- Files: fadec2-kld-token-20261108.txt; LEDGER "8 Nov Card F2"; lib mmvqtune-libs/libggml-cuda-mmvqT-fagemm-fadec2.so unchanged; 64-chunk base and debug v3 lib in <MODELS>/kld-f2-20261108.
 - Prod restored to C3 after the card. NO_RESTORE renamed NO_RESTORE.done-20261108b.
 
 ## 9 Nov no-q8 test and 64-chunk re-gate (design 2 NOT adopted)

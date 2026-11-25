@@ -96,7 +96,7 @@
     "rc": 0,
     "value": 84.884056,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c00-p0-A-59ce516a.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c00-p0-A-59ce516a.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c00-p1-B-2d0ea39b",
@@ -108,7 +108,7 @@
     "rc": 0,
     "value": 86.785527,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c00-p1-B-2d0ea39b.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c00-p1-B-2d0ea39b.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c01-p0-A-157b04ed",
@@ -120,7 +120,7 @@
     "rc": 0,
     "value": 84.845332,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c01-p0-A-157b04ed.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c01-p0-A-157b04ed.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c01-p1-B-6fe5ce34",
@@ -132,7 +132,7 @@
     "rc": 0,
     "value": 86.828973,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c01-p1-B-6fe5ce34.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c01-p1-B-6fe5ce34.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c01-p2-B-874d5081",
@@ -144,7 +144,7 @@
     "rc": 0,
     "value": 86.802719,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c01-p2-B-874d5081.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c01-p2-B-874d5081.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c01-p3-A-a16093f7",
@@ -156,7 +156,7 @@
     "rc": 0,
     "value": 84.862602,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c01-p3-A-a16093f7.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c01-p3-A-a16093f7.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c02-p0-A-44e7226c",
@@ -168,7 +168,7 @@
     "rc": 0,
     "value": 84.840477,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c02-p0-A-44e7226c.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c02-p0-A-44e7226c.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c02-p1-B-3a084892",
@@ -180,7 +180,7 @@
     "rc": 0,
     "value": 87.061047,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c02-p1-B-3a084892.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c02-p1-B-3a084892.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c02-p2-B-ad00c760",
@@ -192,7 +192,7 @@
     "rc": 0,
     "value": 87.009913,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c02-p2-B-ad00c760.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c02-p2-B-ad00c760.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c02-p3-A-bff9843f",
@@ -204,7 +204,7 @@
     "rc": 0,
     "value": 84.790909,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c02-p3-A-bff9843f.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c02-p3-A-bff9843f.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c03-p0-A-be6e1a27",
@@ -216,7 +216,7 @@
     "rc": 0,
     "value": 84.746613,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c03-p0-A-be6e1a27.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c03-p0-A-be6e1a27.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c03-p1-B-80682e66",
@@ -228,7 +228,7 @@
     "rc": 0,
     "value": 86.731519,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c03-p1-B-80682e66.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c03-p1-B-80682e66.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c03-p2-B-0c286346",
@@ -240,7 +240,7 @@
     "rc": 0,
     "value": 86.71974,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c03-p2-B-0c286346.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c03-p2-B-0c286346.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c03-p3-A-83b01a98",
@@ -252,7 +252,7 @@
     "rc": 0,
     "value": 84.867848,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c03-p3-A-83b01a98.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c03-p3-A-83b01a98.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c04-p0-A-679b0c64",
@@ -264,7 +264,7 @@
     "rc": 0,
     "value": 84.949506,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c04-p0-A-679b0c64.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c04-p0-A-679b0c64.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c04-p1-B-9da7f053",
@@ -276,7 +276,7 @@
     "rc": 0,
     "value": 86.707841,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c04-p1-B-9da7f053.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c04-p1-B-9da7f053.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c04-p2-B-c63bb6be",
@@ -288,7 +288,7 @@
     "rc": 0,
     "value": 86.777567,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c04-p2-B-c63bb6be.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c04-p2-B-c63bb6be.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c04-p3-A-37467d62",
@@ -300,7 +300,7 @@
     "rc": 0,
     "value": 85.1675,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c04-p3-A-37467d62.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c04-p3-A-37467d62.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c05-p0-A-aea96046",
@@ -312,7 +312,7 @@
     "rc": 0,
     "value": 85.145403,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c05-p0-A-aea96046.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c05-p0-A-aea96046.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c05-p1-B-0c311fed",
@@ -324,7 +324,7 @@
     "rc": 0,
     "value": 86.860585,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c05-p1-B-0c311fed.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c05-p1-B-0c311fed.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c05-p2-B-0deafc32",
@@ -336,7 +336,7 @@
     "rc": 0,
     "value": 86.612879,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c05-p2-B-0deafc32.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c05-p2-B-0deafc32.log"
    },
    {
     "trial_id": "bundle1-warm_decode-c05-p3-A-797bd686",
@@ -348,7 +348,7 @@
     "rc": 0,
     "value": 84.562904,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c05-p3-A-797bd686.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/BUNDLE1/g4-bundle1/bundle1-warm_decode-c05-p3-A-797bd686.log"
    }
   ]
  }

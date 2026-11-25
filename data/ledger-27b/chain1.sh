@@ -1,6 +1,6 @@
 #!/bin/bash
 # 7 Nov night chain 1: clock sweep (987 vs 1152, same-session, QUICK_LONG rebase) -> pick clock -> tg at long ctx. Prod left stopped (NO_RESTORE).
-set -u; O=/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113; G=GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e; TS=$(date +%Y%m%d-%H%M)
+set -u; O=<STORAGE>/m6000-llama-cpp/opt27b-20261113; G=GPU-REDACTED; TS=$(date +%Y%m%d-%H%M)
 cd $O; exec 9>$O/../gpu-bench.lock; flock 9; touch $O/NO_RESTORE
 trap 'kill $SP 2>/dev/null; docker rm -f llamacpp-m6000-27b-exp >/dev/null 2>&1' EXIT
 docker stop -t 60 llamacpp-m6000-27b >/dev/null 2>&1

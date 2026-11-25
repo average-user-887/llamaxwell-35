@@ -1,0 +1,59 @@
+{
+ "A2": {
+  "ref": "A1",
+  "nreq": [
+   5,
+   5
+  ],
+  "steps": 471,
+  "top1_agree": 471,
+  "mean_abs_dlp": 0.0,
+  "max_abs_dlp": 0.0,
+  "n_dlp": 471,
+  "first_div_per_req": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ]
+ },
+ "B": {
+  "ref": "A1",
+  "nreq": [
+   5,
+   5
+  ],
+  "steps": 166,
+  "top1_agree": 162,
+  "mean_abs_dlp": 0.017274397590361448,
+  "max_abs_dlp": 0.49458,
+  "n_dlp": 166,
+  "first_div_per_req": [
+   5,
+   9,
+   4,
+   null,
+   61
+  ]
+ },
+ "C8": {
+  "ref": "A1",
+  "nreq": [
+   5,
+   5
+  ],
+  "steps": 471,
+  "top1_agree": 471,
+  "mean_abs_dlp": 0.0,
+  "max_abs_dlp": 0.0,
+  "n_dlp": 471,
+  "first_div_per_req": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ]
+ }
+}

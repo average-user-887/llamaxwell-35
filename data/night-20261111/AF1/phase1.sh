@@ -1,7 +1,7 @@
 #!/bin/bash
 # AF1 phase 1 (run under flock gpu-bench.lock): G1 off/off/on/on(mode2), nvprof d0 off/on
-N=/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111; R=$N/rounds/AF1; L=$N/cand/AF1/build/bin/libggml-cuda.so
-GPU=GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e
+N=<STORAGE>/m6000-llama-cpp/occamy35-night-20261111; R=$N/rounds/AF1; L=$N/cand/AF1/build/bin/libggml-cuda.so
+GPU=GPU-REDACTED
 echo "lock acquired $(date)"
 apps=$(nvidia-smi -i $GPU --query-compute-apps=pid --format=csv,noheader | wc -l); echo "compute apps on M6000: $apps"
 if [ "$apps" != 0 ]; then nvidia-smi -i $GPU --query-compute-apps=pid,used_memory --format=csv; echo ABORT_GPU_BUSY; exit 3; fi

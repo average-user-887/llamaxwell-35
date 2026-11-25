@@ -1,0 +1,10 @@
+C3 RECEIPT (stopped early on handback request, 04:29 CET)
+branch: claude/speed-c3-20261122 (local only), base 7ac90aa, commits 7afb2d3, 2592658
+build: c3-fa-tune/build.sh <dir> (nvcc fattn.cu per r3-pp compile-pp.sh line 7, image 747c8a878; link = link-card1.sh with fattn.cu.o swapped)
+20ef19be7eb6903337c28126b7b8f165aff1aef04e83ce52cbcd435e16e2bda6  ctl/out/libggml-cuda.so
+5afeaeb484062ac3153e7dd174125a0025c31109e755232ce98604d858140639  v1/out/libggml-cuda.so
+c08bb3f08af3c0385f438836188845ff535587dad0c4ca63b5310806a65cd59f  orig/out/libggml-cuda.so
+7efa7a719abe2451f1c123aecba08a52a8c778ef0d84c517b78c1e6dc48ebe36  ctl/fattn.cu.o
+3d3efe37d6ae1ab4bf2fc82695a8aa1a3e419ea0f991afa87f8fa18e7b0a429f  v1/fattn.cu.o
+note: orig/ = relink of unmodified r3pp fattn.cu.o, reproduces card1 lib c08bb3f0 exactly.
+GPU chain: detached driver pid 519401, runs/chain (results pending).

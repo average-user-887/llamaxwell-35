@@ -204,7 +204,7 @@ RECOMMEND: cut re-prefill on agent turns (checkpoint placement, no kernel work).
 | 11-08 | S2-stage1-ckpt-flags (synthetic 16k+8 turns, tails 2-4k, 40% reply / 60% earlier mismatch; seed 1 only; ckpt-flags-ab-20261108.txt) | C3 fadec2 DEC=2 | | not run | not run | | | | session wall base 736.6 s / A(32,2048) 736.9 / B(32,512) 736.9 / C(64,256) 736.8 = 0.0% for all; prompt_n per turn identical, re-processed 10410 tok = 2.27 min = 22.1% of prefill minutes in every arm (base valid: 8 restores, 18 ckpts created, 308 MiB each); RSS growth 3.8 / 4.2 / 4.6 / 4.5 GB; 0 real restore failures. GATE FAIL (wall -10% not met). Seed 2 and quick rows not run (GPU lock taken by f2/chain1.sh). |
 
 ## 8 Nov Card F2 (design 2 KLD token)
-Report: fadec2-kld-token-20261108.txt. Evidence: /media/avg-usr/Models/kld-f2-20261108. Debug libs only; no fix built; fadec2.so unchanged; gate not relaxed.
+Report: fadec2-kld-token-20261108.txt. Evidence: <MODELS>/kld-f2-20261108. Debug libs only; no fix built; fadec2.so unchanged; gate not relaxed.
 | time | case | mean KLD | max | >1 | >3 | same top | result |
 |---|---|---|---|---|---|---|---|
 | 11-08 | DEC=0, 64 chunks b3 (16320 tokens, new base head4-64.kld, first 16 chunks byte-identical to head4.kld) | 0.011873 | 1.498 | 5 | 0 | 97.794 | |

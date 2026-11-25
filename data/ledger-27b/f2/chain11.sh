@@ -1,6 +1,6 @@
 #!/bin/bash
 # 9 Nov Scout 3 Stage 1. Short speed, then 64-chunk KLD, then long speed unless F short tg is under .93x. Call under flock gpu-bench.lock; C4 restored on exit.
-M=/media/avg-usr/Storage/m6000-llama-cpp; O=$M/opt27b-20261113; F=$O/f2; R=$O/fp32mv-stage1-20261109.txt
+M=<STORAGE>/m6000-llama-cpp; O=$M/opt27b-20261113; F=$O/f2; R=$O/fp32mv-stage1-20261109.txt
 restore(){ docker rm -f llamacpp-m6000-27b-exp >/dev/null 2>&1; docker start llamacpp-m6000-27b >/dev/null; mv -f $O/NO_RESTORE $O/NO_RESTORE.done-20261109c 2>/dev/null; echo "prod start $(date +%T)" >> $R; }
 trap restore EXIT
 P="GGML_CUDA_CONCAT_T=1 GGML_CUDA_GATE_COPY=1 GGML_CUDA_GDN_COLS=2,4 GGML_CUDA_MMQ_COMPACT_SM52=1 GGML_CUDA_MMQ_TAIL_SM52=1 GGML_CUDA_MMQ_XMAD_SM52=1 GGML_CUDA_NORM_Q8=1 GGML_CUDA_OCCAMY_FA=1 GGML_CUDA_OCCAMY_FUSED=1 GGML_CUDA_OCCAMY_GDN=1 GGML_CUDA_OCCAMY_GDN_STATE_DIRECT=1 GGML_CUDA_Q8_REUSE=1 GGML_CUDA_RMS_WARP=0 KLDSHIM_RAWTHR=99"

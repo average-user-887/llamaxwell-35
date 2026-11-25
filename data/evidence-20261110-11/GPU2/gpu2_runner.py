@@ -17,11 +17,11 @@ import statistics
 import datetime
 import threading
 
-W = "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110"
+W = "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110"
 RESULTS_DIR = os.path.join(W, "results", "GPU2")
 SCRATCH_SLOTS = os.path.join(W, "scratch-slots")
-GPU_UUID = "GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e"
-LOCK_PATH = "/media/avg-usr/Storage/m6000-llama-cpp/gpu-bench.lock"
+GPU_UUID = "GPU-REDACTED"
+LOCK_PATH = "<STORAGE>/m6000-llama-cpp/gpu-bench.lock"
 PROD_IMAGE = "sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d"
 PORT = 11490
 URL = f"http://127.0.0.1:{PORT}"
@@ -218,8 +218,8 @@ class ContainerRunner:
             "--rm",
             "-p", f"127.0.0.1:{PORT}:8080",
             "--device", f"nvidia.com/gpu={GPU_UUID}",
-            "-v", "/media/avg-usr/Storage/ollama-m6000/gguf:/gguf",
-            "-v", "/media/avg-usr/Storage/uroboros-models:/models",
+            "-v", "<STORAGE>/ollama-m6000/gguf:/gguf",
+            "-v", "<STORAGE>/models:/models",
             "-v", f"{SCRATCH_SLOTS}:/slots",
             "-v", f"{self.lib_path}:/app/libggml-cuda.so:ro",
         ]
@@ -964,7 +964,7 @@ def restore_production(lock_proc):
         
     if not healthy:
         try:
-            req = urllib.request.Request("http://172.21.0.1:11445/upstream/qwen36-moe", data=b"", headers={"Content-Type": "application/json"})
+            req = urllib.request.Request("http://<LOCAL_IP>:11445/upstream/qwen36-moe", data=b"", headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(req, timeout=5) as resp:
                 pass
         except Exception:

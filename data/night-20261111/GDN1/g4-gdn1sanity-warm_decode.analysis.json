@@ -54,7 +54,7 @@
     "rc": 0,
     "value": 84.978442,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN1/g4-gdn1sanity/gdn1sanity-warm_decode-c00-p0-A-613295c1.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN1/g4-gdn1sanity/gdn1sanity-warm_decode-c00-p0-A-613295c1.log"
    },
    {
     "trial_id": "gdn1sanity-warm_decode-c00-p1-B-dd0631d2",
@@ -66,7 +66,7 @@
     "rc": 0,
     "value": 84.732136,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN1/g4-gdn1sanity/gdn1sanity-warm_decode-c00-p1-B-dd0631d2.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN1/g4-gdn1sanity/gdn1sanity-warm_decode-c00-p1-B-dd0631d2.log"
    },
    {
     "trial_id": "gdn1sanity-warm_decode-c01-p0-A-b77ab676",
@@ -78,7 +78,7 @@
     "rc": 0,
     "value": 84.825084,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN1/g4-gdn1sanity/gdn1sanity-warm_decode-c01-p0-A-b77ab676.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN1/g4-gdn1sanity/gdn1sanity-warm_decode-c01-p0-A-b77ab676.log"
    },
    {
     "trial_id": "gdn1sanity-warm_decode-c01-p1-B-18284634",
@@ -90,7 +90,7 @@
     "rc": 0,
     "value": 85.066618,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN1/g4-gdn1sanity/gdn1sanity-warm_decode-c01-p1-B-18284634.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN1/g4-gdn1sanity/gdn1sanity-warm_decode-c01-p1-B-18284634.log"
    },
    {
     "trial_id": "gdn1sanity-warm_decode-c01-p2-B-a03679da",
@@ -102,7 +102,7 @@
     "rc": 0,
     "value": 85.095102,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN1/g4-gdn1sanity/gdn1sanity-warm_decode-c01-p2-B-a03679da.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN1/g4-gdn1sanity/gdn1sanity-warm_decode-c01-p2-B-a03679da.log"
    },
    {
     "trial_id": "gdn1sanity-warm_decode-c01-p3-A-ebd36d3d",
@@ -114,7 +114,7 @@
     "rc": 0,
     "value": 84.994456,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN1/g4-gdn1sanity/gdn1sanity-warm_decode-c01-p3-A-ebd36d3d.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN1/g4-gdn1sanity/gdn1sanity-warm_decode-c01-p3-A-ebd36d3d.log"
    }
   ]
  }

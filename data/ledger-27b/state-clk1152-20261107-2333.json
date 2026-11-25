@@ -16,7 +16,7 @@
    "GGML_CUDA_FA_GEMM": "1"
   },
   "extra": [],
-  "so": "/media/avg-usr/Storage/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm.so"
+  "so": "<STORAGE>/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm.so"
  },
  "base_m": {
   "slots": 2,

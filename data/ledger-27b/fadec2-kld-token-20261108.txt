@@ -1,5 +1,5 @@
 Card F2: design 2 (GGML_CUDA_FA_DEC=2) KLD outlier token, 8 Nov 2026. Model Qwen3.8-27B-Q4_0-head4, -c 512 -b 3 -ub 3, ctk/ctv q4_0.
-Evidence: /media/avg-usr/Models/kld-f2-20261108 (per-token *-tok.txt, dumps, summary.txt); scripts $O/f2.
+Evidence: <MODELS>/kld-f2-20261108 (per-token *-tok.txt, dumps, summary.txt); scripts $O/f2.
 
 VERDICT: amplification of rounding-level differences, not a DEC=2 kernel bug shown. No fix built. Gate NOT relaxed: DEC=2 still fails gate 2 as written; owner decides.
 Not proven: that removing q8_1 rounding removes this outlier (no-q8 run only finished chunk 0; see Q5).

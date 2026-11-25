@@ -1,0 +1,10 @@
+C2 append scheduling receipt (2026-11-22 06:22 CET)
+branch: claude/speed-c2-20261122 (local only, base 7ac90aa)
+commits: 997feee (patch), 9bf03e1 (harness), c6e3cc2 (LCP estimate, anti-starvation, C1 pause pacing, pause-subtracted makespan)
+build: cd /tmp/qa-speed-cards/c2/build && bash /tmp/qa-speed-cards/wt-c2/m6000/speed-c2/build-c2.sh <on|ctl> 3  (CPU-only container, --network none, -Werror)
+sha256 libllama-server-impl.so ON : f9aaae14cb24cc62454d14698dae06de382c3c2b31080b137fb67df2ac99bfab
+sha256 libllama-server-impl.so CTL: bdd39cf9a6cf9bfa51271ce5c6978bba3acef9f570214d994a71b3fd9945fe5e (= card1 byte-exact)
+sha256 libllama-common.so.0.6.0   : 3ad7d0ff8fe78b31679cfc0d59561a5a74cb5be1d375bdf066a332a01feacab0
+sha256 libllama.so.0.6.0          : 85c6322def25b9e9141242e6d5589fc65bae0d24f6536f51a40dace1153ae2a4
+other DSOs: card1 set (combined-r3-card1) unchanged
+patch: m6000/speed-c2/append-sched.patch; flag LLAMA_APPEND_SCHED=1 (default off), LLAMA_APPEND_CHUNK unused in A/B

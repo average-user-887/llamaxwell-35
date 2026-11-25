@@ -1,10 +1,10 @@
 #!/bin/bash
 # GDN4 phase 1 (G1 + kill screen). Holds gpu-bench.lock; unloads the M6000 35B via per-model POST only.
-N=/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111; R=$N/rounds/GDN4; L=$R/libggml-cuda.gdn4.so; BL=$N/rounds/BUNDLE2/libggml-cuda.bundle2.so
-GPU=GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e; SWAP_URL=http://172.21.0.1:11445
+N=<STORAGE>/m6000-llama-cpp/occamy35-night-20261111; R=$N/rounds/GDN4; L=$R/libggml-cuda.gdn4.so; BL=$N/rounds/BUNDLE2/libggml-cuda.bundle2.so
+GPU=GPU-REDACTED; SWAP_URL=http://<LOCAL_IP>:11445
 BASE="GGML_CUDA_OCCAMY_GDN_QKREUSE=1 GGML_CUDA_OCCAMY_GDN_PCSHARE=1 GGML_CUDA_MOE_DOWNH=2 GGML_CUDA_OCCAMY_FA_PIPE=3"
 ON="GGML_CUDA_MOE_LOP3=1 GGML_CUDA_MOE_TAILBAL=1 GGML_CUDA_OCCAMY_GDN_PREF=1 GGML_CUDA_OCCAMY_HOSTGAP=1 GGML_CUDA_OCCAMY_SMALLFUSE=2"
-exec 9>/media/avg-usr/Storage/m6000-llama-cpp/gpu-bench.lock; flock 9; echo "lock $(date +%T)"
+exec 9><STORAGE>/m6000-llama-cpp/gpu-bench.lock; flock 9; echo "lock $(date +%T)"
 echo "running before: $(curl -s -m10 $SWAP_URL/running)"
 curl -s -m60 -X POST $SWAP_URL/api/models/unload/qwen36-35b-moe; echo
 echo "running after: $(curl -s -m10 $SWAP_URL/running)"

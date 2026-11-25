@@ -3,8 +3,8 @@
 Usage: tg_long_fadec2.py reps... ; env ORDER (default "0,2,0,2"), XENV (json, extra server env applied to all runs, e.g. {"GGML_CUDA_FA_DEC_MINQ":"1"}),
 DRAFTN ("none" = MTP off), TAG (label). Caller holds lock. Removes only the exp container."""
 import sys, os, json, copy
-sys.path.insert(0, "/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113"); import quick as q
-SO = "/media/avg-usr/Storage/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm-fadec2.so"
+sys.path.insert(0, "<STORAGE>/m6000-llama-cpp/opt27b-20261113"); import quick as q
+SO = "<STORAGE>/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm-fadec2.so"
 XENV = json.loads(os.environ.get("XENV", "{}")); TAG = os.environ.get("TAG", "")
 for flag in os.environ.get("ORDER", "0,2,0,2").split(","):
   c = copy.deepcopy(q.load()["base"]); c["so"] = SO; c["env"]["GGML_CUDA_FA_DEC"] = flag; c["env"].update(XENV)

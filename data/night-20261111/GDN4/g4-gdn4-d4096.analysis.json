@@ -96,7 +96,7 @@
     "rc": 0,
     "value": 84.916298,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c00-p0-A-46f5bc22.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c00-p0-A-46f5bc22.log"
    },
    {
     "trial_id": "gdn4-d4096-c00-p1-B-4acdf5cc",
@@ -108,7 +108,7 @@
     "rc": 0,
     "value": 85.464411,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c00-p1-B-4acdf5cc.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c00-p1-B-4acdf5cc.log"
    },
    {
     "trial_id": "gdn4-d4096-c01-p0-A-816538b0",
@@ -120,7 +120,7 @@
     "rc": 0,
     "value": 84.658611,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c01-p0-A-816538b0.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c01-p0-A-816538b0.log"
    },
    {
     "trial_id": "gdn4-d4096-c01-p1-B-7e11032b",
@@ -132,7 +132,7 @@
     "rc": 0,
     "value": 85.286957,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c01-p1-B-7e11032b.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c01-p1-B-7e11032b.log"
    },
    {
     "trial_id": "gdn4-d4096-c01-p2-B-29f6f580",
@@ -144,7 +144,7 @@
     "rc": 0,
     "value": 85.261205,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c01-p2-B-29f6f580.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c01-p2-B-29f6f580.log"
    },
    {
     "trial_id": "gdn4-d4096-c01-p3-A-908cab40",
@@ -156,7 +156,7 @@
     "rc": 0,
     "value": 84.551228,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c01-p3-A-908cab40.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c01-p3-A-908cab40.log"
    },
    {
     "trial_id": "gdn4-d4096-c02-p0-A-69ead470",
@@ -168,7 +168,7 @@
     "rc": 0,
     "value": 84.624328,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c02-p0-A-69ead470.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c02-p0-A-69ead470.log"
    },
    {
     "trial_id": "gdn4-d4096-c02-p1-B-6ecc79db",
@@ -180,7 +180,7 @@
     "rc": 0,
     "value": 85.227631,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c02-p1-B-6ecc79db.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c02-p1-B-6ecc79db.log"
    },
    {
     "trial_id": "gdn4-d4096-c02-p2-B-e5b1f7d1",
@@ -192,7 +192,7 @@
     "rc": 0,
     "value": 85.341247,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c02-p2-B-e5b1f7d1.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c02-p2-B-e5b1f7d1.log"
    },
    {
     "trial_id": "gdn4-d4096-c02-p3-A-eaf723b9",
@@ -204,7 +204,7 @@
     "rc": 0,
     "value": 84.501747,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c02-p3-A-eaf723b9.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c02-p3-A-eaf723b9.log"
    },
    {
     "trial_id": "gdn4-d4096-c03-p0-A-28229e38",
@@ -216,7 +216,7 @@
     "rc": 0,
     "value": 84.727771,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c03-p0-A-28229e38.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c03-p0-A-28229e38.log"
    },
    {
     "trial_id": "gdn4-d4096-c03-p1-B-c72d9940",
@@ -228,7 +228,7 @@
     "rc": 0,
     "value": 85.232491,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c03-p1-B-c72d9940.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c03-p1-B-c72d9940.log"
    },
    {
     "trial_id": "gdn4-d4096-c03-p2-B-d06595cc",
@@ -240,7 +240,7 @@
     "rc": 0,
     "value": 85.270638,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c03-p2-B-d06595cc.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c03-p2-B-d06595cc.log"
    },
    {
     "trial_id": "gdn4-d4096-c03-p3-A-51b95a00",
@@ -252,7 +252,7 @@
     "rc": 0,
     "value": 84.514628,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c03-p3-A-51b95a00.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c03-p3-A-51b95a00.log"
    },
    {
     "trial_id": "gdn4-d4096-c04-p0-A-fd82b2a1",
@@ -264,7 +264,7 @@
     "rc": 0,
     "value": 84.670926,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c04-p0-A-fd82b2a1.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c04-p0-A-fd82b2a1.log"
    },
    {
     "trial_id": "gdn4-d4096-c04-p1-B-02c453f7",
@@ -276,7 +276,7 @@
     "rc": 0,
     "value": 85.153397,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c04-p1-B-02c453f7.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c04-p1-B-02c453f7.log"
    },
    {
     "trial_id": "gdn4-d4096-c04-p2-B-d673ee98",
@@ -288,7 +288,7 @@
     "rc": 0,
     "value": 85.113379,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c04-p2-B-d673ee98.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c04-p2-B-d673ee98.log"
    },
    {
     "trial_id": "gdn4-d4096-c04-p3-A-61b5bc3e",
@@ -300,7 +300,7 @@
     "rc": 0,
     "value": 84.714353,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c04-p3-A-61b5bc3e.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c04-p3-A-61b5bc3e.log"
    },
    {
     "trial_id": "gdn4-d4096-c05-p0-A-a072e5b9",
@@ -312,7 +312,7 @@
     "rc": 0,
     "value": 84.823247,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c05-p0-A-a072e5b9.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c05-p0-A-a072e5b9.log"
    },
    {
     "trial_id": "gdn4-d4096-c05-p1-B-4b7f4a7c",
@@ -324,7 +324,7 @@
     "rc": 0,
     "value": 85.651516,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c05-p1-B-4b7f4a7c.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c05-p1-B-4b7f4a7c.log"
    },
    {
     "trial_id": "gdn4-d4096-c05-p2-B-183879d0",
@@ -336,7 +336,7 @@
     "rc": 0,
     "value": 85.575319,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c05-p2-B-183879d0.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c05-p2-B-183879d0.log"
    },
    {
     "trial_id": "gdn4-d4096-c05-p3-A-004c65c0",
@@ -348,7 +348,7 @@
     "rc": 0,
     "value": 84.362987,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c05-p3-A-004c65c0.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/GDN4/g4-gdn4/gdn4-d4096-c05-p3-A-004c65c0.log"
    }
   ]
  }

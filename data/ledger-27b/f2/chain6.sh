@@ -1,6 +1,6 @@
 #!/bin/bash
 # Card F2 amplifier test: q8_1 activation rounding as source of the step response. Run under gpu-bench.lock after chain5.
-M=/media/avg-usr/Storage/m6000-llama-cpp; O=$M/opt27b-20261113; F=$O/f2; X=/media/avg-usr/Models/kld-f2-20261108
+M=<STORAGE>/m6000-llama-cpp; O=$M/opt27b-20261113; F=$O/f2; X=<MODELS>/kld-f2-20261108
 L=$M/mmvqtune-libs/libggml-cuda-mmvqT-fagemm-fadec2dbg.so
 [ -f $X/libggml-cuda-fadec2dbg-v2.so ] || cp $L $X/libggml-cuda-fadec2dbg-v2.so
 cp $M/tmp-combo/libggml-cuda-fadec2dbg-v3.so $L

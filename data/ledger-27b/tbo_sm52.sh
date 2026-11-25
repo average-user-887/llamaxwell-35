@@ -1,7 +1,7 @@
 #!/bin/bash
 # 7 Nov card C: MUL_MAT correctness + q4_0 perf (n=1..3, model shapes), GGML_CUDA_MMVQ_SM52=0/1. Run under flock gpu-bench.lock.
-M=/media/avg-usr/Storage/m6000-llama-cpp; O=$M/opt27b-20261113; OUT=$O/tbo-sm52-20261107-b.txt
-GPU=GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e; IMG=sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d
+M=<STORAGE>/m6000-llama-cpp; O=$M/opt27b-20261113; OUT=$O/tbo-sm52-20261107-b.txt
+GPU=GPU-REDACTED; IMG=sha256:3a0caa9afea12f5ca5d982621cc2d86b1fa6ac614d735b262fa475d7dc6e2a6d
 D=$M/tmp-combo/sm52/bin; mkdir -p $D; B=$M/src-b11552-mmvqtune-20261107/build/bin
 cp -f $B/test-backend-ops $B/libggml-base.so* $B/libggml.so* $B/libggml-cpu*.so $B/libllama*.so* $D/ 2>/dev/null
 cp -f $M/mmvqtune-libs/libggml-cuda-mmvqT-fagemm-sm52.so $D/libggml-cuda.so

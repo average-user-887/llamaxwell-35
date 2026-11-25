@@ -2,7 +2,7 @@
 # usage: build_alu35.sh <tag> ; builds 35B alu35 worktree ggml-cuda + test-backend-ops -> tmp/libs/libggml-cuda-downx-<tag>.so
 set -uo pipefail
 TAG=$1
-J=/home/avg-usr/.claude/jobs/fc533454/tmp
+J=<HOME>/.claude/jobs/fc533454/tmp
 WT=$J/repos/llamaxwell-35/.claude/worktrees/downx
 mkdir -p $J/build-moebw $J/libs $J/logs
 LOG=$J/logs/builddownx-$TAG-$(date +%Y%m%dT%H%M%S).log

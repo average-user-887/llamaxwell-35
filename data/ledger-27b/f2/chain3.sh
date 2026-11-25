@@ -1,5 +1,5 @@
 #!/bin/bash
-R=/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113/f2/kldrun.sh
+R=<STORAGE>/m6000-llama-cpp/opt27b-20261113/f2/kldrun.sh
 export CHUNKS=11
 B="GGML_CUDA_FA_DBG=1 GGML_CUDA_FA_DEC=0 KLDSHIM_RAW=10:416 KLDSHIM_RAWTHR=99"
 D="GGML_CUDA_FA_DBG_CMP=1 GGML_CUDA_FA_DBG_DUMP=29584:29600"

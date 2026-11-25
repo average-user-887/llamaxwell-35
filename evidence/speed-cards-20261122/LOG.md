@@ -1,0 +1,1 @@
+- 2026-11-22 04:13:26 speed cards start. Worktree /tmp/qa-speed-cards/wt branch claude/speed-cards-20261122 from 7ac90aa. Deadline corrected by coordinator: no new runs after 08:15, report by 08:50. Card 1 chain: ON64(B0 confirm),OFF64,OFF64,ON64,ON96,OFF96,OFF96,ON96; B0=ub1024 ckpt8 no V5 GRAPHS/DEBUG unset; OFF=--spec-type none (serial); cooldown <=60 C; watchdog 80 C.

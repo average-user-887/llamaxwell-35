@@ -1,6 +1,6 @@
 import sys,json,time
 sys.argv=[sys.argv[0],sys.argv[1],sys.argv[2]]
-exec(open("/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/SMOKE2/raw/drive.py").read().split("# a: concurrent")[0])
+exec(open("<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/SMOKE2/raw/drive.py").read().split("# a: concurrent")[0])
 pa,pb=prompt(11,1500),prompt(22,1800)
 def stream_abort(p,after):
     c=http.client.HTTPConnection("127.0.0.1",port,timeout=600)

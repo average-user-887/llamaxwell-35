@@ -1,11 +1,11 @@
 {
  "run_id": "r1h2h",
- "out_dir": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h",
+ "out_dir": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/R1/g4-r1h2h",
  "image": "nvidia/cuda:12.8.1-devel-ubuntu24.04",
- "gpu": "GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e",
- "models_dir": "/media/avg-usr/Storage/uroboros-models",
+ "gpu": "GPU-REDACTED",
+ "models_dir": "<STORAGE>/models",
  "model_file": "occamy-1.0-Q4_0-headq40b.gguf",
- "app_dir": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/app",
+ "app_dir": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/app",
  "exe_name": "llama",
  "exe_args_prefix": [
   "bench"
@@ -33,14 +33,14 @@
  ],
  "arms": {
   "A": {
-   "lib": "/media/avg-usr/Storage/m6000-llama-cpp/prod-libs/libggml-cuda-call35-20261111.so",
+   "lib": "<STORAGE>/m6000-llama-cpp/prod-libs/libggml-cuda-call35-20261111.so",
    "env": [],
    "expected": {
     "lib_sha256": "c3d0ecd041193e2c4399eb11a4a37df76ba9c9ebfe437872c5663ada2bcadd6f"
    }
   },
   "B": {
-   "lib": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/cand/C24/build/bin/libggml-cuda.so",
+   "lib": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/cand/C24/build/bin/libggml-cuda.so",
    "env": [],
    "expected": {
     "lib_sha256": "8a2a37d4ad9e4ffd0fd2d2766b2bda9e27aeb19e70a66045a90e67bd6d497299"

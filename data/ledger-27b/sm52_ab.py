@@ -2,8 +2,8 @@
 """7 Nov card C: A/B GGML_CUDA_MMVQ_SM52 0 vs 1 on the quick.py base (new .so). 3 reps each, interleaved. Caller holds gpu-bench.lock.
 Also checks bit-exactness: 128-token temp-0 seed-1 completion and the quick probes must be identical across flags."""
 import sys, json, copy, statistics
-sys.path.insert(0, "/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113"); import quick as q
-SO = "/media/avg-usr/Storage/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm-sm52.so"
+sys.path.insert(0, "<STORAGE>/m6000-llama-cpp/opt27b-20261113"); import quick as q
+SO = "<STORAGE>/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm-sm52.so"
 base = q.load()["base"]; res = {"0": [], "1": []}; outs = {"0": [], "1": []}
 for rep in range(3):
     for fl in ("0", "1"):

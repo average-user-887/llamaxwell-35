@@ -21,7 +21,7 @@ Container `llamacpp-m6000` = image `local/llama.cpp:server-cuda-b11552-sm52-norm
 ## Known discrepancies (read before auditing)
 - **Library identity drift.** `prod-libs/libggml-cuda-gate-copy-20261013.so` was first the gate-copy build (sha256 `953bda22...c8e8`, still named in the old `.sha256` file). On 2026-10-15 it was **replaced in place by D14 `d14a076e...`** (see `adoption-receipt.json`; the adoption was a limited warm-cache acceptance, n=2, cold regime did not pass). The file name was not changed. The deployed hash is D14, not 953bda.
 - **Not reproduced from scratch.** D14 is a fresh rebuild whose predecessor artifact (`f64481...`) was overwritten before copying; byte-identity with it is not claimed. A clean from-scratch rebuild from this repo has **not** been run, so reproducibility of `d14a076e` is unverified. NVCC embeds temporary source ids, so byte-equality across builds may not hold; compare symbols/objects too.
-- Receipts reference local paths under `/media/avg-usr/Storage/m6000-llama-cpp/`; they are evidence, not runnable here.
+- Receipts reference local paths under `<STORAGE>/m6000-llama-cpp/`; they are evidence, not runnable here.
 - The gate-copy tree includes a pre-existing local edit to `.devops/cuda.Dockerfile` carried from the shared base checkout.
 
 ## Verify

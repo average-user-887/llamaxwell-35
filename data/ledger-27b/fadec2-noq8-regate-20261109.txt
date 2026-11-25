@@ -1,5 +1,5 @@
 9 Nov no-q8 + 64-chunk re-gate. Gate fixed before results: |dmean|<=.0005, same-top within .3 pt. Start 06:49:19
-28f83e8501965631c130c9c4e2c12c97  /media/avg-usr/Storage/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm-fadec2.so
+28f83e8501965631c130c9c4e2c12c97  <STORAGE>/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm-fadec2.so
 == nq0 GGML_CUDA_FA_DBG=1 GGML_CUDA_FA_DEC=0 KLDSHIM_RAWTHR=99 GGML_CUDA_FA_DBG_NOQ8=1 GGML_CUDA_FA_DBG_AUTH=0 chunks=11 base=/w/head4.kld 06:49:20
 chunk             PPL               ln(PPL(Q)/PPL(base))          KL Divergence              Δp RMS            Same top
 kldshim chunk=15 mean=0.004384 n=4080
@@ -42,12 +42,12 @@ max 1.498 -> 6.679; >1 5 -> 6; >3 0 -> 1
 GATE FAIL
 == real vs debug lib (F2 a064/a264)
 Traceback (most recent call last):
-  File "/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113/f2/gate64.py", line 15, in <module>
+  File "<STORAGE>/m6000-llama-cpp/opt27b-20261113/f2/gate64.py", line 15, in <module>
     print(f"n={n} (a {len(a)}, b {len(b)}) mean {ma:.6f} -> {mb:.6f} d={mb-ma:+.6f} se={s:.6f} t={m/s:.2f} top {top(a):.3f} -> {top(b):.3f} d={dt:+.3f}")
                                                                                                   ~^~
 ZeroDivisionError: float division by zero
 Traceback (most recent call last):
-  File "/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113/f2/gate64.py", line 15, in <module>
+  File "<STORAGE>/m6000-llama-cpp/opt27b-20261113/f2/gate64.py", line 15, in <module>
     print(f"n={n} (a {len(a)}, b {len(b)}) mean {ma:.6f} -> {mb:.6f} d={mb-ma:+.6f} se={s:.6f} t={m/s:.2f} top {top(a):.3f} -> {top(b):.3f} d={dt:+.3f}")
                                                                                                   ~^~
 ZeroDivisionError: float division by zero

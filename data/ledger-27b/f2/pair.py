@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # per-token paired stats from kldshim -tok.txt files: pair.py a b [...]; first file is the reference for pairing
 import sys
-X='/media/avg-usr/Models/kld-f2-20261108/'
+X='<MODELS>/kld-f2-20261108/'
 def L(t):
     d={}
     for l in open(X+t+'-tok.txt'):

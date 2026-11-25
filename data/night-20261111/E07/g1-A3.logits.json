@@ -1,8 +1,8 @@
 [
  {
   "kind": "logits",
-  "ref": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/E07/dumps/g1-A1.bin",
-  "arm": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/E07/dumps/g1-A3.bin",
+  "ref": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/E07/dumps/g1-A1.bin",
+  "arm": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/E07/dumps/g1-A3.bin",
   "ref_sha256": "bfba627714ddf7f38384d5399941ea7ea1bdafb0a2372b6e1f8443e0a039a4dc",
   "arm_sha256": "bfba627714ddf7f38384d5399941ea7ea1bdafb0a2372b6e1f8443e0a039a4dc",
   "units": "step",

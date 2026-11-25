@@ -1,7 +1,7 @@
 #!/bin/bash
 # 7 Nov: clock A/B 987->1152 MHz on C3. A = R21 (4k) + fa-gemm-long-20261107-2001 (long). Temp/power/throttle sampled every 2s.
-set -u; O=/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113; G=GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e
-SO=/media/avg-usr/Storage/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm.so; TS=$(date +%Y%m%d-%H%M)
+set -u; O=<STORAGE>/m6000-llama-cpp/opt27b-20261113; G=GPU-REDACTED
+SO=<STORAGE>/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm.so; TS=$(date +%Y%m%d-%H%M)
 OUT=$O/clk1152-long-$TS.txt; TMP=$O/clk1152-temps-$TS.csv
 exec 9>$O/../gpu-bench.lock; flock 9
 nvidia-smi -i $G --query-gpu=timestamp,temperature.gpu,power.draw,clocks.sm,clocks.mem,clocks_throttle_reasons.active -l 2 --format=csv > $TMP & SP=$!

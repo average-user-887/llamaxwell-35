@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # summarize <tag>-cmp.txt: per-call DEC=2 vs stock difference, map call -> chunk, eval, layer; args: tag [chunk eval]
 import sys,re
-X='/media/avg-usr/Models/kld-f2-20261108/'
+X='<MODELS>/kld-f2-20261108/'
 tag=sys.argv[1]; R=[]
 for l in open(X+tag+'-cmp.txt'):
     f=l.split(); c=int(f[0]); d={k:v for k,v in (x.split('=') for x in f[1:])}

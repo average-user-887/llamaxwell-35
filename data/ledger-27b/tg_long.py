@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """7 Nov: tg at long context on the quick.py base. Filler prompt (as fa_eval) + TG instruction, n_predict 128. Caller holds lock."""
 import sys, json, time, urllib.request
-sys.path.insert(0, "/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113"); import quick as q
+sys.path.insert(0, "<STORAGE>/m6000-llama-cpp/opt27b-20261113"); import quick as q
 c = q.load()["base"]; ok, err = q.start(c)
 if not ok: print(json.dumps({"error": err[-300:]})); sys.exit(2)
 for reps in [0] + [int(x) for x in sys.argv[1:]]:

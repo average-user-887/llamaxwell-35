@@ -1,0 +1,17 @@
+temp_c=42
+M6000 telemetry age_s=2.0 vram_used_MiB=129 util_pct=0 power_limit_W=250
+Device: Quadro M6000 24GB (cc 5.2, SMs=24)
+WyWorkspace bytes (max_T=2048): 338.75 MiB
+NUM[norm] T= 124 K=1 | stock dst=1.09e-07 st=6.17e-08 | wy dst=1.71e-07 st=6.17e-08 | ratio dst=1.56x st=0.62x | nonfin=0+0 -> PASS
+NUM[norm] T= 128 K=1 | stock dst=1.10e-07 st=5.99e-08 | wy dst=1.72e-07 st=5.99e-08 | ratio dst=1.56x st=0.60x | nonfin=0+0 -> PASS
+NUM[norm] T= 512 K=1 | stock dst=1.10e-07 st=5.95e-08 | wy dst=2.06e-07 st=5.95e-08 | ratio dst=1.88x st=0.59x | nonfin=0+0 -> PASS
+NUM[norm] T=1024 K=1 | stock dst=1.10e-07 st=5.86e-08 | wy dst=2.10e-07 st=5.86e-08 | ratio dst=1.90x st=0.59x | nonfin=0+0 -> PASS
+NUM[norm] T=2048 K=1 | stock dst=1.10e-07 st=6.07e-08 | wy dst=2.09e-07 st=6.07e-08 | ratio dst=1.91x st=0.61x | nonfin=0+0 -> PASS
+NUM[norm] T= 124 K=2 | stock dst=1.09e-07 st=5.92e-08 | wy dst=1.73e-07 st=5.92e-08 | ratio dst=1.59x st=0.59x | nonfin=0+0 -> PASS
+NUM[norm] T= 128 K=2 | stock dst=1.10e-07 st=5.92e-08 | wy dst=1.75e-07 st=5.92e-08 | ratio dst=1.59x st=0.59x | nonfin=0+0 -> PASS
+NUM[norm] T= 512 K=2 | stock dst=1.10e-07 st=5.79e-08 | wy dst=2.03e-07 st=5.79e-08 | ratio dst=1.84x st=0.58x | nonfin=0+0 -> PASS
+NUM[norm] T=1024 K=2 | stock dst=1.10e-07 st=6.11e-08 | wy dst=2.09e-07 st=6.11e-08 | ratio dst=1.90x st=0.61x | nonfin=0+0 -> PASS
+NUM[norm] T=2048 K=2 | stock dst=1.10e-07 st=6.40e-08 | wy dst=2.12e-07 st=6.40e-08 | ratio dst=1.93x st=0.64x | nonfin=0+0 -> PASS
+NUM[harsh] T= 512 K=2 | stock dst=1.06e-07 st=5.31e-08 | wy dst=2.04e-07 st=5.31e-08 | ratio dst=1.92x st=0.53x | nonfin=0+0 -> PASS
+TIMING ABBA T=1024 K=2 | stock=[3.9429, 3.9473] avg=3.9451 ms | wy=[5.0414, 5.0413] avg=5.0413 ms | speedup=0.783x (save=-1.0962 ms/call, 240calls=-263.1 ms)
+TIMING ABBA T=2048 K=2 | stock=[7.8698, 7.8566] avg=7.8632 ms | wy=[10.1567, 10.1556] avg=10.1562 ms | speedup=0.774x (save=-2.2930 ms/call, 240calls=-550.3 ms)

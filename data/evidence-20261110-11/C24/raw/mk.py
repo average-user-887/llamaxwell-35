@@ -1,5 +1,5 @@
 import json,sys,hashlib
-W="/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110"
+W="<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110"
 rid=sys.argv[1]; aenv=[e for e in sys.argv[2].split(",") if e]; benv=[e for e in sys.argv[3].split(",") if e]
 cfg=json.load(open(W+"/harness/c04/config.c04.json"))
 lib=f"{W}/cand/C24/build/bin/libggml-cuda.so"; h=hashlib.sha256(open(lib,"rb").read()).hexdigest()

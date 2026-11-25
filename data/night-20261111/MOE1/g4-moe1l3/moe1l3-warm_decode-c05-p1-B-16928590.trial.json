@@ -16,13 +16,13 @@
   "--network",
   "none",
   "--device",
-  "nvidia.com/gpu=GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e",
+  "nvidia.com/gpu=GPU-REDACTED",
   "-v",
-  "/media/avg-usr/Storage/uroboros-models:/models:ro",
+  "<STORAGE>/models:/models:ro",
   "-v",
-  "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/app:/app:ro",
+  "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/app:/app:ro",
   "-v",
-  "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/cand/MOE1/build/bin/libggml-cuda.so:/app/libggml-cuda.so:ro",
+  "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/cand/MOE1/build/bin/libggml-cuda.so:/app/libggml-cuda.so:ro",
   "-e",
   "LD_LIBRARY_PATH=/app",
   "-e",
@@ -107,6 +107,6 @@
   "throttle_bits_or": "0x0",
   "flags": []
  },
- "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c05-p1-B-16928590.log",
+ "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-night-20261111/rounds/MOE1/g4-moe1l3/moe1l3-warm_decode-c05-p1-B-16928590.log",
  "t_start": "2026-11-11T23:30:57"
 }

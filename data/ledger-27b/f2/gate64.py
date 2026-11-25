@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # gate64.py A B: paired gate on kldshim -tok.txt. Limits set by owner 9 Nov (raised from |dmean|<=.0005, |dtop|<=.3): dmean<=+.0010, same-top no lower than -.3 pt; improvements never fail.
 import sys,math
-X='/media/avg-usr/Models/kld-f2-20261108/'
+X='<MODELS>/kld-f2-20261108/'
 def L(t):
     d={}
     for l in open(X+t+'-tok.txt'):

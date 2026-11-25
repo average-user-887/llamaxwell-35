@@ -1,0 +1,197 @@
+{
+  "packet": "native-r3-card3-gdn-wy-20261121",
+  "decision": "retired_cleanly_slow_on_sm52",
+  "chunk_size_B": 64,
+  "workspace_bytes_max_T2048_mib": 338.75,
+  "ptxas_spill_bytes": 0,
+  "numerical_cases": [
+    {
+      "regime": "norm",
+      "T": 124,
+      "K": 1,
+      "stock_dst_rel_rmse": 1.09e-07,
+      "stock_st_rel_rmse": 6.17e-08,
+      "wy_dst_rel_rmse": 1.71e-07,
+      "wy_st_rel_rmse": 6.17e-08,
+      "ratio_dst": 1.56,
+      "ratio_st": 0.62,
+      "nonfinite_dst": 0,
+      "nonfinite_st": 0,
+      "status": "PASS"
+    },
+    {
+      "regime": "norm",
+      "T": 128,
+      "K": 1,
+      "stock_dst_rel_rmse": 1.1e-07,
+      "stock_st_rel_rmse": 5.99e-08,
+      "wy_dst_rel_rmse": 1.72e-07,
+      "wy_st_rel_rmse": 5.99e-08,
+      "ratio_dst": 1.56,
+      "ratio_st": 0.6,
+      "nonfinite_dst": 0,
+      "nonfinite_st": 0,
+      "status": "PASS"
+    },
+    {
+      "regime": "norm",
+      "T": 512,
+      "K": 1,
+      "stock_dst_rel_rmse": 1.1e-07,
+      "stock_st_rel_rmse": 5.95e-08,
+      "wy_dst_rel_rmse": 2.06e-07,
+      "wy_st_rel_rmse": 5.95e-08,
+      "ratio_dst": 1.88,
+      "ratio_st": 0.59,
+      "nonfinite_dst": 0,
+      "nonfinite_st": 0,
+      "status": "PASS"
+    },
+    {
+      "regime": "norm",
+      "T": 1024,
+      "K": 1,
+      "stock_dst_rel_rmse": 1.1e-07,
+      "stock_st_rel_rmse": 5.86e-08,
+      "wy_dst_rel_rmse": 2.1e-07,
+      "wy_st_rel_rmse": 5.86e-08,
+      "ratio_dst": 1.9,
+      "ratio_st": 0.59,
+      "nonfinite_dst": 0,
+      "nonfinite_st": 0,
+      "status": "PASS"
+    },
+    {
+      "regime": "norm",
+      "T": 2048,
+      "K": 1,
+      "stock_dst_rel_rmse": 1.1e-07,
+      "stock_st_rel_rmse": 6.07e-08,
+      "wy_dst_rel_rmse": 2.09e-07,
+      "wy_st_rel_rmse": 6.07e-08,
+      "ratio_dst": 1.91,
+      "ratio_st": 0.61,
+      "nonfinite_dst": 0,
+      "nonfinite_st": 0,
+      "status": "PASS"
+    },
+    {
+      "regime": "norm",
+      "T": 124,
+      "K": 2,
+      "stock_dst_rel_rmse": 1.09e-07,
+      "stock_st_rel_rmse": 5.92e-08,
+      "wy_dst_rel_rmse": 1.73e-07,
+      "wy_st_rel_rmse": 5.92e-08,
+      "ratio_dst": 1.59,
+      "ratio_st": 0.59,
+      "nonfinite_dst": 0,
+      "nonfinite_st": 0,
+      "status": "PASS"
+    },
+    {
+      "regime": "norm",
+      "T": 128,
+      "K": 2,
+      "stock_dst_rel_rmse": 1.1e-07,
+      "stock_st_rel_rmse": 5.92e-08,
+      "wy_dst_rel_rmse": 1.75e-07,
+      "wy_st_rel_rmse": 5.92e-08,
+      "ratio_dst": 1.59,
+      "ratio_st": 0.59,
+      "nonfinite_dst": 0,
+      "nonfinite_st": 0,
+      "status": "PASS"
+    },
+    {
+      "regime": "norm",
+      "T": 512,
+      "K": 2,
+      "stock_dst_rel_rmse": 1.1e-07,
+      "stock_st_rel_rmse": 5.79e-08,
+      "wy_dst_rel_rmse": 2.03e-07,
+      "wy_st_rel_rmse": 5.79e-08,
+      "ratio_dst": 1.84,
+      "ratio_st": 0.58,
+      "nonfinite_dst": 0,
+      "nonfinite_st": 0,
+      "status": "PASS"
+    },
+    {
+      "regime": "norm",
+      "T": 1024,
+      "K": 2,
+      "stock_dst_rel_rmse": 1.1e-07,
+      "stock_st_rel_rmse": 6.11e-08,
+      "wy_dst_rel_rmse": 2.09e-07,
+      "wy_st_rel_rmse": 6.11e-08,
+      "ratio_dst": 1.9,
+      "ratio_st": 0.61,
+      "nonfinite_dst": 0,
+      "nonfinite_st": 0,
+      "status": "PASS"
+    },
+    {
+      "regime": "norm",
+      "T": 2048,
+      "K": 2,
+      "stock_dst_rel_rmse": 1.1e-07,
+      "stock_st_rel_rmse": 6.4e-08,
+      "wy_dst_rel_rmse": 2.12e-07,
+      "wy_st_rel_rmse": 6.4e-08,
+      "ratio_dst": 1.93,
+      "ratio_st": 0.64,
+      "nonfinite_dst": 0,
+      "nonfinite_st": 0,
+      "status": "PASS"
+    },
+    {
+      "regime": "harsh",
+      "T": 512,
+      "K": 2,
+      "stock_dst_rel_rmse": 1.06e-07,
+      "stock_st_rel_rmse": 5.31e-08,
+      "wy_dst_rel_rmse": 2.04e-07,
+      "wy_st_rel_rmse": 5.31e-08,
+      "ratio_dst": 1.92,
+      "ratio_st": 0.53,
+      "nonfinite_dst": 0,
+      "nonfinite_st": 0,
+      "status": "PASS"
+    }
+  ],
+  "timing_abba": [
+    {
+      "T": 1024,
+      "K": 2,
+      "stock_ms": [
+        3.9429,
+        3.9473
+      ],
+      "stock_avg_ms": 3.9451,
+      "wy_ms": [
+        5.0414,
+        5.0413
+      ],
+      "wy_avg_ms": 5.0413,
+      "speedup_x": 0.783,
+      "save_ms_per_call": -1.0962
+    },
+    {
+      "T": 2048,
+      "K": 2,
+      "stock_ms": [
+        7.8698,
+        7.8566
+      ],
+      "stock_avg_ms": 7.8632,
+      "wy_ms": [
+        10.1567,
+        10.1556
+      ],
+      "wy_avg_ms": 10.1562,
+      "speedup_x": 0.774,
+      "save_ms_per_call": -2.293
+    }
+  ]
+}

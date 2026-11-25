@@ -6,7 +6,7 @@ Negative controls must be DETECTED. Run: python3 -I c11_oracle.py [out.json]
 """
 import json, sys
 import numpy as np
-sys.path.insert(0, "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/tests")
+sys.path.insert(0, "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/tests")
 import gdn_ref as R
 F = np.float32
 NVH, NKH, SD, NCG, H = 32, 16, 128, 8, 2048

@@ -1,7 +1,7 @@
 #!/bin/bash
 # GDN1 chain (run under flock gpu-bench.lock): GPU-free check, nvprof d0 (3L OFF, fused OFF, fused PREF), G1 OFF x2 / PREF x2 + cmp, G4 1-cycle sanity (ABBA x5 only if nvprof delta >= ~0.12 ms/tok, separate run)
-N=/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111; R=$N/rounds/GDN1; L=$N/cand/GDN1/build/bin/libggml-cuda.so
-GPU=GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e
+N=<STORAGE>/m6000-llama-cpp/occamy35-night-20261111; R=$N/rounds/GDN1; L=$N/cand/GDN1/build/bin/libggml-cuda.so
+GPU=GPU-REDACTED
 echo "lock acquired $(date)"
 apps=$(nvidia-smi -i $GPU --query-compute-apps=pid --format=csv,noheader | wc -l); echo "compute apps on M6000: $apps"
 if [ "$apps" != 0 ]; then nvidia-smi -i $GPU --query-compute-apps=pid,used_memory --format=csv; echo ABORT_GPU_BUSY; exit 3; fi

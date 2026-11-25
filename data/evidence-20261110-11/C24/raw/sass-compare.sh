@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # C24: CPU-only SASS compare, pin build-clean vs merged C24 build, flags-OFF variants.
 set -uo pipefail
-WORK=/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110
+WORK=<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110
 taskset -c 6-11 docker run --rm --name sass-c24 --cpuset-cpus 6-11 -u "$(id -u):$(id -g)" -e TMPDIR=/tmp -v "$WORK":/w local/m6000-build-tools:20261013 bash -c '
 set -u
 D=ggml/src/ggml-cuda/CMakeFiles/ggml-cuda.dir

@@ -4,7 +4,7 @@
 # Tool image: local/m6000-build-tools:20261013 (nvcc 12.8.93, gcc-14 14.2.0, cmake 3.28.3). Alternative: nvidia/cuda:12.8.1-devel-ubuntu24.04 (nvcc 12.8.93 also; needs apt gcc-14 cmake).
 # Source mounted READ-ONLY; output only under WORK/build-clean.
 set -uo pipefail
-WORK=/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110
+WORK=<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110
 SRC=${SRC:-$WORK/cand/C24}
 OUT=${OUT:-$WORK/cand/C24/build}
 IMG=${IMG:-local/m6000-build-tools:20261013}

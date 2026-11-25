@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """8 Nov fadec: A/B GGML_CUDA_FA_DEC 0/1 with the fadec lib; tg at long context on the quick.py base. Filler prompt (as fa_eval) + TG instruction, n_predict 128. Caller holds lock."""
 import sys, json, time, urllib.request
-sys.path.insert(0, "/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113"); import quick as q
+sys.path.insert(0, "<STORAGE>/m6000-llama-cpp/opt27b-20261113"); import quick as q
 import copy
-SO = "/media/avg-usr/Storage/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm-fadec.so"
+SO = "<STORAGE>/m6000-llama-cpp/mmvqtune-libs/libggml-cuda-mmvqT-fagemm-fadec.so"
 for flag in ("0", "1", "0", "1"):  # order 0,1,0,1 ; each start = 1 run per rep (2 runs/flag total)
   c = copy.deepcopy(q.load()["base"]); c["so"] = SO; c["env"]["GGML_CUDA_FA_DEC"] = flag; ok, err = q.start(c)
   if not ok: print(json.dumps({"error": err[-300:]})); sys.exit(2)

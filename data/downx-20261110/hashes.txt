@@ -1,5 +1,5 @@
 # SHA-256 (computed 2026-11-10 with sha256sum)
-2b5d7a2ca6813e9cdd25fe9142e35bd732583679c52ee7888f9455df218d9cc0  occamy-1.0-Q4_0-headq40b.gguf (/media/avg-usr/Storage/uroboros-models/)
+2b5d7a2ca6813e9cdd25fe9142e35bd732583679c52ee7888f9455df218d9cc0  occamy-1.0-Q4_0-headq40b.gguf (<STORAGE>/models/)
 7b4f304ae3facee48bac2a8cac7e356f31ef8540e8e3711df192645efe155f6e  libggml-cuda-downx-i1.so (mode-1 bench lib; ccc8539 code, built 18:02)
 7b4f304ae3facee48bac2a8cac7e356f31ef8540e8e3711df192645efe155f6e  prod-libs/libggml-cuda-downx35-20261110.so (IDENTICAL to i1; also /app/libggml-cuda.so inside running llamacpp-m6000)
 2d6412e3b0c21117b3ee3bd125bbcefc1d4d40109cb96cd3e292a6139ae11cd5  libggml-cuda-downx-i2.so (mode-3 bench lib; worktree built 18:09, 897a09c committed 18:12)

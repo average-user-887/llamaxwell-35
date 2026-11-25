@@ -2,7 +2,7 @@
 """7 Nov: S16 A/B (VARS entry = GGML_CUDA_FA_GEMM_S16; FA_GEMM=1 always). Orig: A/B long-context prefill for GEMM FA (GGML_CUDA_FA_GEMM). usage: fa_eval.py <so> <reps...>
 Same base config as quick.py state; only GGML_CUDA_FA_GEMM differs. Prod stop/restore is done by the caller."""
 import sys, json, copy, time, urllib.request
-sys.path.insert(0, "/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113")
+sys.path.insert(0, "<STORAGE>/m6000-llama-cpp/opt27b-20261113")
 import quick as q
 
 def pp(reps):

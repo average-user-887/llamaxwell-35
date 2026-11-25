@@ -1,7 +1,7 @@
 #!/bin/bash
 # E07 phase 2 (under flock): nvprof d16384 pipe 0/3/4, G1 A3(off, new lib)/B3/B4 vs A1
-N=/media/avg-usr/Storage/m6000-llama-cpp/occamy35-night-20261111; R=$N/rounds/E07; L=$N/cand/E07/build/bin/libggml-cuda.so
-GPU=GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e
+N=<STORAGE>/m6000-llama-cpp/occamy35-night-20261111; R=$N/rounds/E07; L=$N/cand/E07/build/bin/libggml-cuda.so
+GPU=GPU-REDACTED
 echo "lock acquired $(date) lib=$(sha256sum $L | cut -c1-16)"
 apps=$(nvidia-smi -i $GPU --query-compute-apps=pid --format=csv,noheader | wc -l); echo "compute apps on M6000: $apps"
 if [ "$apps" != 0 ]; then echo ABORT_GPU_BUSY; exit 3; fi

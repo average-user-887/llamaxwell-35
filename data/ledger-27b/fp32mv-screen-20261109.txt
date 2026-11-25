@@ -1,5 +1,5 @@
 9 Nov FP32MV screen. Fixed before results (F vs C): d mean <= +.0005; same-top >= -.3 pt; F mean <= C mean - .0030; no nonfinite; no new token > 3. Start 11:31:36
-28f83e8501965631c130c9c4e2c12c97  /media/avg-usr/Storage/m6000-llama-cpp/prod-libs/libggml-cuda-fadec2-20261109.so
+28f83e8501965631c130c9c4e2c12c97  <STORAGE>/m6000-llama-cpp/prod-libs/libggml-cuda-fadec2-20261109.so
 == p0 GGML_CUDA_CONCAT_T=1 GGML_CUDA_GATE_COPY=1 GGML_CUDA_GDN_COLS=2,4 GGML_CUDA_MMQ_COMPACT_SM52=1 GGML_CUDA_MMQ_TAIL_SM52=1 GGML_CUDA_MMQ_XMAD_SM52=1 GGML_CUDA_NORM_Q8=1 GGML_CUDA_OCCAMY_FA=1 GGML_CUDA_OCCAMY_FUSED=1 GGML_CUDA_OCCAMY_GDN=1 GGML_CUDA_OCCAMY_GDN_STATE_DIRECT=1 GGML_CUDA_Q8_REUSE=1 GGML_CUDA_RMS_WARP=0 KLDSHIM_RAWTHR=99 GGML_CUDA_FA_DEC=0 chunks=16 base=/w/head4.kld 11:31:37
 chunk             PPL               ln(PPL(Q)/PPL(base))          KL Divergence              Δp RMS            Same top
 kldshim chunk=15 mean=0.009094 n=4080

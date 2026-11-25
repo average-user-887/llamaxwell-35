@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """9 Nov power-cap sweep on live prod C4. Same text at each cap (temperature 0). Restores 250 W on any exit."""
 import sys,json,time,random,signal,subprocess,threading,re
-sys.path.insert(0,"/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113"); import quick as q
-P=q.PROD_PORT; U=q.GPU; RES="/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113/power/sweep-20261109.jsonl"
-src=open("/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113/f2/stage1.py").read()
+sys.path.insert(0,"<STORAGE>/m6000-llama-cpp/opt27b-20261113"); import quick as q
+P=q.PROD_PORT; U=q.GPU; RES="<STORAGE>/m6000-llama-cpp/opt27b-20261113/power/sweep-20261109.jsonl"
+src=open("<STORAGE>/m6000-llama-cpp/opt27b-20261113/f2/stage1.py").read()
 PR=eval(re.search(r'^PR=q\.PROBES\+(\[.*\])$',src,re.M).group(1)); PR=q.PROBES+PR
 CAPS=[int(x) for x in sys.argv[1:]] or [250,200,175,225,150,200,250]
 def out(**k):

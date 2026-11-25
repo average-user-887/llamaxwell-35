@@ -15,7 +15,7 @@ def post(path, body, timeout=7200):
     r = urllib.request.Request(U + path, json.dumps(body).encode(), {"Content-Type": "application/json"})
     return json.load(urllib.request.urlopen(r, timeout=timeout))
 def get(path): return json.load(urllib.request.urlopen(U + path, timeout=30))
-def vram(): return int(subprocess.run(["nvidia-smi", "--id=GPU-684f5e72-ce85-7b4f-e4f6-2dddddd6e60e", "--query-gpu=memory.used",
+def vram(): return int(subprocess.run(["nvidia-smi", "--id=GPU-REDACTED", "--query-gpu=memory.used",
                                         "--format=csv,noheader,nounits"], capture_output=True, text=True).stdout.strip() or 0)
 peak = [0]; stop = [False]
 def sampler():

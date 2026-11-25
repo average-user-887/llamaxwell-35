@@ -96,7 +96,7 @@
     "rc": 0,
     "value": 80.103016,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c00-p0-A-08e62a37.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c00-p0-A-08e62a37.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c00-p1-B-f345e931",
@@ -108,7 +108,7 @@
     "rc": 0,
     "value": 81.660913,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c00-p1-B-f345e931.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c00-p1-B-f345e931.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c01-p0-A-7dae14df",
@@ -120,7 +120,7 @@
     "rc": 0,
     "value": 79.717689,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c01-p0-A-7dae14df.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c01-p0-A-7dae14df.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c01-p1-B-b8ba61cc",
@@ -132,7 +132,7 @@
     "rc": 0,
     "value": 81.659671,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c01-p1-B-b8ba61cc.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c01-p1-B-b8ba61cc.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c01-p2-B-28d9d86e",
@@ -144,7 +144,7 @@
     "rc": 0,
     "value": 81.678823,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c01-p2-B-28d9d86e.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c01-p2-B-28d9d86e.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c01-p3-A-1deebe6e",
@@ -156,7 +156,7 @@
     "rc": 0,
     "value": 79.74321,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c01-p3-A-1deebe6e.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c01-p3-A-1deebe6e.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c02-p0-A-0d488ce0",
@@ -168,7 +168,7 @@
     "rc": 0,
     "value": 79.72726,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c02-p0-A-0d488ce0.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c02-p0-A-0d488ce0.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c02-p1-B-18673173",
@@ -180,7 +180,7 @@
     "rc": 0,
     "value": 81.693638,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c02-p1-B-18673173.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c02-p1-B-18673173.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c02-p2-B-14bae70e",
@@ -192,7 +192,7 @@
     "rc": 0,
     "value": 81.688779,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c02-p2-B-14bae70e.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c02-p2-B-14bae70e.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c02-p3-A-c16f6592",
@@ -204,7 +204,7 @@
     "rc": 0,
     "value": 79.758592,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c02-p3-A-c16f6592.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c02-p3-A-c16f6592.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c03-p0-A-7d3f7843",
@@ -216,7 +216,7 @@
     "rc": 0,
     "value": 79.72354,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c03-p0-A-7d3f7843.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c03-p0-A-7d3f7843.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c03-p1-B-6bb2e3c9",
@@ -228,7 +228,7 @@
     "rc": 0,
     "value": 81.708222,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c03-p1-B-6bb2e3c9.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c03-p1-B-6bb2e3c9.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c03-p2-B-4d041c1a",
@@ -240,7 +240,7 @@
     "rc": 0,
     "value": 81.65943,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c03-p2-B-4d041c1a.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c03-p2-B-4d041c1a.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c03-p3-A-cf34a016",
@@ -252,7 +252,7 @@
     "rc": 0,
     "value": 79.758798,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c03-p3-A-cf34a016.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c03-p3-A-cf34a016.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c04-p0-A-10943c09",
@@ -264,7 +264,7 @@
     "rc": 0,
     "value": 79.709811,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c04-p0-A-10943c09.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c04-p0-A-10943c09.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c04-p1-B-130a7826",
@@ -276,7 +276,7 @@
     "rc": 0,
     "value": 81.672244,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c04-p1-B-130a7826.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c04-p1-B-130a7826.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c04-p2-B-de028550",
@@ -288,7 +288,7 @@
     "rc": 0,
     "value": 81.671519,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c04-p2-B-de028550.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c04-p2-B-de028550.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c04-p3-A-ebc7609d",
@@ -300,7 +300,7 @@
     "rc": 0,
     "value": 79.724385,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c04-p3-A-ebc7609d.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c04-p3-A-ebc7609d.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c05-p0-A-8650cd09",
@@ -312,7 +312,7 @@
     "rc": 0,
     "value": 79.713517,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c05-p0-A-8650cd09.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c05-p0-A-8650cd09.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c05-p1-B-174d625a",
@@ -324,7 +324,7 @@
     "rc": 0,
     "value": 81.692207,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c05-p1-B-174d625a.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c05-p1-B-174d625a.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c05-p2-B-6ee023e6",
@@ -336,7 +336,7 @@
     "rc": 0,
     "value": 81.652341,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c05-p2-B-6ee023e6.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c05-p2-B-6ee023e6.log"
    },
    {
     "trial_id": "t1c10-warm_decode-c05-p3-A-aeaf8378",
@@ -348,7 +348,7 @@
     "rc": 0,
     "value": 79.725736,
     "status": "VALID",
-    "log_path": "/media/avg-usr/Storage/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c05-p3-A-aeaf8378.log"
+    "log_path": "<STORAGE>/m6000-llama-cpp/occamy35-moonshot-20261110/results/T1/raw/g4-t1c10/t1c10-warm_decode-c05-p3-A-aeaf8378.log"
    }
   ]
  }

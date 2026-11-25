@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+"""Speed card C2: append scheduling A/B on the same binary (card1 DSOs + C2 libllama-server-impl.so).
+OFF = B0 (ub1024, ckpt 8, native MTP1, mixed-batch 1024, prefill-single-stream); ON = OFF + LLAMA_APPEND_SCHED=1 [+ extra env].
+N3R two-slot fixture via a copy of n3r_replay.py that also stores per-token stream gaps (p95 stall per slot).
+GPU lease: blocking flock on the shared gpu-bench.lock per run (released between runs) + rb.admit_idle_fleet per run.
+Watchdog removes only this run's own container at >=80 C. GRAPHS / OCCAMY_DEBUG stripped. GPU UUID never printed or stored.
+env: QA_ORDER (e.g. OFF96,ON96,ON96,OFF96), QA_STOP_EPOCH, QA_COOL_C, QA_ON_EXTRA ("K=V,K=V"), QA_OUT, QA_MV2=1 (logprob dump arms)."""
+import fcntl, json, os, re, subprocess, sys, threading, time
+from pathlib import Path
+sys.dont_write_bytecode = True
+R3 = Path('<SCRATCH>/r3-bench')
+sys.path.insert(0, str(R3))
+import r3_bench as rb  # noqa: E402
+
+OUT = Path(os.environ.get('QA_OUT', '/tmp/qa-speed-cards/c2/runs'))
+REPLAY = Path('/tmp/qa-speed-cards/c2/scripts/n3r_replay_c2.py')
+LIB = Path('/tmp/qa-speed-cards/c2/build/on/libllama-server-impl.so')
+BFCL_ENV = R3 / 'card2-agentic/runs/r3-bfcl-full-r3-lossless-native-20261121T013713Z-482738/environment.args'
+ORDER = os.environ.get('QA_ORDER', 'OFF84,ON84,ON84,OFF84').split(',')
+STOP_AT = float(os.environ.get('QA_STOP_EPOCH', '0'))
+COOL_C = int(os.environ.get('QA_COOL_C', 60))
+HARD_C = 80
+CKPT = '8'; UB = 1024
+ON_EXTRA = [tuple(kv.split('=', 1)) for kv in os.environ.get('QA_ON_EXTRA', '').split(',') if '=' in kv]
+MV2 = os.environ.get('QA_MV2') == '1'
+assert 'GGML_CUDA_MAXWELL_GRAPHS' not in os.environ and 'GGML_CUDA_OCCAMY_DEBUG' not in os.environ
+
+
+def base_env():
+    pairs = []
+    for l in BFCL_ENV.read_text().splitlines():
+        if '=' not in l: continue
+        k, v = l.split('=', 1)
+        if k in ('GGML_CUDA_MAXWELL_GRAPHS', 'GGML_CUDA_OCCAMY_DEBUG', 'LLAMA_APPEND_SCHED', 'LLAMA_APPEND_CHUNK'): continue
+        pairs.append((k, v))
+    if MV2: pairs += [('LLAMA_MV2_DUMP', '/out/mv2.log'), ('LLAMA_MV2_DUMP_LO', '0'), ('LLAMA_MV2_DUMP_HI', '96')]
+    return pairs
+
+
+_bsa = rb.build_server_args
+def server_args(mode, n_ctx, ub, mb):
+    a = _bsa(mode, n_ctx, ub, mb)
+    a[a.index('-np') + 1] = '2'
+    a[a.index('--cache-ram') + 1] = '0'
+    a[a.index('--ctx-checkpoints') + 1] = CKPT
+    return a
+rb.build_server_args = server_args
+
+
+class Lease:   # same lock file as rb.gpu_lease, but a blocking acquire (queue, no polling)
+    def __enter__(self):
+        rb.LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+        self.fd = os.open(str(rb.LOCK_PATH), os.O_CREAT | os.O_RDWR, 0o600)
+        fcntl.flock(self.fd, fcntl.LOCK_EX); return self
+    def __exit__(self, *a):
+        fcntl.flock(self.fd, fcntl.LOCK_UN); os.close(self.fd)
+
+
+def gpu_temp(uuid):
+    r = subprocess.run(['nvidia-smi', '-i', uuid, '--query-gpu=temperature.gpu,memory.used', '--format=csv,noheader,nounits'], capture_output=True, text=True, timeout=10)
+    try: t, m = r.stdout.strip().splitlines()[0].split(','); gpu_temp.mem = int(m); return int(t)
+    except Exception: return -1
+
+
+class Watchdog(threading.Thread):
+    def __init__(self, uuid, name, log):
+        super().__init__(daemon=True); self.uuid, self.name, self.log = uuid, name, log
+        self.stop = threading.Event(); self.tmax = 0; self.mmax = 0; self.tripped = False
+    def run(self):
+        with open(self.log, 'a') as f:
+            while not self.stop.is_set():
+                t = gpu_temp(self.uuid); self.tmax = max(self.tmax, t); m = getattr(gpu_temp, 'mem', 0); self.mmax = max(self.mmax, m)
+                f.write('%d %d %d\n' % (int(time.time()), t, m)); f.flush()
+                if t >= HARD_C:
+                    self.tripped = True
+                    subprocess.run(['docker', 'rm', '-f', self.name], capture_output=True, timeout=20)
+                    f.write('TRIP %d C, removed own container\n' % t); return
+                self.stop.wait(2.0)
+
+
+def cool(uuid, log):   # wait in-process under the lease (this is pacing, not polling for the lock)
+    t0 = time.time()
+    while True:
+        t = gpu_temp(uuid)
+        if 0 <= t <= COOL_C or time.time() - t0 > 900: break
+        time.sleep(15)
+    log('cooldown %.0fs -> %d C' % (time.time() - t0, t))
+
+
+def p95(x):
+    x = sorted(x); return x[min(len(x) - 1, int(round(0.95 * (len(x) - 1))))] if x else None
+
+
+def main():
+    OUT.mkdir(parents=True, exist_ok=True); steps = OUT / 'steps.log'
+    def log(s):
+        line = '%s %s' % (time.strftime('%H:%M:%S'), re.sub(r'GPU-[0-9a-fA-F-]+', 'GPU-REDACTED', s)); print(line, flush=True)
+        with open(steps, 'a') as f: f.write(line + '\n')
+    dso = dict(rb.resolve_dso_map('card1', rb.DEFAULT_DSO_DIR)); dso['libllama-server-impl.so'] = LIB
+    uuid = rb.resolve_gpu_uuid()
+    rpath = OUT / 'results.json'
+    results = json.loads(rpath.read_text()) if rpath.exists() else []
+    log('order=%s on_extra=%s mv2=%s lib=%s' % (','.join(ORDER), ON_EXTRA, MV2, rb.sha256_file(LIB)[:16]))
+    for i, arm in enumerate(ORDER, 1):
+        if STOP_AT and time.time() > STOP_AT: log('stop time reached, not starting %d %s' % (i, arm)); break
+        tq = time.time()
+        with Lease():
+            if STOP_AT and time.time() > STOP_AT: log('stop time reached after queue, not starting %d %s' % (i, arm)); break
+            log('lease held for %d %s (queued %.0fs)' % (i, arm, time.time() - tq))
+            try: log('fleet admission: %s' % rb.admit_idle_fleet()[:200].replace('\n', ' '))
+            except Exception as ex: log('fleet admission FAILED: %s' % str(ex)[:200]); break
+            cool(uuid, log)
+            on = arm.startswith('ON'); CTX = {'84': 84224, '64': 65536, '96': 98304}[arm[-2:]]  # 2x96K OOMs on 24 GB with f16 KV (see oom96/)
+            env = base_env() + ([('LLAMA_APPEND_SCHED', '1')] + ON_EXTRA if on else [])
+            od = OUT / ('%s_%d_%s' % (time.strftime('%H%M'), i, arm)); od.mkdir(parents=True, exist_ok=True)
+            sess = rb.ServerSession(dso, od, 'native', 2 * CTX, UB, UB, env, health_timeout=300)
+            sess.name = sess.name.replace('r3bench-native-', 'r3bench-c2-', 1)
+            wd = None; rc = None; t_run = time.time()
+            try:
+                with sess:
+                    wd = Watchdog(uuid, sess.name, od / 'temp.log'); wd.start()
+                    r = subprocess.run(['python3', '-I', str(REPLAY), '--url', 'http://127.0.0.1:%d' % sess.port, '--arm', 'c2-%s' % arm,
+                                        '--out', str(od / 'n3r'), '--ctx', str(CTX), '--temp', '0', '--n-predict', '160'],
+                                       capture_output=True, text=True, timeout=5400)
+                    rc = r.returncode; (od / 'n3r.out').write_text(r.stdout[-20000:] + r.stderr[-5000:])
+            except Exception as ex:
+                log('run %d %s exception: %s' % (i, arm, str(ex)[:300]))
+            finally:
+                if wd: wd.stop.set(); wd.join(10)
+        rj = od / 'n3r' / 'run.json'
+        rec = dict(run=i, arm=arm, dir=od.name, rc=rc, wall_s=round(time.time() - t_run, 1), tmax=wd.tmax if wd else None,
+                   vram_peak_mib=wd.mmax if wd else None, ctx=CTX, env_on=on, on_extra=ON_EXTRA, mv2=MV2,
+                   invalid=bool(not wd or wd.tripped or wd.tmax >= HARD_C))
+        if rj.exists():
+            R = json.loads(rj.read_text()); T = R.get('turns_rec', [])
+            rec.update(makespan_s=R.get('makespan_s'), ok=R.get('ok'), n_void=R.get('n_void'), run_sha=R.get('run_sha'),
+                       setup_s=[round(s['s'], 1) for s in R.get('setup', [])])
+            for a in (0, 1):
+                g = [x for t in T if t.get('agent') == a for x in (t.get('gaps_s') or [])]
+                rec['p95_gap_a%d' % a] = p95(g); rec['max_gap_a%d' % a] = max(g) if g else None; rec['n_gap_a%d' % a] = len(g)
+            rec['turns'] = [dict(a=t.get('agent'), k=t.get('turn'), append=t.get('append_tok'), prompt_n=t.get('prompt_n'), cache_n=t.get('cache_n'),
+                                 prompt_ms=t.get('prompt_ms'), predicted_ms=t.get('predicted_ms'), n=t.get('tokens_predicted'),
+                                 t_send=t.get('t_send'), t_first=t.get('t_first'), t_end=t.get('t_end'), sha=(t.get('token_sha') or '')[:12]) for t in T]
+        slog = od / 'server.log'
+        if slog.exists():
+            txt = slog.read_text(errors='replace')
+            rec['cuda_errors'] = len(rb.CUDA_ERROR_RE.findall(txt)); rec['oom'] = 'out of memory' in txt
+            rec['sched_lines'] = [l.strip()[-140:] for l in txt.splitlines() if 'append-sched' in l][-3:]
+            rec['defer_lines'] = [l.strip()[-100:] for l in txt.splitlines() if 'prefill-single-stream' in l][-2:]
+        results.append(rec); rpath.write_text(json.dumps(results, indent=1))
+        log('run %d %s rc=%s makespan=%s setup=%s ok=%s void=%s p95=%s/%s tmax=%s invalid=%s sha=%s' % (
+            i, arm, rc, rec.get('makespan_s'), rec.get('setup_s'), rec.get('ok'), rec.get('n_void'),
+            rec.get('p95_gap_a0'), rec.get('p95_gap_a1'), rec.get('tmax'), rec['invalid'], (rec.get('run_sha') or '')[:12]))
+    log('done')
+
+
+if __name__ == '__main__':
+    main()

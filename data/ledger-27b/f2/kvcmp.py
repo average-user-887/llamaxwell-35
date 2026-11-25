@@ -2,7 +2,7 @@
 # dequantize q4_0 K/V in two runs' dumps and compare: kvcmp.py A B a b
 import sys,struct
 import numpy as np
-X='/media/avg-usr/Models/kld-f2-20261108/'
+X='<MODELS>/kld-f2-20261108/'
 A,B,a,b=sys.argv[1],sys.argv[2],int(sys.argv[3]),int(sys.argv[4])
 def rd(f):
     h=struct.unpack('9q',f.read(72)); return h,np.frombuffer(f.read(h[8]),np.uint8)

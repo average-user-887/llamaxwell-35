@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-ROOT=/media/avg-usr/Storage/m6000-llama-cpp
+ROOT=<STORAGE>/m6000-llama-cpp
 nice -n19 docker run --cpuset-cpus 6-11 --name build-gate-copy-lib-20261013 --network none -v "$ROOT:/w" -w /w/src-b11552-gate-copy-20261013 -e TMPDIR=/w/tmp-combo local/m6000-build-tools:20261013 bash -c '
 set -e
 export CC=gcc-14 CXX=g++-14 CUDAHOSTCXX=g++-14

@@ -2,7 +2,7 @@
 """8 Nov card E: tg at long context on the C3 base, MTP draft length from env DRAFT (2, 1, or 0 = MTP off).
 Copy of tg_long.py; only the server args differ. Filler prompt (as fa_eval) + TG instruction, n_predict 128. Caller holds lock."""
 import os, sys, json
-sys.path.insert(0, "/media/avg-usr/Storage/m6000-llama-cpp/opt27b-20261113"); import quick as q
+sys.path.insert(0, "<STORAGE>/m6000-llama-cpp/opt27b-20261113"); import quick as q
 DRAFT = os.environ.get("DRAFT", "2")
 if DRAFT not in ("0", "1", "2"): print(json.dumps({"error": "DRAFT must be 0,1,2"})); sys.exit(2)
 _orig_args_of = q.args_of
