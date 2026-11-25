@@ -84,11 +84,11 @@ docker run --rm --gpus all \
 
 `llamaxwell-serve.sh` supports three certified R3 profiles via `--mode`:
 
-| Mode | Speculative Decoding | 80K Warm Decode | 2K Warm Decode | IFEval (541) Strict Prompt | BFCL (160) Multi-Turn | Notes |
-| --- | --- | ---: | ---: | ---: | ---: | --- |
-| `mtp` (default) | `draft-mtp` (`n=1`, `f16` KV) | ~104.7 tok/s | ~119.2 tok/s | 79.67% (431/541) | 66/160 (ckpt2) / 69/160 (ckpt8) | Certified R3-lossless native MTP1 + `--ctx-checkpoints 8` |
-| `serial` | `none` | ~80.9 tok/s | ~88.6 tok/s | 81.52% (441/541) | 71/160 (44.38%) | Zero MTP verification drift; lowest variance |
-| `mtp-q8c` | `draft-mtp` + `GDN_T2_Q8C=1` | ~108.8 tok/s | ~121.3 tok/s | 80.96% (438/541) | partial (49/160 thermal stop) | Opt-in INT8 GDN verify (`GGML_CUDA_OCCAMY_GDN_T2_Q8C=1`) |
+| Mode | Speculative Decoding | 2K Warm (`fast2k`) | 80K Warm (`warm80k`) | 80K Unscripted (`ordinary80`) | 16K Prefill (`ub=1024`) | IFEval (541) Strict Prompt | BFCL (160) Multi-Turn | Notes |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| `mtp` (default) | `draft-mtp` (`n=1`, `f16` KV) | 120.08 tok/s | 104.71 tok/s | 96.82 tok/s | 474.53 tok/s | 79.67% (431/541) | 66/160 (ckpt2) / 69/160 (ckpt8) | Certified R3-lossless native MTP1 + `--ctx-checkpoints 8` |
+| `serial` | `none` | 87.94 tok/s | 80.88 tok/s | 80.43 tok/s | 488.40 tok/s | 81.52% (441/541) | 71/160 (44.38%) | Zero MTP verification drift; lowest variance |
+| `mtp-q8c` | `draft-mtp` + `GDN_T2_Q8C=1` | 121.32 tok/s | 108.79 tok/s | 98.59 tok/s | - | 80.96% (438/541) | partial (49/160 thermal stop) | Opt-in INT8 GDN verify (`GGML_CUDA_OCCAMY_GDN_T2_Q8C=1`) |
 
 Examples:
 ```bash
@@ -120,7 +120,7 @@ When `llama-server` exits gracefully (e.g. `SIGINT` / `SIGTERM`), the R3 build p
 
 ### Important Pitfalls
 1. **Never set `GGML_CUDA_OCCAMY_DEBUG=0`**: `ggml-cuda.cu` checks `getenv("GGML_CUDA_OCCAMY_DEBUG") != nullptr`. Even setting it to `"0"` enables verbose debug logging and hurts throughput. Always `unset GGML_CUDA_OCCAMY_DEBUG` (handled automatically by `llamaxwell-serve.sh`).
-2. **Keep `--ubatch-size 1024` (`-ub 1024`)**: Increasing `-ub` to `2048` doubles compute buffer + FA pool pressure and can OOM on 24 GB cards at 2-slot 80K+ context.
+2. **Keep `--ubatch-size 1024` (`-ub 1024`) for 2x80K+**: Increasing `-ub` to `2048` doubles compute buffer + FA pool pressure. On 24 GB M6000 with `-np 2` (`draft-mtp`), `-ub 2048` passes up to `-c 155648` (`2 x 77824`, `24415 MiB` VRAM peak; `-c 147456` / `2 x 73728` uses `24207 MiB` and is safer) and OOMs at `-c 157696` (`2 x 78848`) in `ggml_cuda_flash_attn_ext`. Keep `-ub 1024` when running `2 x 84224` (`-c 168448`).
 3. **Thermal management on Quadro M6000**: Passive/blower M6000 cards can hit 80 C+ under sustained 80K prefill. Monitor `nvidia-smi` temperatures during long benchmark suites.
 
 ---

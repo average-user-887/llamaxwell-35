@@ -22,11 +22,13 @@ Models and weights are **not** included.
 
 ## Certified Performance & Quality (`Quadro M6000 24 GB`)
 
-| Profile | 80K Warm Decode | 2K Warm Decode | IFEval (541) Strict Prompt | BFCL (160) Multi-Turn |
-| --- | ---: | ---: | ---: | ---: |
-| `mtp` (default: R3-lossless MTP1 + `ctx-checkpoints 8`) | ~104.7 tok/s | ~119.2 tok/s | 79.67% (431/541) | 66/160 (ckpt2) / 69/160 (ckpt8) |
-| `serial` (`--spec-type none`) | ~80.9 tok/s | ~88.6 tok/s | 81.52% (441/541) | 71/160 (44.38%) |
-| `mtp-q8c` (`GGML_CUDA_OCCAMY_GDN_T2_Q8C=1`) | ~108.8 tok/s | ~121.3 tok/s | 80.96% (438/541) | partial (thermal stop) |
+| Profile | 2K Warm (`fast2k`) | 80K Warm (`warm80k`) | 80K Unscripted (`ordinary80`) | 16K Prefill (`ub=1024`) | IFEval (541) Strict Prompt | BFCL (160) Multi-Turn |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `mtp` (default: R3-lossless MTP1 + `ctx-checkpoints 8`) | 120.08 tok/s | 104.71 tok/s | 96.82 tok/s | 474.53 tok/s | 79.67% (431/541) | 66/160 (ckpt2) / 69/160 (ckpt8) |
+| `serial` (`--spec-type none`) | 87.94 tok/s | 80.88 tok/s | 80.43 tok/s | 488.40 tok/s | 81.52% (441/541) | 71/160 (44.38%) |
+| `mtp-q8c` (`GGML_CUDA_OCCAMY_GDN_T2_Q8C=1`) | 121.32 tok/s | 108.79 tok/s | 98.59 tok/s | - | 80.96% (438/541) | partial (thermal stop) |
+
+2-slot (`-np 2`) `-ub 2048` usable context ceiling on 24 GB VRAM: max passing `-c 155648` (`2 x 77824`, `24415 MiB` peak); `-c 147456` (`2 x 73728`, `24207 MiB` peak) recommended for margin (`-c 157696` OOMs). Keep `-ub 1024` for `2 x 84224`.
 
 ## Quickstart
 
