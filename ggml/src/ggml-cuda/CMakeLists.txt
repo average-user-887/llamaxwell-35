@@ -115,22 +115,38 @@ if (CUDAToolkit_FOUND)
     list(APPEND GGML_HEADERS_CUDA "../../include/ggml-cuda.h")
 
     file(GLOB   GGML_SOURCES_CUDA "*.cu")
-    file(GLOB   SRCS "template-instances/fattn-tile*.cu")
-    list(APPEND GGML_SOURCES_CUDA ${SRCS})
-    file(GLOB   SRCS "template-instances/fattn-mma*.cu")
-    list(APPEND GGML_SOURCES_CUDA ${SRCS})
-    file(GLOB   SRCS "template-instances/mmq*.cu")
-    list(APPEND GGML_SOURCES_CUDA ${SRCS})
-    file(GLOB   SRCS "template-instances/mmf*.cu")
-    list(APPEND GGML_SOURCES_CUDA ${SRCS})
+    if (GGML_CUDA_OCCAMY_SLIM)
+        list(FILTER GGML_SOURCES_CUDA EXCLUDE REGEX ".*/(fattn-mma-f16|fattn-wmma-f16)\\.cu$")
+        list(APPEND GGML_SOURCES_CUDA
+            "template-instances/fattn-tile-instance-dkq256-dv256.cu"
+            "template-instances/mmq-instance-q4_0.cu"
+            "template-instances/fattn-vec-instance-f16-f16.cu"
+        )
+        add_compile_definitions(GGML_CUDA_OCCAMY_SLIM GGML_CUDA_FA_F16_F16=1)
+    else()
+        file(GLOB   SRCS "template-instances/fattn-tile*.cu")
+        list(APPEND GGML_SOURCES_CUDA ${SRCS})
+        file(GLOB   SRCS "template-instances/fattn-mma*.cu")
+        list(APPEND GGML_SOURCES_CUDA ${SRCS})
+        file(GLOB   SRCS "template-instances/mmq*.cu")
+        list(APPEND GGML_SOURCES_CUDA ${SRCS})
+        file(GLOB   SRCS "template-instances/mmf*.cu")
+        list(APPEND GGML_SOURCES_CUDA ${SRCS})
 
-    ggml_cuda_fattn_vec_instances(${CMAKE_CURRENT_SOURCE_DIR} SRCS)
-    list(APPEND GGML_SOURCES_CUDA ${SRCS})
+        ggml_cuda_fattn_vec_instances(${CMAKE_CURRENT_SOURCE_DIR} SRCS)
+        list(APPEND GGML_SOURCES_CUDA ${SRCS})
+    endif()
 
     ggml_add_backend_library(ggml-cuda
                              ${GGML_HEADERS_CUDA}
                              ${GGML_SOURCES_CUDA}
                             )
+    if (EXISTS "${CMAKE_SOURCE_DIR}/src/compact-readback.h")
+        target_include_directories(ggml-cuda PRIVATE
+            "${CMAKE_SOURCE_DIR}/src"
+            "${CMAKE_SOURCE_DIR}/include"
+        )
+    endif()
 
     if (GGML_CUDA_GRAPHS)
         add_compile_definitions(GGML_CUDA_USE_GRAPHS)

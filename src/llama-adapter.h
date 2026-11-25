@@ -15,6 +15,7 @@
 //
 
 struct llama_adapter_cvec {
+    bool active() const { return layer_start >= 0 && layer_end >= layer_start; }
     ggml_tensor * tensor_for(int il) const;
 
     ggml_tensor * apply_to(ggml_context * ctx, ggml_tensor * cur, int  il) const;

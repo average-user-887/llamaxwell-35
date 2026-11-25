@@ -14,6 +14,7 @@
 #include "llama.h"
 #include "log.h"
 #include "sampling.h"
+#include "compact-sampler-policy.h"
 #include "speculative.h"
 #include "mtmd.h"
 #include "mtmd-helper.h"
@@ -80,6 +81,126 @@ static std::vector<llama_token> server_accept_replay(
 
 // synthetic draft verification for benchmarking - accept draft tokens at random instead of by match with the target
 // on replay the draft was already accepted before a context checkpoint restore, so repeat the same decisions
+// MV1 host-side timing (LLAMA_MV1_TRACE=1, default off)
+struct mv1_host_t {
+    bool on = false;
+    double us[8] = {0};
+    long   n[8]  = {0};
+    long   restore = 0, rounds = 0, hist[8] = {0};
+    ~mv1_host_t() { if (on && rounds) dump(); }
+    mv1_host_t() { const char * e = getenv("LLAMA_MV1_TRACE"); on = e && e[0] && e[0] != '0'; }
+    void dump() {
+        static const char * nm[5] = {"draft", "tgt_decode", "spec_process", "sample_accept", "unused"};
+        fprintf(stderr, "mv1_host: rounds=%ld restores=%ld", rounds, restore);
+        for (int i = 0; i < 4; i++) fprintf(stderr, " %s_ms=%.3f(n=%ld)", nm[i], us[i]/1000.0, n[i]);
+        fprintf(stderr, " acc_hist=[%ld,%ld,%ld,%ld]\n", hist[0], hist[1], hist[2], hist[3]);
+    }
+};
+static mv1_host_t g_mv1;
+
+static bool sampler_snapshot_elision_enabled() {
+    static const bool enabled = [] {
+        const char * flag = getenv("LLAMA_SPEC_RS_SAMPLER_SNAPSHOT_ELIDE");
+        return flag != nullptr && strcmp(flag, "1") == 0;
+    }();
+    return enabled;
+}
+
+// A bounded recurrent checkpoint can rewind at most one row per rejected draft
+// token. Replay and every other sequence-removal mode keep the original snapshot.
+static constexpr bool may_elide_sampler_snapshot(bool enabled, bool replay, common_context_seq_rm_type mode,
+                                                  size_t n_draft, uint32_t n_rs_seq) {
+    return enabled && !replay && mode == COMMON_CONTEXT_SEQ_RM_TYPE_RS && n_draft > 0 && n_draft <= n_rs_seq;
+}
+
+// Accessed only by the server worker. Log snapshots at completion boundaries.
+static struct {
+    unsigned long long elided = 0, elided_rejected = 0, kept = 0, restored = 0;
+} g_sampler_snapshot;
+
+// MV2 top-8 dump (LLAMA_MV2_DUMP=<file>, LLAMA_MV2_DUMP_LO/HI = n_decoded range, default 0..64; off when unset)
+struct mv2_dump_t {
+    FILE * f = nullptr;
+    long lo = 0, hi = 64;
+    mv2_dump_t() {
+        const char * p = getenv("LLAMA_MV2_DUMP");
+        if (!p || !p[0]) return;
+        f = fopen(p, "a");
+        if (const char * e = getenv("LLAMA_MV2_DUMP_LO")) lo = atol(e);
+        if (const char * e = getenv("LLAMA_MV2_DUMP_HI")) hi = atol(e);
+    }
+    ~mv2_dump_t() { if (f) fclose(f); }
+    bool want(long n) const { return f && n >= lo && n <= hi; }
+    // append " idx:id=lp,..." (top-8 log-softmax) for one logits row
+    void row(std::string & out, llama_context * ctx, int32_t idx) const {
+        const float * lg = llama_get_logits_ith(ctx, idx);
+        if (!lg) { out += " [null]"; return; }
+        const int n_vocab = llama_vocab_n_tokens(llama_model_get_vocab(llama_get_model(ctx)));
+        double mx = -1e30;
+        for (int i = 0; i < n_vocab; ++i) mx = std::max<double>(mx, lg[i]);
+        double z = 0.0;
+        for (int i = 0; i < n_vocab; ++i) z += exp((double) lg[i] - mx);
+        const double lz = mx + log(z);
+        std::vector<int> id(n_vocab);
+        for (int i = 0; i < n_vocab; ++i) id[i] = i;
+        const int k = std::min(8, n_vocab);
+        std::partial_sort(id.begin(), id.begin() + k, id.end(), [&](int a, int b) { return lg[a] > lg[b] || (lg[a] == lg[b] && a < b); });
+        char b[64];
+        out += " [";
+        for (int i = 0; i < k; ++i) { snprintf(b, sizeof(b), "%s%d=%.5f", i ? "," : "", id[i], (double) lg[id[i]] - lz); out += b; }
+        out += "]";
+    }
+    void emit(const std::string & s) const { fputs(s.c_str(), f); fputc('\n', f); fflush(f); }
+};
+static mv2_dump_t g_mv2;
+
+enum class compact_mode { off, on, shadow };
+static compact_mode compact_readback_mode() {
+    static const auto mode = [] {
+        const char * value = std::getenv("LLAMA_OCCAMY_COMPACT_READBACK");
+        if (!value) {
+            return compact_mode::off;
+        }
+        if (std::string_view(value) == "1") {
+            return compact_mode::on;
+        }
+        return std::string_view(value) == "shadow" ? compact_mode::shadow : compact_mode::off;
+    }();
+    return mode;
+}
+
+static bool compact_score_observer() {
+    static const bool enabled = [] {
+        const char * value = std::getenv("LLAMA_MV2_DUMP");
+        return value && value[0];
+    }();
+    return enabled;
+}
+
+enum class compact_guard : size_t { ready, observer, types, rollback, shape, model, draft, sampler, mask, count };
+static std::array<unsigned long long, size_t(compact_guard::count)> g_compact_guards{};
+
+// The only writer is the server worker. Report cumulative byte counts per response.
+static struct {
+    unsigned long long requested = 0, launched = 0, compact_only = 0, ambiguous = 0, unsupported = 0;
+    unsigned long long raw_bytes = 0, compact_bytes = 0, shadow_rows = 0, shadow_mismatches = 0;
+} g_compact;
+
+static void compact_record(const occamy_compact::Result & result) {
+    ++g_compact.requested;
+    g_compact.launched += result.launched;
+    g_compact.compact_only += result.compact_only;
+    g_compact.ambiguous += result.launched && !occamy_compact::valid(result.rows);
+    g_compact.unsupported += !result.launched;
+    g_compact.raw_bytes += result.raw;
+    g_compact.compact_bytes += result.compact;
+}
+struct mv1_scope {
+    int id; int64_t t0;
+    explicit mv1_scope(int i) : id(i), t0(g_mv1.on ? ggml_time_us() : 0) {}
+    ~mv1_scope() { if (g_mv1.on) { g_mv1.us[id] += (double)(ggml_time_us() - t0); g_mv1.n[id]++; } }
+};
+
 static std::vector<llama_token> server_sample_and_accept_synth(
         common_sampler * smpl,
         llama_context * ctx,
@@ -2092,6 +2213,40 @@ private:
             SLT_DBG(slot, "%s", "stopped by EOS\n");
         }
 
+        // keep token accounting on incomplete UTF-8 steps; flush valid prefix on stop
+        if (incomplete) {
+            result.text_to_send = "";
+
+            if (!slot.has_next_token) {
+                const size_t pos       = std::min(slot.n_sent_text, slot.generated.text.size());
+                const size_t valid_end = validate_utf8(slot.generated.text);
+                bool send_text         = true;
+                size_t flush_end       = valid_end;
+
+                if (valid_end > pos) {
+                    const std::string str_test = slot.generated.text.substr(pos, valid_end - pos);
+                    const size_t stop_pos = slot.find_stopping_strings(str_test, str_test.size(), true);
+                    if (stop_pos != std::string::npos) {
+                        slot.generated.truncate(pos + stop_pos);
+                        flush_end = std::min(valid_end, pos + stop_pos);
+                    } else if (!llama_vocab_is_eog(vocab, result.tok)) {
+                        const size_t partial_stop = slot.find_stopping_strings(str_test, str_test.size(), false);
+                        send_text = partial_stop == std::string::npos;
+                    }
+                }
+
+                if (send_text && flush_end > pos) {
+                    result.text_to_send = slot.generated.text.substr(pos, flush_end - pos);
+                    slot.n_sent_text    = flush_end;
+                }
+            }
+
+            slot.add_token(result);
+            if (slot.task->params.stream) {
+                send_partial_response(slot, result, false);
+            }
+        }
+
         SLT_DBG(slot, "n_gen = %d, n_remaining = %d, next token: %5d '%s'\n", (int) slot.stats.n_gen, slot.n_remaining(), result.tok, token_str.c_str());
 
         return slot.has_next_token; // continue
@@ -2223,6 +2378,20 @@ private:
     }
 
     void send_final_response(server_slot & slot) {
+        if (compact_readback_mode() != compact_mode::off) {
+            fprintf(stderr, "compact_guard: ready=%llu observer=%llu types=%llu rollback=%llu shape=%llu model=%llu draft=%llu sampler=%llu mask=%llu\n",
+                    g_compact_guards[0], g_compact_guards[1], g_compact_guards[2], g_compact_guards[3], g_compact_guards[4],
+                    g_compact_guards[5], g_compact_guards[6], g_compact_guards[7], g_compact_guards[8]);
+            fprintf(stderr, "compact_readback: requested=%llu launched=%llu compact_only=%llu ambiguous=%llu unsupported=%llu raw_bytes=%llu compact_bytes=%llu shadow_rows=%llu shadow_mismatches=%llu\n",
+                    g_compact.requested, g_compact.launched, g_compact.compact_only, g_compact.ambiguous,
+                    g_compact.unsupported, g_compact.raw_bytes, g_compact.compact_bytes,
+                    g_compact.shadow_rows, g_compact.shadow_mismatches);
+        }
+        if (sampler_snapshot_elision_enabled()) {
+            fprintf(stderr, "sampler_snapshot: elided=%llu elided_rejected=%llu kept=%llu restored=%llu\n",
+                    g_sampler_snapshot.elided, g_sampler_snapshot.elided_rejected,
+                    g_sampler_snapshot.kept, g_sampler_snapshot.restored);
+        }
         auto res = std::make_unique<server_task_result_cmpl_final>();
 
         res->id      = slot.task->id;
@@ -3117,6 +3286,10 @@ private:
         }
     }
 
+    // S1 prefill-single-stream state
+    int32_t s1_rr = 0;
+    int64_t s1_n_defer = 0;
+
     // @ngxson : for debugging only
     int64_t t_pre_decode  = 0;
     int64_t t_decode      = 0;
@@ -3224,12 +3397,13 @@ private:
         int32_t n_batch = llama_n_batch(ctx_tgt);
         for (int32_t off = 0; off < batch.size(); off = off_next) {
             const int32_t n_tokens = std::min(n_batch, batch.size() - off);
+            occamy_compact::Result compact;
             try {
                 scoped_timer t(t_decode, n_decode);
                 // TODO @ngxson : maybe handle n_batch == 1 here instead of inside decode()
 
                 batch.render(off, n_tokens);
-                bool ok = decode(n_batch, off);
+                bool ok = decode(n_batch, off, compact);
 #ifdef DEBUG_TIMINGS
                 llama_synchronize(ctx_tgt);
 #endif
@@ -3252,7 +3426,7 @@ private:
 
             try {
                 scoped_timer t(t_post_decode, n_post_decode);
-                post_decode(n_tokens, off);
+                post_decode(n_tokens, off, compact);
             } catch (const std::exception & e) {
                 SRV_ERR("post_decode() failed: %s\n", e.what());
                 abort_all_slots("post_decode() failed: " + std::string(e.what()));
@@ -3406,6 +3580,7 @@ private:
         // generate the actual drafts (if any)
         if (!drafting.empty()) {
             queue_tasks.yield_to_queue([&]() {
+                mv1_scope _mv1(0);
                 common_speculative_draft(spec.get());
             });
         }
@@ -3466,6 +3641,7 @@ private:
         // process in chunks of params.n_batch
         int32_t n_batch  = llama_n_batch(ctx_tgt);
         int32_t n_ubatch = llama_n_ubatch(ctx_tgt);
+        const int32_t n_generation = batch.size();
 
         auto & alora_scale       = batch.alora_scale;
         auto & alora_disabled_id = batch.alora_disabled_id;
@@ -3473,6 +3649,26 @@ private:
         // next, batch any pending prompts without exceeding n_batch
         if (params_base.cont_batching || batch.size() == 0) {
             bool add_ok = true; // false means the batch is full, skip remaining slots
+
+            // S1: single-stream prefill. The slot that owns this batch's prompt tokens (>= 64 pending) is chosen
+            // round-robin; other slots with >= 64 pending prompt tokens are deferred to a later batch.
+            constexpr int32_t S1_MIN_PENDING = 64;
+            const bool s1_on = params_base.prefill_single_stream;
+            int32_t s1_owner = -1;
+            if (s1_on) {
+                const int32_t n_sl = (int32_t) slots.size();
+                for (int32_t k = 0; k < n_sl && s1_owner < 0; ++k) {
+                    const server_slot & c = slots[(s1_rr + k) % n_sl];
+                    if ((c.state == SLOT_STATE_PROCESSING_PROMPT || c.state == SLOT_STATE_STARTED) && c.task &&
+                        c.task->n_tokens() - (c.state == SLOT_STATE_STARTED ? 0 : c.prompt.n_tokens()) >= S1_MIN_PENDING &&
+                        (!slot_batched || slot_batched->can_batch_with(const_cast<server_slot &>(c)))) {
+                        s1_owner = (int32_t) ((s1_rr + k) % n_sl);
+                    }
+                }
+                if (s1_owner >= 0) {
+                    s1_rr = (s1_owner + 1) % n_sl;
+                }
+            }
 
             iterate(slots, [&](server_slot & slot) {
                 if (!add_ok || batch.size() >= n_batch) {
@@ -3496,7 +3692,24 @@ private:
 
                 // this slot still has a prompt to be processed
                 if (slot.state == SLOT_STATE_PROCESSING_PROMPT || slot.state == SLOT_STATE_STARTED) {
+                    if (s1_on && s1_owner >= 0 && (int32_t) slot.id != s1_owner &&
+                        slot.task->n_tokens() - (slot.state == SLOT_STATE_STARTED ? 0 : slot.prompt.n_tokens()) >= S1_MIN_PENDING) {
+                        // deferred: keeps this slot's prompt tokens out of the batch (single-stream ubatches)
+                        s1_n_defer++;
+                        if ((s1_n_defer & (s1_n_defer - 1)) == 0 || s1_n_defer % 256 == 0) {
+                            SRV_INF("prefill-single-stream: deferred slot prompt batches = %" PRId64 "\n", s1_n_defer);
+                        }
+                        return;
+                    }
                     const auto & input_tokens = slot.task->tokens;
+                    int32_t n_batch_prompt = n_batch;
+                    if (params_base.n_batch_mixed > 0 && n_generation > 0 && slot.can_split() &&
+                        slot.task->type == SERVER_TASK_TYPE_COMPLETION && !input_tokens.has_mtmd) {
+                        n_batch_prompt = std::min({n_batch, n_ubatch, params_base.n_batch_mixed});
+                        if (batch.size() >= n_batch_prompt) {
+                            return;
+                        }
+                    }
 
                     // used to determine the number of tokens added to the batch for the current slot
                     const auto n_tokens_prev = batch.size();
@@ -3940,7 +4153,7 @@ private:
                     const int32_t n_decision_first = slot.task->type == SERVER_TASK_TYPE_DECISION ? slot.task->decision.pos_first() : -1;
 
                     // add prompt tokens for processing in the current batch
-                    while (slot.prompt.n_tokens() < slot.task->n_tokens() && batch.size() < n_batch) {
+                    while (slot.prompt.n_tokens() < slot.task->n_tokens() && batch.size() < n_batch_prompt) {
                         // get next token to process
                         llama_token cur_tok = input_tokens[slot.prompt.n_tokens()];
                         if (cur_tok == LLAMA_TOKEN_NULL) {
@@ -4134,7 +4347,49 @@ private:
 
     // returns true = success ; false = retry with smaller batch size
     // throw std::runtime_error on fatal error
-    bool decode(int32_t & n_batch, int32_t off) {
+    bool compact_eligible(int32_t off, occamy_compact::Mask & mask) const {
+        if (compact_readback_mode() == compact_mode::off || !spec || slots.size() != 1) {
+            return false;
+        }
+        const auto & slot = slots.front();
+        if (slot.state != SLOT_STATE_GENERATING || !slot.task || slot.spec_draft.empty()) {
+            return false;
+        }
+        const auto reason = [&] {
+            if (compact_score_observer()) {
+                return compact_guard::observer;
+            }
+            if (!occamy_compact::native_mtp_types(params_base.speculative.types)) {
+                return compact_guard::types;
+            }
+            if (ctx_tgt_seq_rm_type != COMMON_CONTEXT_SEQ_RM_TYPE_RS || llama_n_rs_seq(ctx_tgt) < 1) {
+                return compact_guard::rollback;
+            }
+            if (slot.id != 0 || off != 0 || batch.size() != 2 || batch.view.size() != 2 ||
+                    slot.spec_i_batch.size() != 2 || slot.spec_i_batch[0] != 0 || slot.spec_i_batch[1] != 1) {
+                return compact_guard::shape;
+            }
+            if (!slot.ctx_dft || llama_get_model(slot.ctx_dft) != llama_get_model(ctx_tgt)) {
+                return compact_guard::model;
+            }
+            if (slot.spec_is_replay || slot.spec_draft.size() != 1 || !slot.spec_draft_q.empty() ||
+                    !common_speculative_get_synth_probs(spec.get()).empty()) {
+                return compact_guard::draft;
+            }
+            const auto & sampling = slot.task->params.sampling;
+            if (!occamy_compact::fixed_sampler(sampling)) {
+                return compact_guard::sampler;
+            }
+            if (!occamy_compact::build_compact_mask(sampling, params_base.sampling.logit_bias_eog, mask)) {
+                return compact_guard::mask;
+            }
+            return compact_guard::ready;
+        }();
+        ++g_compact_guards[size_t(reason)];
+        return reason == compact_guard::ready;
+    }
+
+    bool decode(int32_t & n_batch, int32_t off, occamy_compact::Result & compact) {
         SRV_DBG("n_batch (effective) = %d, off = %d\n", n_batch, off);
 
         metrics_pre_decode();
@@ -4169,9 +4424,19 @@ private:
         // note: the sync is done here too, so that the wait is also covered by the yield
         int ret = 0;
         queue_tasks.yield_to_queue([&]() {
-            ret = llama_process(ctx_tgt, LLAMA_PROCESS_TYPE_DECODE, batch.view.get());
+            mv1_scope _mv1(1);
+            occamy_compact::Mask mask{};
+            if (compact_eligible(off, mask)) {
+                ret = llama_occamy_compact_decode(ctx_tgt, batch.view.get(), mask,
+                        compact_readback_mode() == compact_mode::shadow, compact);
+            } else {
+                ret = llama_process(ctx_tgt, LLAMA_PROCESS_TYPE_DECODE, batch.view.get());
+            }
             if (ret == 0 && has_output) {
                 llama_synchronize(ctx_tgt);
+                if (compact.requested) {
+                    compact_record(compact);
+                }
             }
         });
 
@@ -4234,6 +4499,7 @@ private:
         if (spec) {
             bool ok = true;
             queue_tasks.yield_to_queue([&]() {
+                mv1_scope _mv1(2);
                 ok = common_speculative_process(spec.get(), batch.view);
             });
 
@@ -4273,7 +4539,7 @@ private:
         return true;
     }
 
-    void post_decode(int32_t n_batch_tokens, int32_t off) {
+    void post_decode(int32_t n_batch_tokens, int32_t off, const occamy_compact::Result & compact) {
         // for checking if a given batch index is inside the current sub-batch
         auto is_inside_view = [&](int32_t idx) {
             return idx >= off && idx < off + n_batch_tokens;
@@ -4355,6 +4621,19 @@ private:
                 id = common_sampler_sample(slot.smpl.get(), slot.ctx_tgt, tok_idx);
             }
 
+            if (g_mv2.want(slot.stats.n_gen)) {
+                // no-spec: top-8 of every output row of this slot in the batch (1 row, or 2 for forced-prefix requests)
+                std::string ln = "N slot=" + std::to_string(slot.id) + " n_dec=" + std::to_string(slot.stats.n_gen);
+                int nr = 0;
+                std::string rows;
+                for (int i = 0; i < (int) batch.view.size(); ++i) {
+                    if (batch.view.tokens[i].output && batch.view.tokens[i].seq_id == slot.id) { g_mv2.row(rows, slot.ctx_tgt, i); nr++; }
+                }
+                if (nr == 0) g_mv2.row(rows, slot.ctx_tgt, tok_idx), nr = 1;
+                ln += " rows=" + std::to_string(nr) + rows + " ids=" + std::to_string(id);
+                g_mv2.emit(ln);
+            }
+
             slot.i_batch = -1;
 
             common_sampler_accept(slot.smpl.get(), id, true);
@@ -4407,7 +4686,18 @@ private:
 
             // verify and try to accept the draft
             {
-                common_sampler_ptr smpl_save(common_sampler_clone(slot.smpl.get()));
+                const bool snapshot_opt_in = sampler_snapshot_elision_enabled();
+                const bool elide_snapshot = snapshot_opt_in && may_elide_sampler_snapshot(
+                    snapshot_opt_in, slot.spec_is_replay, ctx_tgt_seq_rm_type, n_draft, llama_n_rs_seq(ctx_tgt));
+                common_sampler_ptr smpl_save;
+                if (elide_snapshot) {
+                    ++g_sampler_snapshot.elided;
+                } else {
+                    smpl_save.reset(common_sampler_clone(slot.smpl.get()));
+                    if (snapshot_opt_in) {
+                        ++g_sampler_snapshot.kept;
+                    }
+                }
 
                 GGML_ASSERT(slot.spec_i_batch.size() == n_draft + 1);
                 GGML_ASSERT(slot.spec_draft_q.empty() || (slot.spec_draft_q.size() == slot.spec_draft.size()));
@@ -4416,7 +4706,10 @@ private:
                 // drafters that fill no distribution fall back here
                 const bool use_rejection = slot.use_spec_rejection() && !slot.spec_draft_q.empty();
 
+                const bool mv2_on = g_mv2.want(slot.stats.n_gen);
+                const std::vector<int32_t> mv2_idx = mv2_on ? slot.spec_i_batch : std::vector<int32_t>();
                 std::vector<llama_token> accepted;
+                mv1_scope _mv1_sa(3);
                 if (!synth_probs.empty()) {
                     // synthetic acceptance replaces verification entirely, so it comes first
                     accepted = server_sample_and_accept_synth(
@@ -4426,18 +4719,54 @@ private:
                     accepted = server_accept_replay(slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft);
                 } else if (use_rejection) {
                     accepted = common_sampler_sample_and_accept_n_rejection(slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft, slot.spec_draft_q);
+                } else if (compact.compact_only) {
+                    GGML_ASSERT(!mv2_on && n_draft == 1 && !slot.spec_is_replay && occamy_compact::valid(compact.rows));
+                    llama_token bonus = LLAMA_TOKEN_NULL;
+                    const auto first = occamy_compact::accept_one(compact, slot.spec_draft[0], [&](llama_token id) {
+                        common_sampler_accept(slot.smpl.get(), id, true);
+                    }, bonus);
+                    accepted.reserve(2);
+                    accepted.push_back(first);
+                    if (bonus != LLAMA_TOKEN_NULL) {
+                        accepted.push_back(bonus);
+                    }
                 } else {
+                    if (compact.shadow && compact.launched && occamy_compact::valid(compact.rows)) {
+                        // The admitted chain is stateless when sampling without accept.
+                        // Check both live rows, including row 1 after a rejection.
+                        for (int i = 0; i < 2; ++i) {
+                            const auto id = common_sampler_sample(slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch[i]);
+                            ++g_compact.shadow_rows;
+                            if (id != compact.rows[i].id) {
+                                ++g_compact.shadow_mismatches;
+                                throw std::runtime_error("compact readback shadow choice disagreed with the original sampler");
+                            }
+                        }
+                    }
                     accepted = common_sampler_sample_and_accept_n(slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft);
                 }
                 slot.spec_i_batch.clear();
 
                 GGML_ASSERT(accepted.size() >= 1);
 
+                if (mv2_on) {
+                    std::string ln = "V slot=" + std::to_string(slot.id) + " n_dec=" + std::to_string(slot.stats.n_gen) +
+                        " draft=" + std::to_string(slot.spec_draft[0]) + " replay=" + std::to_string((int) slot.spec_is_replay) + " rows=" + std::to_string(mv2_idx.size());
+                    for (size_t r = 0; r < mv2_idx.size(); ++r) g_mv2.row(ln, slot.ctx_tgt, mv2_idx[r]);
+                    ln += " acc_n=" + std::to_string(accepted.size() - 1) + " ids=";
+                    for (size_t r = 0; r < accepted.size(); ++r) ln += (r ? "," : "") + std::to_string(accepted[r]);
+                    g_mv2.emit(ln);
+                }
+
                 const uint32_t n_rollback = slot.spec_draft.size() + 1 - accepted.size();
 
                 const bool use_ckpt_tgt =
                     ctx_tgt_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_FULL ||
                     (ctx_tgt_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_RS && n_rollback > llama_n_rs_seq(ctx_tgt));
+
+                if (elide_snapshot && n_rollback > 0) {
+                    ++g_sampler_snapshot.elided_rejected;
+                }
 
                 // check for partial draft acceptance
                 if (n_rollback > 0) {
@@ -4454,6 +4783,7 @@ private:
 
                         SLT_DBG(slot, "restoring speculative checkpoint (pos_min = %d, pos_max = %d, size = %zu)\n", ckpt.pos_min, ckpt.pos_max, ckpt.size());
 
+                        g_mv1.restore++;
                         GGML_ASSERT(ckpt.load_tgt(slot.ctx_tgt, slot.id, LLAMA_STATE_SEQ_FLAGS_PARTIAL_ONLY));
 
                         if (slot.ctx_dft) {
@@ -4463,7 +4793,11 @@ private:
                         slot.mem.seq_rm(slot.id, ckpt.pos_max + 1, -1);
 
                         slot.prompt.tokens.keep_first(ckpt.n_tokens);
+                        GGML_ASSERT(smpl_save != nullptr);
                         common_sampler_copy(smpl_save.get(), slot.smpl.get());
+                        if (snapshot_opt_in) {
+                            ++g_sampler_snapshot.restored;
+                        }
 
                         return;
                     }
@@ -4491,6 +4825,11 @@ private:
             // update how many tokens out of those tested were accepted
             slot.stats.n_draft_accepted += n_accepted;
             slot.stats.n_draft_verif_steps += 1;
+            if (g_mv1.on) {
+                g_mv1.rounds++;
+                g_mv1.hist[std::min<size_t>(n_accepted, 3)]++;
+                if (g_mv1.rounds % 25 == 0) { g_mv1.dump(); }
+            }
 
             auto & n_accepted_per_pos = slot.n_accepted_per_pos;
             if (n_accepted_per_pos.empty()) {

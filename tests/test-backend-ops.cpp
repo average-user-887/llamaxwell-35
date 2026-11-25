@@ -1292,6 +1292,8 @@ struct test_case {
     virtual bool run_whole_graph() { return false; }
     virtual std::vector<ggml_tensor *> fusion_test_nodes() { return {}; }
     virtual bool use_weight_context() { return false; }
+    // nodes expanded into the graph before `out`, in order (side-effect nodes such as state cpys with no consumer)
+    virtual std::vector<ggml_tensor *> graph_pre_outputs() { return {}; }
 
     ggml_cgraph * gf = nullptr;
     ggml_cgraph * gb = nullptr;
@@ -1462,6 +1464,9 @@ struct test_case {
         }
 
         // build graph
+        for (ggml_tensor * t : graph_pre_outputs()) {
+            ggml_build_forward_expand(gf, t);
+        }
         ggml_build_forward_expand(gf, out);
 
         // add sentinels as graph nodes so that they are checked in the callback
@@ -1629,6 +1634,9 @@ struct test_case {
 
         // build graph
         ggml_cgraph * gf = ggml_new_graph_custom(ctx.get(), graph_nodes, false);
+        for (ggml_tensor * t : graph_pre_outputs()) {
+            ggml_build_forward_expand(gf, t);
+        }
         ggml_build_forward_expand(gf, out);
 
         // warmup run
@@ -4967,6 +4975,130 @@ struct test_gated_delta_net : public test_case {
 };
 
 // GGML_OP_GATED_DELTA_NET + GGML_OP_CPY (recurrent cache fusion)
+// OCCAMY_GDN_T2: one qwen35moe linear-attention layer segment (attn_norm .. residual add) for a two-token,
+// one-sequence MTP1 verify batch with rollback snapshots (n_rs_seq = 1, K = 2), built like build_layer_attn_linear,
+// build_conv_state and build_recurrent_attn. On CUDA with GGML_CUDA_OCCAMY_GDN{,_QKREUSE,_PCSHARE,_REPACK,_T2}=1 the
+// whole window runs as the fused GDN2 kernel; the output and all four snapshot planes are compared with the CPU.
+// Fixed qwen35moe-A3B dims (the fused matcher only accepts them). mem_size = 2, kv_head = 1, s_copy = {1}: the plane-0
+// rows alias the source rows, as in steady-state decode.
+struct test_occamy_gdn_t2 : public test_case {
+    static constexpr int64_t H = 2048, NQKV = 8192, DI = 4096, NVH = 32, NKH = 16, SD = 128, NT = 2, KS = 4;
+    static constexpr int64_t MEM = 2, HEAD = 1;
+
+    ggml_tensor * cpy_conv1 = nullptr, * cpy_conv0 = nullptr, * cpy_ssm = nullptr, * out_node = nullptr;
+    ggml_tensor * xn = nullptr, * gr_conv = nullptr, * gr_ssm = nullptr, * ssm_a = nullptr;
+    std::vector<ggml_tensor *> pre;
+
+    std::string vars() override { return "type=q4_0,n_tokens=2,K=2"; }
+    std::string op_desc(ggml_tensor * t) override { GGML_UNUSED(t); return "OCCAMY_GDN_T2"; }
+    bool run_whole_graph() override { return true; }
+    bool use_weight_context() override { return true; }
+    std::vector<ggml_tensor *> fusion_test_nodes() override { return { cpy_conv1, cpy_conv0, cpy_ssm, out_node }; }
+    std::vector<ggml_tensor *> graph_pre_outputs() override { return pre; }
+    double max_nmse_err() override { return 5e-4; }
+
+    ggml_tensor * build_graph(ggml_context * ctx) override { GGML_UNUSED(ctx); GGML_ABORT("needs a weight context"); }
+
+    ggml_tensor * build_graph(ggml_context * ctx, ggml_context * cw) override {
+        const int64_t CONV_N = (KS - 1) * NQKV, SSM_N = SD * SD * NVH;
+        const float eps = 1e-6f;
+
+        ggml_tensor * wqkv  = ggml_new_tensor_2d(cw, GGML_TYPE_Q4_0, H, NQKV);
+        ggml_tensor * wgate = ggml_new_tensor_2d(cw, GGML_TYPE_Q4_0, H, DI);
+        ggml_tensor * wbeta = ggml_new_tensor_2d(cw, GGML_TYPE_Q4_0, H, NVH);
+        ggml_tensor * walph = ggml_new_tensor_2d(cw, GGML_TYPE_Q4_0, H, NVH);
+        ggml_tensor * wout  = ggml_new_tensor_2d(cw, GGML_TYPE_Q4_0, DI, H);
+        ggml_tensor * norm_w   = ggml_new_tensor_1d(cw, GGML_TYPE_F32, H);
+        ggml_tensor * conv_w   = ggml_new_tensor_2d(cw, GGML_TYPE_F32, KS, NQKV);
+        ggml_tensor * dt_bias  = ggml_new_tensor_1d(cw, GGML_TYPE_F32, NVH);
+        ssm_a                  = ggml_new_tensor_1d(cw, GGML_TYPE_F32, NVH);
+        ggml_tensor * ssm_norm = ggml_new_tensor_1d(cw, GGML_TYPE_F32, SD);
+        ggml_set_name(ssm_a, "ssm_a");
+
+        ggml_tensor * h        = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, H, NT);
+        ggml_tensor * conv_all = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, CONV_N, MEM * 2);
+        ggml_tensor * ssm_all  = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, SSM_N, MEM * 2);
+        ggml_tensor * s_copy   = ggml_new_tensor_1d(ctx, GGML_TYPE_I32, 1);
+        ggml_set_name(h, "h"); ggml_set_name(conv_all, "conv_all"); ggml_set_name(ssm_all, "ssm_all"); ggml_set_name(s_copy, "s_copy");
+
+        ggml_tensor * norm = ggml_rms_norm(ctx, h, eps);
+        xn = ggml_mul(ctx, norm, norm_w);
+        pre.push_back(xn);
+
+        ggml_tensor * qkv = ggml_reshape_3d(ctx, ggml_mul_mat(ctx, wqkv, xn), NQKV, NT, 1);
+        ggml_tensor * z   = ggml_mul_mat(ctx, wgate, xn);
+        ggml_tensor * beta = ggml_sigmoid(ctx, ggml_reshape_4d(ctx, ggml_mul_mat(ctx, wbeta, xn), 1, NVH, NT, 1));
+        ggml_tensor * alpha = ggml_reshape_3d(ctx, ggml_mul_mat(ctx, walph, xn), NVH, NT, 1);
+        ggml_tensor * gate  = ggml_reshape_4d(ctx, ggml_mul(ctx, ggml_softplus(ctx, ggml_add(ctx, alpha, dt_bias)), ssm_a), 1, NVH, NT, 1);
+
+        // build_conv_state (n_rs_seq = 1): one gather, concat, two snapshot cpys
+        ggml_tensor * conv_states = ggml_reshape_2d(ctx, conv_all, CONV_N, conv_all->ne[1]);
+        gr_conv = ggml_get_rows(ctx, conv_states, s_copy);
+        pre.push_back(gr_conv);
+        ggml_tensor * cs = ggml_reshape_3d(ctx, ggml_view_2d(ctx, gr_conv, CONV_N, 1, gr_conv->nb[1], 0), KS - 1, NQKV, 1);
+        ggml_tensor * conv_in = ggml_concat(ctx, cs, ggml_transpose(ctx, qkv), 0);
+        const size_t crow = ggml_row_size(GGML_TYPE_F32, CONV_N);
+        for (int64_t t = 1; t <= 2; ++t) {
+            const int64_t s_idx = conv_in->ne[0] - cs->ne[0] - 2 + t, s_slot = 2 - t;
+            ggml_tensor * src = ggml_view_3d(ctx, conv_in, KS - 1, NQKV, 1, conv_in->nb[1], conv_in->nb[2], ggml_row_size(conv_in->type, s_idx));
+            ggml_tensor * dst = ggml_view_2d(ctx, conv_all, CONV_N, 1, conv_all->nb[1], (s_slot * MEM + HEAD) * crow);
+            ggml_tensor * c = ggml_cpy(ctx, src, dst);
+            (t == 1 ? cpy_conv1 : cpy_conv0) = c;
+            pre.push_back(c);
+        }
+
+        // build_rs for the ssm state
+        ggml_tensor * ssm_states = ggml_reshape_2d(ctx, ssm_all, SSM_N, ssm_all->ne[1]);
+        gr_ssm = ggml_get_rows(ctx, ssm_states, s_copy);
+        pre.push_back(gr_ssm);
+        ggml_tensor * state = ggml_reshape_4d(ctx, ggml_view_2d(ctx, gr_ssm, SSM_N, 1, gr_ssm->nb[1], 0), SD, SD, NVH, 1);
+
+        ggml_tensor * conv = ggml_silu(ctx, ggml_ssm_conv(ctx, conv_in, conv_w));
+        const size_t nb1 = ggml_row_size(GGML_TYPE_F32, NQKV);
+        ggml_tensor * qc = ggml_view_4d(ctx, conv, SD, NKH, NT, 1, SD * 4, nb1, nb1 * NT, 0);
+        ggml_tensor * kc = ggml_view_4d(ctx, conv, SD, NKH, NT, 1, SD * 4, nb1, nb1 * NT, SD * NKH * 4);
+        ggml_tensor * vc = ggml_view_4d(ctx, conv, SD, NVH, NT, 1, SD * 4, nb1, nb1 * NT, 2 * SD * NKH * 4);
+        qc = ggml_scale(ctx, ggml_rms_norm(ctx, qc, eps / SD), 1.0f / sqrtf((float) SD));
+        kc = ggml_scale(ctx, ggml_rms_norm(ctx, kc, eps / SD), 1.0f / sqrtf((float) SD));
+
+        // build_recurrent_attn (K = 2)
+        ggml_tensor * gdn = ggml_gated_delta_net(ctx, qc, kc, vc, gate, beta, state, 2);
+        ggml_tensor * attn = ggml_view_4d(ctx, gdn, SD, NVH, NT, 1, SD * 4, SD * NVH * 4, SD * NVH * NT * 4, 0);
+        const size_t srow = ggml_row_size(GGML_TYPE_F32, SSM_N);
+        ggml_tensor * ssrc = ggml_view_3d(ctx, gdn, SSM_N, 1, 2, srow, srow, SD * NVH * NT * 4);
+        ggml_tensor * sdst = ggml_view_3d(ctx, ssm_all, SSM_N, 1, 2, ssm_all->nb[1], MEM * srow, HEAD * srow);
+        cpy_ssm = ggml_cpy(ctx, ssrc, sdst);
+        pre.push_back(cpy_ssm);
+
+        // build_norm_gated, ssm_out, residual
+        ggml_tensor * gn = ggml_mul(ctx, ggml_rms_norm(ctx, attn, eps), ssm_norm);
+        ggml_tensor * zs = ggml_silu(ctx, ggml_reshape_4d(ctx, z, SD, NVH, NT, 1));
+        ggml_tensor * fo = ggml_reshape_3d(ctx, ggml_mul(ctx, gn, zs), DI, NT, 1);
+        ggml_tensor * o  = ggml_reshape_2d(ctx, ggml_mul_mat(ctx, wout, fo), H, NT);
+        out_node = ggml_add(ctx, o, h);
+        ggml_set_name(out_node, "occamy_gdn_t2_out");
+        return out_node;
+    }
+
+    void initialize_tensors(ggml_context * ctx) override {
+        for (ggml_tensor * t = ggml_get_first_tensor(ctx); t != NULL; t = ggml_get_next_tensor(ctx, t)) {
+            if (ggml_is_view_op(t->op) || t->op != GGML_OP_NONE) {
+                continue;
+            }
+            if (t->type == GGML_TYPE_I32) {
+                const int32_t row = HEAD;   // source row = plane-0 row of kv_head
+                ggml_backend_tensor_set(t, &row, 0, sizeof(row));
+            } else if (t == ssm_a) {
+                std::vector<float> a(ggml_nelements(t));
+                for (size_t i = 0; i < a.size(); ++i) { a[i] = -0.1f - 0.9f * (float) rand() / (float) RAND_MAX; }
+                ggml_backend_tensor_set(t, a.data(), 0, a.size() * sizeof(float));
+            } else {
+                init_tensor_uniform(t);
+            }
+        }
+    }
+};
+
 struct test_gated_delta_net_cache_fusion : public test_case {
     const ggml_type type;
 
@@ -8460,6 +8592,77 @@ struct test_flash_attn_ext : public test_case {
     }
 };
 
+// Maxwell GEMM FA path (GGML_CUDA_FA_MAXWELL_GEMM=1, optional _FUSED=1): causal-style mask over the
+// last nb keys plus, on odd rows, a fully masked first 4096-key split, so split-local softmax stats
+// with l == 0 and a partial tail split are exercised.
+struct test_flash_attn_ext_maxwell_causal : public test_flash_attn_ext {
+    using test_flash_attn_ext::test_flash_attn_ext;
+
+    std::string vars() override {
+        return test_flash_attn_ext::vars() + ",mask=causal_split0";
+    }
+
+    void initialize_tensors(ggml_context * ctx) override {
+        test_flash_attn_ext::initialize_tensors(ctx);
+        ggml_tensor * m = ggml_get_tensor(ctx, "m");
+        if (!m) {
+            return;
+        }
+        const int64_t ne0 = m->ne[0];
+        const int64_t ne1 = m->ne[1];
+        std::vector<float> data_f32(ne0*ne1);
+        std::vector<ggml_fp16_t> data_f16(ne0*ne1);
+        for (int64_t row = 0; row < ne1; ++row) {
+            const int64_t last = ne0 - ne1 + row;
+            for (int64_t key = 0; key < ne0; ++key) {
+                const bool masked = key > last || ((row & 1) && key < 4096 && ne0 > 4096);
+                data_f32[row*ne0 + key] = masked ? -INFINITY : -0.0625f * float((key + row) % 5);
+            }
+        }
+        ggml_fp32_to_fp16_row(data_f32.data(), data_f16.data(), data_f16.size());
+        ggml_backend_tensor_set(m, data_f16.data(), 0, data_f16.size()*sizeof(ggml_fp16_t));
+    }
+};
+
+// MRFA (occamy multi-row decode, GGML_CUDA_OCCAMY_FA_MROW=1): verify-shaped causal mask. The cache view has kv keys
+// of which only kv - tail are used (keys >= kv - tail masked, as in a padded KV cache view); row r sees keys up to
+// kv - tail - nb + r, so row 0 never sees the draft slot of row 1.
+struct test_flash_attn_ext_mrow_causal : public test_flash_attn_ext {
+    int64_t tail;
+
+    test_flash_attn_ext_mrow_causal(int64_t kv, int64_t nb, int64_t nr3, int64_t tail)
+        : test_flash_attn_ext(256, 256, 2, {8, nr3}, kv, nb, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16, {0, 2, 1, 3}),
+          tail(tail) {}
+
+    std::string vars() override {
+        return test_flash_attn_ext::vars() + ",mask=mrow_causal,tail=" + std::to_string(tail);
+    }
+
+    void initialize_tensors(ggml_context * ctx) override {
+        test_flash_attn_ext::initialize_tensors(ctx);
+        ggml_tensor * m = ggml_get_tensor(ctx, "m");
+        if (!m) {
+            return;
+        }
+        const int64_t ne0 = m->ne[0];
+        const int64_t ne1 = m->ne[1];
+        const int64_t ne3 = m->ne[3];
+        std::vector<float> data_f32(ne0*ne1*ne3);
+        for (int64_t i3 = 0; i3 < ne3; ++i3) {
+            const int64_t used = ne0 - tail - 64*i3;
+            for (int64_t row = 0; row < ne1; ++row) {
+                const int64_t last = used - ne1 + row;
+                for (int64_t key = 0; key < ne0; ++key) {
+                    data_f32[(i3*ne1 + row)*ne0 + key] = key > last ? -INFINITY : -0.0625f * float((key + row) % 5);
+                }
+            }
+        }
+        std::vector<ggml_fp16_t> data_f16(data_f32.size());
+        ggml_fp32_to_fp16_row(data_f32.data(), data_f16.data(), data_f16.size());
+        ggml_backend_tensor_set(m, data_f16.data(), 0, data_f16.size()*sizeof(ggml_fp16_t));
+    }
+};
+
 // large Q values, so the online softmax has to rescale the partial results
 struct test_flash_attn_ext_large_logits : public test_flash_attn_ext {
     static constexpr int q_range = 20;
@@ -11609,6 +11812,16 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
         }
     }
 
+    // Maxwell GEMM FA path shapes (d=256, 16 q heads over 2 kv heads, nb >= 64, kv >= 4096).
+    // Only engages with GGML_CUDA_FA_MAXWELL_GEMM=1 on cc 5.2; elsewhere these run the normal FA kernels.
+    for (int kv : { 4096, 8448, 12544 }) {
+        for (int nb : { 64, 100 }) {
+            test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, kv, nb, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+            test_cases.emplace_back(new test_flash_attn_ext_maxwell_causal(256, 256, 2, {8, 1}, kv, nb, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+            test_cases.emplace_back(new test_flash_attn_ext_large_logits(256, 256, 2, {8, 1}, kv, nb, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+        }
+    }
+
     for (int hsk : { 40, 64, 72, 80, 96, 128, 192, 256, 320, 512, 576 }) {
         for (int hsv : { 40, 64, 72, 80, 96, 128, 192, 256, 512 }) {
             if (hsk != 96 && hsk != 192 && hsk != 320 && hsk != 576 && hsk != hsv) continue;
@@ -11938,6 +12151,9 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
     test_cases.emplace_back(new test_gated_delta_net(GGML_TYPE_F32, 4, 32,   8, 1, 1, false, false, /*K=*/3));
     test_cases.emplace_back(new test_gated_delta_net(GGML_TYPE_F32, 4, 64,  16, 2, 1, false, false, /*K=*/4));
 
+    // occamy fused GDN layer, MTP1 verify (2 tokens, K = 2): GGML_CUDA_OCCAMY_GDN_T2=1
+    test_cases.emplace_back(new test_occamy_gdn_t2());
+
     // gdn + cache cpy fusion (K > 1)
     test_cases.emplace_back(new test_gated_delta_net_cache_fusion(GGML_TYPE_F32, 4, 32,   2, 1, 2));
     test_cases.emplace_back(new test_gated_delta_net_cache_fusion(GGML_TYPE_F32, 4, 64,   4, 1, 2));
@@ -11973,6 +12189,13 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
         }
     }
 
+    // occamy multi-row decode FA (GGML_CUDA_OCCAMY_FA_MROW=1): n_q 1..5 (1 and 5 fall back), 80K verify shape, small/odd caches
+    for (int64_t nb : {1, 2, 3, 4, 5}) {
+        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal(81920, nb, 1, 260));
+        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal( 4096, nb, 1, 2048));
+        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal( 1028, nb, 2, 36));
+        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal(  260, nb, 2, 8));
+    }
     return test_cases;
 }
 #ifdef _MSC_VER
@@ -11982,6 +12205,10 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
 // Test cases for performance evaluation: should be representative of real-world use cases
 static std::vector<std::unique_ptr<test_case>> make_test_cases_perf() {
     std::vector<std::unique_ptr<test_case>> test_cases;
+    // MRFA microbench: 80K verify-shaped decode attention, n_q 1/2/4
+    for (int64_t nb : {1, 2, 4}) {
+        test_cases.emplace_back(new test_flash_attn_ext_mrow_causal(81920, nb, 1, 260));
+    }
 
     // SWIGLU at a 27B-class FFN width, fused [gate|up] vs split operands
     // note: same bytes either way, so a backend that indexes them differently shows it here
@@ -12265,6 +12492,25 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_perf() {
     // GLM 4.7 Flash gqa20
     test_cases.emplace_back(new test_flash_attn_ext(576, 512, 1, {20, 1}, 8192, 32, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16, {0, 1, 2, 3}, true, true));
     test_cases.emplace_back(new test_flash_attn_ext(576, 512, 1, {20, 1}, 8192, 512, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16, {0, 1, 2, 3}, true, true));
+
+    // occamy GEMM FA (GGML_CUDA_FA_MAXWELL_GEMM=1): Q-tiled path, q > 1024 loops over <=1024-row chunks
+    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 4096, 1024, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 8448, 1024, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 12544, 1024, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 4096, 1536, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 8448, 1536, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 12544, 1536, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 4096, 2048, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 8448, 2048, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {8, 1}, 12544, 2048, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+
+    // stack: fused/masked split softmax with q>1024 chunking (mask offset per chunk)
+    test_cases.emplace_back(new test_flash_attn_ext_maxwell_causal(256, 256, 2, {8, 1}, 4096, 1025, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext_maxwell_causal(256, 256, 2, {8, 1}, 8448, 1025, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext_maxwell_causal(256, 256, 2, {8, 1}, 4096, 1536, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext_maxwell_causal(256, 256, 2, {8, 1}, 8448, 1536, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext_maxwell_causal(256, 256, 2, {8, 1}, 4096, 2048, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+    test_cases.emplace_back(new test_flash_attn_ext_maxwell_causal(256, 256, 2, {8, 1}, 8448, 2048, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
 
     // q8_0 KV cases with long context (decode and prompt)
     test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {16, 1},   128, 1, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0));

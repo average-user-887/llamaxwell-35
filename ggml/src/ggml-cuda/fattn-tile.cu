@@ -5,6 +5,15 @@ void ggml_cuda_flash_attn_ext_tile(ggml_backend_cuda_context & ctx, ggml_tensor 
     const ggml_tensor * K = dst->src[1];
     const ggml_tensor * V = dst->src[2];
     switch (K->ne[0]) {
+#ifdef GGML_CUDA_OCCAMY_SLIM
+        case 256: {
+            GGML_ASSERT(V->ne[0] == K->ne[0]);
+            ggml_cuda_flash_attn_ext_tile_case<256, 256>(ctx, dst);
+        } break;
+        default: {
+            GGML_ABORT("Unsupported head size under GGML_CUDA_OCCAMY_SLIM (only dkq256-dv256)");
+        } break;
+#else
         case  40: {
             GGML_ASSERT(V->ne[0] == K->ne[0]);
             ggml_cuda_flash_attn_ext_tile_case< 40,  40>(ctx, dst);
@@ -56,5 +65,6 @@ void ggml_cuda_flash_attn_ext_tile(ggml_backend_cuda_context & ctx, ggml_tensor 
         default: {
             GGML_ABORT("Unsupported head size");
         } break;
+#endif // GGML_CUDA_OCCAMY_SLIM
     }
 }

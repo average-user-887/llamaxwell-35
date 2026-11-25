@@ -12,6 +12,7 @@
 struct ggml_cuda_occamy_gdn_match {
     int n_nodes = 0;
     int n_seqs = 1;
+    int nt = 1;                              // GDN2 (GGML_CUDA_OCCAMY_GDN_T2=1): 2 = two-token single-sequence MTP1 verify window
     const ggml_tensor *gr_ssm=nullptr,*gdn=nullptr,*cpy_ssm=nullptr;
     const ggml_tensor * h = nullptr;         // residual stream in [2048]
     const ggml_tensor * norm_w = nullptr;    // attn_norm [2048]
@@ -26,6 +27,8 @@ struct ggml_cuda_occamy_gdn_match {
     const float * ssm_base  = nullptr; size_t ssm_stride  = 0;
     float * conv_out = nullptr;              // cpy destination of the new conv state [3, 8192]
     float * state_out = nullptr;             // cpy destination of the new SSM state [128,128,32]
+    float * conv_out1 = nullptr;             // GDN2: rollback snapshot plane 1 (state after token 1); conv_out/state_out = after token 2
+    float * state_out1 = nullptr;
     float * zero_conv = nullptr;             // build_rs state_zero rows (rs_zero >= 0): zeroed before the kernel reads the states
     float * zero_ssm = nullptr;
     ggml_tensor * out = nullptr;             // residual ADD output [2048]
@@ -41,3 +44,7 @@ void ggml_cuda_occamy_gdn_launch(ggml_backend_cuda_context & ctx, const ggml_cud
 // (weights read once, per-sequence arithmetic unchanged); falls back to two launches when its occupancy grid is too small.
 bool ggml_cuda_occamy_gdn_split2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m);
 void ggml_cuda_occamy_gdn_graph_begin();
+// GDN2 (GGML_CUDA_OCCAMY_GDN_T2=1, REPACK path): two-token single-sequence verify window (m.nt == 2) as one
+// gdn_fused2<1> launch; token 2 continues from token 1's conv/recurrent state, both snapshot planes written.
+// Returns false when the kernel is unavailable (caller runs the window's nodes unfused).
+bool ggml_cuda_occamy_gdn_t2(ggml_backend_cuda_context & ctx, const ggml_cuda_occamy_gdn_match & m);

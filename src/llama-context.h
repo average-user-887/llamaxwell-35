@@ -1,5 +1,7 @@
 #pragma once
 
+#include "compact-readback.h"
+
 #include "llama.h"
 #include "llama-ext.h"
 #include "llama-cparams.h"
@@ -8,6 +10,7 @@
 #include "llama-impl.h"
 #include "llama-memory.h"
 #include "llama-moe-cache.h"
+#include "llama-mv3.h"
 
 #include "ggml-cpp.h"
 #include "ggml-opt.h"
@@ -146,7 +149,12 @@ struct llama_context {
                        ggml_status & ret);
 
     int encode(const llama_batch_ext & batch_inp);
-    int decode(const llama_batch_ext & batch_inp);
+    int decode(const llama_batch_ext & batch_inp, bool mtp_cache_catch_up = false);
+    void enable_mtp_last_query() { mtp_last_query_allowed = true; }
+    bool has_graph_adapter() const { return cvec->active() || !loras->empty(); }
+    int decode_mtp(const llama_batch_ext & batch_inp, bool mtp_cache_catch_up, bool last_query);
+    int decode_mtp_output(const llama_batch_ext & batch_inp, bool mtp_cache_catch_up, bool last_query,
+            const occamy_compact::Mask * mask, occamy_compact::Result * compact);
 
     // compat version
     int encode(const llama_batch & batch_inp);
@@ -422,8 +430,16 @@ private:
     mutable int64_t t_compute_start_us = 0;
     mutable int64_t n_queued_tokens    = 0;
 
+    mv3::Ctx mv3_;   // LLAMA_MV3_PHASE
+    mv3::Rec mv3_rec;
+    ggml_backend_t mv3_cuda_backend() const;
+
     mutable int32_t n_p_eval = 0; // number of tokens in eval calls for the prompt (with batch size > 1)
     mutable int32_t n_eval   = 0; // number of eval calls
 
     mutable int32_t n_reused = 0; // number of times the previous graph was reused
+    bool mtp_cache_only_logged = false;
+    bool mtp_full_logged = false;
+    bool mtp_last_query_allowed = false;
+    bool mtp_last_query_logged = false;
 };

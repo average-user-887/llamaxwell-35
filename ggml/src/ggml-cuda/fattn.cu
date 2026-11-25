@@ -1,11 +1,22 @@
 #include "common.cuh"
 #include "fattn-common.cuh"
+#ifndef GGML_CUDA_OCCAMY_SLIM
 #include "fattn-mma-f16.cuh"
+#endif // GGML_CUDA_OCCAMY_SLIM
 #include "fattn-tile.cuh"
 #include "fattn-vec.cuh"
 #include "fattn.cuh"
 #include "fattn-occamy.cuh"
+#include "fattn-maxwell-gemm.cuh"
 
+#ifdef GGML_CUDA_OCCAMY_SLIM
+void ggml_cuda_flash_attn_ext_compact_mask(
+        const ggml_tensor * mask, int32_t * indices, int32_t * counts, int32_t n_queries, int32_t ncols1, int32_t n_kv_max, cudaStream_t stream) {
+    GGML_UNUSED(mask); GGML_UNUSED(indices); GGML_UNUSED(counts);
+    GGML_UNUSED(n_queries); GGML_UNUSED(ncols1); GGML_UNUSED(n_kv_max); GGML_UNUSED(stream);
+    GGML_ABORT("sparse mma_f16 compact_mask stripped on sm_52 (GGML_CUDA_OCCAMY_SLIM)");
+}
+#else
 #if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA)
 // one list per group of ncols1 queries: a column is selected if any query of the group can see it
 template <int ncols1, bool oob>
@@ -416,6 +427,7 @@ static void ggml_cuda_flash_attn_ext_mma_f16(ggml_backend_cuda_context & ctx, gg
             break;
     }
 }
+#endif // GGML_CUDA_OCCAMY_SLIM
 
 #define FATTN_VEC_CASE(D, type_K_case, type_V_case)                                                                                \
     if constexpr (GGML_CUDA_FA_##type_K_case##_##type_V_case) {                                                                    \
@@ -436,6 +448,7 @@ typedef void (* fattn_vec_case_t)(ggml_backend_cuda_context & ctx, ggml_tensor *
 // Vector kernel for the given head size and K/V types, nullptr if its template instance was not compiled:
 static fattn_vec_case_t ggml_cuda_get_fattn_vec_case(const int64_t head_size, const ggml_type type_K, const ggml_type type_V) {
     FATTN_VEC_CASES_ALL_D(F16,  F16)
+#ifndef GGML_CUDA_OCCAMY_SLIM
     FATTN_VEC_CASES_ALL_D(Q4_0, F16)
     FATTN_VEC_CASES_ALL_D(Q4_1, F16)
     FATTN_VEC_CASES_ALL_D(Q5_0, F16)
@@ -490,6 +503,7 @@ static fattn_vec_case_t ggml_cuda_get_fattn_vec_case(const int64_t head_size, co
     FATTN_VEC_CASES_ALL_D(Q5_1, BF16)
     FATTN_VEC_CASES_ALL_D(Q8_0, BF16)
     FATTN_VEC_CASES_ALL_D(BF16, BF16)
+#endif // GGML_CUDA_OCCAMY_SLIM
 
     return nullptr;
 }
@@ -635,6 +649,7 @@ static best_fattn_kernel ggml_cuda_get_best_fattn_kernel(const int device, const
     // 192 satisfies % 64 == 0 but has no vec instance (DKQ != DV); force it onto the MMA path.
     const bool can_use_vector_kernel = Q->ne[0] <= 256 && Q->ne[0] % 64 == 0 && Q->ne[0] != 192 && K->ne[1] % FATTN_KQ_STRIDE == 0;
 
+#ifndef GGML_CUDA_OCCAMY_SLIM
     // If Turing tensor cores are available, use them:
     if (turing_mma_available(cc) && Q->ne[0] != 40 && Q->ne[0] != 72) {
         if (can_use_vector_kernel) {
@@ -702,6 +717,7 @@ static best_fattn_kernel ggml_cuda_get_best_fattn_kernel(const int device, const
             Q->ne[1] * gqa_ratio_eff > (Q->ne[0] <= 128 ? 8 : 16)) {
         return BEST_FATTN_KERNEL_MMA_F16;
     }
+#endif // GGML_CUDA_OCCAMY_SLIM
 
     { // local patch 20261012 fattn: GGML_CUDA_FA_KERNEL=vec|tile forces the generic kernel choice (A/B testing only).
         const int force = ggml_cuda_fattn_env_kernel();
@@ -777,17 +793,72 @@ static void ggml_cuda_flash_attn_ext_stock(ggml_backend_cuda_context & ctx, ggml
             ggml_cuda_flash_attn_ext_vec(ctx, dst);
             break;
         case BEST_FATTN_KERNEL_MMA_F16:
+#ifdef GGML_CUDA_OCCAMY_SLIM
+            GGML_ABORT("fattn mma_f16 stripped on sm_52 (GGML_CUDA_OCCAMY_SLIM)");
+#else
             ggml_cuda_flash_attn_ext_mma_f16(ctx, dst);
+#endif // GGML_CUDA_OCCAMY_SLIM
             break;
     }
 }
 
+#include "mv1-counters.h"
+static void mv1_fa_record(const ggml_tensor * dst, const char * path, float ms) {
+    char key[256];
+    snprintf(key, sizeof(key), "FA %s %s q=[%d,%d,%d,%d] kv=%s[%d,<=%dk,%d] mask=%s", mv1::tag().c_str(), path,
+        (int) dst->src[0]->ne[0], (int) dst->src[0]->ne[1], (int) dst->src[0]->ne[2], (int) dst->src[0]->ne[3],
+        ggml_type_name(dst->src[1]->type), (int) dst->src[1]->ne[0], (int) (((dst->src[1]->ne[1] + 8191) / 8192) * 8), (int) dst->src[1]->ne[2], dst->src[3] ? "y" : "n");
+    mv1::R().add(key, ms);
+}
+
+static void ggml_cuda_flash_attn_ext_impl(ggml_backend_cuda_context & ctx, ggml_tensor * dst, const char ** path_out);
+
 void ggml_cuda_flash_attn_ext(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
+    if (!mv1::mode()) {
+        const char * p = nullptr;
+        ggml_cuda_flash_attn_ext_impl(ctx, dst, &p);
+        return;
+    }
+    if (mv1::mode() == 1) {
+        const char * path1 = "?";
+        ggml_cuda_flash_attn_ext_impl(ctx, dst, &path1);
+        mv1_fa_record(dst, path1, 0.0f);
+        return;
+    }
+    cudaEvent_t e0, e1;
+    cudaEventCreate(&e0); cudaEventCreate(&e1);
+    cudaEventRecord(e0, ctx.stream());
+    const char * path = "?";
+    ggml_cuda_flash_attn_ext_impl(ctx, dst, &path);
+    cudaEventRecord(e1, ctx.stream());
+    cudaEventSynchronize(e1);
+    float ms = 0; cudaEventElapsedTime(&ms, e0, e1);
+    cudaEventDestroy(e0); cudaEventDestroy(e1);
+    mv1_fa_record(dst, path, ms);
+}
+
+static void ggml_cuda_flash_attn_ext_impl(ggml_backend_cuda_context & ctx, ggml_tensor * dst, const char ** path_out) {
     ggml_cuda_set_device(ctx.device);
+    if (ggml_cuda_occamy_fa_sparse_applicable(dst)) {
+        if (ggml_cuda_occamy_fa_sparse_mode() == 2) {
+            *path_out = "occamy_sparse_compare_full";
+            ggml_cuda_flash_attn_ext_stock(ctx, dst);
+            ggml_cuda_occamy_fa_sparse_compare(ctx, dst);
+        } else {
+            *path_out = "occamy_sparse_probe";
+            ggml_cuda_occamy_fa_sparse(ctx, dst);
+        }
+        return;
+    }
+    if (ggml_cuda_flash_attn_ext_maxwell_gemm(ctx, dst)) {
+        *path_out = "maxwell_gemm";
+        return;
+    }
     // Track F: occamy GQA split-K decode kernel (env-gated, default off)
     const int ofa = ggml_cuda_occamy_fa_mode();
     if (ofa != 0 && ggml_cuda_occamy_fa_applicable(dst)) {
         if (ofa == 1) {
+            *path_out = "occamy_splitk";
             ggml_cuda_occamy_fa(ctx, dst);
             return;
         }
@@ -795,9 +866,46 @@ void ggml_cuda_flash_attn_ext(ggml_backend_cuda_context & ctx, ggml_tensor * dst
         ggml_cuda_occamy_fa_compare(ctx, dst);
         return;
     }
+    // MRFA: native multi-row (n_q 2..4) F16 split-K decode (GGML_CUDA_OCCAMY_FA_MROW=1; =2 runs stock and logs the diff)
+    if (ggml_cuda_occamy_fa_mrow_applicable(dst)) {
+        const int mrow = ggml_cuda_occamy_fa_mrow_mode();
+        if (mrow == 1 || mrow == 3) {
+            *path_out = ggml_cuda_occamy_fa_mrow_is_fa2(dst) ? "occamy_fa2" : "occamy_mrow";
+            ggml_cuda_occamy_fa_mrow(ctx, dst);
+            return;
+        }
+        ggml_cuda_flash_attn_ext_stock(ctx, dst);
+        ggml_cuda_occamy_fa_mrow_compare(ctx, dst);
+        return;
+    }
+    // MV3: 2-row verify as two 1-row occamy launches (GGML_CUDA_OCCAMY_FA_2CALL=1)
+    if (ofa == 1 && ggml_cuda_occamy_fa_2call_applicable(dst)) {
+        *path_out = "occamy_splitk_2call";
+        ggml_cuda_occamy_fa_2call(ctx, dst);
+        return;
+    }
+    // Q8N: native q8_0 K/V read (GGML_CUDA_OCCAMY_KVQ8=1); FA=2 runs the generic q8 path and logs the diff
+    if (ofa != 0 && ggml_cuda_occamy_kvq8_applicable(dst)) {
+        if (ofa == 1) {
+            *path_out = "occamy_kvq8";
+            ggml_cuda_occamy_fa_kvq8(ctx, dst);
+            return;
+        }
+        ggml_cuda_flash_attn_ext_stock(ctx, dst);
+        ggml_cuda_occamy_fa_compare(ctx, dst, true);
+        return;
+    }
+    {
+        const best_fattn_kernel k = ggml_cuda_get_best_fattn_kernel(ctx.device, dst);
+        *path_out = k == BEST_FATTN_KERNEL_TILE ? "stock_tile" : k == BEST_FATTN_KERNEL_VEC ? "stock_vec" : k == BEST_FATTN_KERNEL_MMA_F16 ? "stock_mma" : "stock_other";
+    }
     ggml_cuda_flash_attn_ext_stock(ctx, dst);
 }
 
 bool ggml_cuda_flash_attn_ext_supported(int device, const ggml_tensor * dst) {
     return ggml_cuda_get_best_fattn_kernel(device, dst) != BEST_FATTN_KERNEL_NONE;
+}
+
+void ggml_cuda_fa_maxwell_gemm_report_free() {
+    occamy_fa_gemm_report_free_impl();
 }

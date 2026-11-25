@@ -5,6 +5,7 @@
 #include "llama-io.h"
 #include "llama-batch.h"
 #include "llama-model.h"
+#include "llama-mv3.h"
 
 #include <algorithm>
 #include <cassert>
@@ -166,6 +167,7 @@ void llama_memory_recurrent::clear(bool data) {
 }
 
 bool llama_memory_recurrent::seq_rm(llama_seq_id seq_id, llama_pos p0, llama_pos p1) {
+    mv3::RsScope mv3_rs;
     uint32_t new_head = size;
 
     if (p0 < 0) {
@@ -263,6 +265,7 @@ bool llama_memory_recurrent::seq_rm(llama_seq_id seq_id, llama_pos p0, llama_pos
 }
 
 void llama_memory_recurrent::seq_cp(llama_seq_id seq_id_src, llama_seq_id seq_id_dst, llama_pos p0, llama_pos p1) {
+    mv3::RsScope mv3_rs;
     if (seq_id_src == seq_id_dst) {
         return;
     }
@@ -519,6 +522,7 @@ bool llama_memory_recurrent::prepare(const std::vector<llama_ubatch> & ubatches)
 }
 
 bool llama_memory_recurrent::find_slot(const llama_ubatch & ubatch) {
+    mv3::RsScope mv3_rs;
     const uint32_t n_seq_tokens = ubatch.n_seq_tokens;
     const uint32_t n_seqs       = ubatch.n_seqs;
 

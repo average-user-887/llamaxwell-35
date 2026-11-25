@@ -42,6 +42,9 @@ set(TARGET llama-common-base)
 add_library(${TARGET} STATIC ${OUTPUT_FILE})
 
 target_include_directories(${TARGET} PUBLIC .)
+if (EXISTS "${CMAKE_SOURCE_DIR}/src/compact-readback.h")
+    target_include_directories(${TARGET} PRIVATE "${CMAKE_SOURCE_DIR}/src")
+endif()
 
 if (BUILD_SHARED_LIBS)
     set_target_properties(${TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -134,6 +137,9 @@ set_target_properties(${TARGET} PROPERTIES
 )
 
 target_include_directories(${TARGET} PUBLIC .)
+if (EXISTS "${CMAKE_SOURCE_DIR}/src/compact-readback.h")
+    target_include_directories(${TARGET} PRIVATE "${CMAKE_SOURCE_DIR}/src")
+endif()
 target_link_libraries     (${TARGET} PUBLIC vendor::nlohmann vendor::sheredom)
 target_compile_features   (${TARGET} PUBLIC cxx_std_17)
 
