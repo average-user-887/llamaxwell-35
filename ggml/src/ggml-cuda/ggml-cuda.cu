@@ -4816,7 +4816,7 @@ static bool occamy_sf_overlap(const ggml_tensor * a, const ggml_tensor * b) {
 
 // Plan the bit-2 group at the gate CONT node i: CONT(view) -> UNARY sigmoid -> MUL. The fused launch happens at the
 // MUL position; the CONT and SIGMOID results are never materialised. Returns the MUL position or -1.
-static int occamy_sf2_plan(const ggml_cgraph * g, const int i, ggml_tensor ** grp) {
+static int occamy_sf2_plan(const ggml_cgraph * g, const int i, ggml_tensor ** grp, bool allow_two) {
     ggml_tensor * cont = g->nodes[i];
     ggml_tensor * sig  = nullptr;
     ggml_tensor * mul  = nullptr;
@@ -4838,6 +4838,18 @@ static int occamy_sf2_plan(const ggml_cgraph * g, const int i, ggml_tensor ** gr
     if ((cont->flags & sig->flags & mul->flags & GGML_TENSOR_FLAG_COMPUTE) == 0 ||
         (cont->flags | sig->flags) & GGML_TENSOR_FLAG_OUTPUT || cont->view_src != nullptr || sig->view_src != nullptr) {
         return -1;
+    }
+    if (ggml_nrows(mul) != 1) {
+        if (!allow_two || pm + 1 >= g->n_nodes || ps != i + 1 || pm != ps + 1) {
+            return -1;
+        }
+        const ggml_tensor * proj = g->nodes[pm + 1];
+        const ggml_tensor * w = proj->src[0];
+        if (proj->op != GGML_OP_MUL_MAT || proj->src[1] != mul || !(proj->flags & GGML_TENSOR_FLAG_COMPUTE) ||
+                !w || w->type != GGML_TYPE_Q4_0 || w->ne[0] != 4096 || w->ne[1] != 2048 ||
+                w->ne[2] != 1 || w->ne[3] != 1 || !ggml_is_contiguous(w) || occamy_sf_overlap(proj, mul)) {
+            return -1;
+        }
     }
     if (!ggml_cuda_occamy_gate_sig_mul_ok(cont, sig, mul)) {
         return -1;
@@ -5151,6 +5163,11 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
             ggml_tensor * sf1_grp[8];
             int           sf1_pos[8];
             int           sf1_last = -1;
+            static const bool gate_x2_requested = [] {
+                const char * e = getenv("GGML_CUDA_GATE_Q8X2");
+                return e && strcmp(e, "1") == 0;
+            }();
+            const bool gate_x2 = gate_x2_requested && ggml_cuda_info().devices[cuda_ctx->device].cc == 520;
             const bool sf2_on = (ggml_cuda_occamy_smallfuse() & 2) && stream_ctx.concurrent_events.empty();
             ggml_tensor * sf2_grp[3] = {nullptr, nullptr, nullptr};
             int           sf2_last = -1;
@@ -5247,8 +5264,22 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
                             ggml_cuda_occamy_gate_sig_mul(*cuda_ctx, sf2_grp[0], node, q8);
                             cuda_ctx->q8r_invalidate_if_overlaps(node);
                             if (q8 != nullptr) {
-                                // same key as the MMVQ q8_1 reuse path for a single contiguous row
-                                const int64_t key[8] = {(int64_t) (uintptr_t) node->data, ggml_nelements(node), 1, 1, 1, 0, 0, 0};
+                                // Mirror the normalized one-row and strided two-row MMVQ keys.
+                                const bool two = node->ne[1] == 2;
+                                const int64_t key[8] = {(int64_t) (uintptr_t) node->data, two ? node->ne[0] : ggml_nelements(node),
+                                    two ? 2 : 1, 1, 1, two ? int64_t(node->nb[1]/sizeof(float)) : 0,
+                                    two ? int64_t(node->nb[2]/sizeof(float)) : 0, two ? int64_t(node->nb[3]/sizeof(float)) : 0};
+                                if (two) {
+                                    static const bool trace = getenv("GGML_CUDA_GATE_Q8X2_TRACE") != nullptr;
+                                    if (trace) {
+                                        static std::atomic<uint64_t> plans{0};
+                                        const uint64_t n = ++plans;
+                                        if (n <= 12 || (n & (n - 1)) == 0) {
+                                            fprintf(stderr, "gate-q8x2 producer plan=%llu node=%s cuda_graph=%d\n",
+                                                    (unsigned long long) n, node->name, use_cuda_graph);
+                                        }
+                                    }
+                                }
                                 memcpy(cuda_ctx->q8r_key, key, sizeof(key));
                                 cuda_ctx->q8r_lo    = (const char *) node->data;
                                 cuda_ctx->q8r_hi    = cuda_ctx->q8r_lo + ggml_nbytes(node);
@@ -5261,7 +5292,8 @@ static void ggml_cuda_graph_evaluate_and_capture(ggml_backend_cuda_context * cud
                             continue; // not written: nothing to invalidate
                         }
                     } else if (node->op == GGML_OP_CONT && !is_concurrent_event_active && cuda_ctx->curr_stream_no == 0) {
-                        const int last = occamy_sf2_plan(cgraph, i, sf2_grp);
+                        const bool allow_two = gate_x2 && cuda_ctx->q8r_buf && cuda_ctx->q8r_cap >= 8192/QK8_1*sizeof(block_q8_1);
+                        const int last = occamy_sf2_plan(cgraph, i, sf2_grp, allow_two);
                         if (last > i) {
                             sf2_last = last;
                             static const bool sf_dbg2 = getenv("GGML_CUDA_OCCAMY_DEBUG") != nullptr;

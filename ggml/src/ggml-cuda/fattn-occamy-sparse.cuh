@@ -1117,6 +1117,24 @@ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst
     p.nbk1 = k->nb[1]; p.nbk2 = k->nb[2]; p.nbk3 = k->nb[3];
     p.nbv1 = v->nb[1]; p.nbv2 = v->nb[2]; p.nbv3 = v->nb[3];
     p.nbm1 = mask->nb[1]; p.nbm3 = mask->nb[3];
+    static const bool want_stride = [] {
+        const char * flag = getenv("GGML_CUDA_OCCAMY_FA_Q2_R2_STRIDE");
+        return flag && strcmp(flag, "1") == 0;
+    }();
+    static const bool want_midstride = [] {
+        const char * flag = getenv("GGML_CUDA_OCCAMY_FA_Q2_R2_MIDSTRIDE");
+        return flag && strcmp(flag, "1") == 0;
+    }();
+    const bool midstride = NQ == 2 && want_midstride && revision2 && nkvh == 2 &&
+            n_kv % OFS_BLOCK == 0 &&
+            ((n_kv >= 16640 && n_kv <= 19456) || (n_kv >= 40192 && n_kv <= 43264));
+    const bool stride_q2 = NQ == 2 && ((tile4 && want_stride) || midstride) && nsplit == 12 && blocks_per_sm == 1 &&
+            p.nbk2 == 512 && p.nbv2 == 512 && p.nbk1 == p.nbv1 && (p.nbk1 == 1024 || p.nbk1 == 2048);
+    static const bool want_mid_top16 = [] {
+        const char * flag = getenv("GGML_CUDA_OCCAMY_FA_Q2_R2_MID_TOP16");
+        return flag && strcmp(flag, "1") == 0;
+    }();
+    const bool mid_top16 = want_mid_top16 && midstride && stride_q2 && !tile4;
     const long long nc = ++ofa_sparse_calls[NQ];
     static const bool profile_enabled = []() {
         const char * s = getenv("GGML_CUDA_OCCAMY_FA_SPARSE_PROFILE");
@@ -1139,9 +1157,16 @@ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst
         }
         CUDA_CHECK(cudaGetLastError());
         if (profile) CUDA_CHECK(cudaEventRecord(events[5], stream));
-        if (use_top16) {
+        if (use_top16 || mid_top16) {
             ofa_sparse_select_r2_top16<<<nplans, 512, 0, stream>>>(plans.get(), scores.get(), metas.get(), n_blocks);
-            if (nc == 1) fprintf(stderr, "q2_r2_top16_dispatch n_q=2 n_kv=%d nkvh=%d plans=%d\n", n_kv, nkvh, nplans);
+            if (mid_top16) {
+                static const bool logged = [&] {
+                    fprintf(stderr, "q2_r2_mid_top16_dispatch width=%d plans=%d k_token_bytes=%zu splits=%d\n",
+                            n_kv, nplans, p.nbk1, nsplit);
+                    return true;
+                }();
+                (void) logged;
+            } else if (nc == 1) fprintf(stderr, "q2_r2_top16_dispatch n_q=2 n_kv=%d nkvh=%d plans=%d\n", n_kv, nkvh, nplans);
         } else {
             ofa_sparse_select_r2<<<nplans, 128, 0, stream>>>(plans.get(), scores.get(), metas.get(), n_blocks);
         }
@@ -1157,12 +1182,6 @@ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst
         CUDA_CHECK(cudaGetLastError());
     }
     if (profile) CUDA_CHECK(cudaEventRecord(events[1], stream));
-    static const bool want_stride = [] {
-        const char * flag = getenv("GGML_CUDA_OCCAMY_FA_Q2_R2_STRIDE");
-        return flag && strcmp(flag, "1") == 0;
-    }();
-    const bool stride_q2 = NQ == 2 && tile4 && want_stride && nsplit == 12 && blocks_per_sm == 1 &&
-            p.nbk2 == 512 && p.nbv2 == 512 && p.nbk1 == p.nbv1 && (p.nbk1 == 1024 || p.nbk1 == 2048);
     const bool stride_q1 = NQ == 1 && tile4 && q1_r2_fast && nsplit > 0 &&
             p.nbk2 == 512 && p.nbv2 == 512 && p.nbk1 == p.nbv1 && (p.nbk1 == 1024 || p.nbk1 == 2048);
     const bool stride = stride_q2 || stride_q1;
@@ -1170,8 +1189,8 @@ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst
         if (stride_q2) {
             static std::atomic<int> stride_seen{0};
             if (stride_seen.fetch_add(1, std::memory_order_relaxed) == 0) {
-                fprintf(stderr, "q2_r2_stride_dispatch width=%d k_token_bytes=%zu v_token_bytes=%zu splits=%d nu=4 threads=512 grid=%d\n",
-                        n_kv, p.nbk1, p.nbv1, nsplit, nsplit*nkvh);
+                fprintf(stderr, "q2_r2_stride_dispatch width=%d k_token_bytes=%zu v_token_bytes=%zu splits=%d nu=4 threads=512 grid=%d midstride=%d\n",
+                        n_kv, p.nbk1, p.nbv1, nsplit, nsplit*nkvh, int(midstride));
             }
             if (p.nbk1 == 1024) ofa_sparse_attention_q2_stride<1024><<<dim3(nsplit,nkvh,1),NT,0,stream>>>(p,plans.get());
             else ofa_sparse_attention_q2_stride<2048><<<dim3(nsplit,nkvh,1),NT,0,stream>>>(p,plans.get());

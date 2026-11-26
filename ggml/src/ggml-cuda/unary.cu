@@ -816,13 +816,20 @@ bool ggml_cuda_occamy_gate_sig_mul_ok(const ggml_tensor * cont, const ggml_tenso
     const ggml_tensor * gv    = cont->src[0];
     const ggml_tensor * other = mul->src[0] == sig ? mul->src[1] : mul->src[0];
     const int64_t k = ggml_nelements(mul);
+    const bool one = ggml_nrows(mul) == 1 && gv->ne[2] == 1 && gv->ne[0]*gv->ne[1] == k;
+    // The existing flat kernel walks through row 1 when the head and token strides are adjacent.
+    const bool two = mul->ne[0] == 4096 && mul->ne[1] == 2 && mul->ne[2] == 1 && mul->ne[3] == 1 &&
+                     gv->ne[0] == 256 && gv->ne[1] == 16 && gv->ne[2] == 2 &&
+                     gv->nb[1] == 512*sizeof(float) && gv->nb[2] == 16*gv->nb[1] &&
+                     ggml_are_same_shape(cont, mul) && ggml_are_same_shape(sig, mul) &&
+                     ggml_are_same_shape(other, mul) && other->op != GGML_OP_UNARY;
     return cont->op == GGML_OP_CONT && sig->op == GGML_OP_UNARY && ggml_get_unary_op(sig) == GGML_UNARY_OP_SIGMOID &&
            sig->src[0] == cont && mul->op == GGML_OP_MUL && (mul->src[0] == sig || mul->src[1] == sig) &&
            cont->type == GGML_TYPE_F32 && gv->type == GGML_TYPE_F32 && sig->type == GGML_TYPE_F32 &&
            mul->type == GGML_TYPE_F32 && other->type == GGML_TYPE_F32 &&
            ggml_is_contiguous(cont) && ggml_is_contiguous(mul) && ggml_is_contiguous(other) && ggml_is_contiguous(sig) &&
-           ggml_nrows(mul) == 1 && ggml_nelements(other) == k && ggml_nelements(cont) == k && ggml_nelements(sig) == k &&
-           gv->nb[0] == sizeof(float) && gv->ne[2] == 1 && gv->ne[3] == 1 && gv->ne[0]*gv->ne[1] == k &&
+           (one || two) && ggml_nelements(other) == k && ggml_nelements(cont) == k && ggml_nelements(sig) == k &&
+           gv->nb[0] == sizeof(float) && gv->ne[3] == 1 &&
            k % 512 == 0 && k <= (1 << 20);
 }
 

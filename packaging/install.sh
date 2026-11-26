@@ -7,7 +7,7 @@ VERIFY=1
 usage() {
     cat <<EOF
 Usage: $(basename "$0") [--prefix DIR] [--no-verify]
-Install the LlamaMaxwell-35 R3 (sm_52) binaries and launcher into PREFIX (default: /opt/llamaxwell-35).
+Install the LlamaMaxwell-35 R3 v5 (sm_52) binaries and launcher into PREFIX (default: /opt/llamaxwell-35).
 EOF
 }
 
@@ -38,7 +38,7 @@ for doc in README.md DEPLOY.md LICENSE SHA256SUMS; do
 done
 
 echo ""
-echo "Installed LlamaMaxwell-35 R3 to: $PREFIX"
+echo "Installed LlamaMaxwell-35 R3 v5 to: $PREFIX"
 echo "Run with:"
 echo "  $PREFIX/llamaxwell-serve.sh --model /path/to/occamy-1.0-Q4_0-headq40b-mtp.gguf"
 echo ""

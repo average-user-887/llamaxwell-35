@@ -6,8 +6,11 @@
 #include "llama-context.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <limits>
 #include <map>
@@ -397,6 +400,37 @@ void llama_kv_cache::clear(bool data) {
     }
 }
 
+struct kv_tail_trim_stats {
+    std::atomic<uint64_t> empty{0};
+    std::atomic<uint64_t> small{0};
+    std::atomic<uint64_t> fallback{0};
+
+    ~kv_tail_trim_stats() {
+        std::fprintf(stderr, "kv_tail_trim: empty=%llu small=%llu fallback=%llu\n",
+                (unsigned long long) empty.load(), (unsigned long long) small.load(), (unsigned long long) fallback.load());
+    }
+};
+
+static int kv_tail_trim(llama_kv_cells & cells, uint32_t & head, llama_seq_id seq_id, llama_pos p0) {
+    uint32_t ids[8];
+    int count = 0;
+    const auto & positions = cells.seq_pos_get(seq_id);
+    for (auto it = positions.rbegin(); it != positions.rend() && it->first >= p0; ++it) {
+        // The stock range excludes the maximum position, even for an open end.
+        if (count == 8 || it->first == std::numeric_limits<llama_pos>::max()) {
+            return -1;
+        }
+        ids[count++] = it->second;
+    }
+
+    for (int i = 0; i < count; ++i) {
+        if (cells.seq_rm(ids[i], seq_id)) {
+            head = std::min(head, ids[i]);
+        }
+    }
+    return count;
+}
+
 bool llama_kv_cache::seq_rm(llama_seq_id seq_id, llama_pos p0, llama_pos p1) {
     // TODO: refactor [TAG_KV_CACHE_SHARE_CELLS]
     if (other) {
@@ -410,6 +444,7 @@ bool llama_kv_cache::seq_rm(llama_seq_id seq_id, llama_pos p0, llama_pos p1) {
         p0 = 0;
     }
 
+    const bool tail = p0 > 0 && p1 < 0;
     if (p1 < 0) {
         p1 = std::numeric_limits<llama_pos>::max();
     }
@@ -417,6 +452,20 @@ bool llama_kv_cache::seq_rm(llama_seq_id seq_id, llama_pos p0, llama_pos p1) {
     if (seq_id >= 0) {
         auto & cells = v_cells[seq_to_stream[seq_id]];
         auto & head  = v_heads[seq_to_stream[seq_id]];
+
+        static const bool tail_enabled = [] {
+            const char * v = std::getenv("LLAMA_KV_TAIL_TRIM");
+            return v && std::strcmp(v, "1") == 0;
+        }();
+        if (tail_enabled && tail) {
+            static kv_tail_trim_stats stats;
+            const int count = kv_tail_trim(cells, head, seq_id, p0);
+            if (count >= 0) {
+                (count == 0 ? stats.empty : stats.small).fetch_add(1, std::memory_order_relaxed);
+                return true;
+            }
+            stats.fallback.fetch_add(1, std::memory_order_relaxed);
+        }
 
         uint32_t new_head = cells.size();
 
@@ -1566,6 +1615,64 @@ struct args_set_input_kq_mask {
     int64_t n_tps;
 };
 
+struct dense_mask_stats {
+    std::atomic<uint64_t> hits{0};
+    std::atomic<uint64_t> misses{0};
+
+    ~dense_mask_stats() {
+        std::fprintf(stderr, "dense_kq_mask: hits=%llu misses=%llu\n",
+                (unsigned long long) hits.load(), (unsigned long long) misses.load());
+    }
+};
+
+template<typename T>
+static bool set_input_kq_mask_dense(const args_set_input_kq_mask & args, T * data, bool causal) {
+    const auto & ub = *args.ubatch;
+    if (!causal || args.swa_type != LLAMA_SWA_TYPE_NONE || args.hparams.use_alibi ||
+            args.n_stream != 1 || args.n_kv < 32768 || ub.n_seqs_unq != 1 ||
+            ub.n_tokens < 1 || ub.n_tokens > 3 || args.n_tps != ub.n_tokens) {
+        return false;
+    }
+
+    const auto seq = ub.seq_id[0][0];
+    const auto & cells = args.v_cells.at(args.seq_to_stream[seq]);
+    const auto & positions = cells.seq_pos_get(seq);
+    const auto used = cells.get_used();
+    // All physical cells in [0, used) are occupied and carry this sequence.
+    if (used == 0 || used > args.n_kv || used != cells.used_max_p1() || used != positions.size()) {
+        return false;
+    }
+
+    const auto min_pos = *std::min_element(ub.pos, ub.pos + ub.n_tokens);
+    auto first = positions.end();
+    for (int n = 0; first != positions.begin(); ++n) {
+        const auto prev = std::prev(first);
+        if (prev->first < min_pos) {
+            break;
+        }
+        if (n == 8) {
+            return false;
+        }
+        first = prev;
+    }
+
+    const T keep = llama_cast<T>(0.0f);
+    const T drop = llama_cast<T>(-INFINITY);
+    for (uint32_t i = 0; i < ub.n_tokens; ++i) {
+        T * row = data + i*args.n_kv;
+        std::fill(row, row + used, keep);
+        std::fill(row + used, row + args.n_kv, drop);
+        for (auto it = first; it != positions.end(); ++it) {
+            const auto [pos, cell] = *it;
+            if (pos > ub.pos[i] || (pos == ub.pos[i] && ub.is_pos_2d() &&
+                    cells.ext_get(cell).is_2d_gt(ub.pos[i + 2*ub.n_tokens], ub.pos[i + ub.n_tokens]))) {
+                row[cell] = drop;
+            }
+        }
+    }
+    return true;
+}
+
 template<typename T, bool causal, bool swa, bool is_2d, bool alibi>
 static void set_input_kq_mask_impl(const args_set_input_kq_mask & args, T * data) {
   //const auto & hparams = args.hparams;
@@ -1788,6 +1895,22 @@ void llama_kv_cache::set_input_kq_mask(ggml_tensor * dst, const llama_ubatch * u
         /*.n_stream         =*/ n_stream,
         /*.n_tps            =*/ n_tps,
     };
+
+    static const bool dense_enabled = [] {
+        const char * v = std::getenv("LLAMA_DENSE_KQ_MASK");
+        return v && std::strcmp(v, "1") == 0;
+    }();
+    if (dense_enabled) {
+        static dense_mask_stats stats;
+        const bool hit = dst->type == GGML_TYPE_F16
+                ? set_input_kq_mask_dense(args, (ggml_fp16_t *) dst->data, causal_attn)
+                : dst->type == GGML_TYPE_F32 && set_input_kq_mask_dense(args, (float *) dst->data, causal_attn);
+        if (hit) {
+            stats.hits.fetch_add(1, std::memory_order_relaxed);
+            return;
+        }
+        stats.misses.fetch_add(1, std::memory_order_relaxed);
+    }
 
     if (dst->type == GGML_TYPE_F16) {
         set_input_kq_mask_impl<ggml_fp16_t>(args, (ggml_fp16_t *) dst->data, causal_attn);

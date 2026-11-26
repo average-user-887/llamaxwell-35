@@ -29,7 +29,7 @@ Usage: $(basename "$0") --model PATH [options] [-- extra llama-server args]
 
 Options:
   --model PATH            Path to GGUF model (required)
-  --mode MODE             mtp (default, R3-lossless MTP1), serial (no MTP), mtp-q8c (Q8C verify)
+  --mode MODE             mtp (default, R3 v5 MTP1), serial (no MTP), mtp-q8c (Q8C verify)
   --host IP               Bind address (default: 127.0.0.1)
   --port PORT             Listen port (default: 8080)
   --ctx N                 Total context tokens (default: 84224)
@@ -141,8 +141,28 @@ export LLAMA_OCCAMY_COMPACT_READBACK=1
 export LLAMA_OCCAMY_COMPACT_DRAFT=1
 
 SPEC_ARGS=()
+LOG_ARGS=()
 case "$MODE" in
     mtp)
+        for flag in \
+            LLAMA_DENSE_KQ_MASK \
+            LLAMA_KV_TAIL_TRIM \
+            GGML_CUDA_GATE_Q8X2 \
+            GGML_CUDA_GDN_SMEM_PREFILL_TILE8 \
+            GGML_CUDA_MMQ_TAIL_J48_SM52 \
+            GGML_CUDA_OCCAMY_FA_Q2_R2_MIDSTRIDE \
+            GGML_CUDA_OCCAMY_FA_Q2_R2_MID_TOP16; do
+            value=${!flag-1}
+            case "$value" in
+                0|1) export "$flag=$value" ;;
+                *) printf 'Error: %s must be 0 or 1\n' "$flag" >&2; exit 2 ;;
+            esac
+        done
+        export GGML_CUDA_MULTI_GRAPH=0
+        export GGML_CUDA_FA_MAXWELL_GEMM_V5=0
+        export LLAMA_MV1_TRACE=${LLAMA_MV1_TRACE-1}
+        unset GGML_CUDA_OCCAMY_GDN_T2_Q8C
+        LOG_ARGS=(-lv 4)
         SPEC_ARGS=(--spec-type draft-mtp --spec-draft-n-max 1 --spec-draft-type-k f16 --spec-draft-type-v f16)
         ;;
     mtp-q8c)
@@ -178,5 +198,6 @@ exec "$BIN_DIR/llama-server" \
     --port "$PORT" \
     --jinja \
     --metrics \
+    "${LOG_ARGS[@]}" \
     "${SPEC_ARGS[@]}" \
     "${EXTRA_ARGS[@]}"

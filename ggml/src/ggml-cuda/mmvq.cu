@@ -1901,7 +1901,17 @@ void ggml_cuda_mul_mat_vec_q(
         }
         if (use_cache) {
             src1_q8_1 = (char *) ctx.q8r_buf;
-            if (!(ctx.q8r_valid && memcmp(key, ctx.q8r_key, sizeof(key)) == 0)) {
+            const bool hit = ctx.q8r_valid && memcmp(key, ctx.q8r_key, sizeof(key)) == 0;
+            static const bool trace = getenv("GGML_CUDA_GATE_Q8X2_TRACE") != nullptr;
+            if (trace && ne10 == 4096 && ne11 == 2 && ne12 == 1 && ne13 == 1 && src0->type == GGML_TYPE_Q4_0 && src0->ne[1] == 2048) {
+                static std::atomic<uint64_t> hits{0}, misses{0};
+                const uint64_t n = hit ? ++hits : ++misses;
+                if (n <= 12 || (n & (n - 1)) == 0) {
+                    fprintf(stderr, "gate-q8x2 projection %s plan=%llu node=%s\n",
+                            hit ? "hit" : "miss", (unsigned long long) n, src1->name);
+                }
+            }
+            if (!hit) {
                 quantize_row_q8_1_cuda(src1_d, nullptr, src1_q8_1, src0->type, ne10, s11, s12, s13, ne10_padded, ne11, ne12, ne13, stream);
                 memcpy(ctx.q8r_key, key, sizeof(key));
                 ctx.q8r_lo    = (const char *) src1->data;
