@@ -905,7 +905,7 @@ static __device__ __forceinline__ void copy_token_q8_tile(
     }
 }
 
-template <ggml_type type, int J, bool fallback, bool fixup, ggml_prec prec_src1, bool xmad = false, bool token_q8 = false, int dot_J = J>
+template <ggml_type type, int J, bool fallback, bool fixup, ggml_prec prec_src1, bool xmad = false, bool token_q8 = false, int dot_J = J, bool skip_inactive_j8_warps = false>
 static __device__ __forceinline__ void mul_mat_q_process_tile(
         const char * __restrict__ x, const int offset_x, const int * __restrict__ y,
         const int * __restrict__ ids_dst, float * __restrict__ dst, float * __restrict__ tmp_fixup,
@@ -943,6 +943,10 @@ static __device__ __forceinline__ void mul_mat_q_process_tile(
 
     constexpr int ITER_K          = ggml_cuda_mmq_get_K_vram(type, J, fallback, prec_src1);
     constexpr int blocks_per_iter = ITER_K / qk;
+
+    // With a single J8 column per warp, all lanes share the writeback predicate.
+    static_assert(!skip_inactive_j8_warps || (dot_J == 8 && J == 16 && nwarps == 8 && warp_size == 32));
+    const bool compute_dot = !skip_inactive_j8_warps || int(threadIdx.y) <= tile_y_max_j;
 
     float sum[J*I / (nwarps*warp_size)] = {0.0f};
 
@@ -982,7 +986,9 @@ static __device__ __forceinline__ void mul_mat_q_process_tile(
 
         __syncthreads();
 
-        vec_dot(tile_x, tile_y, sum, 0);
+        if (compute_dot) {
+            vec_dot(tile_x, tile_y, sum, 0);
+        }
 
         __syncthreads();
 
@@ -1002,7 +1008,9 @@ static __device__ __forceinline__ void mul_mat_q_process_tile(
 
         __syncthreads();
 
-        vec_dot(tile_x, tile_y, sum, MMQ_TILE_NE_K);
+        if (compute_dot) {
+            vec_dot(tile_x, tile_y, sum, MMQ_TILE_NE_K);
+        }
 
         __syncthreads();
     }
@@ -1024,6 +1032,7 @@ enum ggml_cuda_mmq_compact_variant {
     MMQ_COMPACT_TOKEN_Q8_SM52 = 4,
     MMQ_COMPACT_TOKEN_Q8_J8_SM52 = 5,
     MMQ_COMPACT_DOWN_J8_SM52 = 6,
+    MMQ_COMPACT_TOKEN_Q8_J8_SKIP_SM52 = 7,
 };
 
 template <ggml_type type, int J, bool fallback, ggml_prec prec_src1, auto compact_moe = false, bool xmad = false>
@@ -1055,7 +1064,8 @@ static __global__ void mul_mat_q(
 
     // In the opt-in non-stream-k specialization only, tmp_fixup carries an
     // int2 tile map instead of a float fixup buffer. Keep the old kernel ABI.
-    constexpr bool token_j8 = int(compact_moe) == MMQ_COMPACT_TOKEN_Q8_J8_SM52;
+    constexpr bool skip_inactive_j8_warps = int(compact_moe) == MMQ_COMPACT_TOKEN_Q8_J8_SKIP_SM52;
+    constexpr bool token_j8 = int(compact_moe) == MMQ_COMPACT_TOKEN_Q8_J8_SM52 || skip_inactive_j8_warps;
     constexpr bool token_q8 = int(compact_moe) == MMQ_COMPACT_TOKEN_Q8_SM52 || token_j8;
     int2 moe_tile = make_int2(0, 0);
     if constexpr (compact_moe) {
@@ -1160,7 +1170,7 @@ static __global__ void mul_mat_q(
             // The J16 map, ID loads, Q8 loads, shared layout and masked writeback
             // remain the same. All valid outputs occupy the first XMAD column group.
             if (tile_y_max_j < 8) {
-                mul_mat_q_process_tile<type, J, fallback, fixup, prec_src1, xmad, token_q8, 8>(
+                mul_mat_q_process_tile<type, J, fallback, fixup, prec_src1, xmad, token_q8, 8, skip_inactive_j8_warps>(
                     x, offset_x, y + offset_y, ids_dst_shared, dst + offset_dst, tmp_fixup, y_scale_tile,
                     stride_row_x, ncols_y, stride_col_dst, tile_x_max_i, tile_y_max_j, 0, blocks_per_ne00.z);
                 return;
