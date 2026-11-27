@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "hardware": {
+    "gpu_model": "NVIDIA Quadro M6000 24 GiB",
+    "compute_capability": "5.2",
+    "cuda": "12.8"
+  },
+  "runtime": {
+    "model": "Occamy 1.0 Q4_0 headq40b MTP",
+    "model_sha256": "d5ff985eea0bcb3a7305a2033582bf63f756c9f4b3700d96b4939f81ee041eae",
+    "server_sha256": "95140ec8cc02749877c93022c9fc1c6b3ea833f4258ed7019f9468f595efede3",
+    "context_cells": 84224,
+    "slots": 1,
+    "mtp_draft_depth": 1,
+    "arms": {
+      "v5": {
+        "source_commit": "2374e984589d7eaeaba9a1d06c317cc8b08e4286",
+        "cuda_library_sha256": "c84c5ba94a298c7aa2d8a7de233cd8c63469d0656ea3559795911a59f41ca98d"
+      },
+      "v14": {
+        "source_commit": "ff82e875cda90dc06ee8371a460f05cf2b7703e9",
+        "cuda_library_sha256": "4319b5d92e108721a1340502f4edd78024d5ba4eac988219b8ea15ba9bdff70c"
+      }
+    }
+  },
+  "workload": {
+    "requests_per_arm": 1,
+    "input_tokens": 8192,
+    "cached_input_tokens": 0,
+    "output_tokens_per_arm": 64,
+    "seed": 7,
+    "temperature": 0.8,
+    "n_probs": 8,
+    "post_sampling_probs": false,
+    "sampler_fallback_verified": true,
+    "target_compact_readbacks_per_arm": 0
+  },
+  "parity": {
+    "matching_output_token_count": 64,
+    "trajectory_exact": true,
+    "mtp_proposed_per_arm": 34,
+    "mtp_accepted_per_arm": 29,
+    "first_probability_row": {
+      "records_compared_per_arm": 1,
+      "ranked_entries_per_record": 8,
+      "binary32_values_compared_per_record": 9,
+      "bitwise_exact": true
+    }
+  }
+}

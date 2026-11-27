@@ -1,6 +1,6 @@
 # LlamaXwell-35 R3 v14 serving benchmarks
 
-These comparisons use an NVIDIA Quadro M6000 24 GiB (`sm_52`) and CUDA 12.8. The model is Occamy 1.0 Q4_0 headq40b MTP with one 84,224-cell slot, batch size 2,048, microbatch size 1,024, MTP draft depth 1, FP16 draft K/V, and greedy sampling with seed 7. [Machine-readable receipts](receipts.json) include the exact source and CUDA library pins, serving metrics, clock observations and parity fields. [Released v5 baseline](../r3-v5/README.md)
+The timing comparisons use an NVIDIA Quadro M6000 24 GiB (`sm_52`) and CUDA 12.8. The model is Occamy 1.0 Q4_0 headq40b MTP with one 84,224-cell slot, batch size 2,048, microbatch size 1,024, MTP draft depth 1, FP16 draft K/V, and greedy sampling with seed 7. [Machine-readable receipts](receipts.json) include the exact source and CUDA library pins, serving metrics, clock observations and parity fields. [Released v5 baseline](../r3-v5/README.md)
 
 ## Released v5 to v12 at 65,536 tokens
 
@@ -35,6 +35,10 @@ Four fresh server instances ran in the order v13, v14, v14, v13. Each emitted ei
 | v13 → v14 | 122.58 tok/s | 122.69 tok/s | +0.09% | 0.06% | 4.97 ms |
 | v14 → v13 | 122.43 tok/s | 122.86 tok/s | +0.35% | 0.34% | 0.36 ms |
 
+## Sampled v5 to v14 at 8,192 tokens
+
+One cold request per arm used seed 7, temperature 0.8 and pre-sampling `n_probs=8`. All 64 generated token IDs matched, along with decoded text, cache and stop fields. Each arm proposed 34 MTP tokens and accepted 29. The first returned score row matched the order of all eight ranked tokens and all nine serialized binary32 logprobs, including the sampled token's value. Both arms used the sampler fallback with zero target compact readbacks. The result covers one prompt and its first returned score row. [Sampled parity receipt](sampled-fallback.json)
+
 ## Activate the measured profile
 
 Keep the released v5 MTP configuration and apply the nine additions recorded in the receipt. With the pinned v14 CUDA library and pinned server and host library already selected in a separate runtime directory, the released launcher accepts these extra environment values. Run this Bash example from the receipt directory and set `RUNTIME_DIR` and `MODEL_GGUF` to your copies.
@@ -49,4 +53,4 @@ env "${profile_env[@]}" "$RUNTIME_DIR/llamaxwell-serve.sh" --mode mtp \
   --model "$MODEL_GGUF" --slots 1 --ctx 84224
 ```
 
-The reported gains use distinct baselines and workloads, so combining their percentages would not describe a measured speedup. The parity evidence covers these greedy replays. Concurrent requests, sampled logprobs and full output distributions were unmeasured.
+The reported gains use distinct baselines and workloads, so combining their percentages would not describe a measured speedup. The serving measurements cover single-slot greedy replays. The separate sampled probe covers one fallback request per arm.
