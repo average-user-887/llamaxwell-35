@@ -1146,6 +1146,12 @@ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst
         return flag && strcmp(flag, "1") == 0;
     }();
     const bool extend_top16 = want_extend_top16 && extend_stride && stride_q2 && !mid_width && !tile4;
+    static const bool want_extend_probe4 = [] {
+        const char * flag = getenv("GGML_CUDA_OCCAMY_FA_Q2_R2_EXTEND_PROBE4");
+        return flag && strcmp(flag, "1") == 0;
+    }();
+    const bool extend_probe4 = want_extend_probe4 && extend_top16 && n_kv >= 56064 && n_kv <= 79872;
+    const bool scan_tile4 = tile4 || extend_probe4;
     const long long nc = ++ofa_sparse_calls[NQ];
     static const bool profile_enabled = []() {
         const char * s = getenv("GGML_CUDA_OCCAMY_FA_SPARSE_PROFILE");
@@ -1160,9 +1166,16 @@ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst
     }
     if (revision2) {
         if (profile) CUDA_CHECK(cudaEventRecord(events[4], stream));
-        if (tile4) {
+        if (scan_tile4) {
             ofa_sparse_probe_tile4<<<dim3((n_blocks+3)/4,nplans),128,0,stream>>>(p,metas.get(),scores.get(),n_blocks);
-            if(nc==1) fprintf(stderr,"q2_r2_probe4_dispatch width=%d plans=%d blocks=%d tiles=%d\n",n_kv,nplans,n_blocks,(n_blocks+3)/4);
+            if (extend_probe4) {
+                static const bool logged = [&] {
+                    fprintf(stderr, "q2_r2_extend_probe4_dispatch width=%d plans=%d blocks=%d tiles=%d k_token_bytes=%zu splits=%d\n",
+                            n_kv, nplans, n_blocks, (n_blocks+3)/4, p.nbk1, nsplit);
+                    return true;
+                }();
+                (void) logged;
+            } else if(nc==1) fprintf(stderr,"q2_r2_probe4_dispatch width=%d plans=%d blocks=%d tiles=%d\n",n_kv,nplans,n_blocks,(n_blocks+3)/4);
         } else {
             ofa_sparse_scan_probe_r2<NQ><<<dim3(n_blocks, nplans), 128, 0, stream>>>(p, metas.get(), scores.get(), n_blocks);
         }
