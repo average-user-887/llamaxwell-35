@@ -918,12 +918,18 @@ static __device__ __forceinline__ void mul_mat_q_process_tile(
     constexpr int              qk         = ggml_cuda_type_traits<type>::qk;
     constexpr int              I          = ggml_cuda_mmq_get_I(type, J, fallback, prec_src1);
     constexpr ggml_cuda_mmq_load_tiles_t load_tiles = ggml_cuda_mmq_get_load_tiles<type, J, fallback, prec_src1>();
-    static_assert(dot_J == J || (J == 16 && dot_J == 8 && type == GGML_TYPE_Q4_0 && xmad && !fallback && !fixup && token_q8 && prec_src1 == GGML_PREC_Q8));
+    static_assert(dot_J == J || (J == 16 && dot_J == 8 && type == GGML_TYPE_Q4_0 && xmad && !fallback && !fixup && prec_src1 == GGML_PREC_Q8));
     constexpr ggml_cuda_mmq_vec_dot_t    vec_dot    = ggml_cuda_mmq_get_vec_dot<type, dot_J, fallback, prec_src1, xmad>();
     constexpr ggml_cuda_mmq_write_back_t write_back = ggml_cuda_mmq_get_write_back<type, J, fallback, prec_src1>();
 
-    extern __shared__ __align__(16) int data_mul_mat_q[];
-    int * tile_y = data_mul_mat_q + J;
+    int * tile_y;
+    if constexpr (token_q8) {
+        extern __shared__ __align__(16) int data_mul_mat_q_token[];
+        tile_y = data_mul_mat_q_token + J;
+    } else {
+        extern __shared__ int data_mul_mat_q[];
+        tile_y = data_mul_mat_q + J;
+    }
     int * tile_x = tile_y + GGML_PAD(J*MMQ_TILE_Y_K, nwarps*warp_size);
 
 #if defined(BLACKWELL_MMA_AVAILABLE)
@@ -1017,6 +1023,7 @@ enum ggml_cuda_mmq_compact_variant {
     MMQ_COMPACT_TAIL_J40_J24_SM52 = 3,
     MMQ_COMPACT_TOKEN_Q8_SM52 = 4,
     MMQ_COMPACT_TOKEN_Q8_J8_SM52 = 5,
+    MMQ_COMPACT_DOWN_J8_SM52 = 6,
 };
 
 template <ggml_type type, int J, bool fallback, ggml_prec prec_src1, auto compact_moe = false, bool xmad = false>
@@ -1032,7 +1039,10 @@ static __global__ void mul_mat_q(
 
     // Skip unused template specializations for faster compilation:
     if (ggml_cuda_mmq_get_config(type, J, fallback, prec_src1).type == GGML_TYPE_COUNT) {
+        // Keep the diagnostic immediate identical to the released Q4 instantiation.
+#line 990
         NO_DEVICE_CODE;
+#line 1046
         return;
     }
 
@@ -1142,7 +1152,7 @@ static __global__ void mul_mat_q(
         const int offset_x = fastdiv(wt, sample_ratio)*stride_sample_x + fastdiv(zt, channel_ratio)*stride_channel_x + it*I*stride_row_x;
 
         constexpr bool fixup = false;
-        if constexpr (token_j8) {
+        if constexpr (token_j8 || int(compact_moe) == MMQ_COMPACT_DOWN_J8_SM52) {
             static_assert(type == GGML_TYPE_Q4_0 && J == 16 && !fallback && xmad && prec_src1 == GGML_PREC_Q8);
 #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ == 520
             static_assert(ggml_cuda_mmq_get_nthreads(type, 8, fallback, prec_src1) == nwarps * warp_size);
@@ -1646,8 +1656,18 @@ static void launch_mul_mat_q(ggml_backend_cuda_context & ctx, const mmq_args & a
                                     args, t64.get(), (int) max_tiles, cc, warp_size, stream);
                                 launch_mul_mat_q_compact_map<type, 32, fallback, prec_src1, xmad, MMQ_COMPACT_TAIL_J40_J24_SM52>(
                                     args, t32.get(), args.nchannels_y, cc, warp_size, stream);
-                                launch_mul_mat_q_compact_map<type, 16, fallback, prec_src1, xmad>(
-                                    args, t16.get(), args.nchannels_y, cc, warp_size, stream);
+                                static const bool use_down_j8 = [] {
+                                    const char * value = std::getenv("GGML_CUDA_MMQ_DOWN_J8_SM52");
+                                    return value && std::strcmp(value, "1") == 0;
+                                }();
+                                if (use_down_j8 && args.ncols_x == 512 && args.nrows_x == 2048 &&
+                                        args.ncols_y == args.ncols_dst) {
+                                    launch_mul_mat_q_compact_map<type, 16, fallback, prec_src1, xmad, MMQ_COMPACT_DOWN_J8_SM52>(
+                                        args, t16.get(), args.nchannels_y, cc, warp_size, stream);
+                                } else {
+                                    launch_mul_mat_q_compact_map<type, 16, fallback, prec_src1, xmad>(
+                                        args, t16.get(), args.nchannels_y, cc, warp_size, stream);
+                                }
                                 return;
                             }
                             if (use_j48) {
