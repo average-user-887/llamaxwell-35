@@ -1125,9 +1125,9 @@ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst
         const char * flag = getenv("GGML_CUDA_OCCAMY_FA_Q2_R2_MIDSTRIDE");
         return flag && strcmp(flag, "1") == 0;
     }();
+    const bool mid_width = (n_kv >= 16640 && n_kv <= 19456) || (n_kv >= 40192 && n_kv <= 43264);
     const bool midstride = NQ == 2 && want_midstride && revision2 && nkvh == 2 &&
-            n_kv % OFS_BLOCK == 0 &&
-            ((n_kv >= 16640 && n_kv <= 19456) || (n_kv >= 40192 && n_kv <= 43264));
+            n_kv % OFS_BLOCK == 0 && mid_width;
     static const bool want_extend_stride = [] {
         const char * flag = getenv("GGML_CUDA_OCCAMY_FA_Q2_R2_EXTEND_STRIDE");
         return flag && strcmp(flag, "1") == 0;
@@ -1141,6 +1141,11 @@ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst
         return flag && strcmp(flag, "1") == 0;
     }();
     const bool mid_top16 = want_mid_top16 && midstride && stride_q2 && !tile4;
+    static const bool want_extend_top16 = [] {
+        const char * flag = getenv("GGML_CUDA_OCCAMY_FA_Q2_R2_EXTEND_TOP16");
+        return flag && strcmp(flag, "1") == 0;
+    }();
+    const bool extend_top16 = want_extend_top16 && extend_stride && stride_q2 && !mid_width && !tile4;
     const long long nc = ++ofa_sparse_calls[NQ];
     static const bool profile_enabled = []() {
         const char * s = getenv("GGML_CUDA_OCCAMY_FA_SPARSE_PROFILE");
@@ -1163,9 +1168,16 @@ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst
         }
         CUDA_CHECK(cudaGetLastError());
         if (profile) CUDA_CHECK(cudaEventRecord(events[5], stream));
-        if (use_top16 || mid_top16) {
+        if (use_top16 || mid_top16 || extend_top16) {
             ofa_sparse_select_r2_top16<<<nplans, 512, 0, stream>>>(plans.get(), scores.get(), metas.get(), n_blocks);
-            if (mid_top16) {
+            if (extend_top16) {
+                static const bool logged = [&] {
+                    fprintf(stderr, "q2_r2_extend_top16_dispatch width=%d plans=%d k_token_bytes=%zu splits=%d\n",
+                            n_kv, nplans, p.nbk1, nsplit);
+                    return true;
+                }();
+                (void) logged;
+            } else if (mid_top16) {
                 static const bool logged = [&] {
                     fprintf(stderr, "q2_r2_mid_top16_dispatch width=%d plans=%d k_token_bytes=%zu splits=%d\n",
                             n_kv, nplans, p.nbk1, nsplit);
