@@ -969,7 +969,10 @@ static __device__ __forceinline__ void mul_mat_q_process_tile(
 // The mul_mat_q kernel implements "stream-k" work partitioning as described in https://arxiv.org/abs/2301.03598
 
 // A distinct template argument keeps the original bool specializations intact.
-enum ggml_cuda_mmq_compact_variant { MMQ_COMPACT_TAIL_J48_SM52 = 2 };
+enum ggml_cuda_mmq_compact_variant {
+    MMQ_COMPACT_TAIL_J48_SM52 = 2,
+    MMQ_COMPACT_TAIL_J40_J24_SM52 = 3,
+};
 
 template <ggml_type type, int J, bool fallback, ggml_prec prec_src1, auto compact_moe = false, bool xmad = false>
 __launch_bounds__(ggml_cuda_mmq_get_nthreads(type, J, fallback, prec_src1), ggml_cuda_mmq_get_occupancy(type, J, fallback, prec_src1))
@@ -1085,7 +1088,22 @@ static __global__ void mul_mat_q(
         const int offset_x = fastdiv(wt, sample_ratio)*stride_sample_x + fastdiv(zt, channel_ratio)*stride_channel_x + it*I*stride_row_x;
 
         constexpr bool fixup = false;
-        if constexpr (int(compact_moe) == MMQ_COMPACT_TAIL_J48_SM52) {
+        if constexpr (int(compact_moe) == MMQ_COMPACT_TAIL_J40_J24_SM52) {
+            static_assert(type == GGML_TYPE_Q4_0 && (J == 64 || J == 32) && !fallback && xmad && prec_src1 == GGML_PREC_Q8);
+#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ == 520
+            constexpr int narrow_J = J == 64 ? 40 : 24;
+            constexpr int min_j = J / 2;
+            // Use the original map and offsets. Every valid ID fits within the narrower shared layout.
+            if (tile_y_max_j >= min_j && tile_y_max_j < narrow_J) {
+                mul_mat_q_process_tile<type, narrow_J, fallback, fixup, prec_src1, xmad>
+                    (x, offset_x, y + offset_y, ids_dst_shared, dst + offset_dst, tmp_fixup, y_scale_tile,
+                     stride_row_x, ncols_y, stride_col_dst, tile_x_max_i, tile_y_max_j, 0, blocks_per_ne00.z);
+                return;
+            }
+#endif
+        }
+        if constexpr (int(compact_moe) == MMQ_COMPACT_TAIL_J48_SM52 ||
+                      (J == 64 && int(compact_moe) == MMQ_COMPACT_TAIL_J40_J24_SM52)) {
             static_assert(type == GGML_TYPE_Q4_0 && J == 64 && !fallback && xmad && prec_src1 == GGML_PREC_Q8);
 #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ == 520
             // The map and offsets still address 64-column tiles. Only the compute
@@ -1546,6 +1564,23 @@ static void launch_mul_mat_q(ggml_backend_cuda_context & ctx, const mmq_args & a
                                 const char * value = std::getenv("GGML_CUDA_MMQ_TAIL_J48_SM52");
                                 return value && std::strcmp(value, "1") == 0;
                             }();
+                            static const bool use_j40_j24 = [] {
+                                const char * value = std::getenv("GGML_CUDA_MMQ_TAIL_J40_J24_SM52");
+                                return value && std::strcmp(value, "1") == 0;
+                            }();
+                            if (use_j48 && use_j40_j24 && args.nchannels_y == 256 &&
+                                    (args.ncols_max == 1024 || args.ncols_max == 1020) &&
+                                    args.ncols_dst == 8 * args.ncols_max &&
+                                    ((args.ncols_x == 2048 && args.nrows_x == 512) ||
+                                     (args.ncols_x == 512 && args.nrows_x == 2048))) {
+                                launch_mul_mat_q_compact_map<type, 64, fallback, prec_src1, xmad, MMQ_COMPACT_TAIL_J40_J24_SM52>(
+                                    args, t64.get(), (int) max_tiles, cc, warp_size, stream);
+                                launch_mul_mat_q_compact_map<type, 32, fallback, prec_src1, xmad, MMQ_COMPACT_TAIL_J40_J24_SM52>(
+                                    args, t32.get(), args.nchannels_y, cc, warp_size, stream);
+                                launch_mul_mat_q_compact_map<type, 16, fallback, prec_src1, xmad>(
+                                    args, t16.get(), args.nchannels_y, cc, warp_size, stream);
+                                return;
+                            }
                             if (use_j48) {
                                 launch_mul_mat_q_compact_map<type, 64, fallback, prec_src1, xmad, MMQ_COMPACT_TAIL_J48_SM52>(
                                     args, t64.get(), (int) max_tiles, cc, warp_size, stream);
