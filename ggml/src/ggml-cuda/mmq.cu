@@ -178,8 +178,17 @@ static void launch_token_q8_mmq(ggml_backend_cuda_context & ctx, const mmq_args 
         args, t64.get(), max_tiles, cc, warp_size, stream);
     launch_mul_mat_q_compact_map<GGML_TYPE_Q4_0, 32, false, GGML_PREC_Q8, true, MMQ_COMPACT_TOKEN_Q8_SM52>(
         args, t32.get(), args.nchannels_y, cc, warp_size, stream);
-    launch_mul_mat_q_compact_map<GGML_TYPE_Q4_0, 16, false, GGML_PREC_Q8, true, MMQ_COMPACT_TOKEN_Q8_SM52>(
-        args, t16.get(), args.nchannels_y, cc, warp_size, stream);
+    static const bool use_j8 = [] {
+        const char * value = std::getenv("GGML_CUDA_MMQ_TOKEN_J8_SM52");
+        return value && std::strcmp(value, "1") == 0;
+    }();
+    if (use_j8) {
+        launch_mul_mat_q_compact_map<GGML_TYPE_Q4_0, 16, false, GGML_PREC_Q8, true, MMQ_COMPACT_TOKEN_Q8_J8_SM52>(
+            args, t16.get(), args.nchannels_y, cc, warp_size, stream);
+    } else {
+        launch_mul_mat_q_compact_map<GGML_TYPE_Q4_0, 16, false, GGML_PREC_Q8, true, MMQ_COMPACT_TOKEN_Q8_SM52>(
+            args, t16.get(), args.nchannels_y, cc, warp_size, stream);
+    }
 }
 
 void ggml_cuda_mul_mat_q(

@@ -905,7 +905,7 @@ static __device__ __forceinline__ void copy_token_q8_tile(
     }
 }
 
-template <ggml_type type, int J, bool fallback, bool fixup, ggml_prec prec_src1, bool xmad = false, bool token_q8 = false>
+template <ggml_type type, int J, bool fallback, bool fixup, ggml_prec prec_src1, bool xmad = false, bool token_q8 = false, int dot_J = J>
 static __device__ __forceinline__ void mul_mat_q_process_tile(
         const char * __restrict__ x, const int offset_x, const int * __restrict__ y,
         const int * __restrict__ ids_dst, float * __restrict__ dst, float * __restrict__ tmp_fixup,
@@ -918,7 +918,8 @@ static __device__ __forceinline__ void mul_mat_q_process_tile(
     constexpr int              qk         = ggml_cuda_type_traits<type>::qk;
     constexpr int              I          = ggml_cuda_mmq_get_I(type, J, fallback, prec_src1);
     constexpr ggml_cuda_mmq_load_tiles_t load_tiles = ggml_cuda_mmq_get_load_tiles<type, J, fallback, prec_src1>();
-    constexpr ggml_cuda_mmq_vec_dot_t    vec_dot    = ggml_cuda_mmq_get_vec_dot<type, J, fallback, prec_src1, xmad>();
+    static_assert(dot_J == J || (J == 16 && dot_J == 8 && type == GGML_TYPE_Q4_0 && xmad && !fallback && !fixup && token_q8 && prec_src1 == GGML_PREC_Q8));
+    constexpr ggml_cuda_mmq_vec_dot_t    vec_dot    = ggml_cuda_mmq_get_vec_dot<type, dot_J, fallback, prec_src1, xmad>();
     constexpr ggml_cuda_mmq_write_back_t write_back = ggml_cuda_mmq_get_write_back<type, J, fallback, prec_src1>();
 
     extern __shared__ __align__(16) int data_mul_mat_q[];
@@ -1015,6 +1016,7 @@ enum ggml_cuda_mmq_compact_variant {
     MMQ_COMPACT_TAIL_J48_SM52 = 2,
     MMQ_COMPACT_TAIL_J40_J24_SM52 = 3,
     MMQ_COMPACT_TOKEN_Q8_SM52 = 4,
+    MMQ_COMPACT_TOKEN_Q8_J8_SM52 = 5,
 };
 
 template <ggml_type type, int J, bool fallback, ggml_prec prec_src1, auto compact_moe = false, bool xmad = false>
@@ -1043,7 +1045,8 @@ static __global__ void mul_mat_q(
 
     // In the opt-in non-stream-k specialization only, tmp_fixup carries an
     // int2 tile map instead of a float fixup buffer. Keep the old kernel ABI.
-    constexpr bool token_q8 = int(compact_moe) == MMQ_COMPACT_TOKEN_Q8_SM52;
+    constexpr bool token_j8 = int(compact_moe) == MMQ_COMPACT_TOKEN_Q8_J8_SM52;
+    constexpr bool token_q8 = int(compact_moe) == MMQ_COMPACT_TOKEN_Q8_SM52 || token_j8;
     int2 moe_tile = make_int2(0, 0);
     if constexpr (compact_moe) {
         const int2 * tiles = reinterpret_cast<const int2 *>(tmp_fixup);
@@ -1139,6 +1142,21 @@ static __global__ void mul_mat_q(
         const int offset_x = fastdiv(wt, sample_ratio)*stride_sample_x + fastdiv(zt, channel_ratio)*stride_channel_x + it*I*stride_row_x;
 
         constexpr bool fixup = false;
+        if constexpr (token_j8) {
+            static_assert(type == GGML_TYPE_Q4_0 && J == 16 && !fallback && xmad && prec_src1 == GGML_PREC_Q8);
+#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ == 520
+            static_assert(ggml_cuda_mmq_get_nthreads(type, 8, fallback, prec_src1) == nwarps * warp_size);
+            static_assert(ggml_cuda_mmq_get_I(type, 8, fallback, prec_src1) == I);
+            // The J16 map, ID loads, Q8 loads, shared layout and masked writeback
+            // remain the same. All valid outputs occupy the first XMAD column group.
+            if (tile_y_max_j < 8) {
+                mul_mat_q_process_tile<type, J, fallback, fixup, prec_src1, xmad, token_q8, 8>(
+                    x, offset_x, y + offset_y, ids_dst_shared, dst + offset_dst, tmp_fixup, y_scale_tile,
+                    stride_row_x, ncols_y, stride_col_dst, tile_x_max_i, tile_y_max_j, 0, blocks_per_ne00.z);
+                return;
+            }
+#endif
+        }
         if constexpr (int(compact_moe) == MMQ_COMPACT_TAIL_J40_J24_SM52 || (token_q8 && J != 16)) {
             static_assert(type == GGML_TYPE_Q4_0 && (J == 64 || J == 32) && !fallback && xmad && prec_src1 == GGML_PREC_Q8);
 #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ == 520
