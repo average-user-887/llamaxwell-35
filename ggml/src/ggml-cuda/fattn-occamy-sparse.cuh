@@ -1128,7 +1128,13 @@ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst
     const bool midstride = NQ == 2 && want_midstride && revision2 && nkvh == 2 &&
             n_kv % OFS_BLOCK == 0 &&
             ((n_kv >= 16640 && n_kv <= 19456) || (n_kv >= 40192 && n_kv <= 43264));
-    const bool stride_q2 = NQ == 2 && ((tile4 && want_stride) || midstride) && nsplit == 12 && blocks_per_sm == 1 &&
+    static const bool want_extend_stride = [] {
+        const char * flag = getenv("GGML_CUDA_OCCAMY_FA_Q2_R2_EXTEND_STRIDE");
+        return flag && strcmp(flag, "1") == 0;
+    }();
+    const bool extend_stride = NQ == 2 && want_extend_stride && want_stride && revision2 && nkvh == 2 &&
+            n_kv >= 8192 && n_kv <= 79872 && n_kv % OFS_BLOCK == 0;
+    const bool stride_q2 = NQ == 2 && ((tile4 && want_stride) || midstride || extend_stride) && nsplit == 12 && blocks_per_sm == 1 &&
             p.nbk2 == 512 && p.nbv2 == 512 && p.nbk1 == p.nbv1 && (p.nbk1 == 1024 || p.nbk1 == 2048);
     static const bool want_mid_top16 = [] {
         const char * flag = getenv("GGML_CUDA_OCCAMY_FA_Q2_R2_MID_TOP16");
@@ -1189,8 +1195,9 @@ static void ofa_sparse_launch(ggml_backend_cuda_context & ctx, ggml_tensor * dst
         if (stride_q2) {
             static std::atomic<int> stride_seen{0};
             if (stride_seen.fetch_add(1, std::memory_order_relaxed) == 0) {
-                fprintf(stderr, "q2_r2_stride_dispatch width=%d k_token_bytes=%zu v_token_bytes=%zu splits=%d nu=4 threads=512 grid=%d midstride=%d\n",
-                        n_kv, p.nbk1, p.nbv1, nsplit, nsplit*nkvh, int(midstride));
+                fprintf(stderr, "q2_r2_stride_dispatch width=%d k_token_bytes=%zu v_token_bytes=%zu splits=%d nu=4 threads=512 grid=%d midstride=%d%s\n",
+                        n_kv, p.nbk1, p.nbv1, nsplit, nsplit*nkvh, int(midstride),
+                        extend_stride && !midstride && !tile4 ? " extend_stride=1" : "");
             }
             if (p.nbk1 == 1024) ofa_sparse_attention_q2_stride<1024><<<dim3(nsplit,nkvh,1),NT,0,stream>>>(p,plans.get());
             else ofa_sparse_attention_q2_stride<2048><<<dim3(nsplit,nkvh,1),NT,0,stream>>>(p,plans.get());
