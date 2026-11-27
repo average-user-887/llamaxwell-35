@@ -1404,6 +1404,28 @@ static __global__ void head_rowpack_sm52(const void * __restrict__ w,
     if (lane == 0) { y[row] = acc; }
 }
 
+static_assert(QI4_0 == 4 && VDR_Q4_0_Q8_1_MMVQ == 2);
+static_assert(sizeof(block_q4_0) == 18 && sizeof(block_q8_1) == 36);
+
+static __global__ void head_n1(const void * __restrict__ w,
+        const block_q8_1 * __restrict__ x, float * __restrict__ y, const int nrows) {
+    const int lane = threadIdx.x & 31;
+    const int row = blockIdx.x * 4 + threadIdx.x / 32;
+    if (row >= nrows) return;
+    const auto *weights = static_cast<const block_q4_0 *>(w) + row * 64;
+    const int kqs = 2 * (lane & 1);
+    float acc = 0.0f;
+#pragma unroll 1
+    for (int kb = lane / 2; kb < 64; kb += 16) {
+        ggml_cuda_sm52_i16x4 packed_y[1][4];
+        float2 scales[1];
+        mmvq_sm52_q4_0_load_y<1, 2>(x, 64, kb, kqs, packed_y, scales);
+        mmvq_sm52_q4_0_dot<1, 2>(weights + kb, kqs, packed_y, scales, &acc, 1);
+    }
+    acc = warp_reduce_sum<32>(acc);
+    if (lane == 0) y[row] = acc;
+}
+
 static bool head_rowpack_enabled() {
     static const bool enabled = [] {
         const char * e = getenv("GGML_CUDA_HEAD_ROWPACK_SM52");
@@ -1449,8 +1471,25 @@ static void mul_mat_vec_q_switch_ncols_dst(
                 fprintf(stderr, "head-rowpack: engaged sm52 Q4_0 K2048 rows248320 columns1 rows_per_block4\n");
             }
             const ggml_cuda_kernel_launch_params params(dim3((nrows_x + 3)/4), dim3(128), 0, stream);
-            ggml_cuda_kernel_launch(head_rowpack_sm52, params, vx,
-                    static_cast<const block_q8_1 *>(vy), dst, nrows_x);
+            static const bool use_xmad = [] {
+                const char *value = getenv("GGML_CUDA_HEAD_ROWPACK_N1_XMAD_SM52");
+                return value && value[0] == '1' && !value[1];
+            }();
+            if (use_xmad) {
+                ggml_cuda_kernel_launch(head_n1, params, vx,
+                        static_cast<const block_q8_1 *>(vy), dst, nrows_x);
+            } else {
+                ggml_cuda_kernel_launch(head_rowpack_sm52, params, vx,
+                        static_cast<const block_q8_1 *>(vy), dst, nrows_x);
+            }
+            static const bool witness = getenv("GGML_CUDA_HEAD_ROWPACK_N1_XMAD_SM52") != nullptr;
+            if (witness) {
+                static std::atomic<bool> witnessed{false};
+                if (!witnessed.load(std::memory_order_relaxed) && !witnessed.exchange(true)) {
+                    fprintf(stderr, "head_n1_launch arm=%s M=248320 K=2048 N=1 grid=62080 block=128\n",
+                            use_xmad ? "xmad" : "stock");
+                }
+            }
             return;
         }
     }
