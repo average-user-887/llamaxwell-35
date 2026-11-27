@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "hardware": {
+    "gpu": "NVIDIA Quadro M6000 24 GiB",
+    "architecture": "sm_52"
+  },
+  "profile": {
+    "model": "Occamy 1.0 Q4_0 headq40b",
+    "variant": "legacy batch8",
+    "mtp_enabled": false,
+    "slot_count": 2,
+    "context_cells_per_slot": 98304,
+    "input_tokens_per_prompt": 2048,
+    "solo_cold_outputs": 64,
+    "solo_warm_outputs": 1024,
+    "concurrent_cold_outputs_per_slot": 96,
+    "concurrent_warm_outputs_per_slot": 256,
+    "arm_order": [
+      "original",
+      "off",
+      "on",
+      "on",
+      "off"
+    ],
+    "head": {
+      "output_rows": 248320,
+      "input_columns": 2048,
+      "batch_columns": 1,
+      "enable_env": "GGML_CUDA_HEAD_ROWPACK_N1_XMAD_SM52",
+      "prerequisite_env": {
+        "GGML_CUDA_HEAD_ROWPACK_SM52": "1"
+      }
+    }
+  },
+  "provenance": {
+    "public_source_commit": "ff82e875cda90dc06ee8371a460f05cf2b7703e9",
+    "equivalent_stable_patch_id": "0223f9e1243a0c8f9346370fd535eb4bf0834321",
+    "original_cuda_sha256": "a7eb566c145e50d879c80b82eb40f8b46627e67cf0e82dfd13cf24ee5b9f58f5",
+    "candidate_cuda_sha256": "68b101cbd69489dbb9df3dcf1fc4a3e580a1b997c56b8f4097a6cf828b0091d1",
+    "unchanged_server_sha256": "592908f59ff8496ed5800493cbe1ca175a5d7aa447ce84abff632874196813c5",
+    "unchanged_host_library_sha256": "38a5f8c0ffb733b4549c4bf00c00a68347c77868e9276e91c1997c791165376d",
+    "measured_kernel_instructions_sha256": "555af8fd2149d5a8fb4faaca7a066dc5613f5aa60a5cb342aadc5aaae746a4cd",
+    "abi_entries": 1688,
+    "dynamic_abi_equal": true,
+    "unchanged_cuda_registrations": 146,
+    "unchanged_native_kernel_texts": 335,
+    "added_code_bytes": 1792,
+    "registers": 30,
+    "signed_XMAD_count": 16
+  },
+  "parity": {
+    "exact_requests": 25,
+    "generated_token_positions_checked": 10624,
+    "matched_fields": [
+      "token_ids",
+      "text",
+      "finish_reason",
+      "truncated",
+      "n_out",
+      "cache_n",
+      "prompt_n",
+      "draft_n",
+      "draft_n_accepted"
+    ],
+    "concurrent_case_comparisons_against_original": 8,
+    "overlap_witnessed": true
+  },
+  "warm_pairs": [
+    {
+      "order": "off-on",
+      "round": 1,
+      "off": {
+        "tg_tps": 87.925743,
+        "pp_tps": 47.319358,
+        "ttft_s": 0.085713,
+        "wall_s": 11.732088
+      },
+      "on": {
+        "tg_tps": 88.030061,
+        "pp_tps": 48.072301,
+        "ttft_s": 0.084496,
+        "wall_s": 11.716947
+      },
+      "changes_pct": {
+        "tg_tps": 0.118643,
+        "pp_tps": 1.591193,
+        "ttft_s": -1.420577,
+        "wall_s": -0.129053
+      },
+      "sampled_decode_clocks": {
+        "off": {
+          "sample_count": 4,
+          "pstates": [
+            "P0"
+          ],
+          "median_graphics_mhz": 1151,
+          "median_memory_mhz": 3304
+        },
+        "on": {
+          "sample_count": 4,
+          "pstates": [
+            "P0"
+          ],
+          "median_graphics_mhz": 1151,
+          "median_memory_mhz": 3304
+        }
+      },
+      "matched_sampled_p0": true
+    },
+    {
+      "order": "off-on",
+      "round": 2,
+      "off": {
+        "tg_tps": 87.863902,
+        "pp_tps": 47.799434,
+        "ttft_s": 0.084845,
+        "wall_s": 11.739534
+      },
+      "on": {
+        "tg_tps": 88.033663,
+        "pp_tps": 46.05854,
+        "ttft_s": 0.087986,
+        "wall_s": 11.720155
+      },
+      "changes_pct": {
+        "tg_tps": 0.19321,
+        "pp_tps": -3.642079,
+        "ttft_s": 3.701599,
+        "wall_s": -0.165069
+      },
+      "sampled_decode_clocks": {
+        "off": {
+          "sample_count": 4,
+          "pstates": [
+            "P0"
+          ],
+          "median_graphics_mhz": 1151,
+          "median_memory_mhz": 3304
+        },
+        "on": {
+          "sample_count": 3,
+          "pstates": [
+            "P0"
+          ],
+          "median_graphics_mhz": 1151,
+          "median_memory_mhz": 3304
+        }
+      },
+      "matched_sampled_p0": true
+    },
+    {
+      "order": "on-off",
+      "round": 1,
+      "off": {
+        "tg_tps": 87.747749,
+        "pp_tps": 47.505374,
+        "ttft_s": 0.085381,
+        "wall_s": 11.755419
+      },
+      "on": {
+        "tg_tps": 88.381775,
+        "pp_tps": 48.061904,
+        "ttft_s": 0.084339,
+        "wall_s": 11.670696
+      },
+      "changes_pct": {
+        "tg_tps": 0.722556,
+        "pp_tps": 1.171509,
+        "ttft_s": -1.221168,
+        "wall_s": -0.720718
+      },
+      "sampled_decode_clocks": {
+        "off": {
+          "sample_count": 4,
+          "pstates": [
+            "P0"
+          ],
+          "median_graphics_mhz": 1151,
+          "median_memory_mhz": 3304
+        },
+        "on": {
+          "sample_count": 4,
+          "pstates": [
+            "P0"
+          ],
+          "median_graphics_mhz": 1151,
+          "median_memory_mhz": 3304
+        }
+      },
+      "matched_sampled_p0": true
+    },
+    {
+      "order": "on-off",
+      "round": 2,
+      "off": {
+        "tg_tps": 87.682171,
+        "pp_tps": 47.784587,
+        "ttft_s": 0.0849,
+        "wall_s": 11.763657
+      },
+      "on": {
+        "tg_tps": 88.263726,
+        "pp_tps": 48.034777,
+        "ttft_s": 0.084462,
+        "wall_s": 11.686301
+      },
+      "changes_pct": {
+        "tg_tps": 0.663254,
+        "pp_tps": 0.523579,
+        "ttft_s": -0.514971,
+        "wall_s": -0.657589
+      },
+      "sampled_decode_clocks": {
+        "off": {
+          "sample_count": 3,
+          "pstates": [
+            "P0"
+          ],
+          "median_graphics_mhz": 1151,
+          "median_memory_mhz": 3304
+        },
+        "on": {
+          "sample_count": 4,
+          "pstates": [
+            "P0"
+          ],
+          "median_graphics_mhz": 1151,
+          "median_memory_mhz": 3304
+        }
+      },
+      "matched_sampled_p0": true
+    }
+  ],
+  "cold_wall_change_pct": [
+    {
+      "order": "off-on",
+      "wall_s": 0.010789,
+      "prefill_matched_sampled_p0": false
+    },
+    {
+      "order": "on-off",
+      "wall_s": 0.218007,
+      "prefill_matched_sampled_p0": false
+    }
+  ]
+}
