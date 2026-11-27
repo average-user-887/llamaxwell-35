@@ -887,7 +887,25 @@ static constexpr __device__ ggml_cuda_mmq_write_back_t ggml_cuda_mmq_get_write_b
 
 // ---------------------------------------------------------------------------------------------
 
-template <ggml_type type, int J, bool fallback, bool fixup, ggml_prec prec_src1, bool xmad = false>
+// Each 144-byte Q8_1 MMQ block contains nine aligned vectors. A thread's
+// vector offsets stay constant across K slices, including both halves of an iteration.
+template <int J, int nthreads>
+static __device__ __forceinline__ void copy_token_q8_tile(
+        const int * by0, int * tile_y, const int * vec_offsets) {
+    constexpr int vectors_per_block = sizeof(block_q8_1_mmq)/sizeof(int4);
+    constexpr int nvec = J * vectors_per_block;
+    const int tid = threadIdx.y * warpSize + threadIdx.x;
+#pragma unroll
+    for (int v0 = 0; v0 < nvec; v0 += nthreads) {
+        const int v = v0 + tid;
+        if (v0 + nthreads <= nvec || v < nvec) {
+            reinterpret_cast<int4 *>(tile_y)[v] =
+                reinterpret_cast<const int4 *>(by0)[vec_offsets[v0 / nthreads]];
+        }
+    }
+}
+
+template <ggml_type type, int J, bool fallback, bool fixup, ggml_prec prec_src1, bool xmad = false, bool token_q8 = false>
 static __device__ __forceinline__ void mul_mat_q_process_tile(
         const char * __restrict__ x, const int offset_x, const int * __restrict__ y,
         const int * __restrict__ ids_dst, float * __restrict__ dst, float * __restrict__ tmp_fixup,
@@ -903,7 +921,7 @@ static __device__ __forceinline__ void mul_mat_q_process_tile(
     constexpr ggml_cuda_mmq_vec_dot_t    vec_dot    = ggml_cuda_mmq_get_vec_dot<type, J, fallback, prec_src1, xmad>();
     constexpr ggml_cuda_mmq_write_back_t write_back = ggml_cuda_mmq_get_write_back<type, J, fallback, prec_src1>();
 
-    extern __shared__ int data_mul_mat_q[];
+    extern __shared__ __align__(16) int data_mul_mat_q[];
     int * tile_y = data_mul_mat_q + J;
     int * tile_x = tile_y + GGML_PAD(J*MMQ_TILE_Y_K, nwarps*warp_size);
 
@@ -922,16 +940,36 @@ static __device__ __forceinline__ void mul_mat_q_process_tile(
     float sum[J*I / (nwarps*warp_size)] = {0.0f};
 
     constexpr int sz = sizeof(block_q8_1_mmq) / sizeof(int);
+    constexpr int nthreads = nwarps * warp_size;
+    constexpr int vectors_per_block = sizeof(block_q8_1_mmq)/sizeof(int4);
+    constexpr int nvec = J * vectors_per_block;
+    int vec_offsets[token_q8 ? (nvec + nthreads - 1) / nthreads : 1];
+    if constexpr (token_q8) {
+        static_assert(sz == MMQ_TILE_Y_K && vectors_per_block == 9);
+        const int tid = threadIdx.y * warp_size + threadIdx.x;
+#pragma unroll
+        for (int v0 = 0; v0 < nvec; v0 += nthreads) {
+            const int v = v0 + tid;
+            if (v0 + nthreads <= nvec || v < nvec) {
+                const int col = v / vectors_per_block;
+                vec_offsets[v0 / nthreads] = (ids_dst[col] >> 3) * vectors_per_block + v % vectors_per_block;
+            }
+        }
+    }
 
     for (int kb0 = kb0_start; kb0 < kb0_stop; kb0 += blocks_per_iter) {
         load_tiles(x, tile_x, offset_x + kb0, tile_x_max_i, stride_row_x);
         {
             const int * by0 = y + ncols_y * (kb0 * qk / ne_block) * sz;
+            if constexpr (token_q8) {
+                copy_token_q8_tile<J, nthreads>(by0, tile_y, vec_offsets);
+            } else {
 #pragma unroll
-            for (int l0 = 0; l0 < J * MMQ_TILE_Y_K; l0 += nwarps * warp_size) {
-                int l = l0 + threadIdx.y*warp_size + threadIdx.x;
+                for (int l0 = 0; l0 < J * MMQ_TILE_Y_K; l0 += nwarps * warp_size) {
+                    int l = l0 + threadIdx.y*warp_size + threadIdx.x;
 
-                tile_y[l] = by0[l];
+                    tile_y[l] = by0[l];
+                }
             }
         }
 
@@ -943,11 +981,15 @@ static __device__ __forceinline__ void mul_mat_q_process_tile(
 
         {
             const int * by0 = y + ncols_y * ((kb0 * qk / ne_block) * sz + sz);
+            if constexpr (token_q8) {
+                copy_token_q8_tile<J, nthreads>(by0, tile_y, vec_offsets);
+            } else {
 #pragma unroll
-            for (int l0 = 0; l0 < J * MMQ_TILE_Y_K; l0 += nwarps * warp_size) {
-                int l = l0 + threadIdx.y*warp_size + threadIdx.x;
+                for (int l0 = 0; l0 < J * MMQ_TILE_Y_K; l0 += nwarps * warp_size) {
+                    int l = l0 + threadIdx.y*warp_size + threadIdx.x;
 
-                tile_y[l] = by0[l];
+                    tile_y[l] = by0[l];
+                }
             }
         }
 
@@ -972,6 +1014,7 @@ static __device__ __forceinline__ void mul_mat_q_process_tile(
 enum ggml_cuda_mmq_compact_variant {
     MMQ_COMPACT_TAIL_J48_SM52 = 2,
     MMQ_COMPACT_TAIL_J40_J24_SM52 = 3,
+    MMQ_COMPACT_TOKEN_Q8_SM52 = 4,
 };
 
 template <ggml_type type, int J, bool fallback, ggml_prec prec_src1, auto compact_moe = false, bool xmad = false>
@@ -1000,6 +1043,7 @@ static __global__ void mul_mat_q(
 
     // In the opt-in non-stream-k specialization only, tmp_fixup carries an
     // int2 tile map instead of a float fixup buffer. Keep the old kernel ABI.
+    constexpr bool token_q8 = int(compact_moe) == MMQ_COMPACT_TOKEN_Q8_SM52;
     int2 moe_tile = make_int2(0, 0);
     if constexpr (compact_moe) {
         const int2 * tiles = reinterpret_cast<const int2 *>(tmp_fixup);
@@ -1069,12 +1113,19 @@ static __global__ void mul_mat_q(
                     break;
                 }
 
-                ids_dst_shared[j] = ids_dst[col_low + jt*J + j];
+                if constexpr (token_q8) {
+                    // Invalid compute columns may safely read token zero. Their destinations are masked.
+                    ids_dst_shared[j] = j < col_diff - jt*J ? ids_dst[col_low + jt*J + j] : 0;
+                } else {
+                    ids_dst_shared[j] = ids_dst[col_low + jt*J + j];
+                }
             }
             __syncthreads();
         }
 
-        offset_y   += (col_low + jt*J)*(sizeof(block_q8_1_mmq)/sizeof(int));
+        if constexpr (!token_q8) {
+            offset_y += (col_low + jt*J)*(sizeof(block_q8_1_mmq)/sizeof(int));
+        }
         offset_dst += it*I;
         const float * y_scale_tile = nullptr;
         if constexpr (type == GGML_TYPE_NVFP4) {
@@ -1088,14 +1139,14 @@ static __global__ void mul_mat_q(
         const int offset_x = fastdiv(wt, sample_ratio)*stride_sample_x + fastdiv(zt, channel_ratio)*stride_channel_x + it*I*stride_row_x;
 
         constexpr bool fixup = false;
-        if constexpr (int(compact_moe) == MMQ_COMPACT_TAIL_J40_J24_SM52) {
+        if constexpr (int(compact_moe) == MMQ_COMPACT_TAIL_J40_J24_SM52 || (token_q8 && J != 16)) {
             static_assert(type == GGML_TYPE_Q4_0 && (J == 64 || J == 32) && !fallback && xmad && prec_src1 == GGML_PREC_Q8);
 #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ == 520
             constexpr int narrow_J = J == 64 ? 40 : 24;
             constexpr int min_j = J / 2;
             // Use the original map and offsets. Every valid ID fits within the narrower shared layout.
             if (tile_y_max_j >= min_j && tile_y_max_j < narrow_J) {
-                mul_mat_q_process_tile<type, narrow_J, fallback, fixup, prec_src1, xmad>
+                mul_mat_q_process_tile<type, narrow_J, fallback, fixup, prec_src1, xmad, token_q8>
                     (x, offset_x, y + offset_y, ids_dst_shared, dst + offset_dst, tmp_fixup, y_scale_tile,
                      stride_row_x, ncols_y, stride_col_dst, tile_x_max_i, tile_y_max_j, 0, blocks_per_ne00.z);
                 return;
@@ -1103,20 +1154,20 @@ static __global__ void mul_mat_q(
 #endif
         }
         if constexpr (int(compact_moe) == MMQ_COMPACT_TAIL_J48_SM52 ||
-                      (J == 64 && int(compact_moe) == MMQ_COMPACT_TAIL_J40_J24_SM52)) {
+                      (J == 64 && (int(compact_moe) == MMQ_COMPACT_TAIL_J40_J24_SM52 || token_q8))) {
             static_assert(type == GGML_TYPE_Q4_0 && J == 64 && !fallback && xmad && prec_src1 == GGML_PREC_Q8);
 #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ == 520
             // The map and offsets still address 64-column tiles. Only the compute
             // width changes; columns 48..63 have no destinations in this tail.
             if (tile_y_max_j >= 32 && tile_y_max_j < 48) {
-                mul_mat_q_process_tile<type, 48, fallback, fixup, prec_src1, xmad>
+                mul_mat_q_process_tile<type, 48, fallback, fixup, prec_src1, xmad, token_q8>
                     (x, offset_x, y + offset_y, ids_dst_shared, dst + offset_dst, tmp_fixup, y_scale_tile,
                      stride_row_x, ncols_y, stride_col_dst, tile_x_max_i, tile_y_max_j, 0, blocks_per_ne00.z);
                 return;
             }
 #endif
         }
-        mul_mat_q_process_tile<type, J, fallback, fixup, prec_src1, xmad>
+        mul_mat_q_process_tile<type, J, fallback, fixup, prec_src1, xmad, token_q8>
             (x, offset_x, y + offset_y, ids_dst_shared, dst + offset_dst, tmp_fixup, y_scale_tile,
              stride_row_x, ncols_y, stride_col_dst,
              tile_x_max_i, tile_y_max_j, 0, blocks_per_ne00.z);

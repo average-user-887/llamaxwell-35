@@ -145,6 +145,43 @@ static ggml_prec ggml_cuda_mmq_get_prec_src1(const ggml_tensor * src0, const ggm
     return GGML_PREC_Q4;
 }
 
+static bool token_q8_switches_enabled() {
+    static const bool enabled = [] {
+        const char * flags[] = {
+            "GGML_CUDA_MMQ_TOKEN_Q8_SM52", "GGML_CUDA_MMQ_XMAD_SM52",
+            "GGML_CUDA_MMQ_COMPACT_SM52", "GGML_CUDA_MMQ_TAIL_SM52",
+            "GGML_CUDA_MMQ_TAIL_J48_SM52", "GGML_CUDA_MMQ_TAIL_J40_J24_SM52",
+        };
+        for (const char * flag : flags) {
+            const char * value = std::getenv(flag);
+            if (!value || std::strcmp(value, "1") != 0) {
+                return false;
+            }
+        }
+        return true;
+    }();
+    return enabled;
+}
+
+// The caller committed to a token-packed Q8 allocation before quantization.
+// Launch only consumers specialized for that layout on the three v7 maps.
+static void launch_token_q8_mmq(ggml_backend_cuda_context & ctx, const mmq_args & args,
+                                int cc, cudaStream_t stream) {
+    const int warp_size = ggml_cuda_info().devices[ggml_cuda_get_device()].warp_size;
+    const int max_tiles = (args.ncols_dst + 63) / 64 + args.nchannels_y - 1;
+    ggml_cuda_pool_alloc<int2> t64(ctx.pool(), max_tiles + 1);
+    ggml_cuda_pool_alloc<int2> t32(ctx.pool(), args.nchannels_y + 1);
+    ggml_cuda_pool_alloc<int2> t16(ctx.pool(), args.nchannels_y + 1);
+    ggml_cuda_mmq_make_tail_tiles(args.expert_bounds, t64.get(), t32.get(), t16.get(), args.nchannels_y, stream);
+    CUDA_CHECK(cudaGetLastError());
+    launch_mul_mat_q_compact_map<GGML_TYPE_Q4_0, 64, false, GGML_PREC_Q8, true, MMQ_COMPACT_TOKEN_Q8_SM52>(
+        args, t64.get(), max_tiles, cc, warp_size, stream);
+    launch_mul_mat_q_compact_map<GGML_TYPE_Q4_0, 32, false, GGML_PREC_Q8, true, MMQ_COMPACT_TOKEN_Q8_SM52>(
+        args, t32.get(), args.nchannels_y, cc, warp_size, stream);
+    launch_mul_mat_q_compact_map<GGML_TYPE_Q4_0, 16, false, GGML_PREC_Q8, true, MMQ_COMPACT_TOKEN_Q8_SM52>(
+        args, t16.get(), args.nchannels_y, cc, warp_size, stream);
+}
+
 void ggml_cuda_mul_mat_q(
         ggml_backend_cuda_context & ctx, const ggml_tensor * src0, const ggml_tensor * src1, const ggml_tensor * ids, ggml_tensor * dst) {
     GGML_ASSERT(        src1->type == GGML_TYPE_F32);
@@ -313,7 +350,15 @@ void ggml_cuda_mul_mat_q(
         CUDA_CHECK(cudaGetLastError());
     }
 
-    const size_t nbytes_src1_q8_1 = ne12*n_expert_used*ne10_padded * y_block_size/y_values_per_block + src1_q8_1_padding;
+    const bool token_q8 = dedup_bcast && n_expert_used == 8 && ne02 == 256 &&
+        (ne12 == 1024 || ne12 == 1020) && ne00 == 2048 && ne10 == ne00 && ne01 == 512 &&
+        ne03 == 1 && ne13 == 1 && J_best == 64 && !fallback && src0->type == GGML_TYPE_Q4_0 &&
+        prec_src1 == GGML_PREC_Q8 && cc == 520 && ggml_cuda_highest_compiled_arch(cc) == 520 &&
+        !ggml_cuda_mmq_get_config(src0->type, J_best, fallback, cc, prec_src1).stream_k &&
+        token_q8_switches_enabled();
+    const int64_t nrows_q8 = token_q8 ? ne12 : ne_get_rows;
+    const size_t nbytes_src1_q8_1 = nrows_q8*ne10_padded * y_block_size/y_values_per_block +
+        (token_q8 ? 0 : src1_q8_1_padding);
     ggml_cuda_pool_alloc<char> src1_q8_1(ctx.pool(), nbytes_src1_q8_1);
     ggml_cuda_pool_alloc<float> src1_scale(ctx.pool());
     if (src0->type == GGML_TYPE_NVFP4 && use_native_fp4) {
@@ -339,6 +384,9 @@ void ggml_cuda_mul_mat_q(
                 quantize_mmq_fp4_cuda(src1_d, ids_src1.get(), src1_q8_1.get(), src1_scale.ptr, src0->type, use_aligned_float8, ne10, s11, s12, s13,
                                         ne10_padded, ne11_flat, ne12_flat, ne13_flat, stream);
             }
+        } else if (token_q8) {
+            quantize_mmq_q8_1_cuda(src1_d, nullptr, src1_q8_1.get(), src0->type, ne10, s12, 0, 0,
+                                   ne10_padded, ne12, 1, 1, stream);
         } else if (dedup_bcast) {
             quantize_scatter_mmq_q8_1_cuda(src1_d, ids_src1.get(), src1_q8_1.get(), src0->type, ne10,
                                     /*stride_token=*/s12, ne10_padded, ne12, ne11_flat, n_expert_used, stream);
@@ -358,11 +406,15 @@ void ggml_cuda_mul_mat_q(
     const mmq_args args = {
         src0_d, src0->type, (const int *) src1_q8_1.get(), ids_dst.get(), expert_bounds.get(), dst_d,
         src1_scale.ptr,
-        ne00, ne01, ne_get_rows, s01, ne_get_rows, s1,
+        ne00, ne01, ne_get_rows, s01, nrows_q8, s1,
         ne02, ne02, s02, s12, s2,
         ne03, ne13, s03, s13, s3,
         ne12, J_best};
 
+    if (token_q8) {
+        launch_token_q8_mmq(ctx, args, cc, stream);
+        return;
+    }
     ggml_cuda_mul_mat_q_switch_type(ctx, args, stream, prec_src1);
 }
 
